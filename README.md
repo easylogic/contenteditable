@@ -40,12 +40,15 @@ All commands are run from the root of the project, from a terminal:
 
 ## GitHub Pages and custom domain
 
-This project builds to a static site in `dist/`, which can be published with GitHub Pages:
+This project is configured to deploy automatically to GitHub Pages:
 
 1. Push this repository to GitHub.
-2. Enable Pages in the repository settings and configure a workflow that runs `pnpm install` and
-   `pnpm build`, then publishes the `dist/` directory.
-3. Add a `CNAME` record at your DNS provider for `contenteditable.realerror.com` that points to
-   your GitHub Pages host (for example, `<user>.github.io`).  
-4. In the GitHub repository’s Pages settings, set `contenteditable.realerror.com` as the custom
+2. Go to repository Settings → Pages.
+3. Under "Source", select "GitHub Actions" as the source.
+4. The workflow (`.github/workflows/deploy.yml`) will automatically build and deploy on every push to `main`.
+5. Add a `CNAME` record at your DNS provider for `contenteditable.realerror.com` that points to
+   your GitHub Pages host (for example, `<user>.github.io`).
+6. In the GitHub repository's Pages settings, set `contenteditable.realerror.com` as the custom
    domain. GitHub will then serve this site at that hostname.
+
+The `public/CNAME` file is included to configure the custom domain automatically.
