@@ -1,0 +1,444 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import SiteNav from '../../components/SiteNav.astro';
+
+export const getStaticPaths = (async () => {
+  const cases = await getCollection('cases');
+  const scenarioIds = Array.from(new Set(cases.map((c) => c.data.scenarioId)));
+  return scenarioIds.map((scenarioId) => ({
+    params: { id: scenarioId },
+  }));
+}) satisfies GetStaticPaths;
+
+const scenarioId = Astro.params.id;
+
+if (!scenarioId) {
+  throw new Error('Scenario id is missing in route params.');
+}
+
+const allCases = await getCollection('cases');
+const scenarioCases = allCases.filter((c) => c.data.scenarioId === scenarioId);
+
+if (scenarioCases.length === 0) {
+  throw new Error(`No cases found for scenario "${scenarioId}".`);
+}
+
+// Use the first case as the primary description for now.
+const primaryCase = scenarioCases[0];
+
+// Sort variants for readability.
+scenarioCases.sort((a, b) => a.data.id.localeCompare(b.data.id));
+
+// Build compatibility matrix: Browser x OS
+const browsers = Array.from(new Set(scenarioCases.map((c) => c.data.browser))).sort();
+const osList = Array.from(new Set(scenarioCases.map((c) => c.data.os))).sort();
+
+const compatibilityMatrix = browsers.map((browser) => {
+  const browserCases = scenarioCases.filter((c) => c.data.browser === browser);
+  return {
+    browser,
+    osCoverage: osList.map((os) => {
+      const osCases = browserCases.filter((c) => c.data.os === os);
+      return {
+        os,
+        cases: osCases,
+        hasCase: osCases.length > 0,
+        versions: osCases.map((c) => ({
+          osVersion: c.data.osVersion || 'Any',
+          browserVersion: c.data.browserVersion || 'Any',
+          caseId: c.data.id,
+          slug: c.slug,
+          status: c.data.status,
+        })),
+      };
+    }),
+  };
+});
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{scenarioId} – contenteditable scenario</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 2.5rem;
+      "
+    >
+      <header style="margin-bottom: 1.5rem;">
+        <p style="margin: 0 0 0.45rem 0; font-size: 0.8rem; color: #6b7280;">
+          Scenario
+        </p>
+        <h1
+          style="
+            font-size: 1.9rem;
+            line-height: 1.2;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          {scenarioId}
+        </h1>
+        <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: #4b5563;">
+          This scenario groups concrete cases that describe the same contenteditable phenomenon under
+          different operating systems, devices, browsers, and keyboard setups.
+        </p>
+        <div
+          style="
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            padding: 0.75rem 0.9rem;
+            font-size: 0.85rem;
+          "
+        >
+          <div style="font-weight: 600; margin-bottom: 0.3rem; color: #111827;">
+            Phenomenon
+          </div>
+          <div style="color: #4b5563; line-height: 1.5;">
+            {primaryCase.data.caseTitle}
+          </div>
+        </div>
+      </header>
+
+      <section
+        aria-label="Variants for this scenario"
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 0.9rem 1rem;
+          font-size: 0.85rem;
+          margin-bottom: 1.1rem;
+        "
+      >
+        <h2
+          style="
+            font-size: 0.95rem;
+            margin: 0 0 0.4rem 0;
+          "
+        >
+          Variants
+        </h2>
+        <p style="margin: 0 0 0.6rem 0; color: #4b5563;">
+          Each row is a concrete case for this scenario, with a dedicated document and playground.
+        </p>
+        <div style="overflow-x: auto;">
+          <table
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.8rem;
+            "
+          >
+            <thead>
+              <tr>
+                <th style="text-align: left; padding: 0.25rem 0.4rem;">Case</th>
+                <th style="text-align: left; padding: 0.25rem 0.4rem;">OS</th>
+                <th style="text-align: left; padding: 0.25rem 0.4rem;">Device</th>
+                <th style="text-align: left; padding: 0.25rem 0.4rem;">Browser</th>
+                <th style="text-align: left; padding: 0.25rem 0.4rem;">Keyboard</th>
+                <th style="text-align: left; padding: 0.25rem 0.4rem;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scenarioCases.map((c) => (
+                <tr>
+                  <td style="padding: 0.25rem 0.4rem;">
+                    <a
+                      href={`/cases/${c.slug}`}
+                      style="
+                        color: #111827;
+                        text-decoration: none;
+                      "
+                    >
+                      {c.data.id}
+                    </a>
+                  </td>
+                        <td style="padding: 0.25rem 0.4rem;">
+                          {c.data.os}
+                          {c.data.osVersion && ` ${c.data.osVersion}`}
+                        </td>
+                        <td style="padding: 0.25rem 0.4rem;">
+                          {c.data.device}
+                          {c.data.deviceVersion && ` ${c.data.deviceVersion}`}
+                        </td>
+                        <td style="padding: 0.25rem 0.4rem;">
+                          {c.data.browser}
+                          {c.data.browserVersion && ` ${c.data.browserVersion}`}
+                        </td>
+                        <td style="padding: 0.25rem 0.4rem;">{c.data.keyboard}</td>
+                  <td style="padding: 0.25rem 0.4rem;">{c.data.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {scenarioCases.length > 1 && (
+        <section
+          aria-label="Browser compatibility matrix"
+          style="
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            padding: 0.9rem 1rem;
+            font-size: 0.85rem;
+            margin-bottom: 1.1rem;
+          "
+        >
+          <h2
+            style="
+              font-size: 0.95rem;
+              margin: 0 0 0.4rem 0;
+            "
+          >
+            Browser compatibility
+          </h2>
+          <p style="margin: 0 0 0.6rem 0; color: #4b5563; font-size: 0.8rem;">
+            This matrix shows which browser and OS combinations have documented cases for this
+            scenario. Click on a cell to view the specific case.
+          </p>
+          <div style="overflow-x: auto;">
+            <table
+              style="
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.75rem;
+              "
+            >
+              <thead>
+                <tr>
+                  <th
+                    style="
+                      text-align: left;
+                      padding: 0.4rem 0.5rem;
+                      border-bottom: 2px solid #e5e7eb;
+                      background: #f9fafb;
+                      position: sticky;
+                      left: 0;
+                      z-index: 1;
+                    "
+                  >
+                    Browser
+                  </th>
+                  {osList.map((os) => (
+                    <th
+                      style="
+                        text-align: center;
+                        padding: 0.4rem 0.5rem;
+                        border-bottom: 2px solid #e5e7eb;
+                        background: #f9fafb;
+                        font-weight: 600;
+                      "
+                    >
+                      {os}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {compatibilityMatrix.map((row) => (
+                  <tr>
+                    <td
+                      style="
+                        padding: 0.4rem 0.5rem;
+                        border-bottom: 1px solid #e5e7eb;
+                        background: #f9fafb;
+                        font-weight: 600;
+                        position: sticky;
+                        left: 0;
+                        z-index: 1;
+                      "
+                    >
+                      {row.browser}
+                    </td>
+                    {row.osCoverage.map((cell) => (
+                      <td
+                        style="
+                          padding: 0.3rem 0.4rem;
+                          border-bottom: 1px solid #e5e7eb;
+                          text-align: center;
+                          min-width: 80px;
+                        "
+                      >
+                        {cell.hasCase ? (
+                          <div
+                            style="
+                              display: flex;
+                              flex-direction: column;
+                              gap: 0.2rem;
+                              align-items: center;
+                            "
+                          >
+                            {cell.versions.map((v) => (
+                              <a
+                                href={`/cases/${v.slug}`}
+                                style="
+                                  display: inline-block;
+                                  padding: 0.15rem 0.4rem;
+                                  border-radius: 4px;
+                                  background: ${v.status === 'confirmed'
+                                    ? '#10b981'
+                                    : '#f59e0b'};
+                                  color: #ffffff;
+                                  text-decoration: none;
+                                  font-size: 0.7rem;
+                                  font-weight: 500;
+                                "
+                                title={`${v.caseId}: ${row.browser} ${v.browserVersion} on ${cell.os} ${v.osVersion}`}
+                              >
+                                {v.caseId}
+                              </a>
+                            ))}
+                            <div
+                              style="
+                                font-size: 0.65rem;
+                                color: #6b7280;
+                                margin-top: 0.1rem;
+                              "
+                            >
+                              {cell.versions
+                                .map((v) => `${v.browserVersion || 'Any'}`)
+                                .join(', ')}
+                            </div>
+                          </div>
+                        ) : (
+                          <span style="color: #d1d5db;">—</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div
+            style="
+              margin-top: 0.6rem;
+              padding-top: 0.6rem;
+              border-top: 1px solid #e5e7eb;
+              font-size: 0.75rem;
+              color: #6b7280;
+            "
+          >
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <span
+                  style="
+                    display: inline-block;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 4px;
+                    background: #10b981;
+                  "
+                ></span>
+                <span>Confirmed</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <span
+                  style="
+                    display: inline-block;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 4px;
+                    background: #f59e0b;
+                  "
+                ></span>
+                <span>Draft</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <span style="color: #d1d5db;">—</span>
+                <span>No case documented</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section
+        aria-label="Cases for this scenario"
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 0.9rem 1rem;
+          font-size: 0.85rem;
+        "
+      >
+        <h2
+          style="
+            font-size: 0.95rem;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          Cases
+        </h2>
+        <p style="margin: 0 0 0.6rem 0; color: #4b5563;">
+          Open a case to see the detailed description and its dedicated playground.
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 0.9rem;
+          "
+        >
+          {scenarioCases.map((c) => (
+            <article
+              style="
+                border-radius: 0.75rem;
+                border: 1px solid #e5e7eb;
+                padding: 0.8rem 0.9rem;
+              "
+            >
+              <h3
+                style="
+                  font-size: 0.9rem;
+                  margin: 0 0 0.35rem 0;
+                "
+              >
+                {c.data.caseTitle}
+              </h3>
+              <p style="margin: 0 0 0.35rem 0; color: #4b5563;">
+                OS: {c.data.os}
+                {c.data.osVersion && ` ${c.data.osVersion}`} · Device: {c.data.device}
+                {c.data.deviceVersion && ` ${c.data.deviceVersion}`} · Browser: {c.data.browser}
+                {c.data.browserVersion && ` ${c.data.browserVersion}`} · Keyboard: {c.data.keyboard}
+              </p>
+              <a
+                href={`/cases/${c.slug}`}
+                style="
+                  font-size: 0.8rem;
+                  color: #111827;
+                  text-decoration: none;
+                "
+              >
+                Open case →
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+
+

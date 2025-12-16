@@ -1,0 +1,90 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
+<header
+  style="
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    background: rgba(243, 243, 244, 0.9);
+    border-bottom: 1px solid #e5e7eb;
+  "
+>
+  <nav
+    style="
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0.55rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    "
+  >
+    <a
+      href="/"
+      style="
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #111827;
+        text-decoration: none;
+        white-space: nowrap;
+      "
+    >
+      contenteditable.lab
+    </a>
+    <div
+      style="
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+      "
+    >
+      <a
+        href="/docs"
+        style={{
+          textDecoration: 'none',
+          color: currentPath.startsWith('/docs') ? '#111827' : '#4b5563',
+          fontWeight: currentPath.startsWith('/docs') ? 600 : 400,
+        }}
+      >
+        Docs
+      </a>
+      <a
+        href="/cases"
+        style={{
+          textDecoration: 'none',
+          color: currentPath.startsWith('/cases') ? '#111827' : '#4b5563',
+          fontWeight: currentPath.startsWith('/cases') ? 600 : 400,
+        }}
+      >
+        Cases
+      </a>
+      <a
+        href="/scenarios"
+        style={{
+          textDecoration: 'none',
+          color: currentPath.startsWith('/scenarios') ? '#111827' : '#4b5563',
+          fontWeight: currentPath.startsWith('/scenarios') ? 600 : 400,
+        }}
+      >
+        Scenarios
+      </a>
+      <a
+        href="/playground"
+        style={{
+          textDecoration: 'none',
+          color: currentPath.startsWith('/playground') ? '#111827' : '#4b5563',
+          fontWeight: currentPath.startsWith('/playground') ? 600 : 400,
+        }}
+      >
+        Playground
+      </a>
+    </div>
+  </nav>
+</header>
+
+

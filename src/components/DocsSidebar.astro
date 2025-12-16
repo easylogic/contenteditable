@@ -1,0 +1,87 @@
+---
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '' } = Astro.props;
+
+const docsPages = [
+  { title: 'What is contenteditable?', path: '/docs/what-is-contenteditable' },
+  { title: 'Events', path: '/docs/events' },
+  { title: 'IME & Composition', path: '/docs/ime-composition' },
+  { title: 'Selection API', path: '/docs/selection-api' },
+  { title: 'execCommand alternatives', path: '/docs/execCommand-alternatives' },
+  { title: 'Browser compatibility', path: '/docs/browser-compatibility' },
+];
+---
+
+<aside
+  aria-label="Documentation"
+  style="
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    width: 240px;
+    min-width: 240px;
+    border-right: 1px solid #e5e7eb;
+    background: #f7f7f8;
+    padding: 0;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  "
+>
+  <div style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; background: #ffffff;">
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      "
+    >
+      <span style="font-weight: 600; font-size: 0.9rem;">Documentation</span>
+      <a
+        href="/docs"
+        style="
+          font-size: 0.75rem;
+          color: #0069c2;
+          text-decoration: none;
+        "
+      >
+        Index →
+      </a>
+    </div>
+  </div>
+
+  <nav aria-label="Documentation pages" style="padding: 0.5rem 0;">
+    <ul style="list-style: none; padding: 0; margin: 0;">
+      {docsPages.map((doc) => {
+        const isActive = currentPath === doc.path;
+        return (
+          <li style="margin: 0;">
+            <a
+              href={doc.path}
+              title={doc.title}
+              style={{
+                display: 'block',
+                padding: '0.4rem 0.75rem',
+                textDecoration: 'none',
+                fontSize: '0.875rem',
+                backgroundColor: isActive ? '#0069c2' : 'transparent',
+                color: isActive ? '#ffffff' : '#1a1a1a',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                borderLeft: isActive ? '3px solid #0069c2' : '3px solid transparent',
+              }}
+            >
+              {doc.title}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+</aside>
+

@@ -1,0 +1,294 @@
+---
+import { getCollection } from 'astro:content';
+import SiteNav from '../components/SiteNav.astro';
+
+const allCases = await getCollection('cases');
+
+const scenariosMap = allCases.reduce(
+  (acc, entry) => {
+    const key = entry.data.scenarioId;
+    if (!acc[key]) {
+      acc[key] = {
+        scenarioId: key,
+        cases: [] as typeof allCases,
+      };
+    }
+    acc[key].cases.push(entry);
+    return acc;
+  },
+  {} as Record<
+    string,
+    {
+      scenarioId: string;
+      cases: typeof allCases;
+    }
+  >,
+);
+
+const scenarios = Object.values(scenariosMap).sort((a, b) =>
+  a.scenarioId.localeCompare(b.scenarioId),
+);
+
+// Group scenarios by category based on tags
+const scenariosByCategory = scenarios.reduce(
+  (acc, scenario) => {
+    const tags = scenario.cases.flatMap((c) => c.data.tags);
+    const categoryTags = [
+      'ime',
+      'composition',
+      'formatting',
+      'paste',
+      'selection',
+      'caret',
+      'mobile',
+      'accessibility',
+      'performance',
+      'focus',
+    ];
+
+    let category = 'other';
+    for (const catTag of categoryTags) {
+      if (tags.includes(catTag)) {
+        category = catTag;
+        break;
+      }
+    }
+
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(scenario);
+    return acc;
+  },
+  {} as Record<string, typeof scenarios>,
+);
+
+const categoryLabels: Record<string, string> = {
+  ime: 'IME & Composition',
+  composition: 'IME & Composition',
+  formatting: 'Formatting',
+  paste: 'Paste & Copy',
+  selection: 'Selection',
+  caret: 'Caret & Navigation',
+  mobile: 'Mobile & Touch',
+  accessibility: 'Accessibility',
+  performance: 'Performance',
+  focus: 'Focus & Blur',
+  other: 'Other',
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>contenteditable scenarios</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 2.5rem;
+      "
+    >
+      <header style="margin-bottom: 1.5rem;">
+        <h1
+          style="
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          Scenarios
+        </h1>
+        <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: #4b5563;">
+          A scenario groups multiple cases that describe the same phenomenon across different
+          operating systems, devices, browsers, or keyboard setups.
+        </p>
+        <div
+          style="
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #6b7280;
+          "
+        >
+          <span>
+            <strong style="color: #111827;">{scenarios.length}</strong> scenarios
+          </span>
+          <span>
+            <strong style="color: #111827;">{allCases.length}</strong> total cases
+          </span>
+        </div>
+      </header>
+
+      <section
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 0.9rem 1rem;
+        "
+      >
+        {scenarios.length === 0 ? (
+          <p style="font-size: 0.9rem; color: #6b7280;">
+            No scenarios have been defined yet. Add cases with a scenarioId in the content
+            directory.
+          </p>
+        ) : (
+          <div>
+            {Object.entries(scenariosByCategory)
+              .sort(([a], [b]) => {
+                const order = [
+                  'ime',
+                  'composition',
+                  'formatting',
+                  'paste',
+                  'selection',
+                  'caret',
+                  'mobile',
+                  'accessibility',
+                  'performance',
+                  'focus',
+                  'other',
+                ];
+                const aIdx = order.indexOf(a);
+                const bIdx = order.indexOf(b);
+                if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
+                if (aIdx === -1) return 1;
+                if (bIdx === -1) return -1;
+                return aIdx - bIdx;
+              })
+              .map(([category, categoryScenarios]) => (
+                <div style="margin-bottom: 2rem;">
+                  <h2
+                    style="
+                      font-size: 1rem;
+                      font-weight: 600;
+                      margin: 0 0 0.75rem 0;
+                      color: #111827;
+                      text-transform: capitalize;
+                    "
+                  >
+                    {categoryLabels[category] || category}
+                  </h2>
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                      gap: 0.9rem;
+                      margin-bottom: 1.5rem;
+                    "
+                  >
+                    {categoryScenarios.map((scenario) => {
+                      const osSet = new Set(scenario.cases.map((c) => c.data.os));
+                      const browserSet = new Set(scenario.cases.map((c) => c.data.browser));
+                      return (
+                        <article
+                          style="
+                            border-radius: 0.75rem;
+                            border: 1px solid #e5e7eb;
+                            padding: 0.8rem 0.9rem;
+                            font-size: 0.85rem;
+                          "
+                        >
+                          <h2
+                            style="
+                              font-size: 0.9rem;
+                              margin: 0 0 0.35rem 0;
+                            "
+                          >
+                            {scenario.scenarioId}
+                          </h2>
+                          <div
+                            style="
+                              display: flex;
+                              gap: 0.4rem;
+                              flex-wrap: wrap;
+                              margin: 0 0 0.4rem 0;
+                            "
+                          >
+                            <span
+                              style="
+                                font-size: 0.75rem;
+                                padding: 0.15rem 0.4rem;
+                                border-radius: 999px;
+                                border: 1px solid #e5e7eb;
+                                background: #f9fafb;
+                                color: #4b5563;
+                              "
+                            >
+                              {scenario.cases.length} variant{scenario.cases.length === 1 ? '' : 's'}
+                            </span>
+                            {Array.from(osSet)
+                              .slice(0, 3)
+                              .map((os) => (
+                                <span
+                                  key={os}
+                                  style="
+                                    font-size: 0.75rem;
+                                    padding: 0.15rem 0.4rem;
+                                    border-radius: 999px;
+                                    border: 1px solid #e5e7eb;
+                                    background: #ffffff;
+                                    color: #6b7280;
+                                  "
+                                >
+                                  {os}
+                                </span>
+                              ))}
+                            {Array.from(browserSet)
+                              .slice(0, 2)
+                              .map((browser) => (
+                                <span
+                                  key={browser}
+                                  style="
+                                    font-size: 0.75rem;
+                                    padding: 0.15rem 0.4rem;
+                                    border-radius: 999px;
+                                    border: 1px solid #e5e7eb;
+                                    background: #ffffff;
+                                    color: #6b7280;
+                                  "
+                                >
+                                  {browser}
+                                </span>
+                              ))}
+                          </div>
+                          <p style="margin: 0 0 0.4rem 0; color: #4b5563; font-size: 0.8rem;">
+                            {scenario.cases[0]?.data.caseTitle}
+                          </p>
+                          <a
+                            href={`/scenarios/${encodeURIComponent(scenario.scenarioId)}`}
+                            style="
+                              font-size: 0.8rem;
+                              color: #111827;
+                              text-decoration: none;
+                              font-weight: 500;
+                            "
+                          >
+                            Open scenario →
+                          </a>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </section>
+    </main>
+  </body>
+</html>
+
+

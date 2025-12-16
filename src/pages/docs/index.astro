@@ -1,0 +1,154 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+---
+
+<html lang="en">
+  <style>
+    .doc-card {
+      display: block;
+      border-radius: 0.75rem;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      padding: 1.1rem 1.2rem;
+      text-decoration: none;
+      color: #111827;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .doc-card:hover {
+      border-color: #111827;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Documentation – contenteditable.lab</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 2.5rem;
+      "
+    >
+      <header style="margin-bottom: 2rem;">
+        <h1
+          style="
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          Documentation
+        </h1>
+        <p style="margin: 0; font-size: 0.95rem; color: #4b5563;">
+          Learn about the contenteditable attribute, its behavior, events, and browser compatibility.
+        </p>
+      </header>
+
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1rem;
+        "
+      >
+        <a href="/docs/what-is-contenteditable" class="doc-card">
+          <h2
+            style="
+              font-size: 1.1rem;
+              margin: 0 0 0.4rem 0;
+            "
+          >
+            What is contenteditable?
+          </h2>
+          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+            Introduction to the contenteditable attribute, its purpose, and basic usage.
+          </p>
+        </a>
+
+        <a href="/docs/events" class="doc-card">
+          <h2
+            style="
+              font-size: 1.1rem;
+              margin: 0 0 0.4rem 0;
+            "
+          >
+            Events
+          </h2>
+          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+            Understanding input, beforeinput, composition, and other events in contenteditable.
+          </p>
+        </a>
+
+        <a href="/docs/ime-composition" class="doc-card">
+          <h2
+            style="
+              font-size: 1.1rem;
+              margin: 0 0 0.4rem 0;
+            "
+          >
+            IME & Composition
+          </h2>
+          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+            How Input Method Editors work with contenteditable and composition events.
+          </p>
+        </a>
+
+        <a href="/docs/selection-api" class="doc-card">
+          <h2
+            style="
+              font-size: 1.1rem;
+              margin: 0 0 0.4rem 0;
+            "
+          >
+            Selection API
+          </h2>
+          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+            Working with text selection, ranges, and the Selection API in contenteditable.
+          </p>
+        </a>
+
+        <a href="/docs/execCommand-alternatives" class="doc-card">
+          <h2
+            style="
+              font-size: 1.1rem;
+              margin: 0 0 0.4rem 0;
+            "
+          >
+            execCommand alternatives
+          </h2>
+          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+            Modern alternatives to the deprecated execCommand API for formatting and editing.
+          </p>
+        </a>
+
+        <a href="/docs/browser-compatibility" class="doc-card">
+          <h2
+            style="
+              font-size: 1.1rem;
+              margin: 0 0 0.4rem 0;
+            "
+          >
+            Browser compatibility
+          </h2>
+          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+            Overview of contenteditable support and behavior differences across browsers.
+          </p>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>
+

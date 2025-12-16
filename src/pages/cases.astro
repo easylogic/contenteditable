@@ -1,0 +1,386 @@
+---
+import { getCollection } from 'astro:content';
+import SiteNav from '../components/SiteNav.astro';
+
+const allCases = await getCollection('cases');
+
+const locales = Array.from(new Set(allCases.map((entry) => entry.data.locale))).sort();
+const defaultLocale = locales.includes('en') ? 'en' : locales[0];
+
+// Statistics for display
+const totalCases = allCases.length;
+const confirmedCount = allCases.filter((c) => c.data.status === 'confirmed').length;
+const draftCount = allCases.filter((c) => c.data.status === 'draft').length;
+
+const allTags = Array.from(
+  new Set(
+    allCases.flatMap((entry) => entry.data.tags ?? []),
+  ),
+).sort();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>contenteditable cases</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 2.5rem;
+      "
+    >
+      <header style="margin-bottom: 1.5rem;">
+        <h1
+          style="
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          contenteditable cases
+        </h1>
+        <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: #4b5563;">
+          Individual incident reports (cases) collected from experiments. Each case documents a
+          concrete contenteditable behavior observed in a specific environment. Filter by metadata
+          and follow links to reproduce them in the dedicated playgrounds.
+        </p>
+        <div
+          style="
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #6b7280;
+          "
+        >
+          <span>
+            <strong style="color: #111827;">{totalCases}</strong> total cases
+          </span>
+          <span>
+            <strong style="color: #10b981;">{confirmedCount}</strong> confirmed
+          </span>
+          <span>
+            <strong style="color: #f59e0b;">{draftCount}</strong> draft
+          </span>
+        </div>
+      </header>
+
+      <section
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 0.75rem 0.9rem;
+          margin-bottom: 1rem;
+        "
+      >
+        <form
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            align-items: end;
+          "
+        >
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.2rem;">
+              Locale
+            </label>
+            <select
+              name="locale"
+              value={Astro.url.searchParams.get('locale') ?? defaultLocale}
+              style="
+                width: 100%;
+                padding: 0.35rem 0.45rem;
+                border-radius: 0.375rem;
+                border: 1px solid #d1d5db;
+                font-size: 0.85rem;
+              "
+            >
+              {locales.map((locale) => (
+                <option value={locale}>{locale}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.2rem;">
+              Text search
+            </label>
+            <input
+              type="search"
+              name="q"
+              value={Astro.url.searchParams.get('q') ?? ''}
+              placeholder="Search in title or tags"
+              style="
+                width: 100%;
+                padding: 0.35rem 0.5rem;
+                border-radius: 0.375rem;
+                border: 1px solid #d1d5db;
+                font-size: 0.85rem;
+              "
+            />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.2rem;">
+              Status
+            </label>
+            <select
+              name="status"
+              value={Astro.url.searchParams.get('status') ?? 'all'}
+              style="
+                width: 100%;
+                padding: 0.35rem 0.45rem;
+                border-radius: 0.375rem;
+                border: 1px solid #d1d5db;
+                font-size: 0.85rem;
+              "
+            >
+              <option value="all">all</option>
+              <option value="confirmed">confirmed</option>
+              <option value="draft">draft</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.2rem;">
+              Tag
+            </label>
+            <select
+              name="tag"
+              value={Astro.url.searchParams.get('tag') ?? 'all'}
+              style="
+                width: 100%;
+                padding: 0.35rem 0.45rem;
+                border-radius: 0.375rem;
+                border: 1px solid #d1d5db;
+                font-size: 0.85rem;
+              "
+            >
+              <option value="all">all</option>
+              {allTags.map((tag) => (
+                <option value={tag}>{tag}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              style="
+                width: 100%;
+                padding: 0.4rem 0.75rem;
+                border-radius: 999px;
+                border: 1px solid #111827;
+                background: #111827;
+                color: white;
+                font-size: 0.85rem;
+                cursor: pointer;
+              "
+            >
+              Apply filters
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section>
+        {(() => {
+          const searchParams = Astro.url.searchParams;
+          const locale = searchParams.get('locale') ?? defaultLocale;
+          const q = (searchParams.get('q') ?? '').toLowerCase();
+          const statusFilter = searchParams.get('status') ?? 'all';
+          const tagFilter = searchParams.get('tag') ?? 'all';
+
+          const filtered = allCases.filter((entry) => {
+            if (entry.data.locale !== locale) return false;
+            if (statusFilter !== 'all' && entry.data.status !== statusFilter) return false;
+            if (tagFilter !== 'all' && !entry.data.tags.includes(tagFilter)) return false;
+            if (!q) return true;
+
+            const haystack =
+              `${entry.data.caseTitle} ${entry.data.os} ${entry.data.device} ${entry.data.browser} ${entry.data.keyboard} ${entry.data.tags.join(
+                ' ',
+              )}`.toLowerCase();
+
+            return haystack.includes(q);
+          });
+
+          if (filtered.length === 0) {
+            return (
+              <p style="font-size: 0.9rem; color: #6b7280;">
+                No cases match the current filters. Try a different query or status.
+              </p>
+            );
+          }
+
+          return (
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 0.9rem;
+              "
+            >
+              {filtered.map((entry) => (
+                <article
+                  style="
+                    border-radius: 0.75rem;
+                    border: 1px solid #e5e7eb;
+                    background: #ffffff;
+                    padding: 0.85rem 0.95rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.35rem;
+                  "
+                >
+                  <header>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 0.5rem;
+                        margin-bottom: 0.15rem;
+                      "
+                    >
+                      <h2
+                        style="
+                          font-size: 0.95rem;
+                          margin: 0;
+                        "
+                      >
+                        {entry.data.caseTitle}
+                      </h2>
+                      <span
+                        style={{
+                          fontSize: '0.7rem',
+                          padding: '0.1rem 0.45rem',
+                          borderRadius: '999px',
+                          border: '1px solid #d1d5db',
+                          backgroundColor:
+                            entry.data.status === 'confirmed' ? '#ecfdf3' : '#f9fafb',
+                        }}
+                      >
+                        {entry.data.status}
+                      </span>
+                    </div>
+                    <div
+                      style="
+                        font-size: 0.75rem;
+                        color: #6b7280;
+                      "
+                    >
+                      <span>
+                        OS: {entry.data.os}
+                        {entry.data.osVersion && ` ${entry.data.osVersion}`}
+                      </span>
+                      {' · '}
+                      <span>
+                        Device: {entry.data.device}
+                        {entry.data.deviceVersion && ` ${entry.data.deviceVersion}`}
+                      </span>
+                      {' · '}
+                      <span>
+                        Browser: {entry.data.browser}
+                        {entry.data.browserVersion && ` ${entry.data.browserVersion}`}
+                      </span>
+                      {' · '}
+                      <span>Keyboard: {entry.data.keyboard}</span>
+                      {' · '}
+                      <span>
+                        Scenario:{' '}
+                        <a
+                          href={`/scenarios/${encodeURIComponent(entry.data.scenarioId)}`}
+                          style="color: inherit; text-decoration: underline;"
+                        >
+                          {entry.data.scenarioId}
+                        </a>
+                      </span>
+                    </div>
+                  </header>
+
+                  {entry.data.tags.length > 0 && (
+                    <div style="font-size: 0.75rem; color: #4b5563;">
+                      {entry.data.tags.map((tag) => (
+                        <a
+                          href={`?locale=${encodeURIComponent(
+                            locale,
+                          )}&status=${encodeURIComponent(
+                            statusFilter,
+                          )}&tag=${encodeURIComponent(tag)}&q=${encodeURIComponent(
+                            searchParams.get('q') ?? '',
+                          )}`}
+                          style="
+                            display: inline-flex;
+                            align-items: center;
+                            border-radius: 999px;
+                            border: 1px solid #e5e7eb;
+                            padding: 0.05rem 0.4rem;
+                            margin-right: 0.25rem;
+                            text-decoration: none;
+                            color: inherit;
+                          "
+                        >
+                          {tag}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  <footer style="margin-top: 0.35rem; display: flex; gap: 0.6rem;">
+                    <a
+                      href={`/cases/${entry.slug}`}
+                      style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.2rem;
+                        font-size: 0.8rem;
+                        color: #111827;
+                        text-decoration: none;
+                        font-weight: 500;
+                      "
+                    >
+                      <span>View details</span>
+                      <span aria-hidden="true">→</span>
+                    </a>
+                    <a
+                      href={`/?scenario=${encodeURIComponent(entry.data.id)}`}
+                      style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.2rem;
+                        font-size: 0.8rem;
+                        color: #4b5563;
+                        text-decoration: none;
+                      "
+                    >
+                      <span>Open in playground</span>
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          );
+        })()}
+      </section>
+    </main>
+  </body>
+</html>
+
+

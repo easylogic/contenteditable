@@ -1,0 +1,317 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import DocsSidebar from '../../components/DocsSidebar.astro';
+
+const compositionCode = `element.addEventListener('compositionstart', () => {
+  console.log('Composition started');
+});
+
+element.addEventListener('compositionupdate', (e) => {
+  console.log('Composing:', e.data);
+});
+
+element.addEventListener('compositionend', (e) => {
+  console.log('Composition ended:', e.data);
+});`;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>IME & Composition – contenteditable.lab</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        display: flex;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      "
+    >
+      <DocsSidebar currentPath={Astro.url.pathname} />
+
+      <section
+        style="
+          flex: 1;
+          max-width: 1120px;
+          margin: 0 auto;
+          padding: 1.75rem 1.25rem 2.5rem;
+          width: 100%;
+        "
+      >
+      <header style="margin-bottom: 2rem;">
+        <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
+          <a href="/docs" style="color: #6b7280; text-decoration: none;">Documentation</a>
+          <span style="color: #9ca3af; margin: 0 0.5rem;">/</span>
+          <span style="color: #111827;">IME & Composition</span>
+        </nav>
+        <h1
+          style="
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          IME & Composition
+        </h1>
+        <p style="margin: 0; font-size: 0.95rem; color: #4b5563;">
+          How Input Method Editors (IME) work with contenteditable and the challenges they present.
+        </p>
+      </header>
+
+      <article
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 1.5rem 1.75rem;
+          font-size: 0.9rem;
+          line-height: 1.7;
+        "
+      >
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            What is an IME?
+          </h2>
+          <p style="margin: 0 0 1rem 0;">
+            An Input Method Editor (IME) is a software component that allows users to enter characters that are not directly available on their keyboard. Common examples include:
+          </p>
+          <ul style="margin: 0; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Japanese IME:</strong> Converts romanized input (romaji) into hiragana, katakana, or kanji
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Korean IME:</strong> Combines individual jamo characters into complete syllables
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Chinese IME:</strong> Converts pinyin or other phonetic input into Chinese characters
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Vietnamese IME:</strong> Adds diacritical marks to base characters
+            </li>
+          </ul>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Composition events
+          </h2>
+          <p style="margin: 0 0 1rem 0;">
+            When using an IME, the input process involves multiple stages tracked by composition events:
+          </p>
+          <div
+            style="
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 0.5rem;
+              padding: 1rem;
+              margin-bottom: 1rem;
+            "
+          >
+            <ol style="margin: 0; padding-left: 1.5rem;">
+              <li style="margin-bottom: 0.5rem;">
+                <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionstart</code> – Fires when the user starts composing (e.g., begins typing in Japanese)
+              </li>
+              <li style="margin-bottom: 0.5rem;">
+                <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionupdate</code> – Fires repeatedly as the composition changes (e.g., as candidate characters appear)
+              </li>
+              <li style="margin-bottom: 0.5rem;">
+                <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionend</code> – Fires when the composition is finalized (e.g., user selects a kanji)
+              </li>
+            </ol>
+          </div>
+          <pre
+            style="
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 0.5rem;
+              padding: 1rem;
+              overflow-x: auto;
+              font-size: 0.85rem;
+              line-height: 1.6;
+            "
+          ><code>{compositionCode}</code></pre>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Common issues
+          </h2>
+          <div style="margin-bottom: 1.5rem;">
+            <h3
+              style="
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                color: #111827;
+              "
+            >
+              Enter key during composition
+            </h3>
+            <p style="margin: 0 0 0.5rem 0;">
+              Pressing Enter during IME composition may cancel the composition instead of committing it. This breaks the expected workflow for users.
+            </p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">
+              See cases: <a href="/scenarios/scenario-ime-enter-breaks" style="color: #0069c2;">scenario-ime-enter-breaks</a>
+            </p>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <h3
+              style="
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                color: #111827;
+              "
+            >
+              Backspace granularity
+            </h3>
+            <p style="margin: 0 0 0.5rem 0;">
+              Backspace may delete entire composed syllables instead of individual characters, making fine-grained editing difficult.
+            </p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">
+              See cases: <a href="/scenarios/scenario-ime-backspace-granularity" style="color: #0069c2;">scenario-ime-backspace-granularity</a>
+            </p>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <h3
+              style="
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                color: #111827;
+              "
+            >
+              Space key during composition
+            </h3>
+            <p style="margin: 0 0 0.5rem 0;">
+              The Space key may be ignored or commit composition inconsistently during IME input, depending on the browser and OS.
+            </p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">
+              See cases: <a href="/scenarios/scenario-space-during-composition" style="color: #0069c2;">scenario-space-during-composition</a>
+            </p>
+          </div>
+
+          <div>
+            <h3
+              style="
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                color: #111827;
+              "
+            >
+              Undo during composition
+            </h3>
+            <p style="margin: 0 0 0.5rem 0;">
+              Undo operations during active composition may clear more text than expected, including text that was already committed.
+            </p>
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">
+              See cases: <a href="/scenarios/scenario-undo-with-composition" style="color: #0069c2;">scenario-undo-with-composition</a>
+            </p>
+          </div>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Browser differences
+          </h2>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <p style="margin: 0; font-size: 0.85rem;">
+              <strong>Event timing:</strong> The timing and order of composition events varies significantly between browsers, especially when special keys (Enter, Backspace) are pressed during composition.
+            </p>
+          </div>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <p style="margin: 0; font-size: 0.85rem;">
+              <strong>IME candidate window:</strong> The position and behavior of the IME candidate window (showing possible character conversions) differs across browsers and may not align correctly with the caret.
+            </p>
+          </div>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem;">
+            <p style="margin: 0; font-size: 0.85rem;">
+              <strong>Composition events missing:</strong> Some IMEs may not fire composition events consistently, or events may fire in unexpected orders, making it difficult to track the composition state.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Related resources
+          </h2>
+          <ul style="margin: 0; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/docs/events"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                Events in contenteditable →
+              </a>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/cases?tag=ime"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                Browse IME-related cases →
+              </a>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/cases?tag=composition"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                Browse composition-related cases →
+              </a>
+            </li>
+          </ul>
+        </section>
+      </article>
+      </section>
+    </main>
+  </body>
+</html>
+

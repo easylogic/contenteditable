@@ -1,0 +1,543 @@
+---
+import { getCollection } from 'astro:content';
+import SiteNav from '../components/SiteNav.astro';
+
+const siteTitle = 'contenteditable lab';
+const cases = await getCollection('cases');
+
+const scenariosMap = cases.reduce(
+  (acc, entry) => {
+    const key = entry.data.scenarioId;
+    if (!acc[key]) {
+      acc[key] = {
+        scenarioId: key,
+        representative: entry,
+      };
+    } else if (entry.data.id > acc[key].representative.data.id) {
+      acc[key].representative = entry;
+    }
+    return acc;
+  },
+  {} as Record<
+    string,
+    {
+      scenarioId: string;
+      representative: (typeof cases)[number];
+    }
+  >,
+);
+
+const latestScenarios = Object.values(scenariosMap)
+  .sort((a, b) => b.representative.data.id.localeCompare(a.representative.data.id))
+  .slice(0, 20);
+
+// Statistics
+const totalCases = cases.length;
+const totalScenarios = Object.keys(scenariosMap).length;
+const osList = Array.from(new Set(cases.map((c) => c.data.os))).sort();
+const browserList = Array.from(new Set(cases.map((c) => c.data.browser))).sort();
+const confirmedCases = cases.filter((c) => c.data.status === 'confirmed').length;
+const draftCases = cases.filter((c) => c.data.status === 'draft').length;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{siteTitle}</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 1.75rem 1.25rem 2.5rem;
+      "
+    >
+      <section style="margin-bottom: 2rem;">
+        <h1
+          style="
+            font-size: 2.1rem;
+            line-height: 1.1;
+            margin: 0 0 0.6rem 0;
+          "
+        >
+          contenteditable.lab
+        </h1>
+        <p style="margin: 0 0 1.2rem 0; font-size: 0.95rem; color: #4b5563; line-height: 1.5;">
+          An incident catalog for real-world contenteditable behavior. Each scenario groups multiple
+          cases that describe the same phenomenon across different operating systems, devices,
+          browsers, and keyboard setups. Browse by phenomenon or environment, then use the
+          dedicated playgrounds to reproduce and record logs.
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+          "
+        >
+          <div
+            style="
+              border-radius: 0.5rem;
+              border: 1px solid #e5e7eb;
+              background: #ffffff;
+              padding: 0.75rem 0.9rem;
+            "
+          >
+            <div style="font-size: 1.5rem; font-weight: 600; color: #111827;">
+              {totalCases}
+            </div>
+            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem;">
+              Total Cases
+            </div>
+          </div>
+          <div
+            style="
+              border-radius: 0.5rem;
+              border: 1px solid #e5e7eb;
+              background: #ffffff;
+              padding: 0.75rem 0.9rem;
+            "
+          >
+            <div style="font-size: 1.5rem; font-weight: 600; color: #111827;">
+              {totalScenarios}
+            </div>
+            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem;">
+              Scenarios
+            </div>
+          </div>
+          <div
+            style="
+              border-radius: 0.5rem;
+              border: 1px solid #e5e7eb;
+              background: #ffffff;
+              padding: 0.75rem 0.9rem;
+            "
+          >
+            <div style="font-size: 1.5rem; font-weight: 600; color: #111827;">
+              {osList.length}
+            </div>
+            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem;">
+              OS Variants
+            </div>
+          </div>
+          <div
+            style="
+              border-radius: 0.5rem;
+              border: 1px solid #e5e7eb;
+              background: #ffffff;
+              padding: 0.75rem 0.9rem;
+            "
+          >
+            <div style="font-size: 1.5rem; font-weight: 600; color: #111827;">
+              {browserList.length}
+            </div>
+            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem;">
+              Browsers
+            </div>
+          </div>
+          <div
+            style="
+              border-radius: 0.5rem;
+              border: 1px solid #e5e7eb;
+              background: #ffffff;
+              padding: 0.75rem 0.9rem;
+            "
+          >
+            <div style="font-size: 1.5rem; font-weight: 600; color: #10b981;">
+              {confirmedCases}
+            </div>
+            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem;">
+              Confirmed
+            </div>
+          </div>
+          <div
+            style="
+              border-radius: 0.5rem;
+              border: 1px solid #e5e7eb;
+              background: #ffffff;
+              padding: 0.75rem 0.9rem;
+            "
+          >
+            <div style="font-size: 1.5rem; font-weight: 600; color: #f59e0b;">
+              {draftCases}
+            </div>
+            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem;">
+              Draft
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        aria-label="Browse by phenomenon"
+        style="
+          margin-bottom: 1.5rem;
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 1rem 1.1rem;
+        "
+      >
+        <h2
+          style="
+            font-size: 1.1rem;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          Browse by phenomenon
+        </h2>
+        <p style="margin: 0 0 0.9rem 0; font-size: 0.85rem; color: #4b5563;">
+          Start from a specific contenteditable phenomenon (scenario) to see how it manifests across
+          different environments.
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+          "
+        >
+          {latestScenarios.slice(0, 6).map((item) => (
+            <a
+              href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}
+              style="
+                display: block;
+                border-radius: 0.5rem;
+                border: 1px solid #e5e7eb;
+                padding: 0.7rem 0.85rem;
+                text-decoration: none;
+                color: #111827;
+                transition: border-color 0.15s;
+              "
+              onmouseover="this.style.borderColor='#111827'"
+              onmouseout="this.style.borderColor='#e5e7eb'"
+            >
+              <div style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.25rem;">
+                {item.scenarioId}
+              </div>
+              <div style="font-size: 0.75rem; color: #6b7280;">
+                {item.representative.data.os}
+                {item.representative.data.osVersion && ` ${item.representative.data.osVersion}`} ·{' '}
+                {item.representative.data.browser}
+                {item.representative.data.browserVersion && ` ${item.representative.data.browserVersion}`}
+              </div>
+            </a>
+          ))}
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <a
+            href="/scenarios"
+            style="
+              font-size: 0.85rem;
+              color: #111827;
+              text-decoration: none;
+              font-weight: 500;
+            "
+          >
+            View all scenarios →
+          </a>
+        </div>
+      </section>
+
+      <section
+        aria-label="Browse by category"
+        style="
+          margin-bottom: 1.5rem;
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 1rem 1.1rem;
+        "
+      >
+        <h2
+          style="
+            font-size: 1.1rem;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          Browse by category
+        </h2>
+        <p style="margin: 0 0 0.9rem 0; font-size: 0.85rem; color: #4b5563;">
+          Explore cases by topic tags, environment, or search for specific issues.
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.6rem;
+            margin-bottom: 0.9rem;
+          "
+        >
+          {(() => {
+            const allTags = Array.from(
+              new Set(cases.flatMap((c) => c.data.tags)),
+            ).sort();
+            const popularTags = allTags.filter((tag) => {
+              const count = cases.filter((c) => c.data.tags.includes(tag)).length;
+              return count >= 2;
+            });
+
+            return (
+              <>
+                {popularTags.slice(0, 8).map((tag) => (
+                  <a
+                    href={`/cases?tag=${encodeURIComponent(tag)}`}
+                    style="
+                      display: block;
+                      border-radius: 0.5rem;
+                      border: 1px solid #e5e7eb;
+                      padding: 0.6rem 0.75rem;
+                      text-decoration: none;
+                      color: #111827;
+                      font-size: 0.85rem;
+                      text-align: center;
+                      transition: border-color 0.15s, background-color 0.15s;
+                    "
+                    onmouseover="this.style.borderColor='#111827'; this.style.backgroundColor='#f9fafb'"
+                    onmouseout="this.style.borderColor='#e5e7eb'; this.style.backgroundColor='transparent'"
+                  >
+                    {tag}
+                  </a>
+                ))}
+              </>
+            );
+          })()}
+        </div>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.6rem;
+          "
+        >
+          {(() => {
+            const osList = Array.from(new Set(cases.map((c) => c.data.os))).sort();
+            const browserList = Array.from(new Set(cases.map((c) => c.data.browser))).sort();
+
+            return (
+              <>
+                {osList.slice(0, 3).map((os) => (
+                  <a
+                    href={`/cases?q=${encodeURIComponent(os)}`}
+                    style="
+                      display: block;
+                      border-radius: 0.5rem;
+                      border: 1px solid #e5e7eb;
+                      padding: 0.6rem 0.75rem;
+                      text-decoration: none;
+                      color: #111827;
+                      font-size: 0.85rem;
+                      text-align: center;
+                      transition: border-color 0.15s;
+                    "
+                    onmouseover="this.style.borderColor='#111827'"
+                    onmouseout="this.style.borderColor='#e5e7eb'"
+                  >
+                    {os}
+                  </a>
+                ))}
+                {browserList.slice(0, 3).map((browser) => (
+                  <a
+                    href={`/cases?q=${encodeURIComponent(browser)}`}
+                    style="
+                      display: block;
+                      border-radius: 0.5rem;
+                      border: 1px solid #e5e7eb;
+                      padding: 0.6rem 0.75rem;
+                      text-decoration: none;
+                      color: #111827;
+                      font-size: 0.85rem;
+                      text-align: center;
+                      transition: border-color 0.15s;
+                    "
+                    onmouseover="this.style.borderColor='#111827'"
+                    onmouseout="this.style.borderColor='#e5e7eb'"
+                  >
+                    {browser}
+                  </a>
+                ))}
+              </>
+            );
+          })()}
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <a
+            href="/cases"
+            style="
+              font-size: 0.85rem;
+              color: #111827;
+              text-decoration: none;
+              font-weight: 500;
+            "
+          >
+            View all cases with filters →
+          </a>
+        </div>
+      </section>
+
+      <section
+        aria-label="Pinned incidents"
+        style="
+          margin-bottom: 1.5rem;
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 0.9rem 1rem;
+        "
+      >
+        <h2
+          style="
+            font-size: 1rem;
+            margin: 0 0 0.6rem 0;
+          "
+        >
+          Pinned incidents
+        </h2>
+        <p style="margin: 0 0 0.75rem 0; font-size: 0.85rem; color: #4b5563;">
+          Curated cases that serve as baseline references or highlight frequently observed issues.
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 0.9rem;
+          "
+        >
+          {cases.filter((c) => c.data.tags.includes('baseline')).map((entry) => (
+            <article
+              style="
+                border-radius: 0.75rem;
+                border: 1px solid #e5e7eb;
+                padding: 0.75rem 0.85rem;
+                font-size: 0.85rem;
+              "
+            >
+              <h3
+                style="
+                  font-size: 0.9rem;
+                  margin: 0 0 0.35rem 0;
+                "
+              >
+                {entry.data.caseTitle}
+              </h3>
+              <p style="margin: 0 0 0.45rem 0; color: #4b5563;">
+                OS: {entry.data.os}
+                {entry.data.osVersion && ` ${entry.data.osVersion}`} · Browser: {entry.data.browser}
+                {entry.data.browserVersion && ` ${entry.data.browserVersion}`} · Keyboard:{' '}
+                {entry.data.keyboard}
+              </p>
+              <a
+                href={`/cases/${entry.slug}`}
+                style="
+                  font-size: 0.8rem;
+                  color: #111827;
+                  text-decoration: none;
+                "
+              >
+                Open case →
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section
+        aria-label="Latest scenarios"
+        style="
+          margin-top: 1.25rem;
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 0.9rem 1rem;
+        "
+      >
+        <h2
+          style="
+            font-size: 1rem;
+            margin: 0 0 0.6rem 0;
+          "
+        >
+          Latest scenarios (by highest case id)
+        </h2>
+        <p style="margin: 0 0 0.75rem 0; font-size: 0.85rem; color: #4b5563;">
+          Up to 20 scenarios, ordered by the highest case id associated with each scenario.
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.9rem;
+          "
+        >
+          {latestScenarios.map((item) => (
+            <article
+              style="
+                border-radius: 0.75rem;
+                border: 1px solid #e5e7eb;
+                padding: 0.75rem 0.85rem;
+                font-size: 0.85rem;
+              "
+            >
+              <h3
+                style="
+                  font-size: 0.9rem;
+                  margin: 0 0 0.3rem 0;
+                "
+              >
+                {item.scenarioId}
+              </h3>
+              <p style="margin: 0 0 0.4rem 0; color: #4b5563;">
+                Representative case: {item.representative.data.id} · OS: {item.representative.data.os}
+                {item.representative.data.osVersion && ` ${item.representative.data.osVersion}`} ·
+                Browser: {item.representative.data.browser}
+                {item.representative.data.browserVersion && ` ${item.representative.data.browserVersion}`}{' '}
+                · Keyboard: {item.representative.data.keyboard}
+              </p>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a
+                  href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}
+                  style="
+                    font-size: 0.8rem;
+                    color: #111827;
+                    text-decoration: none;
+                  "
+                >
+                  Open scenario →
+                </a>
+                <a
+                  href={`/cases/${item.representative.slug}`}
+                  style="
+                    font-size: 0.8rem;
+                    color: #4b5563;
+                    text-decoration: none;
+                  "
+                >
+                  Open representative case →
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

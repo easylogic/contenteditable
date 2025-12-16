@@ -1,0 +1,290 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import DocsSidebar from '../../components/DocsSidebar.astro';
+
+const applyBoldCode = `function applyBold() {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+  const strong = document.createElement('strong');
+  
+  try {
+    strong.appendChild(range.extractContents());
+    range.insertNode(strong);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  } catch (e) {
+    console.error('Failed to apply bold:', e);
+  }
+}`;
+
+const beforeInputCode = `element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    // Apply bold formatting using Selection API
+    applyBold();
+  }
+});`;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>execCommand alternatives – contenteditable.lab</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        display: flex;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      "
+    >
+      <DocsSidebar currentPath={Astro.url.pathname} />
+
+      <section
+        style="
+          flex: 1;
+          max-width: 1120px;
+          margin: 0 auto;
+          padding: 1.75rem 1.25rem 2.5rem;
+          width: 100%;
+        "
+      >
+      <header style="margin-bottom: 2rem;">
+        <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
+          <a href="/docs" style="color: #6b7280; text-decoration: none;">Documentation</a>
+          <span style="color: #9ca3af; margin: 0 0.5rem;">/</span>
+          <span style="color: #111827;">execCommand alternatives</span>
+        </nav>
+        <h1
+          style="
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          execCommand alternatives
+        </h1>
+        <p style="margin: 0; font-size: 0.95rem; color: #4b5563;">
+          Modern alternatives to the deprecated execCommand API for formatting and editing operations.
+        </p>
+      </header>
+
+      <article
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 1.5rem 1.75rem;
+          font-size: 0.9rem;
+          line-height: 1.7;
+        "
+      >
+        <section style="margin-bottom: 2rem;">
+          <div style="background: #fee2e2; border-left: 4px solid #ef4444; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+            <strong style="display: block; margin-bottom: 0.3rem;">⚠️ Deprecated</strong>
+            <p style="margin: 0; font-size: 0.85rem;">
+              The <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">document.execCommand()</code> API has been deprecated and may stop working in future browser versions. Modern alternatives should be used instead.
+            </p>
+          </div>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Using the Selection API
+          </h2>
+          <p style="margin: 0 0 1rem 0;">
+            Instead of <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">execCommand('bold')</code>, you can wrap the selected text in a <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;strong&gt;</code> element using the Selection and Range APIs.
+          </p>
+          <pre
+            style="
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 0.5rem;
+              padding: 1rem;
+              overflow-x: auto;
+              font-size: 0.85rem;
+              line-height: 1.6;
+            "
+          ><code>{applyBoldCode}</code></pre>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Using beforeinput event
+          </h2>
+            <p style="margin: 0 0 1rem 0;">
+              The <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> event allows you to intercept and modify input before it's committed to the DOM. Browser support varies by version, so always test in your target browsers.
+            </p>
+          <pre
+            style="
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 0.5rem;
+              padding: 1rem;
+              overflow-x: auto;
+              font-size: 0.85rem;
+              line-height: 1.6;
+            "
+          ><code>{beforeInputCode}</code></pre>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Common operations
+          </h2>
+          <div style="margin-bottom: 1.5rem;">
+            <h3
+              style="
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                color: #111827;
+              "
+            >
+              Bold, Italic, Underline
+            </h3>
+            <p style="margin: 0 0 0.5rem 0;">
+              Wrap selected text in <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;strong&gt;</code>, <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;em&gt;</code>, or <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;u&gt;</code> elements using the Selection API.
+            </p>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <h3
+              style="
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                color: #111827;
+              "
+            >
+              Insert HTML
+            </h3>
+            <p style="margin: 0 0 0.5rem 0;">
+              Instead of <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">execCommand('insertHTML')</code>, create DOM nodes and insert them at the selection position.
+            </p>
+          </div>
+
+          <div>
+            <h3
+              style="
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                color: #111827;
+              "
+            >
+              Delete content
+            </h3>
+            <p style="margin: 0 0 0.5rem 0;">
+              Use <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.deleteContents()</code> to remove selected content programmatically.
+            </p>
+          </div>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Challenges
+          </h2>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <p style="margin: 0; font-size: 0.85rem;">
+              <strong>Complexity:</strong> The Selection API approach is more complex than execCommand and requires careful handling of edge cases (empty selections, collapsed ranges, etc.).
+            </p>
+          </div>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <p style="margin: 0; font-size: 0.85rem;">
+              <strong>Browser differences:</strong> Selection and Range behavior varies across browsers, especially when dealing with complex DOM structures or IME composition.
+            </p>
+          </div>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem;">
+            <p style="margin: 0; font-size: 0.85rem;">
+              <strong>No standard replacement:</strong> There is no single, standardized replacement for execCommand. Each operation must be implemented separately using the Selection API.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Related resources
+          </h2>
+          <ul style="margin: 0; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/docs/selection-api"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                Selection API →
+              </a>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/scenarios/scenario-execCommand-alternatives"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                Browse execCommand-related cases →
+              </a>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                MDN: execCommand (deprecated) (external) →
+              </a>
+            </li>
+          </ul>
+        </section>
+      </article>
+      </section>
+    </main>
+  </body>
+</html>
+

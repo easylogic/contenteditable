@@ -1,0 +1,232 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import DocsSidebar from '../../components/DocsSidebar.astro';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>What is contenteditable? – contenteditable.lab</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        display: flex;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      "
+    >
+      <DocsSidebar currentPath={Astro.url.pathname} />
+
+      <section
+        style="
+          flex: 1;
+          max-width: 1120px;
+          margin: 0 auto;
+          padding: 1.75rem 1.25rem 2.5rem;
+          width: 100%;
+        "
+      >
+      <header style="margin-bottom: 2rem;">
+        <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
+          <a href="/docs" style="color: #6b7280; text-decoration: none;">Documentation</a>
+          <span style="color: #9ca3af; margin: 0 0.5rem;">/</span>
+          <span style="color: #111827;">What is contenteditable?</span>
+        </nav>
+        <h1
+          style="
+            font-size: 2rem;
+            line-height: 1.1;
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          What is contenteditable?
+        </h1>
+        <p style="margin: 0; font-size: 0.95rem; color: #4b5563;">
+          The contenteditable attribute makes any HTML element editable by the user.
+        </p>
+      </header>
+
+      <article
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid #e5e7eb;
+          background: #ffffff;
+          padding: 1.5rem 1.75rem;
+          font-size: 0.9rem;
+          line-height: 1.7;
+        "
+      >
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Basic usage
+          </h2>
+          <p style="margin: 0 0 1rem 0;">
+            The <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">contenteditable</code> attribute can be set to <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">"true"</code> or <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">"false"</code> to control whether an element and its children are editable.
+          </p>
+          <pre
+            style="
+              background: #f9fafb;
+              border: 1px solid #e5e7eb;
+              border-radius: 0.5rem;
+              padding: 1rem;
+              overflow-x: auto;
+              font-size: 0.85rem;
+              line-height: 1.6;
+            "
+          ><code>&lt;div contenteditable="true"&gt;
+  This text can be edited by the user.
+&lt;/div&gt;</code></pre>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Key characteristics
+          </h2>
+          <ul style="margin: 0; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Rich text editing:</strong> Unlike <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;input&gt;</code> or <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;textarea&gt;</code>, contenteditable supports formatted text, images, and complex HTML structures.
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Event-driven:</strong> Content changes trigger events like <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">input</code>, <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code>, and composition events.
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Selection API:</strong> Works with the Selection and Range APIs for programmatic text manipulation.
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <strong>Browser differences:</strong> Behavior varies significantly across browsers, operating systems, and input methods (IME).
+            </li>
+          </ul>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Common use cases
+          </h2>
+          <ul style="margin: 0; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem;">Rich text editors (WYSIWYG)</li>
+            <li style="margin-bottom: 0.5rem;">Collaborative editing interfaces</li>
+            <li style="margin-bottom: 0.5rem;">Inline editing in applications</li>
+            <li style="margin-bottom: 0.5rem;">Custom form inputs with formatting</li>
+            <li style="margin-bottom: 0.5rem;">Code editors with syntax highlighting</li>
+          </ul>
+        </section>
+
+        <section style="margin-bottom: 2rem;">
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Important considerations
+          </h2>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <strong style="display: block; margin-bottom: 0.3rem;">⚠️ Browser compatibility</strong>
+            <p style="margin: 0; font-size: 0.85rem;">
+              contenteditable behavior differs across browsers, especially for IME composition, paste operations, and formatting. Always test on your target platforms.
+            </p>
+          </div>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+            <strong style="display: block; margin-bottom: 0.3rem;">⚠️ Security</strong>
+            <p style="margin: 0; font-size: 0.85rem;">
+              User-editable content can include arbitrary HTML. Always sanitize contenteditable output before storing or displaying it elsewhere.
+            </p>
+          </div>
+          <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem 1rem; border-radius: 0.5rem;">
+            <strong style="display: block; margin-bottom: 0.3rem;">⚠️ execCommand deprecation</strong>
+            <p style="margin: 0; font-size: 0.85rem;">
+              The <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">document.execCommand()</code> API is deprecated. Use the Selection API and DOM manipulation for formatting operations.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2
+            style="
+              font-size: 1.3rem;
+              margin: 0 0 0.75rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            "
+          >
+            Related resources
+          </h2>
+          <ul style="margin: 0; padding-left: 1.5rem;">
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/docs/events"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                Events in contenteditable →
+              </a>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/docs/ime-composition"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                IME & Composition →
+              </a>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="/scenarios"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                Browse documented scenarios →
+              </a>
+            </li>
+            <li style="margin-bottom: 0.5rem;">
+              <a
+                href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="color: #0069c2; text-decoration: none;"
+              >
+                MDN: contenteditable (external) →
+              </a>
+            </li>
+          </ul>
+        </section>
+      </article>
+      </section>
+    </main>
+  </body>
+</html>
+

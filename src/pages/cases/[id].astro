@@ -1,0 +1,805 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import { CasePlayground } from '../../components/CasePlayground';
+import SiteNav from '../../components/SiteNav.astro';
+
+export const getStaticPaths = (async () => {
+  const cases = await getCollection('cases');
+  return cases.map((entry) => ({
+    params: { id: entry.slug },
+  }));
+}) satisfies GetStaticPaths;
+
+const slug = Astro.params.id;
+
+if (!slug) {
+  throw new Error('Case slug is missing in route params.');
+}
+
+const entry = await getEntry('cases', slug);
+
+if (!entry) {
+  throw new Error(`Case entry for slug "${slug}" was not found.`);
+}
+
+const allCases = await getCollection('cases');
+
+const activeView = Astro.url.searchParams.get('view') ?? 'scenario';
+
+const casesByScenario = allCases.reduce(
+  (acc, c) => {
+    const key = c.data.scenarioId;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(c);
+    return acc;
+  },
+  {} as Record<string, typeof allCases>,
+);
+
+const osGroups = allCases.reduce(
+  (acc, c) => {
+    const key = c.data.os;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(c);
+    return acc;
+  },
+  {} as Record<string, typeof allCases>,
+);
+
+const browserGroups = allCases.reduce(
+  (acc, c) => {
+    const key = c.data.browser;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(c);
+    return acc;
+  },
+  {} as Record<string, typeof allCases>,
+);
+
+const deviceGroups = allCases.reduce(
+  (acc, c) => {
+    const key = c.data.device;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(c);
+    return acc;
+  },
+  {} as Record<string, typeof allCases>,
+);
+
+const sameScenarioCases = allCases.filter(
+  (c) => c.data.scenarioId === entry.data.scenarioId,
+);
+
+// Build compatibility matrix for this scenario
+const scenarioBrowsers = Array.from(new Set(sameScenarioCases.map((c) => c.data.browser))).sort();
+const scenarioOS = Array.from(new Set(sameScenarioCases.map((c) => c.data.os))).sort();
+
+const scenarioMatrix = scenarioBrowsers.map((browser) => {
+  const browserCases = sameScenarioCases.filter((c) => c.data.browser === browser);
+  return {
+    browser,
+    osCoverage: scenarioOS.map((os) => {
+      const osCases = browserCases.filter((c) => c.data.os === os);
+      return {
+        os,
+        cases: osCases,
+        hasCase: osCases.length > 0,
+        versions: osCases.map((c) => ({
+          osVersion: c.data.osVersion || 'Any',
+          browserVersion: c.data.browserVersion || 'Any',
+          caseId: c.data.id,
+          slug: c.slug,
+          status: c.data.status,
+          isCurrent: c.slug === slug,
+        })),
+      };
+    }),
+  };
+});
+
+const { Content } = await entry.render();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{entry.data.caseTitle}</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f3f4;
+      color: #111827;
+    "
+  >
+    <SiteNav />
+    <main
+      style="
+        display: flex;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      "
+    >
+        <aside
+          aria-label="Cases"
+          style="
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            width: 240px;
+            min-width: 240px;
+            border-right: 1px solid #e5e7eb;
+            background: #f7f7f8;
+            padding: 0;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+          "
+        >
+          <div style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; background: #ffffff;">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.5rem;
+              "
+            >
+              <span style="font-weight: 600; font-size: 0.9rem;">Cases</span>
+              <a
+                href="/cases"
+                style="
+                  font-size: 0.75rem;
+                  color: #0069c2;
+                  text-decoration: none;
+                "
+              >
+                All →
+              </a>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+                font-size: 0.75rem;
+              "
+            >
+              <a
+                href={`?view=scenario`}
+                style={{
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  backgroundColor: activeView === 'scenario' ? '#0069c2' : 'transparent',
+                  color: activeView === 'scenario' ? '#ffffff' : '#0069c2',
+                  border: activeView === 'scenario' ? 'none' : '1px solid #e5e7eb',
+                }}
+              >
+                Scenario
+              </a>
+              <a
+                href={`?view=os`}
+                style={{
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  backgroundColor: activeView === 'os' ? '#0069c2' : 'transparent',
+                  color: activeView === 'os' ? '#ffffff' : '#0069c2',
+                  border: activeView === 'os' ? 'none' : '1px solid #e5e7eb',
+                }}
+              >
+                OS
+              </a>
+              <a
+                href={`?view=browser`}
+                style={{
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  backgroundColor: activeView === 'browser' ? '#0069c2' : 'transparent',
+                  color: activeView === 'browser' ? '#ffffff' : '#0069c2',
+                  border: activeView === 'browser' ? 'none' : '1px solid #e5e7eb',
+                }}
+              >
+                Browser
+              </a>
+              <a
+                href={`?view=device`}
+                style={{
+                  padding: '0.2rem 0.5rem',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  backgroundColor: activeView === 'device' ? '#0069c2' : 'transparent',
+                  color: activeView === 'device' ? '#ffffff' : '#0069c2',
+                  border: activeView === 'device' ? 'none' : '1px solid #e5e7eb',
+                }}
+              >
+                Device
+              </a>
+            </div>
+          </div>
+
+          <nav aria-label="Case list" style="padding: 0.5rem 0;">
+            {activeView === 'scenario' && (
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                {Object.entries(casesByScenario).map(([scenarioId, scenarioCases]) => (
+                  <li style="margin-bottom: 0.5rem;">
+                    <div
+                      style="
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        margin: 0 0 0.25rem 0.75rem;
+                        color: #4b5563;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      {scenarioId}
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                      {scenarioCases.map((c) => (
+                        <li style="margin: 0;">
+                          <a
+                            href={`/cases/${c.slug}`}
+                            title={c.data.caseTitle}
+                            style={{
+                              display: 'block',
+                              padding: '0.4rem 0.75rem',
+                              textDecoration: 'none',
+                              fontSize: '0.875rem',
+                              backgroundColor:
+                                c.slug === slug ? '#0069c2' : 'transparent',
+                              color: c.slug === slug ? '#ffffff' : '#1a1a1a',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
+                            }}
+                          >
+                            {c.data.caseTitle}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {activeView === 'os' && (
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                {Object.entries(osGroups).map(([os, osCases]) => (
+                  <li style="margin-bottom: 0.5rem;">
+                    <div
+                      style="
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        margin: 0 0 0.25rem 0.75rem;
+                        color: #4b5563;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      {os}
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                      {osCases.map((c) => (
+                        <li style="margin: 0;">
+                          <a
+                            href={`/cases/${c.slug}`}
+                            title={c.data.caseTitle}
+                            style={{
+                              display: 'block',
+                              padding: '0.4rem 0.75rem',
+                              textDecoration: 'none',
+                              fontSize: '0.875rem',
+                              backgroundColor:
+                                c.slug === slug ? '#0069c2' : 'transparent',
+                              color: c.slug === slug ? '#ffffff' : '#1a1a1a',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
+                            }}
+                          >
+                            {c.data.caseTitle}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {activeView === 'browser' && (
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                {Object.entries(browserGroups).map(([browser, browserCases]) => (
+                  <li style="margin-bottom: 0.5rem;">
+                    <div
+                      style="
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        margin: 0 0 0.25rem 0.75rem;
+                        color: #4b5563;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      {browser}
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                      {browserCases.map((c) => (
+                        <li style="margin: 0;">
+                          <a
+                            href={`/cases/${c.slug}`}
+                            title={c.data.caseTitle}
+                            style={{
+                              display: 'block',
+                              padding: '0.4rem 0.75rem',
+                              textDecoration: 'none',
+                              fontSize: '0.875rem',
+                              backgroundColor:
+                                c.slug === slug ? '#0069c2' : 'transparent',
+                              color: c.slug === slug ? '#ffffff' : '#1a1a1a',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
+                            }}
+                          >
+                            {c.data.caseTitle}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {activeView === 'device' && (
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                {Object.entries(deviceGroups).map(([device, deviceCases]) => (
+                  <li style="margin-bottom: 0.5rem;">
+                    <div
+                      style="
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        margin: 0 0 0.25rem 0.75rem;
+                        color: #4b5563;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      {device}
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                      {deviceCases.map((c) => (
+                        <li style="margin: 0;">
+                          <a
+                            href={`/cases/${c.slug}`}
+                            title={c.data.caseTitle}
+                            style={{
+                              display: 'block',
+                              padding: '0.4rem 0.75rem',
+                              textDecoration: 'none',
+                              fontSize: '0.875rem',
+                              backgroundColor:
+                                c.slug === slug ? '#0069c2' : 'transparent',
+                              color: c.slug === slug ? '#ffffff' : '#1a1a1a',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
+                            }}
+                          >
+                            {c.data.caseTitle}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </nav>
+        </aside>
+
+        <section
+          style="
+            flex: 1;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 1.75rem 1.25rem 2.5rem;
+            width: 100%;
+          "
+        >
+          <header style="margin-bottom: 1.5rem;">
+            <p style="margin: 0 0 0.5rem 0; font-size: 0.8rem; color: #6b7280;">
+              Case {entry.data.id} · Scenario{' '}
+              <a
+                href={`/scenarios/${encodeURIComponent(entry.data.scenarioId)}`}
+                style="color: inherit; text-decoration: underline;"
+              >
+                {entry.data.scenarioId}
+              </a>
+            </p>
+            <h1
+              style="
+                font-size: 1.85rem;
+                line-height: 1.2;
+                margin: 0 0 0.75rem 0;
+              "
+            >
+              {entry.data.caseTitle}
+            </h1>
+
+            <div
+              style="
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.35rem 0.75rem;
+                font-size: 0.8rem;
+                color: #4b5563;
+              "
+            >
+              <span>
+                OS: {entry.data.os}
+                {entry.data.osVersion && ` ${entry.data.osVersion}`}
+              </span>
+              <span>
+                Device: {entry.data.device}
+                {entry.data.deviceVersion && ` ${entry.data.deviceVersion}`}
+              </span>
+              <span>
+                Browser: {entry.data.browser}
+                {entry.data.browserVersion && ` ${entry.data.browserVersion}`}
+              </span>
+              <span>Keyboard: {entry.data.keyboard}</span>
+              <span>Status: {entry.data.status}</span>
+            </div>
+
+            {entry.data.tags.length > 0 && (
+              <div style="margin-top: 0.4rem; font-size: 0.8rem;">
+                {entry.data.tags.map((tag) => (
+                  <span
+                    style="
+                      display: inline-flex;
+                      align-items: center;
+                      border-radius: 999px;
+                      border: 1px solid #e5e7eb;
+                      padding: 0.05rem 0.45rem;
+                      margin-right: 0.25rem;
+                      background: #f9fafb;
+                    "
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </header>
+
+          <article
+            style="
+              border-radius: 0.75rem;
+              border: 1px solid #e5e7eb;
+              background: #ffffff;
+              padding: 1rem 1.1rem;
+              font-size: 0.9rem;
+              line-height: 1.6;
+            "
+          >
+            <Content />
+          </article>
+
+          {sameScenarioCases.length > 1 && (
+            <>
+              <section
+                aria-label="Browser compatibility matrix"
+                style="
+                  margin-top: 1.1rem;
+                  border-radius: 0.75rem;
+                  border: 1px solid #e5e7eb;
+                  background: #ffffff;
+                  padding: 0.85rem 0.95rem;
+                  font-size: 0.85rem;
+                "
+              >
+                <h2
+                  style="
+                    font-size: 0.9rem;
+                    margin: 0 0 0.4rem 0;
+                  "
+                >
+                  Browser compatibility matrix
+                </h2>
+                <p style="margin: 0 0 0.6rem 0; color: #4b5563; font-size: 0.8rem;">
+                  This matrix shows which browser and OS combinations have documented cases for this
+                  scenario. The current case is highlighted. Click on a cell to view other cases.
+                </p>
+                <div style="overflow-x: auto;">
+                  <table
+                    style="
+                      width: 100%;
+                      border-collapse: collapse;
+                      font-size: 0.75rem;
+                    "
+                  >
+                    <thead>
+                      <tr>
+                        <th
+                          style="
+                            text-align: left;
+                            padding: 0.4rem 0.5rem;
+                            border-bottom: 2px solid #e5e7eb;
+                            background: #f9fafb;
+                            position: sticky;
+                            left: 0;
+                            z-index: 1;
+                          "
+                        >
+                          Browser
+                        </th>
+                        {scenarioOS.map((os) => (
+                          <th
+                            style="
+                              text-align: center;
+                              padding: 0.4rem 0.5rem;
+                              border-bottom: 2px solid #e5e7eb;
+                              background: #f9fafb;
+                              font-weight: 600;
+                            "
+                          >
+                            {os}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {scenarioMatrix.map((row) => (
+                        <tr>
+                          <td
+                            style="
+                              padding: 0.4rem 0.5rem;
+                              border-bottom: 1px solid #e5e7eb;
+                              background: #f9fafb;
+                              font-weight: 600;
+                              position: sticky;
+                              left: 0;
+                              z-index: 1;
+                            "
+                          >
+                            {row.browser}
+                          </td>
+                          {row.osCoverage.map((cell) => (
+                            <td
+                              style="
+                                padding: 0.3rem 0.4rem;
+                                border-bottom: 1px solid #e5e7eb;
+                                text-align: center;
+                                min-width: 80px;
+                                background: cell.versions.some((v) => v.isCurrent)
+                                  ? 'rgba(17, 24, 39, 0.06)'
+                                  : 'transparent';
+                              "
+                            >
+                              {cell.hasCase ? (
+                                <div
+                                  style="
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: 0.2rem;
+                                    align-items: center;
+                                  "
+                                >
+                                  {cell.versions.map((v) => (
+                                    <a
+                                      href={`/cases/${v.slug}`}
+                                      style="
+                                        display: inline-block;
+                                        padding: 0.15rem 0.4rem;
+                                        border-radius: 4px;
+                                        background: ${v.isCurrent
+                                          ? '#111827'
+                                          : v.status === 'confirmed'
+                                            ? '#10b981'
+                                            : '#f59e0b'};
+                                        color: #ffffff;
+                                        text-decoration: none;
+                                        font-size: 0.7rem;
+                                        font-weight: 500;
+                                        border: ${v.isCurrent ? '2px solid #111827' : 'none'};
+                                      "
+                                      title={`${v.caseId}: ${row.browser} ${v.browserVersion} on ${cell.os} ${v.osVersion}`}
+                                    >
+                                      {v.caseId}
+                                      {v.isCurrent && ' (current)'}
+                                    </a>
+                                  ))}
+                                  <div
+                                    style="
+                                      font-size: 0.65rem;
+                                      color: #6b7280;
+                                      margin-top: 0.1rem;
+                                    "
+                                  >
+                                    {cell.versions
+                                      .map((v) => `${v.browserVersion || 'Any'}`)
+                                      .join(', ')}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span style="color: #d1d5db;">—</span>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div
+                  style="
+                    margin-top: 0.6rem;
+                    padding-top: 0.6rem;
+                    border-top: 1px solid #e5e7eb;
+                    font-size: 0.75rem;
+                    color: #6b7280;
+                  "
+                >
+                  <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.3rem;">
+                      <span
+                        style="
+                          display: inline-block;
+                          width: 12px;
+                          height: 12px;
+                          border-radius: 4px;
+                          background: #111827;
+                        "
+                      ></span>
+                      <span>Current case</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;">
+                      <span
+                        style="
+                          display: inline-block;
+                          width: 12px;
+                          height: 12px;
+                          border-radius: 4px;
+                          background: #10b981;
+                        "
+                      ></span>
+                      <span>Confirmed</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;">
+                      <span
+                        style="
+                          display: inline-block;
+                          width: 12px;
+                          height: 12px;
+                          border-radius: 4px;
+                          background: #f59e0b;
+                        "
+                      ></span>
+                      <span>Draft</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.3rem;">
+                      <span style="color: #d1d5db;">—</span>
+                      <span>No case documented</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section
+                aria-label="Variants table"
+                style="
+                  margin-top: 1.1rem;
+                  border-radius: 0.75rem;
+                  border: 1px solid #e5e7eb;
+                  background: #ffffff;
+                  padding: 0.85rem 0.95rem;
+                  font-size: 0.85rem;
+                "
+              >
+                <h2
+                  style="
+                    font-size: 0.9rem;
+                    margin: 0 0 0.4rem 0;
+                  "
+                >
+                  All variants (detailed table)
+                </h2>
+                <p style="margin: 0 0 0.6rem 0; color: #4b5563; font-size: 0.8rem;">
+                  Complete list of all cases for this scenario with full environment details.
+                </p>
+                <div style="overflow-x: auto;">
+                  <table
+                    style="
+                      width: 100%;
+                      border-collapse: collapse;
+                      font-size: 0.8rem;
+                    "
+                  >
+                    <thead>
+                      <tr>
+                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Case</th>
+                        <th style="text-align: left; padding: 0.25rem 0.4rem;">OS</th>
+                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Device</th>
+                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Browser</th>
+                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Keyboard</th>
+                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sameScenarioCases.map((c) => (
+                        <tr
+                          style={{
+                            backgroundColor:
+                              c.slug === slug ? 'rgba(17, 24, 39, 0.04)' : 'transparent',
+                          }}
+                        >
+                          <td style="padding: 0.25rem 0.4rem;">
+                            <a
+                              href={`/cases/${c.slug}`}
+                              style="
+                                color: #111827;
+                                text-decoration: none;
+                              "
+                            >
+                              {c.data.id}
+                            </a>
+                          </td>
+                          <td style="padding: 0.25rem 0.4rem;">
+                            {c.data.os}
+                            {c.data.osVersion && ` ${c.data.osVersion}`}
+                          </td>
+                          <td style="padding: 0.25rem 0.4rem;">
+                            {c.data.device}
+                            {c.data.deviceVersion && ` ${c.data.deviceVersion}`}
+                          </td>
+                          <td style="padding: 0.25rem 0.4rem;">
+                            {c.data.browser}
+                            {c.data.browserVersion && ` ${c.data.browserVersion}`}
+                          </td>
+                          <td style="padding: 0.25rem 0.4rem;">{c.data.keyboard}</td>
+                          <td style="padding: 0.25rem 0.4rem;">{c.data.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </>
+          )}
+
+          <CasePlayground
+            client:load
+            id={entry.data.id}
+            caseTitle={entry.data.caseTitle}
+            os={entry.data.os}
+            osVersion={entry.data.osVersion}
+            device={entry.data.device}
+            deviceVersion={entry.data.deviceVersion}
+            browser={entry.data.browser}
+            browserVersion={entry.data.browserVersion}
+            keyboard={entry.data.keyboard}
+          />
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
+
+
