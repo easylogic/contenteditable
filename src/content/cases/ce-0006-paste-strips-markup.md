@@ -15,6 +15,16 @@ tags:
   - clipboard
   - formatting
 status: draft
+domSteps:
+  - label: "Clipboard"
+    html: '<h3>Title</h3><ul><li><strong>Bold</strong></li><li><em>Italic</em></li></ul>'
+    description: "복사한 서식 있는 콘텐츠"
+  - label: "❌ After Paste"
+    html: 'Title<br>Bold<br>Italic'
+    description: "서식 손실, 텍스트만 남음"
+  - label: "✅ Expected"
+    html: '<h3>Title</h3><ul><li><strong>Bold</strong></li><li><em>Italic</em></li></ul>'
+    description: "서식 유지"
 ---
 
 ### Phenomenon

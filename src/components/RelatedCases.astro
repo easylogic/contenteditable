@@ -1,0 +1,186 @@
+---
+interface CaseData {
+  id: string;
+  slug: string;
+  caseTitle: string;
+  os: string;
+  browser: string;
+  tags?: string[];
+  scenarioId: string;
+}
+
+interface Props {
+  currentCase: CaseData;
+  allCases: CaseData[];
+  maxItems?: number;
+}
+
+const { currentCase, allCases, maxItems = 5 } = Astro.props;
+
+// Find related cases based on:
+// 1. Same scenario (highest priority)
+// 2. Matching tags
+// 3. Same OS or browser
+const relatedCases = allCases
+  .filter((c) => c.id !== currentCase.id)
+  .map((c) => {
+    let score = 0;
+    
+    // Same scenario = highest priority
+    if (c.scenarioId === currentCase.scenarioId) {
+      score += 100;
+    }
+    
+    // Matching tags
+    const currentTags = currentCase.tags || [];
+    const caseTags = c.tags || [];
+    const matchingTags = currentTags.filter((t) => caseTags.includes(t));
+    score += matchingTags.length * 10;
+    
+    // Same OS
+    if (c.os === currentCase.os) {
+      score += 5;
+    }
+    
+    // Same browser
+    if (c.browser === currentCase.browser) {
+      score += 5;
+    }
+    
+    return { ...c, score, matchingTags };
+  })
+  .filter((c) => c.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, maxItems);
+
+const getRelationType = (c: typeof relatedCases[0]) => {
+  if (c.scenarioId === currentCase.scenarioId) {
+    return { type: 'scenario', label: 'Same scenario', color: 'var(--category-ime)' };
+  }
+  if (c.matchingTags.length > 0) {
+    return { type: 'tags', label: `${c.matchingTags.join(', ')}`, color: 'var(--category-formatting)' };
+  }
+  if (c.os === currentCase.os) {
+    return { type: 'os', label: c.os, color: 'var(--category-selection)' };
+  }
+  if (c.browser === currentCase.browser) {
+    return { type: 'browser', label: c.browser, color: 'var(--category-clipboard)' };
+  }
+  return { type: 'other', label: 'Related', color: 'var(--text-muted)' };
+};
+---
+
+{relatedCases.length > 0 && (
+  <aside class="related-cases">
+    <h3 class="related-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+      </svg>
+      Related Cases
+    </h3>
+    <ul class="related-list">
+      {relatedCases.map((related) => {
+        const relation = getRelationType(related);
+        return (
+          <li class="related-item">
+            <a href={`/cases/${related.slug}`} class="related-link">
+              <div class="related-header">
+                <span
+                  class="related-badge"
+                  style={`background: ${relation.color}20; color: ${relation.color};`}
+                >
+                  {relation.label}
+                </span>
+              </div>
+              <div class="related-title-text">{related.caseTitle}</div>
+              <div class="related-meta">
+                {related.os} • {related.browser}
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </aside>
+)}
+
+<style>
+  .related-cases {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+  }
+
+  .related-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    color: var(--text-primary);
+  }
+
+  .related-title svg {
+    color: var(--accent-primary);
+  }
+
+  .related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .related-item {
+    margin: 0;
+  }
+
+  .related-link {
+    display: block;
+    padding: 0.75rem;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .related-link:hover {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary-light);
+  }
+
+  .related-header {
+    margin-bottom: 0.35rem;
+  }
+
+  .related-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .related-title-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+  }
+
+  .related-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+</style>
+

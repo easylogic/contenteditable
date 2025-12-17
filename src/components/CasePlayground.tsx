@@ -159,7 +159,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
           >
             Playground for this case
           </h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#4b5563' }}>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             Use the reported environment as a reference and record what happens in your environment
             while interacting with the editable area.
           </p>
@@ -168,8 +168,8 @@ export function CasePlayground(props: CasePlaygroundProps) {
         <div
           style={{
             borderRadius: '0.75rem',
-            border: '1px solid #e5e7eb',
-            background: '#ffffff',
+            border: '1px solid var(--border-light)',
+            background: 'var(--bg-surface)',
             padding: '0.8rem 0.9rem',
             display: 'flex',
             flexDirection: 'column',
@@ -213,7 +213,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
                   style={{
                     padding: '0.25rem 0.4rem',
                     borderRadius: '0.375rem',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--border-medium)',
                     fontSize: '0.8rem',
                   }}
                 />
@@ -227,7 +227,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
                   style={{
                     padding: '0.25rem 0.4rem',
                     borderRadius: '0.375rem',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--border-medium)',
                     fontSize: '0.8rem',
                   }}
                 />
@@ -241,7 +241,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
                   style={{
                     padding: '0.25rem 0.4rem',
                     borderRadius: '0.375rem',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--border-medium)',
                     fontSize: '0.8rem',
                   }}
                 />
@@ -255,7 +255,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
                   style={{
                     padding: '0.25rem 0.4rem',
                     borderRadius: '0.375rem',
-                    border: '1px solid #d1d5db',
+                    border: '1px solid var(--border-medium)',
                     fontSize: '0.8rem',
                   }}
                 />
@@ -271,8 +271,8 @@ export function CasePlayground(props: CasePlaygroundProps) {
                 padding: '0.25rem 0.75rem',
                 fontSize: '0.8rem',
                 borderRadius: '999px',
-                border: '1px solid #ddd',
-                background: '#fafafa',
+                border: '1px solid var(--border-light)',
+                background: 'var(--bg-muted)',
                 cursor: 'pointer',
               }}
             >
@@ -285,9 +285,9 @@ export function CasePlayground(props: CasePlaygroundProps) {
                 padding: '0.25rem 0.75rem',
                 fontSize: '0.8rem',
                 borderRadius: '999px',
-                border: '1px solid #111',
-                background: '#111',
-                color: '#fff',
+                border: '1px solid var(--text-primary)',
+                background: 'var(--text-primary)',
+                color: 'var(--bg-surface)',
                 cursor: 'pointer',
               }}
             >
@@ -297,10 +297,10 @@ export function CasePlayground(props: CasePlaygroundProps) {
 
           <div
             style={{
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-light)',
               borderRadius: '0.75rem',
               padding: '0.7rem',
-              background: '#fff',
+              background: 'var(--bg-surface)',
               marginTop: '0.3rem',
             }}
           >
@@ -346,7 +346,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
               }}
               style={{
                 minHeight: '140px',
-                border: '1px solid #ccc',
+                border: '1px solid var(--border-medium)',
                 borderRadius: '0.5rem',
                 padding: '0.7rem',
                 fontSize: '0.9rem',
@@ -363,10 +363,10 @@ export function CasePlayground(props: CasePlaygroundProps) {
       <section
         aria-label="Event log"
         style={{
-          border: '1px solid #e5e7eb',
+          border: '1px solid var(--border-light)',
           borderRadius: '0.75rem',
           padding: '0.75rem',
-          background: '#fafafa',
+          background: 'var(--bg-muted)',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.4rem',
@@ -381,11 +381,11 @@ export function CasePlayground(props: CasePlaygroundProps) {
         >
           <div>
             <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>Event log</div>
-            <div style={{ fontSize: '0.8rem', color: '#555' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               Use this log together with the case description when filing or updating an issue.
             </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#777' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             {logs.length} event{logs.length === 1 ? '' : 's'}
           </div>
         </header>
@@ -396,9 +396,9 @@ export function CasePlayground(props: CasePlaygroundProps) {
             minHeight: '180px',
             maxHeight: '420px',
             overflowY: 'auto',
-            border: '1px solid #e0e0e0',
+            border: '1px solid var(--border-light)',
             borderRadius: '0.5rem',
-            background: '#fff',
+            background: 'var(--bg-surface)',
             padding: '0.5rem',
             fontFamily:
               'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
@@ -406,7 +406,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
           }}
         >
           {logs.length === 0 ? (
-            <div style={{ color: '#999', padding: '0.25rem' }}>
+            <div style={{ color: 'var(--text-faint)', padding: '0.25rem' }}>
               Interact with the editable area to see events here.
             </div>
           ) : (
@@ -416,9 +416,9 @@ export function CasePlayground(props: CasePlaygroundProps) {
                 style={{
                   padding: '0.25rem 0.35rem',
                   borderRadius: '0.35rem',
-                  border: '1px solid #f0f0f0',
+                  border: '1px solid var(--border-light)',
                   marginBottom: '0.25rem',
-                  background: '#fcfcfc',
+                  background: 'var(--bg-surface)',
                 }}
               >
                 <div
@@ -436,7 +436,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
                   >
                     {entry.type}
                   </span>
-                  <span style={{ color: '#999' }}>{entry.time}</span>
+                  <span style={{ color: 'var(--text-faint)' }}>{entry.time}</span>
                 </div>
                 <pre
                   style={{

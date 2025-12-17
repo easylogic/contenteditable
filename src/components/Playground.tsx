@@ -211,7 +211,7 @@ export function Playground() {
       <section style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <header style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>contenteditable playground</h1>
-          <p style={{ fontSize: '0.9rem', color: '#555' }}>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
             Combine your real OS, device, browser, and keyboard. Use this page only as a
             controlled surface to inspect and record event behavior.
           </p>
@@ -219,7 +219,7 @@ export function Playground() {
 
         <div
           style={{
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-light)',
             borderRadius: '0.75rem',
             padding: '0.75rem 0.75rem 0.5rem',
             display: 'flex',
@@ -280,8 +280,8 @@ export function Playground() {
                 padding: '0.25rem 0.75rem',
                 fontSize: '0.8rem',
                 borderRadius: '999px',
-                border: '1px solid #ddd',
-                background: '#fafafa',
+                border: '1px solid var(--border-light)',
+                background: 'var(--bg-muted)',
                 cursor: 'pointer',
               }}
             >
@@ -294,9 +294,9 @@ export function Playground() {
                 padding: '0.25rem 0.75rem',
                 fontSize: '0.8rem',
                 borderRadius: '999px',
-                border: '1px solid #111',
-                background: '#111',
-                color: '#fff',
+                border: '1px solid var(--text-primary)',
+                background: 'var(--text-primary)',
+                color: 'var(--bg-surface)',
                 cursor: 'pointer',
               }}
             >
@@ -307,10 +307,10 @@ export function Playground() {
 
         <div
           style={{
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-light)',
             borderRadius: '0.75rem',
             padding: '0.75rem',
-            background: '#fff',
+            background: 'var(--bg-surface)',
           }}
         >
           <div
@@ -355,7 +355,7 @@ export function Playground() {
             }}
             style={{
               minHeight: '160px',
-              border: '1px solid #ccc',
+              border: '1px solid var(--border-medium)',
               borderRadius: '0.5rem',
               padding: '0.75rem',
               fontSize: '0.9rem',
@@ -371,13 +371,13 @@ export function Playground() {
       <section
         aria-label="Event log"
         style={{
-          border: '1px solid #ddd',
+          border: '1px solid var(--border-light)',
           borderRadius: '0.75rem',
           padding: '0.75rem',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.5rem',
-          background: '#fafafa',
+          background: 'var(--bg-muted)',
         }}
       >
         <header
@@ -390,11 +390,11 @@ export function Playground() {
         >
           <div>
             <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>Event log</div>
-            <div style={{ fontSize: '0.8rem', color: '#555' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               Newest events appear at the top. Use this when preparing GitHub issues.
             </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#777' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             {logs.length} event{logs.length === 1 ? '' : 's'}
           </div>
         </header>
@@ -405,9 +405,9 @@ export function Playground() {
             minHeight: '180px',
             maxHeight: '420px',
             overflowY: 'auto',
-            border: '1px solid #e0e0e0',
+            border: '1px solid var(--border-light)',
             borderRadius: '0.5rem',
-            background: '#fff',
+            background: 'var(--bg-surface)',
             padding: '0.5rem',
             fontFamily:
               'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
@@ -415,7 +415,7 @@ export function Playground() {
           }}
         >
           {logs.length === 0 ? (
-            <div style={{ color: '#999', padding: '0.25rem' }}>
+            <div style={{ color: 'var(--text-faint)', padding: '0.25rem' }}>
               Interact with the editable area to see events here.
             </div>
           ) : (
@@ -425,9 +425,9 @@ export function Playground() {
                 style={{
                   padding: '0.25rem 0.35rem',
                   borderRadius: '0.35rem',
-                  border: '1px solid #f0f0f0',
+                  border: '1px solid var(--border-light)',
                   marginBottom: '0.25rem',
-                  background: '#fcfcfc',
+                  background: 'var(--bg-surface)',
                 }}
               >
                 <div
@@ -445,7 +445,7 @@ export function Playground() {
                   >
                     {entry.type}
                   </span>
-                  <span style={{ color: '#999' }}>{entry.time}</span>
+                  <span style={{ color: 'var(--text-faint)' }}>{entry.time}</span>
                 </div>
                 <pre
                   style={{

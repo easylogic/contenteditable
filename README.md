@@ -1,54 +1,131 @@
-## contenteditable.lab
+# ⌨️ contenteditable.lab
 
-Interactive playground and knowledge base for observing and documenting `contenteditable`
-behavior across operating systems, devices, browsers, and keyboard setups.
+> **A living catalog of `contenteditable` behavior across browsers, operating systems, and input methods.**
 
-All current documentation is written in English. The content layout is prepared to support
-additional locales in the future.
+---
 
-## Commands
+## Why This Project Exists
 
-All commands are run from the root of the project, from a terminal:
+The `contenteditable` attribute is deceptively simple—add it to any HTML element and users can edit its contents. But beneath this simplicity lies a minefield of browser-specific quirks, OS-dependent behaviors, and IME complications that have frustrated developers for decades.
 
-| Command            | Action                                        |
-| :----------------- | :-------------------------------------------- |
-| `pnpm dev`         | Starts local dev server at `localhost:4321`  |
-| `pnpm build`       | Builds the production site to `./dist/`      |
-| `pnpm preview`     | Previews your build locally before deploying |
-| `pnpm astro ...`   | Runs Astro CLI commands                      |
-| `pnpm astro --help`| Shows Astro CLI help                         |
+**contenteditable.lab** exists to document these behaviors systematically:
 
-## Pages
+- 🔍 **Observe** — Real-world edge cases captured with precise reproduction steps
+- 📚 **Catalog** — Organized by environment (OS × Browser × Input Method)
+- 🧪 **Reproduce** — Interactive playground to verify behaviors yourself
+- 📖 **Learn** — Documentation on events, Selection API, and modern alternatives
 
-- `/`  
-  - Main `contenteditable` playground.  
-  - Logs key events (`keydown`, `beforeinput`, `input`, composition events) and can copy a GitHub
-    issue template including the log payload.
+---
 
-- `/cases`  
-  - Lists Markdown-based cases, filterable by `locale`, `status`, and text search.  
-  - Each case includes free-form metadata for OS, device, browser, keyboard, and tags, and links
-    back to the playground with a query string parameter.
+## What You'll Find Here
 
-## Content layout and locales
+### 📋 Cases
 
-- `src/content/config.ts` defines the `cases` collection, including:
-  - `id`, `locale`, `os`, `device`, `browser`, `keyboard`, `caseTitle`, `tags`, and `status`.
-- Example English content lives under `src/content/en/cases/`.  
-  To introduce another language, add a parallel directory such as `src/content/ko/cases/` with
-  Markdown files that use the same frontmatter schema and `locale` value.
+Each case documents a specific `contenteditable` behavior:
 
-## GitHub Pages and custom domain
+```
+Case: ce-0002-ime-enter-breaks
+├── Environment: Windows × Chrome × Korean IME
+├── Title: Composition is cancelled when pressing Enter
+├── Description: What happens and why
+├── Reproduction Steps: How to trigger it
+└── Status: confirmed / draft
+```
 
-This project is configured to deploy automatically to GitHub Pages:
+Cases are searchable by OS, browser, device, keyboard layout, and tags.
 
-1. Push this repository to GitHub.
-2. Go to repository Settings → Pages.
-3. Under "Source", select "GitHub Actions" as the source.
-4. The workflow (`.github/workflows/deploy.yml`) will automatically build and deploy on every push to `main`.
-5. Add a `CNAME` record at your DNS provider for `contenteditable.realerror.com` that points to
-   your GitHub Pages host (for example, `<user>.github.io`).
-6. In the GitHub repository's Pages settings, set `contenteditable.realerror.com` as the custom
-   domain. GitHub will then serve this site at that hostname.
+### 🎭 Scenarios
 
-The `public/CNAME` file is included to configure the custom domain automatically.
+Scenarios group related cases that describe the same phenomenon across different environments. For example:
+
+> "IME composition cancelled on Enter"
+> - Windows + Chrome + Korean IME ✓
+> - macOS + Safari + Japanese IME ✓
+> - Linux + Firefox + Chinese IME ?
+
+This helps you see which environments are affected and which need testing.
+
+### 🧪 Playground
+
+An interactive testing ground where you can:
+
+- Type in a `contenteditable` region
+- Watch events fire in real-time (`keydown`, `beforeinput`, `input`, `compositionstart/update/end`)
+- Copy a pre-filled GitHub issue template with your event logs
+- Reproduce documented cases in your own environment
+
+### 📖 Documentation
+
+Guides covering:
+
+- **What is contenteditable?** — Fundamentals and use cases
+- **Events** — The event lifecycle and browser differences
+- **IME & Composition** — How input methods interact with contenteditable
+- **Selection API** — Working with ranges and selections
+- **execCommand alternatives** — Modern approaches to rich text editing
+- **Browser compatibility** — Support matrix across browsers
+
+---
+
+## The Problem We're Solving
+
+Building a rich text editor? You'll encounter questions like:
+
+- *"Why does Enter behave differently in Safari?"*
+- *"Why does my Korean IME lose characters on certain key combos?"*
+- *"Why does paste formatting vary between browsers?"*
+- *"Why does undo/redo break after programmatic DOM changes?"*
+
+These aren't theoretical—they're real issues developers face daily. **contenteditable.lab** collects these "incidents" so you don't have to rediscover them the hard way.
+
+---
+
+## Who This Is For
+
+- **Rich text editor developers** — ProseMirror, Slate, Lexical, Tiptap users
+- **Web application developers** — Anyone using `contenteditable` in production
+- **Browser engineers** — Understanding cross-browser behavior differences
+- **Accessibility specialists** — Documenting input method behaviors
+- **Curious developers** — Learning how the web platform really works
+
+---
+
+## Contributing
+
+### Report a New Case
+
+Found a weird `contenteditable` behavior? 
+
+1. Go to the [Playground](/playground)
+2. Reproduce the issue and observe the event log
+3. Click "Copy GitHub issue template"
+4. [Open an issue](https://github.com/user/contenteditable/issues/new) with your findings
+
+### Verify Existing Cases
+
+Many cases need confirmation across different environments. Pick a case marked as "draft" and test it in your environment.
+
+### Translate
+
+The UI supports multiple languages. See [TRANSLATION.md](./TRANSLATION.md) for contribution guidelines.
+
+---
+
+## Philosophy
+
+**Precision over assumptions.** Each case documents exactly what happens, not what "should" happen according to specs.
+
+**Environment matters.** The same code produces different results on Windows Chrome vs macOS Safari vs mobile browsers. We capture these differences.
+
+**Reproducibility is key.** Every case includes steps to reproduce. If you can't reproduce it, we refine the case until you can.
+
+**Community-driven.** No single person has tested every OS × Browser × IME combination. This catalog grows through collective documentation.
+
+---
+
+## Links
+
+- 🌐 [Live Site](https://contenteditable.realerror.com)
+- 📖 [Translation Guide](./TRANSLATION.md)
+- 🤝 [Contributing Guide](./CONTRIBUTING.md)
+- 🐛 [Report an Issue](https://github.com/user/contenteditable/issues)

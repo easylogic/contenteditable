@@ -1,90 +1,351 @@
 ---
+import {
+  locales,
+  defaultLocale,
+  supportedLocales,
+  getLocaleFromPath,
+  getLocalizedPath,
+  type Locale,
+} from '../i18n/translations';
+import ThemeToggle from './ThemeToggle.astro';
+import { SearchIsland } from './SearchIsland';
+
 const currentPath = Astro.url.pathname;
+const currentLocale = getLocaleFromPath(currentPath);
+const currentLocaleInfo = locales[currentLocale];
+
+// Get path without locale for language switching
+const localePattern = new RegExp(`^/(${supportedLocales.join('|')})`);
+const pathWithoutLocale = currentPath.replace(localePattern, '') || '/';
+
+// Helper to build localized paths
+const localePath = (path: string) => getLocalizedPath(path, currentLocale);
+
+// Get other available locales for the switcher
+const availableLocales = supportedLocales.map((code) => ({
+  code,
+  ...locales[code],
+  href: getLocalizedPath(pathWithoutLocale, code),
+  isCurrent: code === currentLocale,
+}));
 ---
 
-<header
-  style="
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-    background: rgba(243, 243, 244, 0.9);
-    border-bottom: 1px solid #e5e7eb;
-  "
->
-  <nav
-    style="
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0.55rem 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-    "
-  >
-    <a
-      href="/"
-      style="
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: #111827;
-        text-decoration: none;
-        white-space: nowrap;
-      "
-    >
-      contenteditable.lab
-    </a>
-    <div
-      style="
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-size: 0.8rem;
-      "
-    >
+<header class="site-nav">
+  <nav class="site-nav-inner">
+    <div class="site-nav-left">
+      <a href={localePath('/')} class="site-logo">
+        <span class="logo-icon">⌨</span>
+        <span class="logo-text">contenteditable<span class="logo-dot">.</span>lab</span>
+      </a>
+    </div>
+
+    <div class="site-nav-center">
       <a
-        href="/docs"
-        style={{
-          textDecoration: 'none',
-          color: currentPath.startsWith('/docs') ? '#111827' : '#4b5563',
-          fontWeight: currentPath.startsWith('/docs') ? 600 : 400,
-        }}
+        href={localePath('/docs')}
+        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/docs') }]}
       >
         Docs
       </a>
       <a
-        href="/cases"
-        style={{
-          textDecoration: 'none',
-          color: currentPath.startsWith('/cases') ? '#111827' : '#4b5563',
-          fontWeight: currentPath.startsWith('/cases') ? 600 : 400,
-        }}
+        href={localePath('/cases')}
+        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/cases') }]}
       >
         Cases
       </a>
       <a
-        href="/scenarios"
-        style={{
-          textDecoration: 'none',
-          color: currentPath.startsWith('/scenarios') ? '#111827' : '#4b5563',
-          fontWeight: currentPath.startsWith('/scenarios') ? 600 : 400,
-        }}
+        href={localePath('/scenarios')}
+        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/scenarios') }]}
       >
         Scenarios
       </a>
       <a
-        href="/playground"
-        style={{
-          textDecoration: 'none',
-          color: currentPath.startsWith('/playground') ? '#111827' : '#4b5563',
-          fontWeight: currentPath.startsWith('/playground') ? 600 : 400,
-        }}
+        href={localePath('/playground')}
+        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/playground') }]}
       >
         Playground
+      </a>
+      <a
+        href={localePath('/coverage')}
+        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/coverage') }]}
+      >
+        Coverage
+      </a>
+    </div>
+
+    <div class="site-nav-right">
+      <SearchIsland client:load />
+      <ThemeToggle />
+      <div class="lang-dropdown">
+        <button class="lang-trigger" aria-haspopup="true" aria-expanded="false">
+          <span class="lang-flag">{currentLocaleInfo.flag}</span>
+          <span class="lang-code">{currentLocaleInfo.shortName}</span>
+          <svg class="lang-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="lang-menu" role="menu">
+          {availableLocales.map((locale) => (
+            <a
+              href={locale.href}
+              class:list={['lang-option', { active: locale.isCurrent }]}
+              role="menuitem"
+            >
+              <span class="lang-flag">{locale.flag}</span>
+              <span class="lang-name">{locale.name}</span>
+              {locale.isCurrent && (
+                <svg class="lang-check" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/>
+                </svg>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+      <a
+        href="https://github.com/barocss/contenteditable"
+        target="_blank"
+        rel="noopener"
+        class="github-link"
+        title="View on GitHub"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
       </a>
     </div>
   </nav>
 </header>
+
+<style>
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    background: var(--bg-nav);
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .site-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 2rem;
+    height: 52px;
+  }
+
+  .site-nav-left {
+    flex: 0 0 auto;
+  }
+
+  .site-nav-center {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .site-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 0 0 auto;
+  }
+
+  .site-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .site-logo:hover {
+    opacity: 0.8;
+  }
+
+  .logo-icon {
+    font-size: 1.25rem;
+  }
+
+  .logo-text {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .logo-dot {
+    color: var(--accent-primary);
+  }
+
+  .nav-item {
+    position: relative;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .nav-item:hover {
+    color: var(--text-primary);
+    background: var(--bg-muted);
+  }
+
+  .nav-item.active {
+    color: var(--accent-primary);
+    background: var(--accent-primary-light);
+  }
+
+  .nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 2px;
+    background: var(--accent-primary);
+    border-radius: 1px;
+  }
+
+  /* Language Dropdown */
+  .lang-dropdown {
+    position: relative;
+  }
+
+  .lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .lang-trigger:hover {
+    color: var(--text-primary);
+    border-color: var(--border-medium);
+    background: var(--bg-muted);
+  }
+
+  .lang-flag {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .lang-code {
+    font-weight: 600;
+  }
+
+  .lang-chevron {
+    transition: transform 0.2s;
+  }
+
+  .lang-dropdown:hover .lang-chevron,
+  .lang-dropdown:focus-within .lang-chevron {
+    transform: rotate(180deg);
+  }
+
+  .lang-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 160px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s;
+    z-index: 1000;
+  }
+
+  .lang-dropdown:hover .lang-menu,
+  .lang-dropdown:focus-within .lang-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .lang-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: background 0.1s;
+  }
+
+  .lang-option:first-child {
+    border-radius: 7px 7px 0 0;
+  }
+
+  .lang-option:last-child {
+    border-radius: 0 0 7px 7px;
+  }
+
+  .lang-option:hover {
+    background: var(--bg-muted);
+    color: var(--text-primary);
+  }
+
+  .lang-option.active {
+    background: var(--accent-primary-light);
+    color: var(--accent-primary);
+  }
+
+  .lang-name {
+    flex: 1;
+  }
+
+  .lang-check {
+    color: var(--accent-primary);
+  }
+
+  .github-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--text-muted);
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .github-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-muted);
+  }
+
+  @media (max-width: 768px) {
+    .site-nav-inner {
+      padding: 0 1rem;
+    }
+
+    .site-nav-center {
+      display: none;
+    }
+
+    .logo-text {
+      display: none;
+    }
+  }
+</style>
 
 

@@ -1,0 +1,382 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import SiteNav from '../../../components/SiteNav.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getTranslation,
+  type Locale,
+} from '../../../i18n/translations';
+
+export const getStaticPaths = (async () => {
+  const cases = await getCollection('cases');
+  const scenarioIds = Array.from(new Set(cases.map((c) => c.data.scenarioId)));
+  const paths = [];
+
+  for (const locale of supportedLocales.filter((l) => l !== defaultLocale)) {
+    for (const id of scenarioIds) {
+      paths.push({
+        params: { locale, id },
+      });
+    }
+  }
+
+  return paths;
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const scenarioId = Astro.params.id;
+const t = getTranslation(locale);
+const localeInfo = locales[locale];
+
+if (!scenarioId) {
+  throw new Error('Scenario ID is missing.');
+}
+
+const allCases = await getCollection('cases');
+const scenarioCases = allCases.filter((c) => c.data.scenarioId === scenarioId);
+
+if (scenarioCases.length === 0) {
+  throw new Error(`No cases found for scenario "${scenarioId}".`);
+}
+
+const primaryCase = scenarioCases[0];
+const browsers = Array.from(new Set(scenarioCases.map((c) => c.data.browser))).sort();
+const oses = Array.from(new Set(scenarioCases.map((c) => c.data.os))).sort();
+
+// Build compatibility matrix
+const matrix = browsers.map((browser) => {
+  const browserCases = scenarioCases.filter((c) => c.data.browser === browser);
+  return {
+    browser,
+    osCoverage: oses.map((os) => {
+      const osCases = browserCases.filter((c) => c.data.os === os);
+      return {
+        os,
+        cases: osCases,
+        hasCase: osCases.length > 0,
+      };
+    }),
+  };
+});
+
+// Helper for localized paths
+const localePath = (path: string) => `/${locale}${path}`;
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{scenarioId} | contenteditable lab</title>
+  </head>
+  <body>
+    <SiteNav />
+    <main class="scenario-page">
+      <header class="page-header">
+        <a href={localePath('/scenarios')} class="back-link">← {t.caseDetail.backToScenarios}</a>
+        <h1>{scenarioId}</h1>
+        <p class="phenomenon">{primaryCase.data.caseTitle}</p>
+        <div class="stats">
+          <span><strong>{scenarioCases.length}</strong> {t.nav.cases}</span>
+          <span><strong>{browsers.length}</strong> {t.caseDetail.browser}</span>
+          <span><strong>{oses.length}</strong> {t.caseDetail.os}</span>
+        </div>
+      </header>
+
+      <section class="matrix-section">
+        <h2>{t.caseDetail.compatibilityMatrix}</h2>
+        <div class="matrix-wrapper">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>{t.caseDetail.browser}</th>
+                {oses.map((os) => (
+                  <th>{os}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {matrix.map((row) => (
+                <tr>
+                  <td class="browser-cell">{row.browser}</td>
+                  {row.osCoverage.map((cell) => (
+                    <td class="status-cell">
+                      {cell.hasCase ? (
+                        <div class="cell-content">
+                          {cell.cases.map((c) => (
+                            <a
+                              href={localePath(`/cases/${c.slug}`)}
+                              class={`case-badge status-${c.data.status}`}
+                              title={c.data.caseTitle}
+                            >
+                              {c.data.id}
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <span class="no-case">—</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-badge status-confirmed"></span> {t.caseDetail.statusConfirmed}
+          </span>
+          <span class="legend-item">
+            <span class="legend-badge status-draft"></span> {t.caseDetail.statusDraft}
+          </span>
+        </div>
+      </section>
+
+      <section class="cases-section">
+        <h2>{t.caseDetail.allVariants}</h2>
+        <div class="cases-grid">
+          {scenarioCases.map((entry) => (
+            <a href={localePath(`/cases/${entry.slug}`)} class="case-card">
+              <div class="case-id">{entry.data.id}</div>
+              <h3>{entry.data.caseTitle}</h3>
+              <div class="case-meta">
+                <span>{entry.data.os} {entry.data.osVersion}</span>
+                <span>{entry.data.browser} {entry.data.browserVersion}</span>
+              </div>
+              <span class={`status status-${entry.data.status}`}>
+                {entry.data.status === 'confirmed' ? t.caseDetail.statusConfirmed : t.caseDetail.statusDraft}
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  .scenario-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    display: inline-block;
+  }
+
+  .back-link:hover {
+    color: var(--accent-primary);
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    margin: 0 0 0.5rem;
+    color: var(--accent-primary);
+  }
+
+  .phenomenon {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0 0 1rem;
+  }
+
+  .stats {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .stats strong {
+    color: var(--text-primary);
+  }
+
+  .matrix-section {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .matrix-section h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+
+  .matrix-wrapper {
+    overflow-x: auto;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .matrix-table th,
+  .matrix-table td {
+    padding: 0.75rem;
+    border: 1px solid var(--border-light);
+    text-align: center;
+  }
+
+  .matrix-table th {
+    background: var(--bg-muted);
+    font-weight: 600;
+  }
+
+  .browser-cell {
+    background: var(--bg-muted);
+    font-weight: 600;
+    text-align: left !important;
+  }
+
+  .status-cell {
+    min-width: 100px;
+  }
+
+  .cell-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  .case-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: white;
+    text-decoration: none;
+  }
+
+  .case-badge.status-confirmed {
+    background: var(--status-confirmed);
+  }
+
+  .case-badge.status-draft {
+    background: var(--status-draft);
+  }
+
+  .no-case {
+    color: var(--text-faint);
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .legend-badge {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  .legend-badge.status-confirmed {
+    background: var(--status-confirmed);
+  }
+
+  .legend-badge.status-draft {
+    background: var(--status-draft);
+  }
+
+  .cases-section h2 {
+    font-size: 1.15rem;
+    margin: 0 0 1rem;
+  }
+
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .case-card {
+    display: block;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 1rem;
+    text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .case-card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .case-id {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .case-card h3 {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+    line-height: 1.4;
+  }
+
+  .case-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .status {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+
+  .status-confirmed {
+    background: var(--status-confirmed-light);
+    color: var(--status-confirmed);
+  }
+
+  .status-draft {
+    background: var(--status-draft-light);
+    color: var(--status-draft);
+  }
+
+  @media (max-width: 768px) {
+    .scenario-page {
+      padding: 1rem;
+    }
+  }
+</style>
+

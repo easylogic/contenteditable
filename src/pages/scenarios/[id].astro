@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import '../../styles/global.css';
 
 export const getStaticPaths = (async () => {
   const cases = await getCollection('cases');
@@ -59,20 +61,9 @@ const compatibilityMatrix = browsers.map((browser) => {
 
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{scenarioId} – contenteditable scenario</title>
+    <BaseHead title={`${scenarioId} – contenteditable scenario`} />
   </head>
-  <body
-    style="
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f3f3f4;
-      color: #111827;
-    "
-  >
+  <body>
     <SiteNav />
     <main
       style="
@@ -82,7 +73,7 @@ const compatibilityMatrix = browsers.map((browser) => {
       "
     >
       <header style="margin-bottom: 1.5rem;">
-        <p style="margin: 0 0 0.45rem 0; font-size: 0.8rem; color: #6b7280;">
+        <p style="margin: 0 0 0.45rem 0; font-size: 0.8rem; color: var(--text-muted);">
           Scenario
         </p>
         <h1
@@ -94,23 +85,23 @@ const compatibilityMatrix = browsers.map((browser) => {
         >
           {scenarioId}
         </h1>
-        <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: #4b5563;">
+        <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: var(--text-secondary);">
           This scenario groups concrete cases that describe the same contenteditable phenomenon under
           different operating systems, devices, browsers, and keyboard setups.
         </p>
         <div
           style="
             border-radius: 0.5rem;
-            border: 1px solid #e5e7eb;
-            background: #f9fafb;
+            border: 1px solid var(--border-light);
+            background: var(--bg-muted);
             padding: 0.75rem 0.9rem;
             font-size: 0.85rem;
           "
         >
-          <div style="font-weight: 600; margin-bottom: 0.3rem; color: #111827;">
+          <div style="font-weight: 600; margin-bottom: 0.3rem; color: var(--text-primary);">
             Phenomenon
           </div>
-          <div style="color: #4b5563; line-height: 1.5;">
+          <div style="color: var(--text-secondary); line-height: 1.5;">
             {primaryCase.data.caseTitle}
           </div>
         </div>
@@ -120,8 +111,8 @@ const compatibilityMatrix = browsers.map((browser) => {
         aria-label="Variants for this scenario"
         style="
           border-radius: 0.75rem;
-          border: 1px solid #e5e7eb;
-          background: #ffffff;
+          border: 1px solid var(--border-light);
+          background: var(--bg-surface);
           padding: 0.9rem 1rem;
           font-size: 0.85rem;
           margin-bottom: 1.1rem;
@@ -135,7 +126,7 @@ const compatibilityMatrix = browsers.map((browser) => {
         >
           Variants
         </h2>
-        <p style="margin: 0 0 0.6rem 0; color: #4b5563;">
+        <p style="margin: 0 0 0.6rem 0; color: var(--text-secondary);">
           Each row is a concrete case for this scenario, with a dedicated document and playground.
         </p>
         <div style="overflow-x: auto;">
@@ -163,7 +154,7 @@ const compatibilityMatrix = browsers.map((browser) => {
                     <a
                       href={`/cases/${c.slug}`}
                       style="
-                        color: #111827;
+                        color: var(--text-primary);
                         text-decoration: none;
                       "
                     >
@@ -196,8 +187,8 @@ const compatibilityMatrix = browsers.map((browser) => {
           aria-label="Browser compatibility matrix"
           style="
             border-radius: 0.75rem;
-            border: 1px solid #e5e7eb;
-            background: #ffffff;
+            border: 1px solid var(--border-light);
+            background: var(--bg-surface);
             padding: 0.9rem 1rem;
             font-size: 0.85rem;
             margin-bottom: 1.1rem;
@@ -211,7 +202,7 @@ const compatibilityMatrix = browsers.map((browser) => {
           >
             Browser compatibility
           </h2>
-          <p style="margin: 0 0 0.6rem 0; color: #4b5563; font-size: 0.8rem;">
+          <p style="margin: 0 0 0.6rem 0; color: var(--text-secondary); font-size: 0.8rem;">
             This matrix shows which browser and OS combinations have documented cases for this
             scenario. Click on a cell to view the specific case.
           </p>
@@ -229,8 +220,8 @@ const compatibilityMatrix = browsers.map((browser) => {
                     style="
                       text-align: left;
                       padding: 0.4rem 0.5rem;
-                      border-bottom: 2px solid #e5e7eb;
-                      background: #f9fafb;
+                      border-bottom: 2px solid var(--border-light);
+                      background: var(--bg-muted);
                       position: sticky;
                       left: 0;
                       z-index: 1;
@@ -243,8 +234,8 @@ const compatibilityMatrix = browsers.map((browser) => {
                       style="
                         text-align: center;
                         padding: 0.4rem 0.5rem;
-                        border-bottom: 2px solid #e5e7eb;
-                        background: #f9fafb;
+                        border-bottom: 2px solid var(--border-light);
+                        background: var(--bg-muted);
                         font-weight: 600;
                       "
                     >
@@ -259,8 +250,8 @@ const compatibilityMatrix = browsers.map((browser) => {
                     <td
                       style="
                         padding: 0.4rem 0.5rem;
-                        border-bottom: 1px solid #e5e7eb;
-                        background: #f9fafb;
+                        border-bottom: 1px solid var(--border-light);
+                        background: var(--bg-muted);
                         font-weight: 600;
                         position: sticky;
                         left: 0;
@@ -273,7 +264,7 @@ const compatibilityMatrix = browsers.map((browser) => {
                       <td
                         style="
                           padding: 0.3rem 0.4rem;
-                          border-bottom: 1px solid #e5e7eb;
+                          border-bottom: 1px solid var(--border-light);
                           text-align: center;
                           min-width: 80px;
                         "
@@ -290,18 +281,7 @@ const compatibilityMatrix = browsers.map((browser) => {
                             {cell.versions.map((v) => (
                               <a
                                 href={`/cases/${v.slug}`}
-                                style="
-                                  display: inline-block;
-                                  padding: 0.15rem 0.4rem;
-                                  border-radius: 4px;
-                                  background: ${v.status === 'confirmed'
-                                    ? '#10b981'
-                                    : '#f59e0b'};
-                                  color: #ffffff;
-                                  text-decoration: none;
-                                  font-size: 0.7rem;
-                                  font-weight: 500;
-                                "
+                                class={`matrix-case-link ${v.status}`}
                                 title={`${v.caseId}: ${row.browser} ${v.browserVersion} on ${cell.os} ${v.osVersion}`}
                               >
                                 {v.caseId}
@@ -310,7 +290,7 @@ const compatibilityMatrix = browsers.map((browser) => {
                             <div
                               style="
                                 font-size: 0.65rem;
-                                color: #6b7280;
+                                color: var(--text-muted);
                                 margin-top: 0.1rem;
                               "
                             >
@@ -320,7 +300,7 @@ const compatibilityMatrix = browsers.map((browser) => {
                             </div>
                           </div>
                         ) : (
-                          <span style="color: #d1d5db;">—</span>
+                          <span style="color: var(--text-faint);">—</span>
                         )}
                       </td>
                     ))}
@@ -333,9 +313,9 @@ const compatibilityMatrix = browsers.map((browser) => {
             style="
               margin-top: 0.6rem;
               padding-top: 0.6rem;
-              border-top: 1px solid #e5e7eb;
+              border-top: 1px solid var(--border-light);
               font-size: 0.75rem;
-              color: #6b7280;
+              color: var(--text-muted);
             "
           >
             <div style="display: flex; gap: 1rem; align-items: center;">
@@ -346,7 +326,7 @@ const compatibilityMatrix = browsers.map((browser) => {
                     width: 12px;
                     height: 12px;
                     border-radius: 4px;
-                    background: #10b981;
+                    background: var(--status-confirmed);
                   "
                 ></span>
                 <span>Confirmed</span>
@@ -358,13 +338,13 @@ const compatibilityMatrix = browsers.map((browser) => {
                     width: 12px;
                     height: 12px;
                     border-radius: 4px;
-                    background: #f59e0b;
+                    background: var(--status-draft);
                   "
                 ></span>
                 <span>Draft</span>
               </div>
               <div style="display: flex; align-items: center; gap: 0.3rem;">
-                <span style="color: #d1d5db;">—</span>
+                <span style="color: var(--text-faint);">—</span>
                 <span>No case documented</span>
               </div>
             </div>
@@ -376,8 +356,8 @@ const compatibilityMatrix = browsers.map((browser) => {
         aria-label="Cases for this scenario"
         style="
           border-radius: 0.75rem;
-          border: 1px solid #e5e7eb;
-          background: #ffffff;
+          border: 1px solid var(--border-light);
+          background: var(--bg-surface);
           padding: 0.9rem 1rem;
           font-size: 0.85rem;
         "
@@ -390,7 +370,7 @@ const compatibilityMatrix = browsers.map((browser) => {
         >
           Cases
         </h2>
-        <p style="margin: 0 0 0.6rem 0; color: #4b5563;">
+        <p style="margin: 0 0 0.6rem 0; color: var(--text-secondary);">
           Open a case to see the detailed description and its dedicated playground.
         </p>
 
@@ -405,7 +385,7 @@ const compatibilityMatrix = browsers.map((browser) => {
             <article
               style="
                 border-radius: 0.75rem;
-                border: 1px solid #e5e7eb;
+                border: 1px solid var(--border-light);
                 padding: 0.8rem 0.9rem;
               "
             >
@@ -417,7 +397,7 @@ const compatibilityMatrix = browsers.map((browser) => {
               >
                 {c.data.caseTitle}
               </h3>
-              <p style="margin: 0 0 0.35rem 0; color: #4b5563;">
+              <p style="margin: 0 0 0.35rem 0; color: var(--text-secondary);">
                 OS: {c.data.os}
                 {c.data.osVersion && ` ${c.data.osVersion}`} · Device: {c.data.device}
                 {c.data.deviceVersion && ` ${c.data.deviceVersion}`} · Browser: {c.data.browser}
@@ -427,7 +407,7 @@ const compatibilityMatrix = browsers.map((browser) => {
                 href={`/cases/${c.slug}`}
                 style="
                   font-size: 0.8rem;
-                  color: #111827;
+                  color: var(--text-primary);
                   text-decoration: none;
                 "
               >
@@ -441,4 +421,23 @@ const compatibilityMatrix = browsers.map((browser) => {
   </body>
 </html>
 
+<style>
+  .matrix-case-link {
+    display: inline-block;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+
+  .matrix-case-link.confirmed {
+    background: var(--status-confirmed);
+  }
+
+  .matrix-case-link.draft {
+    background: var(--status-draft);
+  }
+</style>
 

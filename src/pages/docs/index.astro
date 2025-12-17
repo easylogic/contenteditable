@@ -1,39 +1,14 @@
 ---
 import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import '../../styles/global.css';
 ---
 
 <html lang="en">
-  <style>
-    .doc-card {
-      display: block;
-      border-radius: 0.75rem;
-      border: 1px solid #e5e7eb;
-      background: #ffffff;
-      padding: 1.1rem 1.2rem;
-      text-decoration: none;
-      color: #111827;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .doc-card:hover {
-      border-color: #111827;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-  </style>
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Documentation – contenteditable.lab</title>
+    <BaseHead title="Documentation – contenteditable.lab" description="Documentation for contenteditable behavior and APIs." />
   </head>
-  <body
-    style="
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f3f3f4;
-      color: #111827;
-    "
-  >
+  <body>
     <SiteNav />
     <main
       style="
@@ -52,7 +27,7 @@ import SiteNav from '../../components/SiteNav.astro';
         >
           Documentation
         </h1>
-        <p style="margin: 0; font-size: 0.95rem; color: #4b5563;">
+        <p style="margin: 0; font-size: 0.95rem; color: var(--text-secondary);">
           Learn about the contenteditable attribute, its behavior, events, and browser compatibility.
         </p>
       </header>
@@ -73,7 +48,7 @@ import SiteNav from '../../components/SiteNav.astro';
           >
             What is contenteditable?
           </h2>
-          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
             Introduction to the contenteditable attribute, its purpose, and basic usage.
           </p>
         </a>
@@ -87,7 +62,7 @@ import SiteNav from '../../components/SiteNav.astro';
           >
             Events
           </h2>
-          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
             Understanding input, beforeinput, composition, and other events in contenteditable.
           </p>
         </a>
@@ -101,7 +76,7 @@ import SiteNav from '../../components/SiteNav.astro';
           >
             IME & Composition
           </h2>
-          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
             How Input Method Editors work with contenteditable and composition events.
           </p>
         </a>
@@ -115,7 +90,7 @@ import SiteNav from '../../components/SiteNav.astro';
           >
             Selection API
           </h2>
-          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
             Working with text selection, ranges, and the Selection API in contenteditable.
           </p>
         </a>
@@ -129,7 +104,7 @@ import SiteNav from '../../components/SiteNav.astro';
           >
             execCommand alternatives
           </h2>
-          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
             Modern alternatives to the deprecated execCommand API for formatting and editing.
           </p>
         </a>
@@ -143,7 +118,7 @@ import SiteNav from '../../components/SiteNav.astro';
           >
             Browser compatibility
           </h2>
-          <p style="margin: 0; font-size: 0.85rem; color: #6b7280; line-height: 1.5;">
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
             Overview of contenteditable support and behavior differences across browsers.
           </p>
         </a>
@@ -152,3 +127,20 @@ import SiteNav from '../../components/SiteNav.astro';
   </body>
 </html>
 
+<style>
+  .doc-card {
+    display: block;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    padding: 1.1rem 1.2rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  
+  .doc-card:hover {
+    border-color: var(--text-primary);
+    box-shadow: var(--card-shadow);
+  }
+</style>

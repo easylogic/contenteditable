@@ -1,0 +1,69 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Playground } from '../../components/Playground';
+import SiteNav from '../../components/SiteNav.astro';
+import '../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getTranslation,
+  type Locale,
+} from '../../i18n/translations';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const t = getTranslation(locale);
+const localeInfo = locales[locale];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{t.playground.title} | contenteditable lab</title>
+  </head>
+  <body>
+    <SiteNav />
+    <main class="playground-page">
+      <header class="page-header">
+        <h1>{t.playground.title}</h1>
+        <p>{t.playground.description}</p>
+      </header>
+      <Playground client:load />
+    </main>
+  </body>
+</html>
+
+<style>
+  .playground-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 1rem;
+    max-width: 600px;
+  }
+</style>
+

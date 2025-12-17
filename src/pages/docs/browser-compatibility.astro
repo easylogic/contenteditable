@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import SiteNav from '../../components/SiteNav.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import '../../styles/global.css';
 
 const allCases = await getCollection('cases');
 
@@ -30,20 +32,9 @@ const browserStats = browsers.map((browser) => {
 
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Browser compatibility – contenteditable.lab</title>
+    <BaseHead title="Browser compatibility – contenteditable.lab" description="Overview of contenteditable support across browsers." />
   </head>
-  <body
-    style="
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f3f3f4;
-      color: #111827;
-    "
-  >
+  <body>
     <SiteNav />
     <main
       style="
@@ -66,9 +57,9 @@ const browserStats = browsers.map((browser) => {
       >
       <header style="margin-bottom: 2rem;">
         <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
-          <a href="/docs" style="color: #6b7280; text-decoration: none;">Documentation</a>
-          <span style="color: #9ca3af; margin: 0 0.5rem;">/</span>
-          <span style="color: #111827;">Browser compatibility</span>
+          <a href="/docs" style="color: var(--text-muted); text-decoration: none;">Documentation</a>
+          <span style="color: var(--text-faint); margin: 0 0.5rem;">/</span>
+          <span style="color: var(--text-primary);">Browser compatibility</span>
         </nav>
         <h1
           style="
@@ -79,7 +70,7 @@ const browserStats = browsers.map((browser) => {
         >
           Browser compatibility
         </h1>
-        <p style="margin: 0; font-size: 0.95rem; color: #4b5563;">
+        <p style="margin: 0; font-size: 0.95rem; color: var(--text-secondary);">
           Overview of contenteditable support and behavior differences across browsers and operating systems.
         </p>
       </header>
@@ -87,8 +78,8 @@ const browserStats = browsers.map((browser) => {
       <article
         style="
           border-radius: 0.75rem;
-          border: 1px solid #e5e7eb;
-          background: #ffffff;
+          border: 1px solid var(--border-light);
+          background: var(--bg-surface);
           padding: 1.5rem 1.75rem;
           font-size: 0.9rem;
           line-height: 1.7;
@@ -100,7 +91,7 @@ const browserStats = browsers.map((browser) => {
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
               padding-bottom: 0.5rem;
-              border-bottom: 2px solid #e5e7eb;
+              border-bottom: 2px solid var(--border-light);
             "
           >
             Browser support overview
@@ -122,8 +113,8 @@ const browserStats = browsers.map((browser) => {
                     style="
                       text-align: left;
                       padding: 0.5rem 0.75rem;
-                      border-bottom: 2px solid #e5e7eb;
-                      background: #f9fafb;
+                      border-bottom: 2px solid var(--border-light);
+                      background: var(--bg-muted);
                       position: sticky;
                       left: 0;
                       z-index: 1;
@@ -136,8 +127,8 @@ const browserStats = browsers.map((browser) => {
                       style="
                         text-align: center;
                         padding: 0.5rem 0.75rem;
-                        border-bottom: 2px solid #e5e7eb;
-                        background: #f9fafb;
+                        border-bottom: 2px solid var(--border-light);
+                        background: var(--bg-muted);
                         font-weight: 600;
                       "
                     >
@@ -148,8 +139,8 @@ const browserStats = browsers.map((browser) => {
                     style="
                       text-align: center;
                       padding: 0.5rem 0.75rem;
-                      border-bottom: 2px solid #e5e7eb;
-                      background: #f9fafb;
+                      border-bottom: 2px solid var(--border-light);
+                      background: var(--bg-muted);
                       font-weight: 600;
                     "
                   >
@@ -163,8 +154,8 @@ const browserStats = browsers.map((browser) => {
                     <td
                       style="
                         padding: 0.5rem 0.75rem;
-                        border-bottom: 1px solid #e5e7eb;
-                        background: #f9fafb;
+                        border-bottom: 1px solid var(--border-light);
+                        background: var(--bg-muted);
                         font-weight: 600;
                         position: sticky;
                         left: 0;
@@ -177,20 +168,20 @@ const browserStats = browsers.map((browser) => {
                       <td
                         style="
                           padding: 0.5rem 0.75rem;
-                          border-bottom: 1px solid #e5e7eb;
+                          border-bottom: 1px solid var(--border-light);
                           text-align: center;
                         "
                       >
                         {coverage.count > 0 ? (
                           <div>
-                            <div style="font-weight: 600; color: #111827;">
+                            <div style="font-weight: 600; color: var(--text-primary);">
                               {coverage.count}
                             </div>
                             {coverage.confirmed > 0 && (
                               <div
                                 style="
                                   font-size: 0.75rem;
-                                  color: #10b981;
+                                  color: var(--status-confirmed);
                                   margin-top: 0.2rem;
                                 "
                               >
@@ -199,14 +190,14 @@ const browserStats = browsers.map((browser) => {
                             )}
                           </div>
                         ) : (
-                          <span style="color: #d1d5db;">—</span>
+                          <span style="color: var(--text-faint);">—</span>
                         )}
                       </td>
                     ))}
                     <td
                       style="
                         padding: 0.5rem 0.75rem;
-                        border-bottom: 1px solid #e5e7eb;
+                        border-bottom: 1px solid var(--border-light);
                         text-align: center;
                         font-weight: 600;
                       "
@@ -226,7 +217,7 @@ const browserStats = browsers.map((browser) => {
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
               padding-bottom: 0.5rem;
-              border-bottom: 2px solid #e5e7eb;
+              border-bottom: 2px solid var(--border-light);
             "
           >
             Known differences
@@ -236,14 +227,14 @@ const browserStats = browsers.map((browser) => {
               style="
                 font-size: 1.1rem;
                 margin: 0 0 0.5rem 0;
-                color: #111827;
+                color: var(--text-primary);
               "
             >
               Safari
             </h3>
             <ul style="margin: 0; padding-left: 1.5rem;">
               <li style="margin-bottom: 0.5rem;">
-                Does not support the <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> event
+                Does not support the <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> event
               </li>
               <li style="margin-bottom: 0.5rem;">
                 May insert double line breaks when pressing Enter
@@ -259,20 +250,20 @@ const browserStats = browsers.map((browser) => {
               style="
                 font-size: 1.1rem;
                 margin: 0 0 0.5rem 0;
-                color: #111827;
+                color: var(--text-primary);
               "
             >
               Chrome
             </h3>
             <ul style="margin: 0; padding-left: 1.5rem;">
               <li style="margin-bottom: 0.5rem;">
-                Shows deprecation warnings for <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">execCommand</code>
+                Shows deprecation warnings for <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">execCommand</code>
               </li>
               <li style="margin-bottom: 0.5rem;">
                 IME composition behavior differs from Safari
               </li>
               <li style="margin-bottom: 0.5rem;">
-                Better support for <code style="background: #f3f4f6; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> event
+                Better support for <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> event
               </li>
             </ul>
           </div>
@@ -282,7 +273,7 @@ const browserStats = browsers.map((browser) => {
               style="
                 font-size: 1.1rem;
                 margin: 0 0 0.5rem 0;
-                color: #111827;
+                color: var(--text-primary);
               "
             >
               Firefox
@@ -305,7 +296,7 @@ const browserStats = browsers.map((browser) => {
               style="
                 font-size: 1.1rem;
                 margin: 0 0 0.5rem 0;
-                color: #111827;
+                color: var(--text-primary);
               "
             >
               Edge
@@ -327,7 +318,7 @@ const browserStats = browsers.map((browser) => {
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
               padding-bottom: 0.5rem;
-              border-bottom: 2px solid #e5e7eb;
+              border-bottom: 2px solid var(--border-light);
             "
           >
             Related resources
@@ -336,7 +327,7 @@ const browserStats = browsers.map((browser) => {
             <li style="margin-bottom: 0.5rem;">
               <a
                 href="/scenarios"
-                style="color: #0069c2; text-decoration: none;"
+                style="color: var(--accent-primary); text-decoration: none;"
               >
                 Browse all scenarios →
               </a>
@@ -344,7 +335,7 @@ const browserStats = browsers.map((browser) => {
             <li style="margin-bottom: 0.5rem;">
               <a
                 href="/cases"
-                style="color: #0069c2; text-decoration: none;"
+                style="color: var(--accent-primary); text-decoration: none;"
               >
                 Browse all cases →
               </a>

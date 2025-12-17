@@ -1,0 +1,144 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+  title?: string;
+}
+
+const { headings, title = 'On this page' } = Astro.props;
+
+// Filter to only h2 and h3
+const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{filteredHeadings.length > 0 && (
+  <aside class="toc-container" aria-label="Table of contents">
+    <nav class="toc-nav">
+      <h2 class="toc-title">{title}</h2>
+      <ul class="toc-list">
+        {filteredHeadings.map((heading) => (
+          <li class={`toc-item toc-depth-${heading.depth}`}>
+            <a href={`#${heading.slug}`} class="toc-link">
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </aside>
+)}
+
+<style>
+  .toc-container {
+    position: sticky;
+    top: 80px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    width: 220px;
+    min-width: 220px;
+    padding: 0 0 2rem 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .toc-nav {
+    padding-left: 1rem;
+    border-left: 2px solid var(--border-light);
+  }
+
+  .toc-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0 0 0.75rem;
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc-item {
+    margin: 0;
+  }
+
+  .toc-link {
+    display: block;
+    padding: 0.35rem 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    line-height: 1.4;
+    transition: color 0.15s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .toc-link:hover {
+    color: var(--text-primary);
+  }
+
+  .toc-depth-3 {
+    padding-left: 0.75rem;
+  }
+
+  .toc-depth-3 .toc-link {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+  }
+
+  .toc-depth-3 .toc-link:hover {
+    color: var(--text-muted);
+  }
+
+  /* Active state via IntersectionObserver */
+  .toc-link.active {
+    color: var(--accent-primary);
+    font-weight: 500;
+  }
+
+  @media (max-width: 1100px) {
+    .toc-container {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Highlight active section in TOC
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const id = entry.target.getAttribute('id');
+        const tocLink = document.querySelector(`.toc-link[href="#${id}"]`);
+        
+        if (tocLink) {
+          if (entry.isIntersecting) {
+            // Remove active from all
+            document.querySelectorAll('.toc-link.active').forEach((link) => {
+              link.classList.remove('active');
+            });
+            tocLink.classList.add('active');
+          }
+        }
+      });
+    },
+    {
+      rootMargin: '-80px 0px -80% 0px',
+      threshold: 0,
+    }
+  );
+
+  // Observe all headings
+  document.querySelectorAll('h2[id], h3[id]').forEach((heading) => {
+    observer.observe(heading);
+  });
+</script>
+

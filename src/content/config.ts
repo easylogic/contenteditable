@@ -1,5 +1,12 @@
 import { defineCollection, z } from 'astro:content';
 
+// Schema for DOM change animation steps
+const domStepSchema = z.object({
+  label: z.string(),
+  html: z.string(),
+  description: z.string().optional(),
+});
+
 const cases = defineCollection({
   type: 'content',
   schema: z.object({
@@ -16,6 +23,8 @@ const cases = defineCollection({
     caseTitle: z.string(),
     tags: z.array(z.string()).default([]),
     status: z.enum(['draft', 'confirmed']).default('draft'),
+    // DOM change animation steps
+    domSteps: z.array(domStepSchema).optional(),
   }),
 });
 

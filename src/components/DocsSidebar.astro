@@ -17,40 +17,12 @@ const docsPages = [
 
 <aside
   aria-label="Documentation"
-  style="
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    width: 240px;
-    min-width: 240px;
-    border-right: 1px solid #e5e7eb;
-    background: #f7f7f8;
-    padding: 0;
-    font-size: 0.875rem;
-    flex-shrink: 0;
-  "
+  class="docs-sidebar"
 >
-  <div style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; background: #ffffff;">
-    <div
-      style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-      "
-    >
+  <div class="docs-sidebar-header">
+    <div class="docs-sidebar-title">
       <span style="font-weight: 600; font-size: 0.9rem;">Documentation</span>
-      <a
-        href="/docs"
-        style="
-          font-size: 0.75rem;
-          color: #0069c2;
-          text-decoration: none;
-        "
-      >
-        Index →
-      </a>
+      <a href="/docs" class="docs-index-link">Index →</a>
     </div>
   </div>
 
@@ -63,18 +35,7 @@ const docsPages = [
             <a
               href={doc.path}
               title={doc.title}
-              style={{
-                display: 'block',
-                padding: '0.4rem 0.75rem',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                backgroundColor: isActive ? '#0069c2' : 'transparent',
-                color: isActive ? '#ffffff' : '#1a1a1a',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                borderLeft: isActive ? '3px solid #0069c2' : '3px solid transparent',
-              }}
+              class={`docs-nav-link ${isActive ? 'active' : ''}`}
             >
               {doc.title}
             </a>
@@ -84,4 +45,63 @@ const docsPages = [
     </ul>
   </nav>
 </aside>
+
+<style>
+  .docs-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    width: 240px;
+    min-width: 240px;
+    border-right: 1px solid var(--border-light);
+    background: var(--bg-muted);
+    padding: 0;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .docs-sidebar-header {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-surface);
+  }
+
+  .docs-sidebar-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .docs-index-link {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+    text-decoration: none;
+  }
+
+  .docs-nav-link {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    text-decoration: none;
+    font-size: 0.875rem;
+    background-color: transparent;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  .docs-nav-link:hover {
+    background-color: var(--bg-muted);
+  }
+
+  .docs-nav-link.active {
+    background-color: var(--accent-primary);
+    color: white;
+    border-left-color: var(--accent-primary);
+  }
+</style>
 

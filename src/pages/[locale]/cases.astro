@@ -1,0 +1,399 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import SiteNav from '../../components/SiteNav.astro';
+import '../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getTranslation,
+  type Locale,
+} from '../../i18n/translations';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const t = getTranslation(locale);
+const localeInfo = locales[locale];
+
+const cases = await getCollection('cases');
+
+// Get unique values for filters
+const allOS = Array.from(new Set(cases.map((c) => c.data.os))).sort();
+const allBrowsers = Array.from(new Set(cases.map((c) => c.data.browser))).sort();
+const allTags = Array.from(new Set(cases.flatMap((c) => c.data.tags))).sort();
+
+// Get filter values from URL
+const url = Astro.url;
+const osFilter = url.searchParams.get('os') || '';
+const browserFilter = url.searchParams.get('browser') || '';
+const statusFilter = url.searchParams.get('status') || '';
+const tagFilter = url.searchParams.get('tag') || '';
+const searchQuery = url.searchParams.get('q') || '';
+
+// Filter cases
+let filteredCases = cases;
+
+if (osFilter) {
+  filteredCases = filteredCases.filter((c) => c.data.os === osFilter);
+}
+if (browserFilter) {
+  filteredCases = filteredCases.filter((c) => c.data.browser === browserFilter);
+}
+if (statusFilter) {
+  filteredCases = filteredCases.filter((c) => c.data.status === statusFilter);
+}
+if (tagFilter) {
+  filteredCases = filteredCases.filter((c) => c.data.tags.includes(tagFilter));
+}
+if (searchQuery) {
+  const q = searchQuery.toLowerCase();
+  filteredCases = filteredCases.filter(
+    (c) =>
+      c.data.caseTitle.toLowerCase().includes(q) ||
+      c.data.os.toLowerCase().includes(q) ||
+      c.data.browser.toLowerCase().includes(q) ||
+      c.data.id.toLowerCase().includes(q),
+  );
+}
+
+// Sort by ID descending
+filteredCases = filteredCases.sort((a, b) => b.data.id.localeCompare(a.data.id));
+
+const confirmedCount = filteredCases.filter((c) => c.data.status === 'confirmed').length;
+const draftCount = filteredCases.filter((c) => c.data.status === 'draft').length;
+
+// Helper for localized paths
+const localePath = (path: string) => `/${locale}${path}`;
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{t.nav.cases} | contenteditable lab</title>
+  </head>
+  <body>
+    <SiteNav />
+    <main class="cases-page">
+      <header class="page-header">
+        <h1>{t.nav.cases}</h1>
+        <div class="stats">
+          <span class="stat">
+            <strong>{filteredCases.length}</strong> {t.nav.cases}
+          </span>
+          <span class="stat confirmed">
+            <strong>{confirmedCount}</strong> {t.stats.confirmed}
+          </span>
+          <span class="stat draft">
+            <strong>{draftCount}</strong> {t.stats.draft}
+          </span>
+        </div>
+      </header>
+
+      <form method="get" class="filters">
+        <input
+          type="text"
+          name="q"
+          placeholder={t.caseDetail.search}
+          value={searchQuery}
+          class="search-input"
+        />
+        <select name="os" class="filter-select">
+          <option value="">{t.caseDetail.allOS}</option>
+          {allOS.map((os) => (
+            <option value={os} selected={os === osFilter}>
+              {os}
+            </option>
+          ))}
+        </select>
+        <select name="browser" class="filter-select">
+          <option value="">{t.caseDetail.allBrowsers}</option>
+          {allBrowsers.map((browser) => (
+            <option value={browser} selected={browser === browserFilter}>
+              {browser}
+            </option>
+          ))}
+        </select>
+        <select name="tag" class="filter-select">
+          <option value="">{t.caseDetail.allTags}</option>
+          {allTags.map((tag) => (
+            <option value={tag} selected={tag === tagFilter}>
+              {tag}
+            </option>
+          ))}
+        </select>
+        <select name="status" class="filter-select">
+          <option value="">{t.caseDetail.allStatus}</option>
+          <option value="confirmed" selected={statusFilter === 'confirmed'}>{t.caseDetail.statusConfirmed}</option>
+          <option value="draft" selected={statusFilter === 'draft'}>{t.caseDetail.statusDraft}</option>
+        </select>
+        <button type="submit" class="filter-btn">{t.caseDetail.applyFilters}</button>
+        <a href={localePath('/cases')} class="clear-btn">{t.caseDetail.reset}</a>
+      </form>
+
+      <div class="cases-grid">
+        {filteredCases.map((entry) => (
+          <article class="case-card">
+            <div class="case-id">{entry.data.id}</div>
+            <h2>{entry.data.caseTitle}</h2>
+            <div class="case-meta">
+              <span>{entry.data.os} {entry.data.osVersion}</span>
+              <span>{entry.data.browser} {entry.data.browserVersion}</span>
+            </div>
+            <div class="case-tags">
+              {entry.data.tags.slice(0, 3).map((tag) => (
+                <a href={localePath(`/cases?tag=${encodeURIComponent(tag)}`)} class="tag">
+                  {tag}
+                </a>
+              ))}
+            </div>
+            <div class="case-footer">
+              <span class={`status status-${entry.data.status}`}>
+                {entry.data.status === 'confirmed' ? t.caseDetail.statusConfirmed : t.caseDetail.statusDraft}
+              </span>
+              <a href={localePath(`/cases/${entry.slug}`)} class="case-link">{t.caseDetail.viewDetails} →</a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {filteredCases.length === 0 && (
+        <div class="empty-state">
+          <p>{t.caseDetail.noCases}</p>
+          <a href={localePath('/cases')}>{t.caseDetail.resetFilters}</a>
+        </div>
+      )}
+    </main>
+  </body>
+</html>
+
+<style>
+  .cases-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .stats {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .stat strong {
+    font-weight: 700;
+  }
+
+  .stat.confirmed strong {
+    color: var(--status-confirmed);
+  }
+
+  .stat.draft strong {
+    color: var(--status-draft);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+  }
+
+  .filter-select {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+  }
+
+  .filter-btn {
+    padding: 0.6rem 1.25rem;
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .filter-btn:hover {
+    background: var(--accent-primary-hover);
+  }
+
+  .clear-btn {
+    padding: 0.6rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .clear-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .cases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+
+  .case-card {
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .case-card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .case-id {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .case-card h2 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    line-height: 1.4;
+  }
+
+  .case-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .case-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tag {
+    padding: 0.15rem 0.5rem;
+    background: var(--bg-muted);
+    border-radius: 999px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .tag:hover {
+    background: var(--border-light);
+    color: var(--text-primary);
+  }
+
+  .case-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .status {
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+
+  .status-confirmed {
+    background: var(--status-confirmed-light);
+    color: var(--status-confirmed);
+  }
+
+  .status-draft {
+    background: var(--status-draft-light);
+    color: var(--status-draft);
+  }
+
+  .case-link {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent-primary);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+  }
+
+  .empty-state p {
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+  }
+
+  .empty-state a {
+    color: var(--accent-primary);
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .cases-page {
+      padding: 1rem;
+    }
+
+    .filters {
+      flex-direction: column;
+    }
+
+    .search-input,
+    .filter-select {
+      width: 100%;
+    }
+  }
+</style>
+

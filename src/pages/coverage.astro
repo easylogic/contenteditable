@@ -1,0 +1,438 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import SiteNav from '../components/SiteNav.astro';
+import '../styles/global.css';
+
+const cases = await getCollection('cases');
+
+// Get unique OS and browsers
+const osList = Array.from(new Set(cases.map((c) => c.data.os))).sort();
+const browserList = Array.from(new Set(cases.map((c) => c.data.browser))).sort();
+
+// Build coverage matrix
+const matrix = osList.map((os) => {
+  const row = browserList.map((browser) => {
+    const matchingCases = cases.filter(
+      (c) => c.data.os === os && c.data.browser === browser
+    );
+    const confirmed = matchingCases.filter((c) => c.data.status === 'confirmed').length;
+    const draft = matchingCases.filter((c) => c.data.status === 'draft').length;
+    return {
+      os,
+      browser,
+      total: matchingCases.length,
+      confirmed,
+      draft,
+      cases: matchingCases,
+    };
+  });
+  return { os, cells: row };
+});
+
+// Statistics
+const totalCombinations = osList.length * browserList.length;
+const coveredCombinations = matrix.flatMap((r) => r.cells).filter((c) => c.total > 0).length;
+const coveragePercent = Math.round((coveredCombinations / totalCombinations) * 100);
+
+// Get coverage level
+const getCoverageLevel = (count: number) => {
+  if (count === 0) return 'none';
+  if (count <= 2) return 'low';
+  if (count <= 5) return 'medium';
+  return 'high';
+};
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Coverage Matrix – contenteditable.lab"
+      description="Visualization of documented contenteditable cases across OS and browser combinations."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="main-content">
+      <header class="page-header">
+        <h1 class="page-title">Coverage Matrix</h1>
+        <p class="page-description">
+          This matrix shows how well each OS × Browser combination is documented.
+          Darker colors indicate more documented cases.
+        </p>
+      </header>
+
+      <section class="stats-row">
+        <div class="stat-box">
+          <div class="stat-value">{coveragePercent}%</div>
+          <div class="stat-label">Coverage</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">{coveredCombinations}/{totalCombinations}</div>
+          <div class="stat-label">Combinations with cases</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">{cases.length}</div>
+          <div class="stat-label">Total cases</div>
+        </div>
+      </section>
+
+      <section class="matrix-container">
+        <div class="matrix-scroll">
+          <table class="coverage-matrix">
+            <thead>
+              <tr>
+                <th class="corner-cell">OS / Browser</th>
+                {browserList.map((browser) => (
+                  <th class="browser-header">
+                    <span class="browser-name">{browser}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {matrix.map((row) => (
+                <tr>
+                  <th class="os-header">{row.os}</th>
+                  {row.cells.map((cell) => {
+                    const level = getCoverageLevel(cell.total);
+                    return (
+                      <td class={`matrix-cell level-${level}`}>
+                        {cell.total > 0 ? (
+                          <a
+                            href={`/cases?os=${encodeURIComponent(cell.os)}&browser=${encodeURIComponent(cell.browser)}`}
+                            class="cell-link"
+                          >
+                            <span class="cell-count">{cell.total}</span>
+                            <span class="cell-breakdown">
+                              {cell.confirmed > 0 && (
+                                <span class="confirmed-dot" title={`${cell.confirmed} confirmed`}>
+                                  ✓{cell.confirmed}
+                                </span>
+                              )}
+                              {cell.draft > 0 && (
+                                <span class="draft-dot" title={`${cell.draft} draft`}>
+                                  ○{cell.draft}
+                                </span>
+                              )}
+                            </span>
+                          </a>
+                        ) : (
+                          <span class="cell-empty">—</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="legend">
+        <h3 class="legend-title">Legend</h3>
+        <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-color level-none"></div>
+            <span>No cases</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color level-low"></div>
+            <span>1-2 cases</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color level-medium"></div>
+            <span>3-5 cases</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color level-high"></div>
+            <span>6+ cases</span>
+          </div>
+          <div class="legend-item">
+            <span class="confirmed-dot">✓</span>
+            <span>Confirmed</span>
+          </div>
+          <div class="legend-item">
+            <span class="draft-dot">○</span>
+            <span>Draft</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="help-contribute">
+        <h3>Help improve coverage</h3>
+        <p>
+          See a gray cell? That combination needs documentation! 
+          <a href="/playground">Open the playground</a> in that environment and report your findings.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  .main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .page-description {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-box {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .matrix-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .matrix-scroll {
+    overflow-x: auto;
+  }
+
+  .coverage-matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .corner-cell {
+    position: sticky;
+    left: 0;
+    background: var(--bg-muted);
+    padding: 1rem;
+    font-weight: 600;
+    text-align: left;
+    z-index: 2;
+    min-width: 120px;
+  }
+
+  .browser-header {
+    padding: 1rem 0.75rem;
+    background: var(--bg-muted);
+    font-weight: 600;
+    text-align: center;
+    min-width: 100px;
+    border-bottom: 2px solid var(--border-light);
+  }
+
+  .browser-name {
+    writing-mode: horizontal-tb;
+  }
+
+  .os-header {
+    position: sticky;
+    left: 0;
+    background: var(--bg-muted);
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    text-align: left;
+    z-index: 1;
+    border-right: 2px solid var(--border-light);
+  }
+
+  .matrix-cell {
+    padding: 0;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    transition: background 0.15s;
+  }
+
+  .matrix-cell.level-none {
+    background: var(--bg-muted);
+  }
+
+  .matrix-cell.level-low {
+    background: #dbeafe;
+  }
+
+  .matrix-cell.level-medium {
+    background: #93c5fd;
+  }
+
+  .matrix-cell.level-high {
+    background: #3b82f6;
+  }
+
+  .matrix-cell.level-high .cell-count {
+    color: white;
+  }
+
+  /* Dark mode adjustments */
+  [data-theme="dark"] .matrix-cell.level-low {
+    background: #1e3a5f;
+  }
+
+  [data-theme="dark"] .matrix-cell.level-medium {
+    background: #1e4a7f;
+  }
+
+  [data-theme="dark"] .matrix-cell.level-high {
+    background: #2563eb;
+  }
+
+  .cell-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    min-height: 60px;
+  }
+
+  .cell-link:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .cell-count {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .cell-breakdown {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+  }
+
+  .confirmed-dot {
+    color: var(--status-confirmed);
+  }
+
+  .draft-dot {
+    color: var(--status-draft);
+  }
+
+  .cell-empty {
+    color: var(--text-faint);
+    padding: 0.75rem;
+    display: block;
+  }
+
+  .legend {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .legend-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+  }
+
+  .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .legend-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid var(--border-light);
+  }
+
+  .legend-color.level-none {
+    background: var(--bg-muted);
+  }
+
+  .legend-color.level-low {
+    background: #dbeafe;
+  }
+
+  .legend-color.level-medium {
+    background: #93c5fd;
+  }
+
+  .legend-color.level-high {
+    background: #3b82f6;
+  }
+
+  .help-contribute {
+    background: var(--accent-primary-light);
+    border: 1px solid var(--accent-primary);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+
+  .help-contribute h3 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: var(--accent-primary);
+  }
+
+  .help-contribute p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .help-contribute a {
+    color: var(--accent-primary);
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .stats-row {
+      flex-direction: column;
+    }
+  }
+</style>
+

@@ -1,11 +1,29 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import SiteNav from '../components/SiteNav.astro';
-import { BrowserDetectionBanner } from '../components/BrowserDetectionBanner';
-import '../styles/global.css';
+import type { GetStaticPaths } from 'astro';
+import SiteNav from '../../components/SiteNav.astro';
+import '../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getTranslation,
+  type Locale,
+} from '../../i18n/translations';
 
-const siteTitle = 'contenteditable lab';
+export const getStaticPaths = (() => {
+  // Generate paths for all non-default locales
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const t = getTranslation(locale);
+const localeInfo = locales[locale];
+
 const cases = await getCollection('cases');
 
 const scenariosMap = cases.reduce(
@@ -41,37 +59,41 @@ const osList = Array.from(new Set(cases.map((c) => c.data.os))).sort();
 const browserList = Array.from(new Set(cases.map((c) => c.data.browser))).sort();
 const confirmedCases = cases.filter((c) => c.data.status === 'confirmed').length;
 const draftCases = cases.filter((c) => c.data.status === 'draft').length;
+
+// Helper for localized paths
+const localePath = (path: string) => `/${locale}${path}`;
 ---
 
-<html lang="en">
+<html lang={locale} dir={localeInfo.dir}>
   <head>
-    <BaseHead title={siteTitle} />
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>contenteditable lab</title>
   </head>
   <body>
     <SiteNav />
-    <BrowserDetectionBanner client:load />
     <main class="main-content">
       <!-- Hero Section -->
       <section class="hero">
         <div class="hero-badge">
           <span class="hero-badge-icon">📝</span>
-          <span>Real-world contenteditable research</span>
+          <span>{t.hero.badge}</span>
         </div>
         <h1 class="hero-title">
           contenteditable<span class="hero-dot">.</span>lab
         </h1>
         <p class="hero-description">
-          An incident catalog documenting real-world contenteditable behavior.
-          Each scenario groups multiple cases across different operating systems,
-          browsers, and keyboard setups. Reproduce, record, and understand.
+          {t.hero.description}
         </p>
         <div class="hero-actions">
-          <a href="/cases" class="btn-hero-primary">
-            Browse all cases
+          <a href={localePath('/cases')} class="btn-hero-primary">
+            {t.hero.browseCases}
             <span>→</span>
           </a>
-          <a href="/playground" class="btn-hero-secondary">
-            Open playground
+          <a href={localePath('/playground')} class="btn-hero-secondary">
+            {t.hero.openPlayground}
           </a>
         </div>
       </section>
@@ -80,27 +102,27 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
       <section class="stats-grid">
         <div class="stat-card stat-total">
           <div class="stat-value">{totalCases}</div>
-          <div class="stat-label">Total Cases</div>
+          <div class="stat-label">{t.stats.totalCases}</div>
         </div>
         <div class="stat-card stat-scenarios">
           <div class="stat-value">{totalScenarios}</div>
-          <div class="stat-label">Scenarios</div>
+          <div class="stat-label">{t.stats.scenarios}</div>
         </div>
         <div class="stat-card stat-os">
           <div class="stat-value">{osList.length}</div>
-          <div class="stat-label">OS Variants</div>
+          <div class="stat-label">{t.stats.osVariants}</div>
         </div>
         <div class="stat-card stat-browsers">
           <div class="stat-value">{browserList.length}</div>
-          <div class="stat-label">Browsers</div>
+          <div class="stat-label">{t.stats.browsers}</div>
         </div>
         <div class="stat-card stat-confirmed">
           <div class="stat-value">{confirmedCases}</div>
-          <div class="stat-label">Confirmed</div>
+          <div class="stat-label">{t.stats.confirmed}</div>
         </div>
         <div class="stat-card stat-draft">
           <div class="stat-value">{draftCases}</div>
-          <div class="stat-label">Draft</div>
+          <div class="stat-label">{t.stats.draft}</div>
         </div>
       </section>
 
@@ -109,15 +131,15 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
         <div class="section-header">
           <div class="section-icon">🔬</div>
           <div>
-            <h2>Browse by phenomenon</h2>
-            <p>Start from a specific phenomenon to see how it manifests across environments.</p>
+            <h2>{t.sections.browseByPhenomenon}</h2>
+            <p>{t.sections.browseByPhenomenonDesc}</p>
           </div>
         </div>
 
         <div class="scenario-grid">
           {latestScenarios.slice(0, 6).map((item, idx) => (
             <a
-              href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}
+              href={localePath(`/scenarios/${encodeURIComponent(item.scenarioId)}`)}
               class={`scenario-card scenario-color-${idx % 6}`}
             >
               <div class="scenario-name">{item.scenarioId}</div>
@@ -130,7 +152,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
             </a>
           ))}
         </div>
-        <a href="/scenarios" class="section-link">View all scenarios →</a>
+        <a href={localePath('/scenarios')} class="section-link">{t.sections.viewAllScenarios} →</a>
       </section>
 
       <!-- Browse by category -->
@@ -138,8 +160,8 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
         <div class="section-header">
           <div class="section-icon">🏷️</div>
           <div>
-            <h2>Browse by category</h2>
-            <p>Explore cases by topic tags or environment filters.</p>
+            <h2>{t.sections.browseByCategory}</h2>
+            <p>{t.sections.browseByCategoryDesc}</p>
           </div>
         </div>
 
@@ -168,10 +190,10 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
             return (
               <>
                 {popularTags.slice(0, 8).map((tag) => {
-                  const color = tagColors[tag.toLowerCase()] || '#6b7280';
+                  const color = tagColors[tag.toLowerCase() as keyof typeof tagColors] || '#6b7280';
                   return (
                     <a
-                      href={`/cases?tag=${encodeURIComponent(tag)}`}
+                      href={localePath(`/cases?tag=${encodeURIComponent(tag)}`)}
                       class="tag-chip"
                       style={`--tag-color: ${color}`}
                     >
@@ -192,13 +214,13 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
             return (
               <>
                 {osData.slice(0, 3).map((os) => (
-                  <a href={`/cases?q=${encodeURIComponent(os)}`} class="env-chip env-os">
+                  <a href={localePath(`/cases?q=${encodeURIComponent(os)}`)} class="env-chip env-os">
                     <span class="env-icon">💻</span>
                     {os}
                   </a>
                 ))}
                 {browserData.slice(0, 3).map((browser) => (
-                  <a href={`/cases?q=${encodeURIComponent(browser)}`} class="env-chip env-browser">
+                  <a href={localePath(`/cases?q=${encodeURIComponent(browser)}`)} class="env-chip env-browser">
                     <span class="env-icon">🌐</span>
                     {browser}
                   </a>
@@ -207,7 +229,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
             );
           })()}
         </div>
-        <a href="/cases" class="section-link">View all cases with filters →</a>
+        <a href={localePath('/cases')} class="section-link">{t.sections.viewAllCases} →</a>
       </section>
 
       <!-- Pinned incidents -->
@@ -215,8 +237,8 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
         <div class="section-header">
           <div class="section-icon">📌</div>
           <div>
-            <h2>Pinned incidents</h2>
-            <p>Curated baseline references and frequently observed issues.</p>
+            <h2>{t.sections.pinnedIncidents}</h2>
+            <p>{t.sections.pinnedIncidentsDesc}</p>
           </div>
         </div>
 
@@ -227,7 +249,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
               <p class="case-meta">
                 {entry.data.os} {entry.data.osVersion} · {entry.data.browser} {entry.data.browserVersion}
               </p>
-              <a href={`/cases/${entry.slug}`} class="case-link">Open case →</a>
+              <a href={localePath(`/cases/${entry.slug}`)} class="case-link">{t.sections.openCase} →</a>
             </article>
           ))}
         </div>
@@ -238,8 +260,8 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
         <div class="section-header">
           <div class="section-icon">🆕</div>
           <div>
-            <h2>Latest scenarios</h2>
-            <p>Up to 20 scenarios, ordered by most recent case ID.</p>
+            <h2>{t.sections.latestScenarios}</h2>
+            <p>{t.sections.latestScenariosDesc}</p>
           </div>
         </div>
 
@@ -251,8 +273,8 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
                 {item.representative.data.id} · {item.representative.data.os} · {item.representative.data.browser}
               </p>
               <div class="latest-links">
-                <a href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}>Scenario →</a>
-                <a href={`/cases/${item.representative.slug}`} class="secondary">Case →</a>
+                <a href={localePath(`/scenarios/${encodeURIComponent(item.scenarioId)}`)}>{t.sections.openScenario} →</a>
+                <a href={localePath(`/cases/${item.representative.slug}`)} class="secondary">{t.sections.openCase} →</a>
               </div>
             </article>
           ))}
@@ -274,7 +296,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
     text-align: center;
     padding: 3rem 1rem;
     margin-bottom: 2rem;
-    background: var(--hero-gradient);
+    background: var(--hero-gradient, linear-gradient(135deg, #f0f7ff 0%, #fdf4ff 50%, #fff7ed 100%));
     border-radius: 20px;
     border: 1px solid var(--border-light);
   }
@@ -284,7 +306,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0.9rem;
-    background: var(--bg-surface);
+    background: white;
     border: 1px solid var(--border-light);
     border-radius: 999px;
     font-size: 0.8rem;
@@ -345,7 +367,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
     display: inline-flex;
     align-items: center;
     padding: 0.75rem 1.5rem;
-    background: var(--bg-surface);
+    background: white;
     color: var(--text-primary);
     border: 1px solid var(--border-medium);
     border-radius: 10px;
@@ -355,7 +377,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
 
   .btn-hero-secondary:hover {
     border-color: var(--accent-primary);
-    background: var(--bg-muted);
+    background: var(--bg-surface);
     color: var(--accent-primary);
   }
 
@@ -368,7 +390,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
   }
 
   .stat-card {
-    background: var(--bg-surface);
+    background: white;
     border: 1px solid var(--border-light);
     border-radius: 12px;
     padding: 1.25rem 1rem;
@@ -396,7 +418,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
 
   /* Section Cards */
   .section-card {
-    background: var(--bg-surface);
+    background: white;
     border: 1px solid var(--border-light);
     border-radius: 16px;
     padding: 1.5rem;
@@ -532,7 +554,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
   }
 
   .env-chip:hover {
-    background: var(--border-light);
+    background: var(--bg-muted);
     border-color: var(--border-medium);
     color: var(--text-primary);
   }
@@ -550,7 +572,6 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
 
   .case-card {
     padding: 1rem 1.15rem;
-    background: var(--bg-surface);
     border: 1px solid var(--border-light);
     border-radius: 10px;
     transition: border-color 0.15s;
@@ -585,7 +606,6 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
 
   .latest-card {
     padding: 0.9rem 1rem;
-    background: var(--bg-surface);
     border: 1px solid var(--border-light);
     border-radius: 10px;
     transition: border-color 0.15s;
@@ -649,3 +669,4 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
     }
   }
 </style>
+

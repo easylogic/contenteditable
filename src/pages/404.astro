@@ -1,0 +1,179 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import SiteNav from '../components/SiteNav.astro';
+import '../styles/global.css';
+---
+
+<html lang="en">
+  <head>
+    <BaseHead title="Page not found" noindex={true} />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="error-page">
+      <div class="error-content">
+        <div class="error-icon">🔍</div>
+        <h1>404</h1>
+        <p class="error-title">Page not found</p>
+        <p class="error-message">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <div class="error-actions">
+          <a href="/" class="btn-primary">Go to home</a>
+          <a href="/cases" class="btn-secondary">Browse cases</a>
+        </div>
+        <div class="error-suggestions">
+          <p>Looking for something specific?</p>
+          <ul>
+            <li><a href="/cases">All documented cases</a></li>
+            <li><a href="/scenarios">Scenario groups</a></li>
+            <li><a href="/playground">Interactive playground</a></li>
+            <li><a href="/docs">Documentation</a></li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .error-page {
+    min-height: calc(100vh - 52px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--bg-page);
+  }
+
+  .error-content {
+    text-align: center;
+    max-width: 480px;
+  }
+
+  .error-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  h1 {
+    font-size: 6rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--category-ime) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .error-message {
+    color: var(--text-muted);
+    margin: 0 0 2rem;
+    line-height: 1.6;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .btn-primary {
+    padding: 0.75rem 1.5rem;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.15s;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-primary-hover);
+    transform: translateY(-1px);
+    color: white;
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-medium);
+    border-radius: 10px;
+    font-weight: 500;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+
+  .error-suggestions {
+    padding: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+  }
+
+  .error-suggestions p {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0 0 0.75rem;
+  }
+
+  .error-suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .error-suggestions li a {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .error-suggestions li a:hover {
+    background: var(--accent-primary-light);
+    color: var(--accent-primary);
+  }
+
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 4rem;
+    }
+
+    .error-title {
+      font-size: 1.25rem;
+    }
+
+    .error-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+

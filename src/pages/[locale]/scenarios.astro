@@ -1,0 +1,203 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import SiteNav from '../../components/SiteNav.astro';
+import '../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getTranslation,
+  type Locale,
+} from '../../i18n/translations';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const t = getTranslation(locale);
+const localeInfo = locales[locale];
+
+const cases = await getCollection('cases');
+
+// Group cases by scenario
+const scenariosMap = cases.reduce(
+  (acc, entry) => {
+    const key = entry.data.scenarioId;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(entry);
+    return acc;
+  },
+  {} as Record<string, typeof cases>,
+);
+
+const scenarios = Object.entries(scenariosMap)
+  .map(([id, scenarioCases]) => ({
+    id,
+    cases: scenarioCases,
+    caseCount: scenarioCases.length,
+    primaryCase: scenarioCases[0],
+    browsers: Array.from(new Set(scenarioCases.map((c) => c.data.browser))),
+    oses: Array.from(new Set(scenarioCases.map((c) => c.data.os))),
+  }))
+  .sort((a, b) => b.caseCount - a.caseCount);
+
+const totalCases = cases.length;
+
+// Helper for localized paths
+const localePath = (path: string) => `/${locale}${path}`;
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{t.nav.scenarios} | contenteditable lab</title>
+  </head>
+  <body>
+    <SiteNav />
+    <main class="scenarios-page">
+      <header class="page-header">
+        <h1>{t.nav.scenarios}</h1>
+        <div class="stats">
+          <span class="stat">
+            <strong>{scenarios.length}</strong> {t.nav.scenarios}
+          </span>
+          <span class="stat">
+            <strong>{totalCases}</strong> {t.nav.cases}
+          </span>
+        </div>
+      </header>
+
+      <div class="scenarios-grid">
+        {scenarios.map((scenario, idx) => (
+          <a
+            href={localePath(`/scenarios/${encodeURIComponent(scenario.id)}`)}
+            class={`scenario-card scenario-color-${idx % 6}`}
+          >
+            <div class="scenario-header">
+              <span class="scenario-count">{scenario.caseCount} {t.nav.cases}</span>
+            </div>
+            <h2>{scenario.id}</h2>
+            <p class="scenario-title">{scenario.primaryCase.data.caseTitle}</p>
+            <div class="scenario-env">
+              <span>{t.caseDetail.os}: {scenario.oses.join(', ')}</span>
+              <span>{t.caseDetail.browser}: {scenario.browsers.join(', ')}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .scenarios-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .stats {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .stat strong {
+    font-weight: 700;
+    color: var(--accent-primary);
+  }
+
+  .scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1rem;
+  }
+
+  .scenario-card {
+    display: block;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .scenario-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .scenario-color-0 { background: linear-gradient(135deg, #ede9fe, #fae8ff); border-color: #c4b5fd; }
+  .scenario-color-1 { background: linear-gradient(135deg, #cffafe, #e0f2fe); border-color: #67e8f9; }
+  .scenario-color-2 { background: linear-gradient(135deg, #fce7f3, #fdf2f8); border-color: #f9a8d4; }
+  .scenario-color-3 { background: linear-gradient(135deg, #ccfbf1, #d1fae5); border-color: #5eead4; }
+  .scenario-color-4 { background: linear-gradient(135deg, #ffedd5, #fef3c7); border-color: #fdba74; }
+  .scenario-color-5 { background: linear-gradient(135deg, #e0e7ff, #dbeafe); border-color: #a5b4fc; }
+
+  .scenario-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+  }
+
+  .scenario-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.7);
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+  }
+
+  .scenario-card h2 {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+
+  .scenario-title {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.75rem;
+    line-height: 1.4;
+  }
+
+  .scenario-env {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 768px) {
+    .scenarios-page {
+      padding: 1rem;
+    }
+
+    .scenarios-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+

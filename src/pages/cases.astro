@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import SiteNav from '../components/SiteNav.astro';
+import BaseHead from '../components/BaseHead.astro';
+import '../styles/global.css';
 
 const allCases = await getCollection('cases');
 
@@ -21,20 +23,9 @@ const allTags = Array.from(
 
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>contenteditable cases</title>
+    <BaseHead title="contenteditable cases" description="Individual incident reports documenting contenteditable behavior across environments." />
   </head>
-  <body
-    style="
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f3f3f4;
-      color: #111827;
-    "
-  >
+  <body>
     <SiteNav />
     <main
       style="
@@ -53,7 +44,7 @@ const allTags = Array.from(
         >
           contenteditable cases
         </h1>
-        <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: #4b5563;">
+        <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: var(--text-secondary);">
           Individual incident reports (cases) collected from experiments. Each case documents a
           concrete contenteditable behavior observed in a specific environment. Filter by metadata
           and follow links to reproduce them in the dedicated playgrounds.
@@ -63,17 +54,17 @@ const allTags = Array.from(
             display: flex;
             gap: 1rem;
             font-size: 0.85rem;
-            color: #6b7280;
+            color: var(--text-muted);
           "
         >
           <span>
-            <strong style="color: #111827;">{totalCases}</strong> total cases
+            <strong style="color: var(--text-primary);">{totalCases}</strong> total cases
           </span>
           <span>
-            <strong style="color: #10b981;">{confirmedCount}</strong> confirmed
+            <strong style="color: var(--status-confirmed);">{confirmedCount}</strong> confirmed
           </span>
           <span>
-            <strong style="color: #f59e0b;">{draftCount}</strong> draft
+            <strong style="color: var(--status-draft);">{draftCount}</strong> draft
           </span>
         </div>
       </header>
@@ -81,8 +72,8 @@ const allTags = Array.from(
       <section
         style="
           border-radius: 0.75rem;
-          border: 1px solid #e5e7eb;
-          background: #ffffff;
+          border: 1px solid var(--border-light);
+          background: var(--bg-surface);
           padding: 0.75rem 0.9rem;
           margin-bottom: 1rem;
         "
@@ -106,7 +97,7 @@ const allTags = Array.from(
                 width: 100%;
                 padding: 0.35rem 0.45rem;
                 border-radius: 0.375rem;
-                border: 1px solid #d1d5db;
+                border: 1px solid var(--border-medium);
                 font-size: 0.85rem;
               "
             >
@@ -129,7 +120,7 @@ const allTags = Array.from(
                 width: 100%;
                 padding: 0.35rem 0.5rem;
                 border-radius: 0.375rem;
-                border: 1px solid #d1d5db;
+                border: 1px solid var(--border-medium);
                 font-size: 0.85rem;
               "
             />
@@ -146,7 +137,7 @@ const allTags = Array.from(
                 width: 100%;
                 padding: 0.35rem 0.45rem;
                 border-radius: 0.375rem;
-                border: 1px solid #d1d5db;
+                border: 1px solid var(--border-medium);
                 font-size: 0.85rem;
               "
             >
@@ -167,7 +158,7 @@ const allTags = Array.from(
                 width: 100%;
                 padding: 0.35rem 0.45rem;
                 border-radius: 0.375rem;
-                border: 1px solid #d1d5db;
+                border: 1px solid var(--border-medium);
                 font-size: 0.85rem;
               "
             >
@@ -185,9 +176,9 @@ const allTags = Array.from(
                 width: 100%;
                 padding: 0.4rem 0.75rem;
                 border-radius: 999px;
-                border: 1px solid #111827;
-                background: #111827;
-                color: white;
+                border: 1px solid var(--text-primary);
+                background: var(--text-primary);
+                color: var(--bg-surface);
                 font-size: 0.85rem;
                 cursor: pointer;
               "
@@ -222,7 +213,7 @@ const allTags = Array.from(
 
           if (filtered.length === 0) {
             return (
-              <p style="font-size: 0.9rem; color: #6b7280;">
+              <p style="font-size: 0.9rem; color: var(--text-muted);">
                 No cases match the current filters. Try a different query or status.
               </p>
             );
@@ -240,8 +231,8 @@ const allTags = Array.from(
                 <article
                   style="
                     border-radius: 0.75rem;
-                    border: 1px solid #e5e7eb;
-                    background: #ffffff;
+                    border: 1px solid var(--border-light);
+                    background: var(--bg-surface);
                     padding: 0.85rem 0.95rem;
                     display: flex;
                     flex-direction: column;
@@ -267,14 +258,7 @@ const allTags = Array.from(
                         {entry.data.caseTitle}
                       </h2>
                       <span
-                        style={{
-                          fontSize: '0.7rem',
-                          padding: '0.1rem 0.45rem',
-                          borderRadius: '999px',
-                          border: '1px solid #d1d5db',
-                          backgroundColor:
-                            entry.data.status === 'confirmed' ? '#ecfdf3' : '#f9fafb',
-                        }}
+                        class={entry.data.status === 'confirmed' ? 'status-badge confirmed' : 'status-badge draft'}
                       >
                         {entry.data.status}
                       </span>
@@ -282,7 +266,7 @@ const allTags = Array.from(
                     <div
                       style="
                         font-size: 0.75rem;
-                        color: #6b7280;
+                        color: var(--text-muted);
                       "
                     >
                       <span>
@@ -315,7 +299,7 @@ const allTags = Array.from(
                   </header>
 
                   {entry.data.tags.length > 0 && (
-                    <div style="font-size: 0.75rem; color: #4b5563;">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">
                       {entry.data.tags.map((tag) => (
                         <a
                           href={`?locale=${encodeURIComponent(
@@ -329,7 +313,7 @@ const allTags = Array.from(
                             display: inline-flex;
                             align-items: center;
                             border-radius: 999px;
-                            border: 1px solid #e5e7eb;
+                            border: 1px solid var(--border-light);
                             padding: 0.05rem 0.4rem;
                             margin-right: 0.25rem;
                             text-decoration: none;
@@ -350,7 +334,7 @@ const allTags = Array.from(
                         align-items: center;
                         gap: 0.2rem;
                         font-size: 0.8rem;
-                        color: #111827;
+                        color: var(--text-primary);
                         text-decoration: none;
                         font-weight: 500;
                       "
@@ -365,7 +349,7 @@ const allTags = Array.from(
                         align-items: center;
                         gap: 0.2rem;
                         font-size: 0.8rem;
-                        color: #4b5563;
+                        color: var(--text-secondary);
                         text-decoration: none;
                       "
                     >
@@ -383,4 +367,22 @@ const allTags = Array.from(
   </body>
 </html>
 
+<style>
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-medium);
+  }
+
+  .status-badge.confirmed {
+    background: var(--status-confirmed-light);
+    color: var(--status-confirmed);
+  }
+
+  .status-badge.draft {
+    background: var(--status-draft-light);
+    color: var(--status-draft);
+  }
+</style>
 
