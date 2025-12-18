@@ -1,0 +1,80 @@
+[
+  {
+    "id": "plain-cjk-paragraph",
+    "labels": {
+      "en": "Plain paragraph (CJK + ASCII)",
+      "ko": "기본 문단 (CJK + ASCII)"
+    }
+  },
+  {
+    "id": "inline-link-boundary-cjk",
+    "labels": {
+      "en": "Inline link boundary (CJK)",
+      "ko": "인라인 링크 경계 (CJK)"
+    }
+  },
+  {
+    "id": "nested-inline-wrappers",
+    "labels": {
+      "en": "Nested inline wrappers (bold/italic/span)",
+      "ko": "중첩 인라인 래퍼 (굵게/이탤릭/span)"
+    }
+  },
+  {
+    "id": "block-list-mix-cjk",
+    "labels": {
+      "en": "Paragraph + list mix (CJK)",
+      "ko": "문단 + 목록 혼합 (CJK)"
+    }
+  },
+  {
+    "id": "whitespace-special-chars",
+    "labels": {
+      "en": "Whitespace & special chars (ZWNBSP, NBSP)",
+      "ko": "공백 & 특수 문자 (ZWNBSP, NBSP)"
+    }
+  },
+  {
+    "id": "rich-inline-list-previous-default",
+    "labels": {
+      "en": "Rich inline + nested + list (previous default)",
+      "ko": "복합 인라인 + 중첩 + 목록 (이전 기본 샘플)"
+    }
+  },
+  {
+    "id": "blog-post-with-images",
+    "labels": {
+      "en": "Blog post (headings + images + text)",
+      "ko": "블로그 글 (제목 + 이미지 + 텍스트)"
+    }
+  },
+  {
+    "id": "table-with-inline-content",
+    "labels": {
+      "en": "Table with inline content (CJK)",
+      "ko": "테이블 + 인라인 콘텐츠 (CJK)"
+    }
+  },
+  {
+    "id": "blockquote-and-code",
+    "labels": {
+      "en": "Blockquote + code block + lists",
+      "ko": "인용문 + 코드 블록 + 목록"
+    }
+  },
+  {
+    "id": "complex-nested-structure",
+    "labels": {
+      "en": "Complex nested structure (divs + spans)",
+      "ko": "복잡한 중첩 구조 (div + span)"
+    }
+  },
+  {
+    "id": "mixed-media-content",
+    "labels": {
+      "en": "Mixed media (images + videos + text)",
+      "ko": "혼합 미디어 (이미지 + 비디오 + 텍스트)"
+    }
+  }
+]
+

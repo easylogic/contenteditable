@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { EDITOR_PRESETS, type EditorPreset } from '../data/presets';
 
 // ============================================================
 // Types
@@ -71,14 +72,6 @@ type RangeDrawInfo = {
   heightScale?: number;
 };
 
-type EditorPreset = {
-  id: string;
-  labels: {
-    en: string;
-    ko: string;
-  };
-  html: string;
-};
 
 // ============================================================
 // RangeVisualizer Class (uses external overlay container)
@@ -213,86 +206,6 @@ class RangeVisualizer {
     this.overlayEl.querySelector('.range-overlay')?.remove();
   }
 }
-
-// ============================================================
-// Editor Presets
-// ============================================================
-
-const EDITOR_PRESETS: EditorPreset[] = [
-  {
-    id: 'plain-cjk-paragraph',
-    labels: {
-      en: 'Plain paragraph (CJK + ASCII)',
-      ko: '기본 문단 (CJK + ASCII)',
-    },
-    html:
-      '<p>기본 텍스트 샘플입니다. contenteditable 테스트용 plain paragraph 123.</p>' +
-      '<p>한글, English, 日本語, 中文이 섞여 있습니다.</p>',
-  },
-  {
-    id: 'inline-link-boundary-cjk',
-    labels: {
-      en: 'Inline link boundary (CJK)',
-      ko: '인라인 링크 경계 (CJK)',
-    },
-    html:
-      '<p>링크 앞뒤 경계를 테스트합니다: ' +
-      '<a id="link-nav" href="https://www.naver.com" class="zjs-inline-hyperlink">www.naver.com</a> 바로 뒤에 글자를 입력해 보세요.</p>' +
-      '<p>커서가 <b>링크 끝</b>에서 어떻게 이동하는지, 조합 입력(한글 IME)과 함께 관찰합니다.</p>',
-  },
-  {
-    id: 'nested-inline-wrappers',
-    labels: {
-      en: 'Nested inline wrappers (bold/italic/span)',
-      ko: '중첩 인라인 래퍼 (굵게/이탤릭/span)',
-    },
-    html:
-      '<p>중첩 인라인 요소 테스트: ' +
-      '<b id="b1" class="emphasis">굵은<b id="b2" class="inner">안쪽 <i id="i1">이탤릭</i></b></b> 텍스트와 ' +
-      '<span id="s1" class="colored" data-color="blue">컬러 span 텍스트</span>가 섞여 있습니다.</p>' +
-      '<p>문장 끝 | 경계에서 Backspace / IME 조합을 시도해 보세요.</p>',
-  },
-  {
-    id: 'block-list-mix-cjk',
-    labels: {
-      en: 'Paragraph + list mix (CJK)',
-      ko: '문단 + 목록 혼합 (CJK)',
-    },
-    html:
-      '<p>아래 목록은 Enter / Backspace 시 DOM 구조 변화를 보기 좋게 구성한 샘플입니다.</p>' +
-      '<ul id="list-a" class="list unordered">' +
-      '<li id="li-a1" class="list-item">목록 <b>항목1</b> — inline bold 포함</li>' +
-      '<li id="li-a2" class="list-item">목록 <i>항목2</i> — inline italic 포함</li>' +
-      '<li id="li-a3" class="list-item">세 번째 항목: 😃 emoji + CJK</li>' +
-      '</ul>' +
-      '<p>목록 앞/뒤에서 Enter, Shift+Enter, Backspace를 시도해 보세요.</p>',
-  },
-  {
-    id: 'whitespace-special-chars',
-    labels: {
-      en: 'Whitespace & special chars (ZWNBSP, NBSP)',
-      ko: '공백 & 특수 문자 (ZWNBSP, NBSP)',
-    },
-    html:
-      '<p>아래 줄에는 눈에 보이지 않는 문자들이 포함되어 있습니다.</p>' +
-      '<p id="ws-1">앞쪽\u00A0&nbsp;두 개의 NBSP 와 중간\u00A0공백, 끝에\uFEFFZWNBSP 포함</p>' +
-      '<p>커서를 이동하면서 selection / beforeinput / input 로그에 어떻게 찍히는지 확인합니다.</p>',
-  },
-  {
-    id: 'rich-inline-list-previous-default',
-    labels: {
-      en: 'Rich inline + nested + list (previous default)',
-      ko: '복합 인라인 + 중첩 + 목록 (이전 기본 샘플)',
-    },
-    html:
-      '<p id="para-1" class="paragraph intro">일반 텍스트 <a id="link-1" href="https://example.com" class="external-link" data-type="url">링크텍스트</a> 뒤에 이어지는 글</p>' +
-      '<p id="para-2" class="paragraph content"><b id="bold-1" class="emphasis strong">굵은글씨</b>와 <i id="italic-1" class="emphasis italic">이탤릭</i> 그리고 <span id="span-blue" class="colored" style="color:blue" data-color="blue">파란색</span> 텍스트</p>' +
-      '<p id="para-3" class="paragraph nested">중첩: <b id="bold-nested" class="emphasis"><i id="italic-nested" class="inner">굵은이탤릭</i></b> | <a id="link-2" href="#section" class="internal-link"><b id="bold-link" class="link-text">굵은링크</b></a></p>' +
-      '<p id="para-4" class="paragraph boundary-test">경계: <code id="code-1" class="inline-code" data-lang="text">코드블록</code>끝 | 시작<mark id="mark-1" class="highlight" data-highlight="yellow">하이라이트</mark>끝</p>' +
-      '<p id="para-5" class="paragraph complex">복잡한 구조: <span id="outer" class="wrapper level-1"><span id="middle" class="wrapper level-2"><span id="inner" class="wrapper level-3" data-depth="3">깊은 중첩</span></span></span> 후 텍스트</p>' +
-      '<ul id="list-1" class="list unordered"><li id="item-1" class="list-item">목록 <b class="item-bold">항목1</b></li><li id="item-2" class="list-item">목록 <i class="item-italic">항목2</i></li></ul>',
-  },
-];
 
 // ============================================================
 // Utility Functions
@@ -1245,7 +1158,9 @@ function buildSelectionSegmentsFromLog(log: EventLog): { path: string; start: nu
   try {
     const root = range.commonAncestorContainer || range.startContainer;
     const doc = (root as Node).ownerDocument || document;
-    const walker = doc.createTreeWalker(
+    
+    // First, collect text nodes
+    const textWalker = doc.createTreeWalker(
       root,
       NodeFilter.SHOW_TEXT,
       {
@@ -1263,9 +1178,9 @@ function buildSelectionSegmentsFromLog(log: EventLog): { path: string; start: nu
       } as unknown as NodeFilter,
     );
 
-    let textNode: Node | null = walker.currentNode;
+    let textNode: Node | null = textWalker.currentNode;
     if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
-      textNode = walker.nextNode();
+      textNode = textWalker.nextNode();
     }
 
     while (textNode) {
@@ -1299,7 +1214,145 @@ function buildSelectionSegmentsFromLog(log: EventLog): { path: string; start: nu
         });
       }
 
-      textNode = walker.nextNode();
+      textNode = textWalker.nextNode();
+    }
+
+    // Then, collect element nodes (images, etc.) that are fully or partially selected
+    const elementWalker = doc.createTreeWalker(
+      root,
+      NodeFilter.SHOW_ELEMENT,
+      {
+        acceptNode(node: Node) {
+          try {
+            if (node.nodeType !== Node.ELEMENT_NODE) return NodeFilter.FILTER_REJECT;
+            // Check if the element is fully contained or intersects with the range
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (!(range as any).intersectsNode) return NodeFilter.FILTER_REJECT;
+            
+            // For element nodes, we need to check if they're within the range
+            const element = node as Element;
+            const elementRange = doc.createRange();
+            try {
+              elementRange.selectNodeContents(element);
+              // Check if element range intersects with selection range
+              const intersects = 
+                elementRange.compareBoundaryPoints(Range.START_TO_END, range) > 0 &&
+                elementRange.compareBoundaryPoints(Range.END_TO_START, range) < 0;
+              
+              // Also check if the element itself is the start or end container
+              const isStartContainer = element === range.startContainer;
+              const isEndContainer = element === range.endContainer;
+              const isContained = 
+                range.compareBoundaryPoints(Range.START_TO_START, elementRange) <= 0 &&
+                range.compareBoundaryPoints(Range.END_TO_END, elementRange) >= 0;
+              
+              return (intersects || isStartContainer || isEndContainer || isContained)
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_REJECT;
+            } catch {
+              // Fallback: use intersectsNode
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              return (range as any).intersectsNode(element)
+                ? NodeFilter.FILTER_ACCEPT
+                : NodeFilter.FILTER_REJECT;
+            }
+          } catch {
+            return NodeFilter.FILTER_REJECT;
+          }
+        },
+      } as unknown as NodeFilter,
+    );
+
+    const processedElements = new Set<Element>();
+    let elementNode: Node | null = elementWalker.currentNode;
+    if (!elementNode || elementNode.nodeType !== Node.ELEMENT_NODE) {
+      elementNode = elementWalker.nextNode();
+    }
+
+    while (elementNode) {
+      const element = elementNode as Element;
+      
+      // Skip if already processed (avoid duplicates)
+      if (processedElements.has(element)) {
+        elementNode = elementWalker.nextNode();
+        continue;
+      }
+      
+      // Skip if this element is just a container (has text children that we already processed)
+      // Only include elements that are meaningful (img, br, etc.) or are directly selected
+      const isDirectlySelected = 
+        element === range.startContainer || 
+        element === range.endContainer ||
+        (range.startContainer.nodeType === Node.ELEMENT_NODE && 
+         range.startContainer === element) ||
+        (range.endContainer.nodeType === Node.ELEMENT_NODE && 
+         range.endContainer === element);
+      
+      // Check if element is a leaf node (img, br, input, etc.) or is directly selected
+      const isLeafElement = 
+        element.tagName === 'IMG' ||
+        element.tagName === 'BR' ||
+        element.tagName === 'HR' ||
+        element.tagName === 'INPUT' ||
+        element.tagName === 'VIDEO' ||
+        element.tagName === 'AUDIO' ||
+        element.tagName === 'IFRAME' ||
+        element.tagName === 'EMBED' ||
+        element.tagName === 'OBJECT';
+      
+      // Check if element is fully contained in range (not just a parent container)
+      let isFullyContained = false;
+      try {
+        const elementRange = doc.createRange();
+        elementRange.selectNodeContents(element);
+        isFullyContained = 
+          range.compareBoundaryPoints(Range.START_TO_START, elementRange) <= 0 &&
+          range.compareBoundaryPoints(Range.END_TO_END, elementRange) >= 0;
+      } catch {
+        // ignore
+      }
+
+      if (isDirectlySelected || (isLeafElement && isFullyContained)) {
+        const elementName = element.tagName;
+        const elementId = element.id || undefined;
+        const elementClass = (element.className as string) || undefined;
+        const path = formatNodePath(elementName, elementId, elementClass);
+        
+        // For element nodes, offset represents child index
+        let segStart = 0;
+        let segEnd = 1;
+        
+        if (element === range.startContainer) {
+          segStart = range.startOffset;
+        }
+        if (element === range.endContainer) {
+          segEnd = range.endOffset;
+        }
+        
+        // Determine element type label
+        let elementLabel = `[${elementName}]`;
+        if (elementName === 'IMG') {
+          const alt = (element as HTMLImageElement).alt || '';
+          elementLabel = `[IMG${alt ? `: ${alt}` : ''}]`;
+        } else if (elementName === 'BR') {
+          elementLabel = '[BR]';
+        } else if (elementName === 'VIDEO') {
+          elementLabel = '[VIDEO]';
+        } else if (elementName === 'AUDIO') {
+          elementLabel = '[AUDIO]';
+        }
+
+        segments.push({
+          path,
+          start: segStart,
+          end: segEnd,
+          text: elementLabel,
+        });
+        
+        processedElements.add(element);
+      }
+
+      elementNode = elementWalker.nextNode();
     }
   } catch {
     // ignore errors in segment construction

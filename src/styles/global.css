@@ -177,11 +177,12 @@ code {
 pre {
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--bg-muted);
+  color: var(--text-primary);
   padding: 1rem;
   border-radius: 8px;
   overflow-x: auto;
+  border: 1px solid var(--border-light);
 }
 
 pre code {
