@@ -10,6 +10,19 @@ import {
 import ThemeToggle from './ThemeToggle.astro';
 import { SearchIsland } from './SearchIsland';
 
+interface NavItem {
+  label: string;
+  href: string;
+  active?: boolean;
+}
+
+interface Props {
+  items?: NavItem[];
+  showMobileMenu?: boolean;
+}
+
+const { items, showMobileMenu = true } = Astro.props;
+
 const currentPath = Astro.url.pathname;
 const currentLocale = getLocaleFromPath(currentPath);
 const currentLocaleInfo = locales[currentLocale];
@@ -28,6 +41,17 @@ const availableLocales = supportedLocales.map((code) => ({
   href: getLocalizedPath(pathWithoutLocale, code),
   isCurrent: code === currentLocale,
 }));
+
+// Default navigation items if not provided
+const defaultItems: NavItem[] = [
+  { label: 'Docs', href: localePath('/docs'), active: pathWithoutLocale.startsWith('/docs') },
+  { label: 'Cases', href: localePath('/cases'), active: pathWithoutLocale.startsWith('/cases') },
+  { label: 'Scenarios', href: localePath('/scenarios'), active: pathWithoutLocale.startsWith('/scenarios') },
+  { label: 'Playground', href: localePath('/playground'), active: pathWithoutLocale.startsWith('/playground') },
+  { label: 'Coverage', href: localePath('/coverage'), active: pathWithoutLocale.startsWith('/coverage') },
+];
+
+const navItems = items || defaultItems;
 ---
 
 <header class="site-nav">
@@ -40,39 +64,24 @@ const availableLocales = supportedLocales.map((code) => ({
     </div>
 
     <div class="site-nav-center">
-      <a
-        href={localePath('/docs')}
-        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/docs') }]}
-      >
-        Docs
-      </a>
-      <a
-        href={localePath('/cases')}
-        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/cases') }]}
-      >
-        Cases
-      </a>
-      <a
-        href={localePath('/scenarios')}
-        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/scenarios') }]}
-      >
-        Scenarios
-      </a>
-      <a
-        href={localePath('/playground')}
-        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/playground') }]}
-      >
-        Playground
-      </a>
-      <a
-        href={localePath('/coverage')}
-        class:list={['nav-item', { active: pathWithoutLocale.startsWith('/coverage') }]}
-      >
-        Coverage
-      </a>
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class:list={['nav-item', { active: item.active || pathWithoutLocale === item.href.replace(localePattern, '') || pathWithoutLocale.startsWith(item.href.replace(localePattern, '')) }]}
+        >
+          {item.label}
+        </a>
+      ))}
     </div>
 
     <div class="site-nav-right">
+      {showMobileMenu && (
+        <button class="mobile-menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      )}
       <SearchIsland client:load />
       <ThemeToggle />
       <div class="lang-dropdown">
@@ -114,6 +123,22 @@ const availableLocales = supportedLocales.map((code) => ({
       </a>
     </div>
   </nav>
+  {showMobileMenu && (
+    <div class="mobile-menu">
+      <a href={localePath('/')} class="mobile-menu-logo">
+        <span class="logo-icon">⌨</span>
+        <span class="logo-text">contenteditable<span class="logo-dot">.</span>lab</span>
+      </a>
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class:list={['mobile-nav-item', { active: item.active || pathWithoutLocale === item.href.replace(localePattern, '') || pathWithoutLocale.startsWith(item.href.replace(localePattern, '')) }]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+  )}
 </header>
 
 <style>
@@ -169,7 +194,8 @@ const availableLocales = supportedLocales.map((code) => ({
   }
 
   .logo-icon {
-    font-size: 1.25rem;
+    font-size: 3.25rem;
+    line-height: 1;
   }
 
   .logo-text {
@@ -333,6 +359,115 @@ const availableLocales = supportedLocales.map((code) => ({
     background: var(--bg-muted);
   }
 
+  /* Mobile Menu Toggle */
+  .mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 101;
+    position: relative;
+  }
+
+  .hamburger-line {
+    width: 22px;
+    height: 2.5px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    display: block;
+    position: absolute;
+  }
+
+  .hamburger-line:nth-child(1) {
+    top: 10px;
+  }
+
+  .hamburger-line:nth-child(2) {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .hamburger-line:nth-child(3) {
+    bottom: 10px;
+  }
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-light);
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 99;
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+
+  .mobile-menu.active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .mobile-menu-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 0.5rem;
+    padding-bottom: 1rem;
+  }
+
+  .mobile-menu-logo:hover {
+    opacity: 0.8;
+  }
+
+  .mobile-menu-logo .logo-icon {
+    font-size: 3.25rem;
+    line-height: 1;
+  }
+
+  .mobile-menu-logo .logo-text {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .mobile-menu-logo .logo-dot {
+    color: var(--accent-primary);
+  }
+
+  .mobile-nav-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .mobile-nav-item:hover,
+  .mobile-nav-item.active {
+    color: var(--accent-primary);
+    background: var(--accent-primary-light);
+  }
+
   @media (max-width: 768px) {
     .site-nav-inner {
       padding: 0 1rem;
@@ -345,7 +480,73 @@ const availableLocales = supportedLocales.map((code) => ({
     .logo-text {
       display: none;
     }
+
+    .site-nav-right {
+      gap: 0;
+    }
+
+    /* Hide other nav items on mobile, show only hamburger */
+    .site-nav-right > :not(.mobile-menu-toggle) {
+      display: none;
+    }
+
+    .mobile-menu-toggle {
+      display: flex;
+      margin-left: auto;
+    }
+
+    .mobile-menu {
+      display: flex;
+    }
+
+    .mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(1) {
+      top: 50%;
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(2) {
+      opacity: 0;
+      transform: translateY(-50%) scale(0);
+    }
+
+    .mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(3) {
+      bottom: auto;
+      top: 50%;
+      transform: translateY(-50%) rotate(-45deg);
+    }
   }
 </style>
+
+<script>
+  // Mobile menu toggle
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    const menu = document.querySelector('.mobile-menu');
+    
+    if (toggle && menu) {
+      toggle.addEventListener('click', () => {
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!isExpanded));
+        menu.classList.toggle('active');
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!toggle.contains(e.target as Node) && !menu.contains(e.target as Node)) {
+          toggle.setAttribute('aria-expanded', 'false');
+          menu.classList.remove('active');
+        }
+      });
+
+      // Close menu when clicking a nav item
+      menu.querySelectorAll('.mobile-nav-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          toggle.setAttribute('aria-expanded', 'false');
+          menu.classList.remove('active');
+        });
+      });
+    }
+  });
+</script>
 
 

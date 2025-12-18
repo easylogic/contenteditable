@@ -161,7 +161,7 @@ class RangeVisualizer {
         rect.setAttribute('rx', '2');
         rect.setAttribute('fill', fill);
         rect.setAttribute('stroke', stroke);
-        rect.setAttribute('stroke-width', '1.5');
+        rect.setAttribute('stroke-width', '1');
         g.appendChild(rect);
       }
     }
