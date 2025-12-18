@@ -7,24 +7,13 @@ import '../styles/global.css';
 const siteTitle = 'contenteditable lab – global playground';
 ---
 
-<html lang="en" style="height: 100%;">
+<html lang="en" class="h-full">
   <head>
     <BaseHead title={siteTitle} description="Interactive playground to test contenteditable behavior." />
   </head>
-  <body style="height: 100%; margin: 0; display: flex; flex-direction: column;">
+  <body class="h-full m-0 flex flex-col">
     <SiteNav />
-    <main
-      style="
-        flex: 1;
-        max-width: 1280px;
-        width: 100%;
-        margin: 0 auto;
-        padding: 1rem 1.25rem 2rem;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-      "
-    >
+    <main class="flex-1 max-w-[1280px] w-full mx-auto py-4 px-5 pb-8 box-border flex flex-col">
       <Playground client:load />
     </main>
   </body>

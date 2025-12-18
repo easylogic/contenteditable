@@ -142,42 +142,22 @@ export function CasePlayground(props: CasePlaygroundProps) {
   return (
     <section
       aria-label="Case playground"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 3fr)',
-        gap: '1.5rem',
-        marginTop: '1.75rem',
-      }}
+      className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 mt-7"
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+      <div className="flex flex-col gap-3.5">
         <header>
-          <h2
-            style={{
-              fontSize: '1.1rem',
-              margin: '0 0 0.4rem 0',
-            }}
-          >
+          <h2 className="text-lg mb-1.5">
             Playground for this case
           </h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <p className="m-0 text-sm text-text-secondary">
             Use the reported environment as a reference and record what happens in your environment
             while interacting with the editable area.
           </p>
         </header>
 
-        <div
-          style={{
-            borderRadius: '0.75rem',
-            border: '1px solid var(--border-light)',
-            background: 'var(--bg-surface)',
-            padding: '0.8rem 0.9rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.6rem',
-          }}
-        >
-          <div style={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
-            <div style={{ marginBottom: '0.2rem', fontWeight: 600 }}>
+        <div className="rounded-xl border border-border-light bg-bg-surface p-3.5 px-3.5 flex flex-col gap-2.5">
+          <div className="text-sm leading-normal">
+            <div className="mb-0.5 font-semibold">
               Reported environment
             </div>
             <div>
@@ -195,115 +175,66 @@ export function CasePlayground(props: CasePlaygroundProps) {
             <div>Keyboard: {reportedEnv.keyboard}</div>
           </div>
 
-          <div style={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
-            <div style={{ marginBottom: '0.2rem', fontWeight: 600 }}>Your environment</div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                gap: '0.45rem 0.5rem',
-              }}
-            >
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+          <div className="text-sm leading-normal">
+            <div className="mb-0.5 font-semibold">Your environment</div>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-1.5 gap-x-2">
+              <label className="flex flex-col gap-0.5">
                 <span>OS</span>
                 <input
                   type="text"
                   value={userEnv.os}
                   onChange={(e) => setUserEnv((prev) => ({ ...prev, os: e.target.value }))}
-                  style={{
-                    padding: '0.25rem 0.4rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid var(--border-medium)',
-                    fontSize: '0.8rem',
-                  }}
+                  className="px-1.5 py-1 rounded-md border border-border-medium text-sm"
                 />
               </label>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+              <label className="flex flex-col gap-0.5">
                 <span>Device</span>
                 <input
                   type="text"
                   value={userEnv.device}
                   onChange={(e) => setUserEnv((prev) => ({ ...prev, device: e.target.value }))}
-                  style={{
-                    padding: '0.25rem 0.4rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid var(--border-medium)',
-                    fontSize: '0.8rem',
-                  }}
+                  className="px-1.5 py-1 rounded-md border border-border-medium text-sm"
                 />
               </label>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+              <label className="flex flex-col gap-0.5">
                 <span>Browser</span>
                 <input
                   type="text"
                   value={userEnv.browser}
                   onChange={(e) => setUserEnv((prev) => ({ ...prev, browser: e.target.value }))}
-                  style={{
-                    padding: '0.25rem 0.4rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid var(--border-medium)',
-                    fontSize: '0.8rem',
-                  }}
+                  className="px-1.5 py-1 rounded-md border border-border-medium text-sm"
                 />
               </label>
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+              <label className="flex flex-col gap-0.5">
                 <span>Keyboard</span>
                 <input
                   type="text"
                   value={userEnv.keyboard}
                   onChange={(e) => setUserEnv((prev) => ({ ...prev, keyboard: e.target.value }))}
-                  style={{
-                    padding: '0.25rem 0.4rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid var(--border-medium)',
-                    fontSize: '0.8rem',
-                  }}
+                  className="px-1.5 py-1 rounded-md border border-border-medium text-sm"
                 />
               </label>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.2rem' }}>
+          <div className="flex gap-2 mt-0.5">
             <button
               type="button"
               onClick={resetLogs}
-              style={{
-                padding: '0.25rem 0.75rem',
-                fontSize: '0.8rem',
-                borderRadius: '999px',
-                border: '1px solid var(--border-light)',
-                background: 'var(--bg-muted)',
-                cursor: 'pointer',
-              }}
+              className="px-3 py-1 text-sm rounded-full border border-border-light bg-bg-muted cursor-pointer hover:bg-bg-surface transition-colors"
             >
               Clear logs
             </button>
             <button
               type="button"
               onClick={handleCopyIssueTemplate}
-              style={{
-                padding: '0.25rem 0.75rem',
-                fontSize: '0.8rem',
-                borderRadius: '999px',
-                border: '1px solid var(--text-primary)',
-                background: 'var(--text-primary)',
-                color: 'var(--bg-surface)',
-                cursor: 'pointer',
-              }}
+              className="px-3 py-1 text-sm rounded-full border border-text-primary bg-text-primary text-bg-surface cursor-pointer hover:opacity-90 transition-opacity"
             >
               Copy GitHub issue template (with logs)
             </button>
           </div>
 
-          <div
-            style={{
-              border: '1px solid var(--border-light)',
-              borderRadius: '0.75rem',
-              padding: '0.7rem',
-              background: 'var(--bg-surface)',
-              marginTop: '0.3rem',
-            }}
-          >
+          <div className="border border-border-light rounded-xl p-2.5 bg-bg-surface mt-1">
             <div
               contentEditable
               suppressContentEditableWarning
@@ -344,16 +275,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
                   data: event.data,
                 });
               }}
-              style={{
-                minHeight: '140px',
-                border: '1px solid var(--border-medium)',
-                borderRadius: '0.5rem',
-                padding: '0.7rem',
-                fontSize: '0.9rem',
-                lineHeight: 1.5,
-                outline: 'none',
-                overflowY: 'auto',
-              }}
+              className="min-h-[140px] border border-border-medium rounded-lg p-2.5 text-sm leading-normal outline-none overflow-y-auto"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           </div>
@@ -362,89 +284,38 @@ export function CasePlayground(props: CasePlaygroundProps) {
 
       <section
         aria-label="Event log"
-        style={{
-          border: '1px solid var(--border-light)',
-          borderRadius: '0.75rem',
-          padding: '0.75rem',
-          background: 'var(--bg-muted)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.4rem',
-        }}
+        className="border border-border-light rounded-xl p-3 bg-bg-muted flex flex-col gap-1.5"
       >
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
+        <header className="flex justify-between items-center">
           <div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>Event log</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <div className="text-[0.95rem] font-semibold">Event log</div>
+            <div className="text-sm text-text-secondary">
               Use this log together with the case description when filing or updating an issue.
             </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <div className="text-xs text-text-muted">
             {logs.length} event{logs.length === 1 ? '' : 's'}
           </div>
         </header>
 
-        <div
-          style={{
-            flex: 1,
-            minHeight: '180px',
-            maxHeight: '420px',
-            overflowY: 'auto',
-            border: '1px solid var(--border-light)',
-            borderRadius: '0.5rem',
-            background: 'var(--bg-surface)',
-            padding: '0.5rem',
-            fontFamily:
-              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-            fontSize: '0.78rem',
-          }}
-        >
+        <div className="flex-1 min-h-[180px] max-h-[420px] overflow-y-auto border border-border-light rounded-lg bg-bg-surface p-2 font-mono text-[0.78rem]">
           {logs.length === 0 ? (
-            <div style={{ color: 'var(--text-faint)', padding: '0.25rem' }}>
+            <div className="text-text-faint p-1">
               Interact with the editable area to see events here.
             </div>
           ) : (
             logs.map((entry) => (
               <div
                 key={entry.id}
-                style={{
-                  padding: '0.25rem 0.35rem',
-                  borderRadius: '0.35rem',
-                  border: '1px solid var(--border-light)',
-                  marginBottom: '0.25rem',
-                  background: 'var(--bg-surface)',
-                }}
+                className="p-1 px-1.5 rounded border border-border-light mb-1 bg-bg-surface"
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.15rem',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 600,
-                      textTransform: 'lowercase',
-                    }}
-                  >
+                <div className="flex justify-between mb-0.5">
+                  <span className="font-semibold lowercase">
                     {entry.type}
                   </span>
-                  <span style={{ color: 'var(--text-faint)' }}>{entry.time}</span>
+                  <span className="text-text-faint">{entry.time}</span>
                 </div>
-                <pre
-                  style={{
-                    margin: 0,
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                  }}
-                >
+                <pre className="m-0 whitespace-pre-wrap break-words">
                   {JSON.stringify(entry.data, null, 2)}
                 </pre>
               </div>

@@ -81,47 +81,18 @@ export function BrowserDetectionBanner() {
   const filterUrl = `/cases?os=${encodeURIComponent(env.os)}&browser=${encodeURIComponent(env.browser)}`;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '1rem',
-        padding: '0.6rem 1rem',
-        background: 'linear-gradient(90deg, var(--accent-primary-light) 0%, var(--bg-surface) 100%)',
-        borderBottom: '1px solid var(--border-light)',
-        fontSize: '0.85rem',
-      }}
-    >
-      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '1.1rem' }}>🔍</span>
-        <span style={{ color: 'var(--text-secondary)' }}>
-          Detected: <strong style={{ color: 'var(--text-primary)' }}>{env.osName || 'Unknown OS'}</strong>
+    <div className="flex items-center justify-center gap-4 py-2.5 px-4 bg-gradient-to-r from-accent-primary-light to-bg-surface border-b border-border-light text-sm">
+      <span className="flex items-center gap-2">
+        <span className="text-lg">🔍</span>
+        <span className="text-text-secondary">
+          Detected: <strong className="text-text-primary">{env.osName || 'Unknown OS'}</strong>
           {' + '}
-          <strong style={{ color: 'var(--text-primary)' }}>{env.browserName || 'Unknown Browser'}</strong>
+          <strong className="text-text-primary">{env.browserName || 'Unknown Browser'}</strong>
         </span>
       </span>
       <a
         href={filterUrl}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-          padding: '0.35rem 0.75rem',
-          background: 'var(--accent-primary)',
-          color: 'white',
-          borderRadius: '6px',
-          fontSize: '0.8rem',
-          fontWeight: 500,
-          textDecoration: 'none',
-          transition: 'background 0.15s',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'var(--accent-primary-hover)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'var(--accent-primary)';
-        }}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-primary text-white rounded-md text-xs font-medium no-underline transition-colors hover:bg-accent-primary-hover"
       >
         View cases for your environment
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -131,24 +102,7 @@ export function BrowserDetectionBanner() {
       <button
         type="button"
         onClick={handleDismiss}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0.25rem',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          color: 'var(--text-muted)',
-          borderRadius: '4px',
-          transition: 'color 0.15s',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--text-primary)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--text-muted)';
-        }}
+        className="flex items-center justify-center p-1 bg-transparent border-none cursor-pointer text-text-muted rounded transition-colors hover:text-text-primary"
         aria-label="Dismiss"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

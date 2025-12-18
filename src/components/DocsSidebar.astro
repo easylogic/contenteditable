@@ -21,17 +21,17 @@ const docsPages = [
 >
   <div class="docs-sidebar-header">
     <div class="docs-sidebar-title">
-      <span style="font-weight: 600; font-size: 0.9rem;">Documentation</span>
+      <span class="font-semibold text-sm">Documentation</span>
       <a href="/docs" class="docs-index-link">Index →</a>
     </div>
   </div>
 
-  <nav aria-label="Documentation pages" style="padding: 0.5rem 0;">
-    <ul style="list-style: none; padding: 0; margin: 0;">
+  <nav aria-label="Documentation pages" class="py-2">
+    <ul class="list-none p-0 m-0">
       {docsPages.map((doc) => {
         const isActive = currentPath === doc.path;
         return (
-          <li style="margin: 0;">
+          <li class="m-0">
             <a
               href={doc.path}
               title={doc.title}

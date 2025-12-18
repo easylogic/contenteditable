@@ -84,54 +84,28 @@ const categoryLabels: Record<string, string> = {
   </head>
   <body>
     <SiteNav />
-    <main
-      style="
-        max-width: 1120px;
-        margin: 0 auto;
-        padding: 1.75rem 1.25rem 2.5rem;
-      "
-    >
-      <header style="margin-bottom: 1.5rem;">
-        <h1
-          style="
-            font-size: 2rem;
-            line-height: 1.1;
-            margin: 0 0 0.5rem 0;
-          "
-        >
+    <main class="max-w-[1120px] mx-auto py-7 px-5 pb-10">
+      <header class="mb-6">
+        <h1 class="text-[2rem] leading-[1.1] m-0 mb-2">
           Scenarios
         </h1>
-        <p style="margin: 0 0 0.75rem 0; font-size: 0.95rem; color: var(--text-secondary);">
+        <p class="m-0 mb-3 text-[0.95rem] text-text-secondary">
           A scenario groups multiple cases that describe the same phenomenon across different
           operating systems, devices, browsers, or keyboard setups.
         </p>
-        <div
-          style="
-            display: flex;
-            gap: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-          "
-        >
+        <div class="flex gap-4 text-sm text-text-muted">
           <span>
-            <strong style="color: var(--text-primary);">{scenarios.length}</strong> scenarios
+            <strong class="text-text-primary">{scenarios.length}</strong> scenarios
           </span>
           <span>
-            <strong style="color: var(--text-primary);">{allCases.length}</strong> total cases
+            <strong class="text-text-primary">{allCases.length}</strong> total cases
           </span>
         </div>
       </header>
 
-      <section
-        style="
-          border-radius: 0.75rem;
-          border: 1px solid var(--border-light);
-          background: var(--bg-surface);
-          padding: 0.9rem 1rem;
-        "
-      >
+      <section class="rounded-xl border border-border-light bg-bg-surface p-3.5 px-4">
         {scenarios.length === 0 ? (
-          <p style="font-size: 0.9rem; color: var(--text-muted);">
+          <p class="text-sm text-text-muted">
             No scenarios have been defined yet. Add cases with a scenarioId in the content
             directory.
           </p>
@@ -160,64 +134,21 @@ const categoryLabels: Record<string, string> = {
                 return aIdx - bIdx;
               })
               .map(([category, categoryScenarios]) => (
-                <div style="margin-bottom: 2rem;">
-                  <h2
-                    style="
-                      font-size: 1rem;
-                      font-weight: 600;
-                      margin: 0 0 0.75rem 0;
-                      color: var(--text-primary);
-                      text-transform: capitalize;
-                    "
-                  >
+                <div class="mb-8">
+                  <h2 class="text-base font-semibold m-0 mb-3 text-text-primary capitalize">
                     {categoryLabels[category] || category}
                   </h2>
-                  <div
-                    style="
-                      display: grid;
-                      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                      gap: 0.9rem;
-                      margin-bottom: 1.5rem;
-                    "
-                  >
+                  <div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5 mb-6">
                     {categoryScenarios.map((scenario) => {
                       const osSet = new Set(scenario.cases.map((c) => c.data.os));
                       const browserSet = new Set(scenario.cases.map((c) => c.data.browser));
                       return (
-                        <article
-                          style="
-                            border-radius: 0.75rem;
-                            border: 1px solid var(--border-light);
-                            padding: 0.8rem 0.9rem;
-                            font-size: 0.85rem;
-                          "
-                        >
-                          <h2
-                            style="
-                              font-size: 0.9rem;
-                              margin: 0 0 0.35rem 0;
-                            "
-                          >
+                        <article class="rounded-xl border border-border-light p-3.5 px-3.5 text-sm">
+                          <h2 class="text-sm m-0 mb-1.5">
                             {scenario.scenarioId}
                           </h2>
-                          <div
-                            style="
-                              display: flex;
-                              gap: 0.4rem;
-                              flex-wrap: wrap;
-                              margin: 0 0 0.4rem 0;
-                            "
-                          >
-                            <span
-                              style="
-                                font-size: 0.75rem;
-                                padding: 0.15rem 0.4rem;
-                                border-radius: 999px;
-                                border: 1px solid var(--border-light);
-                                background: var(--bg-muted);
-                                color: var(--text-secondary);
-                              "
-                            >
+                          <div class="flex gap-1.5 flex-wrap m-0 mb-1.5">
+                            <span class="text-xs px-1.5 py-0.5 rounded-full border border-border-light bg-bg-muted text-text-secondary">
                               {scenario.cases.length} variant{scenario.cases.length === 1 ? '' : 's'}
                             </span>
                             {Array.from(osSet)
@@ -225,14 +156,7 @@ const categoryLabels: Record<string, string> = {
                               .map((os) => (
                                 <span
                                   key={os}
-                                  style="
-                                    font-size: 0.75rem;
-                                    padding: 0.15rem 0.4rem;
-                                    border-radius: 999px;
-                                    border: 1px solid var(--border-light);
-                                    background: var(--bg-surface);
-                                    color: var(--text-muted);
-                                  "
+                                  class="text-xs px-1.5 py-0.5 rounded-full border border-border-light bg-bg-surface text-text-muted"
                                 >
                                   {os}
                                 </span>
@@ -242,30 +166,18 @@ const categoryLabels: Record<string, string> = {
                               .map((browser) => (
                                 <span
                                   key={browser}
-                                  style="
-                                    font-size: 0.75rem;
-                                    padding: 0.15rem 0.4rem;
-                                    border-radius: 999px;
-                                    border: 1px solid var(--border-light);
-                                    background: var(--bg-surface);
-                                    color: var(--text-muted);
-                                  "
+                                  class="text-xs px-1.5 py-0.5 rounded-full border border-border-light bg-bg-surface text-text-muted"
                                 >
                                   {browser}
                                 </span>
                               ))}
                           </div>
-                          <p style="margin: 0 0 0.4rem 0; color: var(--text-secondary); font-size: 0.8rem;">
+                          <p class="m-0 mb-1.5 text-text-secondary text-xs">
                             {scenario.cases[0]?.data.caseTitle}
                           </p>
                           <a
                             href={`/scenarios/${encodeURIComponent(scenario.scenarioId)}`}
-                            style="
-                              font-size: 0.8rem;
-                              color: var(--text-primary);
-                              text-decoration: none;
-                              font-weight: 500;
-                            "
+                            class="text-xs text-text-primary no-underline font-medium"
                           >
                             Open scenario →
                           </a>

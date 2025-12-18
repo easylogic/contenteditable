@@ -89,42 +89,14 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        paddingTop: '10vh',
-        background: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(4px)',
-      }}
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[10vh] bg-black/50 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '600px',
-          background: 'var(--bg-surface)',
-          borderRadius: '12px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          overflow: 'hidden',
-          border: '1px solid var(--border-light)',
-        }}
-      >
+      <div className="w-full max-w-[600px] bg-bg-surface rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] overflow-hidden border border-border-light">
         {/* Search Input */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '1rem',
-            borderBottom: '1px solid var(--border-light)',
-          }}
-        >
+        <div className="flex items-center gap-3 p-4 border-b border-border-light">
           <svg
             width="20"
             height="20"
@@ -144,24 +116,9 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search cases, scenarios, docs..."
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              fontSize: '1rem',
-              background: 'transparent',
-              color: 'var(--text-primary)',
-            }}
+            className="flex-1 border-none outline-none text-base bg-transparent text-text-primary"
           />
-          <kbd
-            style={{
-              padding: '0.25rem 0.5rem',
-              fontSize: '0.75rem',
-              background: 'var(--bg-muted)',
-              borderRadius: '4px',
-              color: 'var(--text-muted)',
-            }}
-          >
+          <kbd className="px-2 py-1 text-xs bg-bg-muted rounded text-text-muted">
             ESC
           </kbd>
         </div>
@@ -169,20 +126,10 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
         {/* Results */}
         <div
           ref={listRef}
-          style={{
-            maxHeight: '400px',
-            overflowY: 'auto',
-            padding: '0.5rem',
-          }}
+          className="max-h-[400px] overflow-y-auto p-2"
         >
           {filteredItems.length === 0 ? (
-            <div
-              style={{
-                padding: '2rem',
-                textAlign: 'center',
-                color: 'var(--text-muted)',
-              }}
-            >
+            <div className="p-8 text-center text-text-muted">
               No results found for "{query}"
             </div>
           ) : (
@@ -195,61 +142,23 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
                   key={item.id}
                   href={item.url}
                   data-index={index}
-                  style={{
-                    display: 'block',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    background: isSelected ? 'var(--accent-primary-light)' : 'transparent',
-                    marginBottom: '0.25rem',
-                    transition: 'background 0.1s',
-                  }}
+                  className={`block px-4 py-3 rounded-lg no-underline mb-1 transition-colors ${
+                    isSelected ? 'bg-accent-primary-light' : 'bg-transparent'
+                  }`}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      marginBottom: '0.25rem',
-                    }}
-                  >
+                  <div className="flex items-center gap-2 mb-1">
                     <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        padding: '0.15rem 0.4rem',
-                        borderRadius: '4px',
-                        background: typeInfo.color,
-                        color: 'white',
-                        textTransform: 'uppercase',
-                      }}
+                      className="text-[0.7rem] font-semibold px-1.5 py-0.5 rounded uppercase text-white"
+                      style={{ backgroundColor: typeInfo.color }}
                     >
                       {typeInfo.label}
                     </span>
-                    <span
-                      style={{
-                        fontSize: '0.9rem',
-                        fontWeight: 500,
-                        color: 'var(--text-primary)',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
+                    <span className="text-sm font-medium text-text-primary overflow-hidden text-ellipsis whitespace-nowrap">
                       {item.title}
                     </span>
                   </div>
-                  <p
-                    style={{
-                      fontSize: '0.8rem',
-                      color: 'var(--text-muted)',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+                  <p className="text-xs text-text-muted m-0 overflow-hidden text-ellipsis whitespace-nowrap">
                     {item.description}
                   </p>
                 </a>
@@ -259,25 +168,15 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0.75rem 1rem',
-            borderTop: '1px solid var(--border-light)',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border-light text-xs text-text-muted">
+          <div className="flex gap-4">
             <span>
-              <kbd style={{ padding: '0.15rem 0.3rem', background: 'var(--bg-muted)', borderRadius: '3px' }}>↑</kbd>
-              <kbd style={{ padding: '0.15rem 0.3rem', background: 'var(--bg-muted)', borderRadius: '3px', marginLeft: '0.25rem' }}>↓</kbd>
+              <kbd className="px-1 py-0.5 bg-bg-muted rounded">↑</kbd>
+              <kbd className="px-1 py-0.5 bg-bg-muted rounded ml-1">↓</kbd>
               {' '}to navigate
             </span>
             <span>
-              <kbd style={{ padding: '0.15rem 0.3rem', background: 'var(--bg-muted)', borderRadius: '3px' }}>↵</kbd>
+              <kbd className="px-1 py-0.5 bg-bg-muted rounded">↵</kbd>
               {' '}to select
             </span>
           </div>
@@ -305,25 +204,7 @@ export function SearchButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.4rem 0.75rem',
-        background: 'var(--bg-muted)',
-        border: '1px solid var(--border-light)',
-        borderRadius: '8px',
-        cursor: 'pointer',
-        fontSize: '0.85rem',
-        color: 'var(--text-muted)',
-        transition: 'all 0.15s',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--border-medium)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--border-light)';
-      }}
+      className="flex items-center gap-2 px-3 py-1.5 bg-bg-muted border border-border-light rounded-lg cursor-pointer text-sm text-text-muted transition-all hover:border-border-medium"
     >
       <svg
         width="16"
@@ -339,15 +220,7 @@ export function SearchButton({ onClick }: { onClick: () => void }) {
         <path d="m21 21-4.35-4.35" />
       </svg>
       <span>Search...</span>
-      <kbd
-        style={{
-          padding: '0.15rem 0.4rem',
-          fontSize: '0.7rem',
-          background: 'var(--bg-surface)',
-          borderRadius: '4px',
-          border: '1px solid var(--border-light)',
-        }}
-      >
+      <kbd className="px-1.5 py-0.5 text-[0.7rem] bg-bg-surface rounded border border-border-light">
         ⌘K
       </kbd>
     </button>

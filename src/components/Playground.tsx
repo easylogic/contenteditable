@@ -71,6 +71,15 @@ type RangeDrawInfo = {
   heightScale?: number;
 };
 
+type EditorPreset = {
+  id: string;
+  labels: {
+    en: string;
+    ko: string;
+  };
+  html: string;
+};
+
 // ============================================================
 // RangeVisualizer Class (uses external overlay container)
 // ============================================================
@@ -206,6 +215,86 @@ class RangeVisualizer {
 }
 
 // ============================================================
+// Editor Presets
+// ============================================================
+
+const EDITOR_PRESETS: EditorPreset[] = [
+  {
+    id: 'plain-cjk-paragraph',
+    labels: {
+      en: 'Plain paragraph (CJK + ASCII)',
+      ko: '기본 문단 (CJK + ASCII)',
+    },
+    html:
+      '<p>기본 텍스트 샘플입니다. contenteditable 테스트용 plain paragraph 123.</p>' +
+      '<p>한글, English, 日本語, 中文이 섞여 있습니다.</p>',
+  },
+  {
+    id: 'inline-link-boundary-cjk',
+    labels: {
+      en: 'Inline link boundary (CJK)',
+      ko: '인라인 링크 경계 (CJK)',
+    },
+    html:
+      '<p>링크 앞뒤 경계를 테스트합니다: ' +
+      '<a id="link-nav" href="https://www.naver.com" class="zjs-inline-hyperlink">www.naver.com</a> 바로 뒤에 글자를 입력해 보세요.</p>' +
+      '<p>커서가 <b>링크 끝</b>에서 어떻게 이동하는지, 조합 입력(한글 IME)과 함께 관찰합니다.</p>',
+  },
+  {
+    id: 'nested-inline-wrappers',
+    labels: {
+      en: 'Nested inline wrappers (bold/italic/span)',
+      ko: '중첩 인라인 래퍼 (굵게/이탤릭/span)',
+    },
+    html:
+      '<p>중첩 인라인 요소 테스트: ' +
+      '<b id="b1" class="emphasis">굵은<b id="b2" class="inner">안쪽 <i id="i1">이탤릭</i></b></b> 텍스트와 ' +
+      '<span id="s1" class="colored" data-color="blue">컬러 span 텍스트</span>가 섞여 있습니다.</p>' +
+      '<p>문장 끝 | 경계에서 Backspace / IME 조합을 시도해 보세요.</p>',
+  },
+  {
+    id: 'block-list-mix-cjk',
+    labels: {
+      en: 'Paragraph + list mix (CJK)',
+      ko: '문단 + 목록 혼합 (CJK)',
+    },
+    html:
+      '<p>아래 목록은 Enter / Backspace 시 DOM 구조 변화를 보기 좋게 구성한 샘플입니다.</p>' +
+      '<ul id="list-a" class="list unordered">' +
+      '<li id="li-a1" class="list-item">목록 <b>항목1</b> — inline bold 포함</li>' +
+      '<li id="li-a2" class="list-item">목록 <i>항목2</i> — inline italic 포함</li>' +
+      '<li id="li-a3" class="list-item">세 번째 항목: 😃 emoji + CJK</li>' +
+      '</ul>' +
+      '<p>목록 앞/뒤에서 Enter, Shift+Enter, Backspace를 시도해 보세요.</p>',
+  },
+  {
+    id: 'whitespace-special-chars',
+    labels: {
+      en: 'Whitespace & special chars (ZWNBSP, NBSP)',
+      ko: '공백 & 특수 문자 (ZWNBSP, NBSP)',
+    },
+    html:
+      '<p>아래 줄에는 눈에 보이지 않는 문자들이 포함되어 있습니다.</p>' +
+      '<p id="ws-1">앞쪽\u00A0&nbsp;두 개의 NBSP 와 중간\u00A0공백, 끝에\uFEFFZWNBSP 포함</p>' +
+      '<p>커서를 이동하면서 selection / beforeinput / input 로그에 어떻게 찍히는지 확인합니다.</p>',
+  },
+  {
+    id: 'rich-inline-list-previous-default',
+    labels: {
+      en: 'Rich inline + nested + list (previous default)',
+      ko: '복합 인라인 + 중첩 + 목록 (이전 기본 샘플)',
+    },
+    html:
+      '<p id="para-1" class="paragraph intro">일반 텍스트 <a id="link-1" href="https://example.com" class="external-link" data-type="url">링크텍스트</a> 뒤에 이어지는 글</p>' +
+      '<p id="para-2" class="paragraph content"><b id="bold-1" class="emphasis strong">굵은글씨</b>와 <i id="italic-1" class="emphasis italic">이탤릭</i> 그리고 <span id="span-blue" class="colored" style="color:blue" data-color="blue">파란색</span> 텍스트</p>' +
+      '<p id="para-3" class="paragraph nested">중첩: <b id="bold-nested" class="emphasis"><i id="italic-nested" class="inner">굵은이탤릭</i></b> | <a id="link-2" href="#section" class="internal-link"><b id="bold-link" class="link-text">굵은링크</b></a></p>' +
+      '<p id="para-4" class="paragraph boundary-test">경계: <code id="code-1" class="inline-code" data-lang="text">코드블록</code>끝 | 시작<mark id="mark-1" class="highlight" data-highlight="yellow">하이라이트</mark>끝</p>' +
+      '<p id="para-5" class="paragraph complex">복잡한 구조: <span id="outer" class="wrapper level-1"><span id="middle" class="wrapper level-2"><span id="inner" class="wrapper level-3" data-depth="3">깊은 중첩</span></span></span> 후 텍스트</p>' +
+      '<ul id="list-1" class="list unordered"><li id="item-1" class="list-item">목록 <b class="item-bold">항목1</b></li><li id="item-2" class="list-item">목록 <i class="item-italic">항목2</i></li></ul>',
+  },
+];
+
+// ============================================================
 // Utility Functions
 // ============================================================
 
@@ -317,19 +406,19 @@ function normalizeDebugText(value: string | null | undefined): string {
     .replace(/ /g, '<space>');         // Regular Space (last to avoid double-replacement)
 }
 
-// Special character token styles
-const specialCharStyles: Record<string, React.CSSProperties> = {
-  zwnbsp: { background: '#fef3c7', color: '#92400e', padding: '0 2px', borderRadius: '2px', fontSize: '0.55rem' },
-  nbsp: { background: '#dbeafe', color: '#1e40af', padding: '0 2px', borderRadius: '2px', fontSize: '0.55rem' },
-  space: { background: '#e5e7eb', color: '#374151', padding: '0 2px', borderRadius: '2px', fontSize: '0.55rem' },
-  lf: { background: '#dcfce7', color: '#166534', padding: '0 2px', borderRadius: '2px', fontSize: '0.55rem' },
-  cr: { background: '#fce7f3', color: '#9d174d', padding: '0 2px', borderRadius: '2px', fontSize: '0.55rem' },
-  tab: { background: '#f3e8ff', color: '#6b21a8', padding: '0 2px', borderRadius: '2px', fontSize: '0.55rem' },
+// Special character token class names
+const specialCharClasses: Record<string, string> = {
+  zwnbsp: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-1 rounded text-[0.65rem]',
+  nbsp: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-1 rounded text-[0.65rem]',
+  space: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-1 rounded text-[0.65rem]',
+  lf: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-1 rounded text-[0.65rem]',
+  cr: 'bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 px-1 rounded text-[0.65rem]',
+  tab: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-1 rounded text-[0.65rem]',
 };
 
 // Render text with special character highlighting
 function DebugText({ text }: { text: string | null | undefined }) {
-  if (!text) return <span style={{ color: 'var(--text-muted)' }}>-</span>;
+  if (!text) return <span className="text-text-muted">-</span>;
   
   const normalized = normalizeDebugText(text);
   const parts: React.ReactNode[] = [];
@@ -346,9 +435,9 @@ function DebugText({ text }: { text: string | null | undefined }) {
       parts.push(<span key={key++}>{normalized.slice(lastIndex, match.index)}</span>);
     }
     // Add the styled token
-    const tokenType = match[1] as keyof typeof specialCharStyles;
+    const tokenType = match[1] as keyof typeof specialCharClasses;
     parts.push(
-      <span key={key++} style={specialCharStyles[tokenType]}>
+      <span key={key++} className={specialCharClasses[tokenType]}>
         {`<${tokenType}>`}
       </span>
     );
@@ -373,7 +462,7 @@ function TextWithCursor({
   startOffset: number; 
   endOffset: number;
 }) {
-  if (!text) return <span style={{ color: 'var(--text-muted)' }}>-</span>;
+  if (!text) return <span className="text-text-muted">-</span>;
   
   const isCollapsed = startOffset === endOffset;
   const start = Math.min(startOffset, text.length);
@@ -383,32 +472,17 @@ function TextWithCursor({
   const selectedText = text.slice(start, end);
   const afterText = text.slice(end);
   
-  const cursorStyle: React.CSSProperties = {
-    color: '#ef4444',
-    fontWeight: 700,
-    fontSize: '0.7rem',
-  };
-  
-  const selectionStyle: React.CSSProperties = {
-    background: '#bfdbfe',
-    color: '#1e40af',
-    borderRadius: '2px',
-    padding: '0 1px',
-  };
-  
   return (
-    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem' }}>
+    <span className="font-mono text-sm leading-relaxed">
       "<DebugText text={beforeText} />
       {isCollapsed ? (
-        <span style={cursorStyle}>|</span>
+        <span className="text-red-500 font-bold text-base">|</span>
       ) : (
-        <span style={selectionStyle}>[<DebugText text={selectedText} />]</span>
+        <span className="bg-blue-200 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 rounded px-1 py-0.5 font-medium">[<DebugText text={selectedText} />]</span>
       )}
       <DebugText text={afterText} />"
     </span>
   );
-  
-  return <>{parts}</>;
 }
 
 // Simple diff algorithm - finds common prefix and suffix, marks the difference
@@ -448,16 +522,16 @@ function highlightHtml(html: string): React.ReactNode {
   while ((match = regex.exec(html)) !== null) {
     if (match[5]) {
       // Text content
-      parts.push(<span key={key++} style={{ color: 'var(--text-primary)' }}>{match[5]}</span>);
+      parts.push(<span key={key++} className="text-text-primary">{match[5]}</span>);
     } else {
       // Tag
       const [, open, tagName, attrs, close] = match;
       parts.push(
         <span key={key++}>
-          <span style={{ color: '#6b7280' }}>{open}</span>
-          <span style={{ color: '#ef4444' }}>{tagName}</span>
-          {attrs && <span style={{ color: '#3b82f6' }}>{attrs}</span>}
-          <span style={{ color: '#6b7280' }}>{close}</span>
+          <span className="text-gray-500">{open}</span>
+          <span className="text-red-500">{tagName}</span>
+          {attrs && <span className="text-blue-500">{attrs}</span>}
+          <span className="text-gray-500">{close}</span>
         </span>
       );
     }
@@ -473,9 +547,9 @@ function highlightHtmlWithDiff(html: string, diffParts: string[], diffType: 'rem
   const parts: React.ReactNode[] = [];
   let key = 0;
   
-  const diffStyle = diffType === 'removed' 
-    ? { background: '#fee2e2', color: '#991b1b', textDecoration: 'line-through' }
-    : { background: '#dcfce7', color: '#166534' };
+  const diffClass = diffType === 'removed' 
+    ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 line-through'
+    : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
   
   // Simple regex-based tokenizer
   const regex = /(<\/?)([\w-]+)([^>]*?)(\/?>)|([^<]+)/g;
@@ -501,26 +575,26 @@ function highlightHtmlWithDiff(html: string, diffParts: string[], diffType: 'rem
       for (const dp of diffParts) {
         if (dp && textContent.includes(dp)) {
           const idx = textContent.indexOf(dp);
-          parts.push(<span key={key++} style={{ color: 'var(--text-primary)' }}>{textContent.slice(0, idx)}</span>);
-          parts.push(<span key={key++} style={diffStyle}>{dp}</span>);
-          parts.push(<span key={key++} style={{ color: 'var(--text-primary)' }}>{textContent.slice(idx + dp.length)}</span>);
+          parts.push(<span key={key++} className="text-text-primary">{textContent.slice(0, idx)}</span>);
+          parts.push(<span key={key++} className={diffClass}>{dp}</span>);
+          parts.push(<span key={key++} className="text-text-primary">{textContent.slice(idx + dp.length)}</span>);
           hasRenderedDiff = true;
           break;
         }
       }
       if (!hasRenderedDiff) {
-        parts.push(<span key={key++} style={{ color: 'var(--text-primary)' }}>{textContent}</span>);
+        parts.push(<span key={key++} className="text-text-primary">{textContent}</span>);
       }
     } else {
       // Tag
       const [, open, tagName, attrs, close] = match;
       const tagIsDiff = isDiffPart;
       parts.push(
-        <span key={key++} style={tagIsDiff ? diffStyle : undefined}>
-          <span style={{ color: tagIsDiff ? undefined : '#6b7280' }}>{open}</span>
-          <span style={{ color: tagIsDiff ? undefined : '#ef4444' }}>{tagName}</span>
-          {attrs && <span style={{ color: tagIsDiff ? undefined : '#3b82f6' }}>{attrs}</span>}
-          <span style={{ color: tagIsDiff ? undefined : '#6b7280' }}>{close}</span>
+        <span key={key++} className={tagIsDiff ? diffClass : undefined}>
+          <span className={tagIsDiff ? undefined : 'text-gray-500'}>{open}</span>
+          <span className={tagIsDiff ? undefined : 'text-red-500'}>{tagName}</span>
+          {attrs && <span className={tagIsDiff ? undefined : 'text-blue-500'}>{attrs}</span>}
+          <span className={tagIsDiff ? undefined : 'text-gray-500'}>{close}</span>
         </span>
       );
     }
@@ -536,7 +610,7 @@ function DomDiffView({ before, after, type }: { before: string; after: string; t
   const html = type === 'before' ? before : after;
   
   if (!html) {
-    return <span style={{ color: 'var(--text-muted)' }}>{type === 'before' ? '(입력 전 DOM)' : '(입력 후 DOM)'}</span>;
+    return <span className="text-text-muted">{type === 'before' ? '(입력 전 DOM)' : '(입력 후 DOM)'}</span>;
   }
   
   // If no difference or same
@@ -552,16 +626,16 @@ function DomDiffView({ before, after, type }: { before: string; after: string; t
     parts.push(<span key={key++}>{highlightHtml(diff.commonPrefix)}</span>);
   }
   
-  // Diff part
+  // Diff part - make it more visible
   if (type === 'before' && diff.removed) {
     parts.push(
-      <span key={key++} style={{ background: '#fee2e2', color: '#991b1b', textDecoration: 'line-through', borderRadius: '2px', padding: '0 2px' }}>
+      <span key={key++} className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 line-through rounded px-1.5 py-0.5 font-semibold inline-block mx-0.5 border border-red-300 dark:border-red-700">
         {diff.removed}
       </span>
     );
   } else if (type === 'after' && diff.added) {
     parts.push(
-      <span key={key++} style={{ background: '#dcfce7', color: '#166534', borderRadius: '2px', padding: '0 2px' }}>
+      <span key={key++} className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 rounded px-1.5 py-0.5 font-semibold inline-block mx-0.5 border border-green-300 dark:border-green-700">
         {diff.added}
       </span>
     );
@@ -591,24 +665,58 @@ export function Playground() {
   const [domBefore, setDomBefore] = useState<string>('');
   const [domAfter, setDomAfter] = useState<string>('');
   const environment = useMemo(() => detectEnvironment(), []);
+  const [uiLocale, setUiLocale] = useState<'en' | 'ko'>('en');
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('rich-inline-list-previous-default');
+  const selectedPreset = useMemo(
+    () => EDITOR_PRESETS.find((p) => p.id === selectedPresetId) ?? EDITOR_PRESETS[0],
+    [selectedPresetId],
+  );
 
-  const sampleHtml = useMemo(() => `<p id="para-1" class="paragraph intro">일반 텍스트 <a id="link-1" href="https://example.com" class="external-link" data-type="url">링크텍스트</a> 뒤에 이어지는 글</p>
-<p id="para-2" class="paragraph content"><b id="bold-1" class="emphasis strong">굵은글씨</b>와 <i id="italic-1" class="emphasis italic">이탤릭</i> 그리고 <span id="span-blue" class="colored" style="color:blue" data-color="blue">파란색</span> 텍스트</p>
-<p id="para-3" class="paragraph nested">중첩: <b id="bold-nested" class="emphasis"><i id="italic-nested" class="inner">굵은이탤릭</i></b> | <a id="link-2" href="#section" class="internal-link"><b id="bold-link" class="link-text">굵은링크</b></a></p>
-<p id="para-4" class="paragraph boundary-test">경계: <code id="code-1" class="inline-code" data-lang="text">코드블록</code>끝 | 시작<mark id="mark-1" class="highlight" data-highlight="yellow">하이라이트</mark>끝</p>
-<p id="para-5" class="paragraph complex">복잡한 구조: <span id="outer" class="wrapper level-1"><span id="middle" class="wrapper level-2"><span id="inner" class="wrapper level-3" data-depth="3">깊은 중첩</span></span></span> 후 텍스트</p>
-<ul id="list-1" class="list unordered"><li id="item-1" class="list-item">목록 <b class="item-bold">항목1</b></li><li id="item-2" class="list-item">목록 <i class="item-italic">항목2</i></li></ul>`, []);
-
-  // Initialize editor and visualizer
+  // Initialize visualizer once
   useEffect(() => {
     if (editorRef.current && overlayRef.current) {
-      editorRef.current.innerHTML = sampleHtml;
       visualizerRef.current = new RangeVisualizer(editorRef.current, overlayRef.current);
     }
     return () => {
       visualizerRef.current?.destroy();
     };
   }, []);
+
+  // Detect UI locale (for preset labels)
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && navigator.language) {
+      if (navigator.language.toLowerCase().startsWith('ko')) {
+        setUiLocale('ko');
+      } else {
+        setUiLocale('en');
+      }
+    }
+  }, []);
+
+  const applyPreset = useCallback(
+    (preset: EditorPreset) => {
+      logsRef.current = [];
+      rangesRef.current = {};
+      setPhases([]);
+      setAnomalies([]);
+      setDomBefore('');
+      setDomAfter('');
+      startTimeRef.current = Date.now();
+      visualizerRef.current?.clear();
+      if (editorRef.current) {
+        editorRef.current.innerHTML = preset.html;
+        editorRef.current.scrollTop = 0;
+      }
+    },
+    [],
+  );
+
+  // Apply preset when selection changes (including initial mount)
+  useEffect(() => {
+    if (selectedPreset) {
+      applyPreset(selectedPreset);
+    }
+  }, [selectedPreset, applyPreset]);
 
   const drawVisualization = useCallback(() => {
     if (!visualizerRef.current || !editorRef.current || !overlayRef.current) return;
@@ -964,16 +1072,10 @@ export function Playground() {
   }, [pushLog, createLog]);
 
   const resetAll = useCallback(() => {
-    logsRef.current = [];
-    rangesRef.current = {};
-    setPhases([]);
-    setAnomalies([]);
-    setDomBefore('');
-    setDomAfter('');
-    startTimeRef.current = Date.now();
-    visualizerRef.current?.clear();
-    if (editorRef.current) editorRef.current.innerHTML = sampleHtml;
-  }, [sampleHtml]);
+    if (selectedPreset) {
+      applyPreset(selectedPreset);
+    }
+  }, [selectedPreset, applyPreset]);
 
   const copyReport = useCallback(() => {
     const lines: string[] = [
@@ -1013,94 +1115,103 @@ export function Playground() {
   }, [environment, anomalies, phases, domBefore, domAfter]);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', flex: 1, minHeight: 0 }}>
+    <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
       {/* Left: Editor */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', minHeight: 0 }}>
+      <div className="flex flex-col gap-2 min-h-0">
         {/* Environment */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.75rem',
-          background: 'var(--accent-primary-light)', border: '1px solid var(--accent-primary)',
-          borderRadius: '6px', fontSize: '0.7rem',
-        }}>
-          <span style={{ fontWeight: 600 }}>🔍</span>
+        <div className="flex items-center gap-2 px-3 py-2 bg-accent-primary-light border border-accent-primary rounded-md text-sm">
+          <span className="font-semibold">🔍</span>
           <span>{environment.os} {environment.osVersion}</span>
-          <span style={{ color: 'var(--text-muted)' }}>•</span>
+          <span className="text-text-muted">•</span>
           <span>{environment.browser} {environment.browserVersion}</span>
-          <span style={{ color: 'var(--text-muted)' }}>•</span>
+          <span className="text-text-muted">•</span>
           <span>{environment.device}</span>
         </div>
 
-        {/* Legend */}
-        <div style={{ display: 'flex', gap: '0.75rem', padding: '0.3rem 0.75rem', background: 'var(--bg-muted)', borderRadius: '6px', fontSize: '0.6rem', color: 'var(--text-secondary)' }}>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(59,130,246,0.4)', border: '2px solid #3b82f6', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }}></span>SEL</span>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(139,92,246,0.4)', border: '2px solid #8b5cf6', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }}></span>COMP</span>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(249,115,22,0.4)', border: '2px solid #f97316', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }}></span>BI</span>
-          <span><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(34,197,94,0.4)', border: '2px solid #22c55e', borderRadius: 2, marginRight: 3, verticalAlign: 'middle' }}></span>IN</span>
+        {/* Preset selector + Actions */}
+        <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-bg-muted rounded-md text-xs text-text-secondary flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[0.7rem] text-text-muted">
+              {uiLocale === 'ko' ? '샘플 HTML' : 'Sample HTML'}
+            </span>
+            <select
+              value={selectedPresetId}
+              onChange={(e) => setSelectedPresetId(e.target.value)}
+              className="h-7 px-2 rounded-md border border-border-light bg-bg-surface text-[0.75rem] text-text-primary cursor-pointer"
+            >
+              {EDITOR_PRESETS.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.labels[uiLocale] ?? preset.labels.en}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex gap-1.5">
+            <button 
+              type="button" 
+              onClick={resetAll}
+              className="px-2.5 py-1.5 text-xs rounded-md border border-border-light bg-bg-surface text-text-primary cursor-pointer hover:bg-bg-muted transition-colors"
+            >
+              🗑️ 초기화
+            </button>
+            <button 
+              type="button" 
+              onClick={copyReport}
+              className="px-2.5 py-1.5 text-xs rounded-md border-none bg-accent-primary text-white cursor-pointer hover:bg-accent-primary-hover transition-colors"
+            >
+              📋 리포트 복사
+            </button>
+          </div>
         </div>
 
         {/* Editor & DOM Diff */}
-        <div style={{ flex: 1, display: 'grid', gridTemplateRows: '1fr 1fr', gap: '0.5rem', minHeight: 0 }}>
+        <div className="flex-1 grid grid-rows-[0.9fr_1.1fr] gap-2 min-h-0">
           {/* Editor with overlay wrapper */}
-          <div ref={overlayRef} style={{ position: 'relative', minHeight: 0 }}>
+          <div ref={overlayRef} className="relative min-h-0">
             <div
               ref={editorRef}
               contentEditable
               suppressContentEditableWarning
-              style={{ height: '100%', padding: '0.75rem', fontSize: '1rem', lineHeight: 1.8, outline: 'none', background: 'var(--bg-surface)', border: '2px solid var(--accent-primary)', borderRadius: '8px', overflowY: 'auto', boxSizing: 'border-box' }}
+              className="h-full p-3 text-base leading-[1.8] outline-none focus:outline-none focus-visible:outline-none bg-bg-surface border-2 border-accent-primary rounded-lg overflow-y-auto box-border"
             />
           </div>
 
-          {/* DOM Diff with syntax highlighting */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', minHeight: 0 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-              <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
-                Before {domBefore && domAfter && domBefore !== domAfter && <span style={{ color: '#dc2626', fontSize: '0.55rem' }}>(-)</span>}
+          {/* DOM Diff with syntax highlighting - larger size */}
+          <div className="grid grid-cols-2 gap-2.5 min-h-0">
+            <div className="flex flex-col min-h-0">
+              <div className="text-sm font-semibold text-text-muted mb-1.5">
+                Before {domBefore && domAfter && domBefore !== domAfter && <span className="text-red-600 text-xs">(-)</span>}
               </div>
-              <div style={{ flex: 1, fontSize: '0.55rem', padding: '0.4rem', background: 'var(--bg-muted)', borderRadius: '4px', overflow: 'auto', fontFamily: 'var(--font-mono)', lineHeight: 1.4, border: '1px solid var(--border-light)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              <div className="flex-1 text-sm p-2.5 bg-bg-muted rounded overflow-auto font-mono leading-relaxed border border-border-light whitespace-pre-wrap break-all max-h-full">
                 <DomDiffView before={domBefore} after={domAfter} type="before" />
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-              <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
-                After {domBefore && domAfter && domBefore !== domAfter && <span style={{ color: '#16a34a', fontSize: '0.55rem' }}>(+)</span>}
+            <div className="flex flex-col min-h-0">
+              <div className="text-sm font-semibold text-text-muted mb-1.5">
+                After {domBefore && domAfter && domBefore !== domAfter && <span className="text-green-600 text-xs">(+)</span>}
               </div>
-              <div style={{ flex: 1, fontSize: '0.55rem', padding: '0.4rem', background: 'var(--bg-muted)', borderRadius: '4px', overflow: 'auto', fontFamily: 'var(--font-mono)', lineHeight: 1.4, border: '1px solid var(--border-light)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              <div className="flex-1 text-sm p-2.5 bg-bg-muted rounded overflow-auto font-mono leading-relaxed border border-border-light whitespace-pre-wrap break-all max-h-full">
                 <DomDiffView before={domBefore} after={domAfter} type="after" />
               </div>
             </div>
           </div>
         </div>
-
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button type="button" onClick={resetAll} style={{ padding: '0.35rem 0.65rem', fontSize: '0.7rem', borderRadius: '6px', border: '1px solid var(--border-light)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer' }}>
-            🗑️ 초기화
-          </button>
-          <button type="button" onClick={copyReport} style={{ padding: '0.35rem 0.65rem', fontSize: '0.7rem', borderRadius: '6px', border: 'none', background: 'var(--accent-primary)', color: 'white', cursor: 'pointer' }}>
-            📋 리포트 복사
-          </button>
-        </div>
       </div>
 
       {/* Right: Event Phases */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', overflow: 'auto', minHeight: 0 }}>
+      <div className="flex flex-col gap-1.5 overflow-y-auto overflow-x-hidden min-h-0 flex-1">
         {/* Anomalies */}
         {anomalies.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <div className="flex flex-col gap-1">
             {anomalies.map((a, i) => (
-              <div key={i} style={{ 
-                padding: '0.3rem 0.5rem', 
-                background: '#fef2f2', 
-                border: '1px solid #ef4444', 
-                borderRadius: '4px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontWeight: 600, color: '#dc2626', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+              <div key={i} className="p-1.5 bg-red-50 dark:bg-red-950/20 border border-red-500 dark:border-red-600 rounded">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-red-600 dark:text-red-400 text-sm whitespace-nowrap">
                     ⚠️ {a.type}
                   </span>
-                  <span style={{ fontSize: '0.6rem', color: '#991b1b' }}>{a.description}</span>
+                  <span className="text-xs text-red-800 dark:text-red-300">{a.description}</span>
                 </div>
-                <code style={{ fontSize: '0.55rem', color: '#7f1d1d', display: 'block', marginTop: '0.2rem' }}>
+                <code className="text-xs text-red-900 dark:text-red-200 block mt-1.5">
                   {a.detail}
                 </code>
               </div>
@@ -1110,7 +1221,7 @@ export function Playground() {
 
         {/* Phase Blocks */}
         {phases.length === 0 ? (
-          <div style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--bg-muted)', borderRadius: '8px', fontSize: '0.8rem' }}>
+          <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
             에디터에 입력하면 이벤트가 여기에 표시됩니다.
           </div>
         ) : (
@@ -1125,54 +1236,124 @@ export function Playground() {
 // Phase Block Component
 // ============================================================
 
+function buildSelectionSegmentsFromLog(log: EventLog): { path: string; start: number; end: number; text: string }[] {
+  const segments: { path: string; start: number; end: number; text: string }[] = [];
+  if (!log.range) return segments;
+  const range = log.range;
+  if (range.collapsed) return segments;
+
+  try {
+    const root = range.commonAncestorContainer || range.startContainer;
+    const doc = (root as Node).ownerDocument || document;
+    const walker = doc.createTreeWalker(
+      root,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node: Node) {
+          try {
+            // Some browsers may throw for intersectsNode on detached nodes
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return (range as any).intersectsNode && (range as any).intersectsNode(node)
+              ? NodeFilter.FILTER_ACCEPT
+              : NodeFilter.FILTER_REJECT;
+          } catch {
+            return NodeFilter.FILTER_REJECT;
+          }
+        },
+      } as unknown as NodeFilter,
+    );
+
+    let textNode: Node | null = walker.currentNode;
+    if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+      textNode = walker.nextNode();
+    }
+
+    while (textNode) {
+      const text = (textNode as Text).data ?? '';
+      let segStart = 0;
+      let segEnd = text.length;
+
+      if (textNode === range.startContainer) {
+        segStart = range.startOffset;
+      }
+      if (textNode === range.endContainer) {
+        segEnd = range.endOffset;
+      }
+
+      if (segStart < 0) segStart = 0;
+      if (segEnd > text.length) segEnd = text.length;
+
+      if (segStart < segEnd) {
+        const selectedText = text.slice(segStart, segEnd);
+        const parent = textNode.parentNode as Element | null;
+        const parentName = parent ? parent.nodeName : '#text';
+        const parentId = parent instanceof Element ? parent.id || undefined : undefined;
+        const parentClass = parent instanceof Element ? (parent.className as string) || undefined : undefined;
+        const path = formatNodePath(parentName, parentId, parentClass);
+
+        segments.push({
+          path,
+          start: segStart,
+          end: segEnd,
+          text: selectedText,
+        });
+      }
+
+      textNode = walker.nextNode();
+    }
+  } catch {
+    // ignore errors in segment construction
+  }
+
+  return segments;
+}
+
 function PhaseBlockView({ phase }: { phase: PhaseBlock }) {
   const log = phase.log;
   if (!log) return null;
 
   const isError = phase.highlight === 'error';
   const isWarning = phase.highlight === 'warning';
-  const borderColor = isError ? '#ef4444' : isWarning ? '#f59e0b' : 'var(--border-light)';
-  const headerBg = isError ? '#fee2e2' : isWarning ? '#fef3c7' : 'var(--bg-muted)';
-  const bodyBg = isError ? '#fef2f2' : isWarning ? '#fffbeb' : 'var(--bg-surface)';
+  const borderClass = isError ? 'border-red-500' : isWarning ? 'border-amber-500' : 'border-border-light';
+  const headerBgClass = isError ? 'bg-red-100 dark:bg-red-950/30' : isWarning ? 'bg-amber-100 dark:bg-amber-950/30' : 'bg-bg-muted';
+  const bodyBgClass = isError ? 'bg-red-50 dark:bg-red-950/20' : isWarning ? 'bg-amber-50 dark:bg-amber-950/20' : 'bg-bg-surface';
 
-  const typeColor: Record<string, string> = {
-    selectionchange: '#3b82f6',
-    compositionstart: '#8b5cf6',
-    compositionupdate: '#8b5cf6',
-    compositionend: '#8b5cf6',
-    beforeinput: '#f97316',
-    input: '#22c55e',
+  const typeColorClass: Record<string, string> = {
+    selectionchange: 'text-blue-500',
+    compositionstart: 'text-purple-500',
+    compositionupdate: 'text-purple-500',
+    compositionend: 'text-purple-500',
+    beforeinput: 'text-orange-500',
+    input: 'text-green-500',
   };
 
   const formatSibling = (s: SiblingInfo | null | undefined, label: string) => {
     if (!s) return null;
     const path = formatNodePath(s.nodeName, s.id, s.className);
     const text = s.textPreview ? ` "${s.textPreview}"` : '';
-    return <Line label={label} value={`${path}${text}`} color="var(--text-muted)" />;
+    return <Line label={label} value={`${path}${text}`} />;
   };
 
+  const selectionSegments =
+    log.type === 'selectionchange'
+      ? buildSelectionSegmentsFromLog(log)
+      : [];
+
   return (
-    <div style={{ border: `1.5px solid ${borderColor}`, borderRadius: '6px', overflow: 'hidden', background: bodyBg }}>
-      <div style={{
-        padding: '0.3rem 0.5rem',
-        background: headerBg,
-        borderBottom: `1px solid ${borderColor}`,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <span style={{ fontWeight: 700, fontSize: '0.65rem', color: typeColor[log.type] || 'var(--text-primary)' }}>
+    <div className={`border-[1.5px] ${borderClass} rounded-md overflow-hidden ${bodyBgClass}`}>
+      <div className={`px-2 py-1.5 ${headerBgClass} border-b ${borderClass} flex justify-between items-center`}>
+        <span className={`font-bold text-sm ${typeColorClass[log.type] || 'text-text-primary'}`}>
           {phase.title}
         </span>
-        <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>Δ={phase.delta}ms</span>
+        <span className="text-xs text-text-muted">Δ={phase.delta}ms</span>
       </div>
 
-      <div style={{ padding: '0.4rem 0.5rem', fontSize: '0.62rem', fontFamily: 'var(--font-mono)', lineHeight: 1.5 }}>
+      <div className="p-2 px-2.5 text-xs font-mono leading-relaxed">
         <Line label="type" value={`${log.type} (${log.inputType || '-'})`} />
         <Line 
           label="parent" 
           value={formatNodePath(log.parent?.nodeName || '-', log.parent?.id, log.parent?.className)} 
-          color={typeColor[log.type]} 
+          color={typeColorClass[log.type]} 
         />
         <Line 
           label="  node" 
@@ -1181,16 +1362,10 @@ function PhaseBlockView({ phase }: { phase: PhaseBlock }) {
         {/* Offset display */}
         {log.endNode ? (
           // Cross-node selection - show detailed Range Selection box
-          <div style={{ 
-            background: '#fef3c7', 
-            border: '1px solid #f59e0b',
-            borderRadius: '4px',
-            padding: '0.3rem 0.4rem',
-            marginTop: '0.2rem',
-          }}>
-            <div style={{ display: 'flex', gap: '0.4rem' }}>
-              <span style={{ color: '#78350f', minWidth: '35px' }}>start:</span>
-              <span style={{ color: '#92400e' }}>
+          <div className="bg-amber-100 dark:bg-amber-900/30 border border-amber-500 rounded px-2 py-1.5 mt-1 text-xs">
+            <div className="flex gap-1.5">
+              <span className="text-amber-900 dark:text-amber-200 min-w-[40px] text-xs">start:</span>
+              <span className="text-amber-800 dark:text-amber-300 text-xs">
                 {log.node?.nodeName === '#text' && log.parent ? (
                   <>{formatNodePath(log.parent.nodeName, log.parent.id, log.parent.className)} &gt; #text @ {log.startOffset}</>
                 ) : (
@@ -1198,17 +1373,9 @@ function PhaseBlockView({ phase }: { phase: PhaseBlock }) {
                 )}
               </span>
             </div>
-            <div style={{ 
-              display: 'flex', 
-              gap: '0.4rem',
-              background: '#fed7aa',
-              padding: '0.15rem 0.3rem',
-              borderRadius: '3px',
-              marginLeft: '-0.3rem',
-              marginRight: '-0.3rem',
-            }}>
-              <span style={{ color: '#78350f', minWidth: '35px' }}>end:</span>
-              <span style={{ color: '#c2410c', fontWeight: 600 }}>
+            <div className="flex gap-1.5 bg-orange-200 dark:bg-orange-900/40 px-1.5 py-1 rounded -mx-2 mt-1">
+              <span className="text-amber-900 dark:text-amber-200 min-w-[40px] text-xs">end:</span>
+              <span className="text-orange-800 dark:text-orange-200 font-semibold text-xs">
                 {log.endNode.nodeName === '#text' && log.endParent ? (
                   <>{formatNodePath(log.endParent.nodeName, log.endParent.id, log.endParent.className)} &gt; #text @ {log.endOffset}</>
                 ) : (
@@ -1219,23 +1386,18 @@ function PhaseBlockView({ phase }: { phase: PhaseBlock }) {
           </div>
         ) : log.startOffset !== log.endOffset ? (
           // Same node range selection - simple format with range highlight
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            <span style={{ color: 'var(--text-muted)', minWidth: '45px' }}>offset:</span>
-            <span style={{ 
-              background: '#fef3c7', 
-              color: '#92400e', 
-              padding: '0 4px', 
-              borderRadius: '3px',
-            }}>
-              {log.startOffset}..{log.endOffset} <span style={{ fontSize: '0.55rem' }}>(range: {log.endOffset - log.startOffset})</span>
+          <div className="flex gap-1.5">
+            <span className="text-text-muted min-w-[45px]">offset:</span>
+            <span className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-1 rounded">
+              {log.startOffset}..{log.endOffset} <span className="text-[0.7rem]">(range: {log.endOffset - log.startOffset})</span>
             </span>
           </div>
         ) : (
           // Collapsed cursor
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            <span style={{ color: 'var(--text-muted)', minWidth: '45px' }}>offset:</span>
-            <span style={{ color: 'var(--text-primary)' }}>
-              {log.startOffset} <span style={{ color: 'var(--text-muted)', fontSize: '0.55rem' }}>(collapsed)</span>
+          <div className="flex gap-1.5">
+            <span className="text-text-muted min-w-[45px]">offset:</span>
+            <span className="text-text-primary">
+              {log.startOffset} <span className="text-text-muted text-[0.7rem]">(collapsed)</span>
             </span>
           </div>
         )}
@@ -1244,23 +1406,40 @@ function PhaseBlockView({ phase }: { phase: PhaseBlock }) {
         )}
         {formatSibling(log.leftSibling, 'left')}
         {formatSibling(log.rightSibling, 'right')}
+        {/* Selection segments: show only the actually selected ranges, not the entire text */}
+        {log.type === 'selectionchange' && selectionSegments.length > 0 && (
+          <div className="mt-1">
+            {selectionSegments.map((seg, idx) => (
+              <div key={idx} className="flex gap-2 text-xs">
+                <span className="text-text-muted min-w-[55px] text-xs">
+                  {idx === 0 ? 'segments:' : ''}
+                </span>
+                <span className="text-text-primary text-xs">
+                  {`seg${idx}: ${seg.path} [${seg.start}..${seg.end}] "`}
+                  <DebugText text={seg.text} />
+                  {'"'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         {/* Show data for beforeinput, input, and composition events */}
         {['beforeinput', 'input', 'compositionstart', 'compositionupdate', 'compositionend'].includes(log.type) && (
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            <span style={{ color: 'var(--text-muted)', minWidth: '45px' }}>data:</span>
-            <span style={{ color: '#22c55e', fontWeight: 600 }}>
+          <div className="flex gap-2 text-xs">
+            <span className="text-text-muted min-w-[55px] text-xs">data:</span>
+            <span className="text-green-600 dark:text-green-400 font-semibold text-xs">
               {log.data !== null && log.data !== undefined ? (
                 <>"<DebugText text={log.data} />"</>
               ) : (
-                <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>null</span>
+                <span className="text-gray-400 dark:text-gray-500 italic">null</span>
               )}
             </span>
           </div>
         )}
         {log.isComposing !== undefined && (
-          <div style={{ display: 'flex', gap: '0.4rem' }}>
-            <span style={{ color: 'var(--text-muted)', minWidth: '45px' }}>composing:</span>
-            <span style={{ color: log.isComposing ? '#8b5cf6' : '#6b7280', fontWeight: 500 }}>
+          <div className="flex gap-2 text-xs">
+            <span className="text-text-muted min-w-[55px] text-xs">composing:</span>
+            <span className={`font-medium text-xs ${log.isComposing ? 'text-purple-500' : 'text-gray-500'}`}>
               {log.isComposing ? 'true' : 'false'}
             </span>
           </div>
@@ -1268,13 +1447,7 @@ function PhaseBlockView({ phase }: { phase: PhaseBlock }) {
         {/* Show text content with cursor position for #text nodes in input-related events */}
         {['beforeinput', 'input', 'compositionstart', 'compositionupdate', 'compositionend'].includes(log.type) && 
          log.node?.nodeName === '#text' && log.startContainerText && (
-          <div style={{ 
-            marginTop: '0.3rem',
-            padding: '0.3rem 0.4rem',
-            background: 'var(--bg-muted)',
-            borderRadius: '4px',
-            border: '1px solid var(--border-light)',
-          }}>
+          <div className="mt-1.5 p-1.5 px-2 bg-bg-muted rounded border border-border-light">
             <TextWithCursor 
               text={log.startContainerText} 
               startOffset={log.startOffset} 
@@ -1282,18 +1455,24 @@ function PhaseBlockView({ phase }: { phase: PhaseBlock }) {
             />
           </div>
         )}
-        {log.startBoundary && <Line label="⚠️ start" value={`${log.startBoundary.element} ${log.startBoundary.type} 경계`} color="#f59e0b" />}
-        {log.endBoundary && <Line label="⚠️ end" value={`${log.endBoundary.element} ${log.endBoundary.type} 경계`} color="#ef4444" />}
+        {log.startBoundary && <Line label="⚠️ start" value={`${log.startBoundary.element} ${log.startBoundary.type} 경계`} color="text-amber-600 dark:text-amber-400" />}
+        {log.endBoundary && <Line label="⚠️ end" value={`${log.endBoundary.element} ${log.endBoundary.type} 경계`} color="text-red-600 dark:text-red-400" />}
       </div>
     </div>
   );
 }
 
 function Line({ label, value, color, highlight }: { label: string; value: string; color?: string; highlight?: boolean }) {
+  const valueColorClass = highlight 
+    ? 'text-green-600 dark:text-green-400 font-semibold' 
+    : color 
+      ? color 
+      : 'text-text-primary';
+  
   return (
-    <div style={{ display: 'flex', gap: '0.4rem' }}>
-      <span style={{ color: 'var(--text-muted)', minWidth: '45px' }}>{label}:</span>
-      <span style={{ color: highlight ? '#22c55e' : color || 'var(--text-primary)', fontWeight: highlight ? 600 : 400 }}>{value}</span>
+    <div className="flex gap-2 text-xs">
+      <span className="text-text-muted min-w-[55px] text-xs">{label}:</span>
+      <span className={`${valueColorClass} text-xs`}>{value}</span>
     </div>
   );
 }

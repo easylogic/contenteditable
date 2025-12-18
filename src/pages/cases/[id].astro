@@ -113,151 +113,94 @@ const { Content } = await entry.render();
   </head>
   <body>
     <SiteNav />
-    <main
-      style="
-        display: flex;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-      "
-    >
+    <main class="flex max-w-full m-0 p-0">
         <aside
           aria-label="Cases"
-          style="
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            width: 240px;
-            min-width: 240px;
-            border-right: 1px solid var(--border-light);
-            background: var(--bg-muted);
-            padding: 0;
-            font-size: 0.875rem;
-            flex-shrink: 0;
-          "
+          class="sticky top-0 h-screen overflow-y-auto w-[240px] min-w-[240px] border-r border-border-light bg-bg-muted p-0 text-sm flex-shrink-0"
         >
-          <div style="padding: 1rem 0.75rem; border-bottom: 1px solid var(--border-light); background: var(--bg-surface);">
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
+          <div class="p-4 px-3 border-b border-border-light bg-bg-surface">
+            <div class="flex justify-between">
                 align-items: center;
                 margin-bottom: 0.5rem;
               "
             >
-              <span style="font-weight: 600; font-size: 0.9rem;">Cases</span>
+              <span class="font-semibold text-sm">Cases</span>
               <a
                 href="/cases"
-                style="
-                  font-size: 0.75rem;
-                  color: var(--accent-primary);
-                  text-decoration: none;
-                "
+                class="text-xs text-accent-primary no-underline"
               >
                 All →
               </a>
             </div>
 
-            <div
-              style="
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.25rem;
-                font-size: 0.75rem;
-              "
-            >
+            <div class="flex flex-wrap gap-1 text-xs">
               <a
                 href={`?view=scenario`}
-                style={{
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  backgroundColor: activeView === 'scenario' ? 'var(--accent-primary)' : 'transparent',
-                  color: activeView === 'scenario' ? 'var(--bg-surface)' : 'var(--accent-primary)',
-                  border: activeView === 'scenario' ? 'none' : '1px solid var(--border-light)',
-                }}
+                class:list={[
+                  'px-2 py-0.5 rounded no-underline transition-colors',
+                  activeView === 'scenario'
+                    ? 'bg-accent-primary text-bg-surface border-none'
+                    : 'bg-transparent text-accent-primary border border-border-light',
+                ]}
               >
                 Scenario
               </a>
               <a
                 href={`?view=os`}
-                style={{
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  backgroundColor: activeView === 'os' ? 'var(--accent-primary)' : 'transparent',
-                  color: activeView === 'os' ? 'var(--bg-surface)' : 'var(--accent-primary)',
-                  border: activeView === 'os' ? 'none' : '1px solid var(--border-light)',
-                }}
+                class:list={[
+                  'px-2 py-0.5 rounded no-underline transition-colors',
+                  activeView === 'os'
+                    ? 'bg-accent-primary text-bg-surface border-none'
+                    : 'bg-transparent text-accent-primary border border-border-light',
+                ]}
               >
                 OS
               </a>
               <a
                 href={`?view=browser`}
-                style={{
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  backgroundColor: activeView === 'browser' ? 'var(--accent-primary)' : 'transparent',
-                  color: activeView === 'browser' ? 'var(--bg-surface)' : 'var(--accent-primary)',
-                  border: activeView === 'browser' ? 'none' : '1px solid var(--border-light)',
-                }}
+                class:list={[
+                  'px-2 py-0.5 rounded no-underline transition-colors',
+                  activeView === 'browser'
+                    ? 'bg-accent-primary text-bg-surface border-none'
+                    : 'bg-transparent text-accent-primary border border-border-light',
+                ]}
               >
                 Browser
               </a>
               <a
                 href={`?view=device`}
-                style={{
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '4px',
-                  textDecoration: 'none',
-                  backgroundColor: activeView === 'device' ? 'var(--accent-primary)' : 'transparent',
-                  color: activeView === 'device' ? 'var(--bg-surface)' : 'var(--accent-primary)',
-                  border: activeView === 'device' ? 'none' : '1px solid var(--border-light)',
-                }}
+                class:list={[
+                  'px-2 py-0.5 rounded no-underline transition-colors',
+                  activeView === 'device'
+                    ? 'bg-accent-primary text-bg-surface border-none'
+                    : 'bg-transparent text-accent-primary border border-border-light',
+                ]}
               >
                 Device
               </a>
             </div>
           </div>
 
-          <nav aria-label="Case list" style="padding: 0.5rem 0;">
+          <nav aria-label="Case list" class="py-2">
             {activeView === 'scenario' && (
-              <ul style="list-style: none; padding: 0; margin: 0;">
+              <ul class="list-none p-0 m-0">
                 {Object.entries(casesByScenario).map(([scenarioId, scenarioCases]) => (
-                  <li style="margin-bottom: 0.5rem;">
-                    <div
-                      style="
-                        font-size: 0.75rem;
-                        font-weight: 600;
-                        margin: 0 0 0.25rem 0.75rem;
-                        color: var(--text-secondary);
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                      "
-                    >
+                  <li class="mb-2">
+                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
                       {scenarioId}
                     </div>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
+                    <ul class="list-none p-0 m-0">
                       {scenarioCases.map((c) => (
-                        <li style="margin: 0;">
+                        <li class="m-0">
                           <a
                             href={`/cases/${c.slug}`}
                             title={c.data.caseTitle}
-                            style={{
-                              display: 'block',
-                              padding: '0.4rem 0.75rem',
-                              textDecoration: 'none',
-                              fontSize: '0.875rem',
-                              backgroundColor:
-                                c.slug === slug ? 'var(--accent-primary)' : 'transparent',
-                              color: c.slug === slug ? 'var(--bg-surface)' : 'var(--text-primary)',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
-                            }}
+                            class:list={[
+                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
+                              c.slug === slug
+                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
+                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
+                            ]}
                           >
                             {c.data.caseTitle}
                           </a>
@@ -270,40 +213,24 @@ const { Content } = await entry.render();
             )}
 
             {activeView === 'os' && (
-              <ul style="list-style: none; padding: 0; margin: 0;">
+              <ul class="list-none p-0 m-0">
                 {Object.entries(osGroups).map(([os, osCases]) => (
-                  <li style="margin-bottom: 0.5rem;">
-                    <div
-                      style="
-                        font-size: 0.75rem;
-                        font-weight: 600;
-                        margin: 0 0 0.25rem 0.75rem;
-                        color: var(--text-secondary);
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                      "
-                    >
+                  <li class="mb-2">
+                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
                       {os}
                     </div>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
+                    <ul class="list-none p-0 m-0">
                       {osCases.map((c) => (
-                        <li style="margin: 0;">
+                        <li class="m-0">
                           <a
                             href={`/cases/${c.slug}`}
                             title={c.data.caseTitle}
-                            style={{
-                              display: 'block',
-                              padding: '0.4rem 0.75rem',
-                              textDecoration: 'none',
-                              fontSize: '0.875rem',
-                              backgroundColor:
-                                c.slug === slug ? 'var(--accent-primary)' : 'transparent',
-                              color: c.slug === slug ? 'var(--bg-surface)' : 'var(--text-primary)',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
-                            }}
+                            class:list={[
+                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
+                              c.slug === slug
+                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
+                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
+                            ]}
                           >
                             {c.data.caseTitle}
                           </a>
@@ -316,40 +243,24 @@ const { Content } = await entry.render();
             )}
 
             {activeView === 'browser' && (
-              <ul style="list-style: none; padding: 0; margin: 0;">
+              <ul class="list-none p-0 m-0">
                 {Object.entries(browserGroups).map(([browser, browserCases]) => (
-                  <li style="margin-bottom: 0.5rem;">
-                    <div
-                      style="
-                        font-size: 0.75rem;
-                        font-weight: 600;
-                        margin: 0 0 0.25rem 0.75rem;
-                        color: var(--text-secondary);
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                      "
-                    >
+                  <li class="mb-2">
+                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
                       {browser}
                     </div>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
+                    <ul class="list-none p-0 m-0">
                       {browserCases.map((c) => (
-                        <li style="margin: 0;">
+                        <li class="m-0">
                           <a
                             href={`/cases/${c.slug}`}
                             title={c.data.caseTitle}
-                            style={{
-                              display: 'block',
-                              padding: '0.4rem 0.75rem',
-                              textDecoration: 'none',
-                              fontSize: '0.875rem',
-                              backgroundColor:
-                                c.slug === slug ? 'var(--accent-primary)' : 'transparent',
-                              color: c.slug === slug ? 'var(--bg-surface)' : 'var(--text-primary)',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
-                            }}
+                            class:list={[
+                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
+                              c.slug === slug
+                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
+                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
+                            ]}
                           >
                             {c.data.caseTitle}
                           </a>
@@ -362,40 +273,24 @@ const { Content } = await entry.render();
             )}
 
             {activeView === 'device' && (
-              <ul style="list-style: none; padding: 0; margin: 0;">
+              <ul class="list-none p-0 m-0">
                 {Object.entries(deviceGroups).map(([device, deviceCases]) => (
-                  <li style="margin-bottom: 0.5rem;">
-                    <div
-                      style="
-                        font-size: 0.75rem;
-                        font-weight: 600;
-                        margin: 0 0 0.25rem 0.75rem;
-                        color: var(--text-secondary);
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                      "
-                    >
+                  <li class="mb-2">
+                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
                       {device}
                     </div>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
+                    <ul class="list-none p-0 m-0">
                       {deviceCases.map((c) => (
-                        <li style="margin: 0;">
+                        <li class="m-0">
                           <a
                             href={`/cases/${c.slug}`}
                             title={c.data.caseTitle}
-                            style={{
-                              display: 'block',
-                              padding: '0.4rem 0.75rem',
-                              textDecoration: 'none',
-                              fontSize: '0.875rem',
-                              backgroundColor:
-                                c.slug === slug ? 'var(--accent-primary)' : 'transparent',
-                              color: c.slug === slug ? 'var(--bg-surface)' : 'var(--text-primary)',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              borderLeft: c.slug === slug ? '3px solid #0069c2' : '3px solid transparent',
-                            }}
+                            class:list={[
+                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
+                              c.slug === slug
+                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
+                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
+                            ]}
                           >
                             {c.data.caseTitle}
                           </a>
@@ -409,44 +304,22 @@ const { Content } = await entry.render();
           </nav>
         </aside>
 
-        <section
-          style="
-            flex: 1;
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 1.75rem 1.25rem 2.5rem;
-            width: 100%;
-          "
-        >
-          <header style="margin-bottom: 1.5rem;">
-            <p style="margin: 0 0 0.5rem 0; font-size: 0.8rem; color: var(--text-muted);">
+        <section class="flex-1 max-w-[1120px] mx-auto py-7 px-5 pb-10 w-full">
+          <header class="mb-6">
+            <p class="m-0 mb-2 text-xs text-text-muted">
               Case {entry.data.id} · Scenario{' '}
               <a
                 href={`/scenarios/${encodeURIComponent(entry.data.scenarioId)}`}
-                style="color: inherit; text-decoration: underline;"
+                class="text-inherit underline"
               >
                 {entry.data.scenarioId}
               </a>
             </p>
-            <h1
-              style="
-                font-size: 1.85rem;
-                line-height: 1.2;
-                margin: 0 0 0.75rem 0;
-              "
-            >
+            <h1 class="text-[1.85rem] leading-[1.2] m-0 mb-3">
               {entry.data.caseTitle}
             </h1>
 
-            <div
-              style="
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.35rem 0.75rem;
-                font-size: 0.8rem;
-                color: var(--text-secondary);
-              "
-            >
+            <div class="flex flex-wrap gap-1.5 gap-x-3 text-xs text-text-secondary">
               <span>
                 OS: {entry.data.os}
                 {entry.data.osVersion && ` ${entry.data.osVersion}`}
@@ -464,26 +337,16 @@ const { Content } = await entry.render();
             </div>
 
             {entry.data.tags.length > 0 && (
-              <div style="margin-top: 0.4rem; font-size: 0.8rem;">
+              <div class="mt-1.5 text-xs">
                 {entry.data.tags.map((tag) => (
-                  <span
-                    style="
-                      display: inline-flex;
-                      align-items: center;
-                      border-radius: 999px;
-                      border: 1px solid var(--border-light);
-                      padding: 0.05rem 0.45rem;
-                      margin-right: 0.25rem;
-                      background: var(--bg-muted);
-                    "
-                  >
+                  <span class="inline-flex items-center rounded-full border border-border-light px-1.5 py-0.5 mr-1 bg-bg-muted">
                     {tag}
                   </span>
                 ))}
               </div>
             )}
 
-            <div style="margin-top: 0.75rem;">
+            <div class="mt-3">
               <CaseExport
                 client:load
                 caseData={{
@@ -507,16 +370,7 @@ const { Content } = await entry.render();
             </div>
           </header>
 
-          <article
-            style="
-              border-radius: 0.75rem;
-              border: 1px solid var(--border-light);
-              background: var(--bg-surface);
-              padding: 1rem 1.1rem;
-              font-size: 0.9rem;
-              line-height: 1.6;
-            "
-          >
+          <article class="rounded-xl border border-border-light bg-bg-surface p-4 px-4.5 text-sm leading-relaxed">
             <Content />
           </article>
 
@@ -542,60 +396,24 @@ const { Content } = await entry.render();
             <>
               <section
                 aria-label="Browser compatibility matrix"
-                style="
-                  margin-top: 1.1rem;
-                  border-radius: 0.75rem;
-                  border: 1px solid var(--border-light);
-                  background: var(--bg-surface);
-                  padding: 0.85rem 0.95rem;
-                  font-size: 0.85rem;
-                "
+                class="mt-4 rounded-xl border border-border-light bg-bg-surface p-3.5 px-4 text-sm"
               >
-                <h2
-                  style="
-                    font-size: 0.9rem;
-                    margin: 0 0 0.4rem 0;
-                  "
-                >
+                <h2 class="text-sm m-0 mb-1.5">
                   Browser compatibility matrix
                 </h2>
-                <p style="margin: 0 0 0.6rem 0; color: var(--text-secondary); font-size: 0.8rem;">
+                <p class="m-0 mb-2.5 text-text-secondary text-xs">
                   This matrix shows which browser and OS combinations have documented cases for this
                   scenario. The current case is highlighted. Click on a cell to view other cases.
                 </p>
-                <div style="overflow-x: auto;">
-                  <table
-                    style="
-                      width: 100%;
-                      border-collapse: collapse;
-                      font-size: 0.75rem;
-                    "
-                  >
+                <div class="overflow-x-auto">
+                  <table class="w-full border-collapse text-xs">
                     <thead>
                       <tr>
-                        <th
-                          style="
-                            text-align: left;
-                            padding: 0.4rem 0.5rem;
-                            border-bottom: 2px solid var(--border-light);
-                            background: var(--bg-muted);
-                            position: sticky;
-                            left: 0;
-                            z-index: 1;
-                          "
-                        >
+                        <th class="text-left px-2 py-1.5 border-b-2 border-border-light bg-bg-muted sticky left-0 z-[1]">
                           Browser
                         </th>
                         {scenarioOS.map((os) => (
-                          <th
-                            style="
-                              text-align: center;
-                              padding: 0.4rem 0.5rem;
-                              border-bottom: 2px solid var(--border-light);
-                              background: var(--bg-muted);
-                              font-weight: 600;
-                            "
-                          >
+                          <th class="text-center px-2 py-1.5 border-b-2 border-border-light bg-bg-muted font-semibold">
                             {os}
                           </th>
                         ))}
@@ -604,78 +422,43 @@ const { Content } = await entry.render();
                     <tbody>
                       {scenarioMatrix.map((row) => (
                         <tr>
-                          <td
-                            style="
-                              padding: 0.4rem 0.5rem;
-                              border-bottom: 1px solid var(--border-light);
-                              background: var(--bg-muted);
-                              font-weight: 600;
-                              position: sticky;
-                              left: 0;
-                              z-index: 1;
-                            "
-                          >
+                          <td class="px-2 py-1.5 border-b border-border-light bg-bg-muted font-semibold sticky left-0 z-[1]">
                             {row.browser}
                           </td>
                           {row.osCoverage.map((cell) => (
                             <td
-                              style="
-                                padding: 0.3rem 0.4rem;
-                                border-bottom: 1px solid var(--border-light);
-                                text-align: center;
-                                min-width: 80px;
-                                background: cell.versions.some((v) => v.isCurrent)
-                                  ? 'rgba(17, 24, 39, 0.06)'
-                                  : 'transparent';
-                              "
+                              class:list={[
+                                'px-1.5 py-1 border-b border-border-light text-center min-w-[80px]',
+                                cell.versions.some((v) => v.isCurrent) ? 'bg-gray-900/6 dark:bg-gray-100/6' : 'bg-transparent',
+                              ]}
                             >
                               {cell.hasCase ? (
-                                <div
-                                  style="
-                                    display: flex;
-                                    flex-direction: column;
-                                    gap: 0.2rem;
-                                    align-items: center;
-                                  "
-                                >
+                                <div class="flex flex-col gap-0.5 items-center">
                                   {cell.versions.map((v) => (
                                     <a
                                       href={`/cases/${v.slug}`}
-                                      style="
-                                        display: inline-block;
-                                        padding: 0.15rem 0.4rem;
-                                        border-radius: 4px;
-                                        background: ${v.isCurrent
-                                          ? 'var(--text-primary)'
+                                      class:list={[
+                                        'inline-block px-1.5 py-0.5 rounded no-underline text-[0.7rem] font-medium text-white',
+                                        v.isCurrent
+                                          ? 'bg-text-primary border-2 border-text-primary'
                                           : v.status === 'confirmed'
-                                            ? 'var(--status-confirmed)'
-                                            : 'var(--status-draft)'};
-                                        color: white;
-                                        text-decoration: none;
-                                        font-size: 0.7rem;
-                                        font-weight: 500;
-                                        border: ${v.isCurrent ? '2px solid var(--text-primary)' : 'none'};
-                                      "
+                                            ? 'bg-status-confirmed border-none'
+                                            : 'bg-status-draft border-none',
+                                      ]}
                                       title={`${v.caseId}: ${row.browser} ${v.browserVersion} on ${cell.os} ${v.osVersion}`}
                                     >
                                       {v.caseId}
                                       {v.isCurrent && ' (current)'}
                                     </a>
                                   ))}
-                                  <div
-                                    style="
-                                      font-size: 0.65rem;
-                                      color: var(--text-muted);
-                                      margin-top: 0.1rem;
-                                    "
-                                  >
+                                  <div class="text-[0.65rem] text-text-muted mt-0.5">
                                     {cell.versions
                                       .map((v) => `${v.browserVersion || 'Any'}`)
                                       .join(', ')}
                                   </div>
                                 </div>
                               ) : (
-                                <span style="color: var(--text-faint);">—</span>
+                                <span class="text-text-faint">—</span>
                               )}
                             </td>
                           ))}
@@ -684,54 +467,22 @@ const { Content } = await entry.render();
                     </tbody>
                   </table>
                 </div>
-                <div
-                  style="
-                    margin-top: 0.6rem;
-                    padding-top: 0.6rem;
-                    border-top: 1px solid var(--border-light);
-                    font-size: 0.75rem;
-                    color: var(--text-muted);
-                  "
-                >
-                  <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 0.3rem;">
-                      <span
-                        style="
-                          display: inline-block;
-                          width: 12px;
-                          height: 12px;
-                          border-radius: 4px;
-                          background: var(--text-primary);
-                        "
-                      ></span>
+                <div class="mt-2.5 pt-2.5 border-t border-border-light text-xs text-text-muted">
+                  <div class="flex gap-4 items-center flex-wrap">
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-block w-3 h-3 rounded bg-text-primary"></span>
                       <span>Current case</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.3rem;">
-                      <span
-                        style="
-                          display: inline-block;
-                          width: 12px;
-                          height: 12px;
-                          border-radius: 4px;
-                          background: var(--status-confirmed);
-                        "
-                      ></span>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-block w-3 h-3 rounded bg-status-confirmed"></span>
                       <span>Confirmed</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.3rem;">
-                      <span
-                        style="
-                          display: inline-block;
-                          width: 12px;
-                          height: 12px;
-                          border-radius: 4px;
-                          background: var(--status-draft);
-                        "
-                      ></span>
+                    <div class="flex items-center gap-1.5">
+                      <span class="inline-block w-3 h-3 rounded bg-status-draft"></span>
                       <span>Draft</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.3rem;">
-                      <span style="color: var(--text-faint);">—</span>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-text-faint">—</span>
                       <span>No case documented</span>
                     </div>
                   </div>
@@ -740,77 +491,55 @@ const { Content } = await entry.render();
 
               <section
                 aria-label="Variants table"
-                style="
-                  margin-top: 1.1rem;
-                  border-radius: 0.75rem;
-                  border: 1px solid var(--border-light);
-                  background: var(--bg-surface);
-                  padding: 0.85rem 0.95rem;
-                  font-size: 0.85rem;
-                "
+                class="mt-4 rounded-xl border border-border-light bg-bg-surface p-3.5 px-4 text-sm"
               >
-                <h2
-                  style="
-                    font-size: 0.9rem;
-                    margin: 0 0 0.4rem 0;
-                  "
-                >
+                <h2 class="text-sm m-0 mb-1.5">
                   All variants (detailed table)
                 </h2>
-                <p style="margin: 0 0 0.6rem 0; color: var(--text-secondary); font-size: 0.8rem;">
+                <p class="m-0 mb-2.5 text-text-secondary text-xs">
                   Complete list of all cases for this scenario with full environment details.
                 </p>
-                <div style="overflow-x: auto;">
-                  <table
-                    style="
-                      width: 100%;
-                      border-collapse: collapse;
-                      font-size: 0.8rem;
-                    "
-                  >
+                <div class="overflow-x-auto">
+                  <table class="w-full border-collapse text-xs">
                     <thead>
                       <tr>
-                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Case</th>
-                        <th style="text-align: left; padding: 0.25rem 0.4rem;">OS</th>
-                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Device</th>
-                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Browser</th>
-                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Keyboard</th>
-                        <th style="text-align: left; padding: 0.25rem 0.4rem;">Status</th>
+                        <th class="text-left px-1.5 py-1">Case</th>
+                        <th class="text-left px-1.5 py-1">OS</th>
+                        <th class="text-left px-1.5 py-1">Device</th>
+                        <th class="text-left px-1.5 py-1">Browser</th>
+                        <th class="text-left px-1.5 py-1">Keyboard</th>
+                        <th class="text-left px-1.5 py-1">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sameScenarioCases.map((c) => (
                         <tr
-                          style={{
-                            backgroundColor:
-                              c.slug === slug ? 'rgba(17, 24, 39, 0.04)' : 'transparent',
-                          }}
+                          class:list={[
+                            c.slug === slug ? 'bg-gray-900/5 dark:bg-gray-100/5' : 'bg-transparent',
+                          ]}
                         >
-                          <td style="padding: 0.25rem 0.4rem;">
+                          <td class="p-1 px-1.5">
                             <a
                               href={`/cases/${c.slug}`}
-                              style="
-                                color: var(--text-primary);
-                                text-decoration: none;
-                              "
+                              class="text-text-primary no-underline"
                             >
                               {c.data.id}
                             </a>
                           </td>
-                          <td style="padding: 0.25rem 0.4rem;">
+                          <td class="px-1.5 py-1">
                             {c.data.os}
                             {c.data.osVersion && ` ${c.data.osVersion}`}
                           </td>
-                          <td style="padding: 0.25rem 0.4rem;">
+                          <td class="px-1.5 py-1">
                             {c.data.device}
                             {c.data.deviceVersion && ` ${c.data.deviceVersion}`}
                           </td>
-                          <td style="padding: 0.25rem 0.4rem;">
+                          <td class="px-1.5 py-1">
                             {c.data.browser}
                             {c.data.browserVersion && ` ${c.data.browserVersion}`}
                           </td>
-                          <td style="padding: 0.25rem 0.4rem;">{c.data.keyboard}</td>
-                          <td style="padding: 0.25rem 0.4rem;">{c.data.status}</td>
+                          <td class="px-1.5 py-1">{c.data.keyboard}</td>
+                          <td class="px-1.5 py-1">{c.data.status}</td>
                         </tr>
                       ))}
                     </tbody>

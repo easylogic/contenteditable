@@ -120,24 +120,11 @@ export function CaseExport({ caseData }: CaseExportProps) {
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="relative">
       <button
         type="button"
         onClick={() => setShowMenu(!showMenu)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.35rem',
-          padding: '0.4rem 0.75rem',
-          background: 'var(--bg-muted)',
-          border: '1px solid var(--border-light)',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '0.8rem',
-          fontWeight: 500,
-          color: 'var(--text-secondary)',
-          transition: 'all 0.15s',
-        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-muted border border-border-light rounded-md cursor-pointer text-xs font-medium text-text-secondary transition-all hover:bg-bg-surface"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -153,79 +140,26 @@ export function CaseExport({ caseData }: CaseExportProps) {
       {showMenu && (
         <>
           <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 99,
-            }}
+            className="fixed inset-0 z-[99]"
             onClick={() => setShowMenu(false)}
           />
-          <div
-            style={{
-              position: 'absolute',
-              top: 'calc(100% + 4px)',
-              right: 0,
-              minWidth: '180px',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-light)',
-              borderRadius: '8px',
-              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.12)',
-              zIndex: 100,
-              overflow: 'hidden',
-            }}
-          >
+          <div className="absolute top-[calc(100%+4px)] right-0 min-w-[180px] bg-bg-surface border border-border-light rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.12)] z-[100] overflow-hidden">
             <button
               type="button"
               onClick={() => handleExport('json')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.6rem 0.75rem',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-                color: 'var(--text-secondary)',
-                textAlign: 'left',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--bg-muted)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
+              className="flex items-center gap-2 w-full px-3 py-2.5 bg-transparent border-none cursor-pointer text-sm text-text-secondary text-left hover:bg-bg-muted transition-colors"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
               Download JSON
-              {copied === 'json' && <span style={{ color: 'var(--status-confirmed)', marginLeft: 'auto' }}>✓</span>}
+              {copied === 'json' && <span className="text-status-confirmed ml-auto">✓</span>}
             </button>
             <button
               type="button"
               onClick={() => handleExport('markdown')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.6rem 0.75rem',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-                color: 'var(--text-secondary)',
-                textAlign: 'left',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--bg-muted)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
+              className="flex items-center gap-2 w-full px-3 py-2.5 bg-transparent border-none cursor-pointer text-sm text-text-secondary text-left hover:bg-bg-muted transition-colors"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -234,38 +168,20 @@ export function CaseExport({ caseData }: CaseExportProps) {
                 <line x1="16" y1="17" x2="8" y2="17" />
               </svg>
               Download Markdown
-              {copied === 'markdown' && <span style={{ color: 'var(--status-confirmed)', marginLeft: 'auto' }}>✓</span>}
+              {copied === 'markdown' && <span className="text-status-confirmed ml-auto">✓</span>}
             </button>
-            <div style={{ height: '1px', background: 'var(--border-light)', margin: '0.25rem 0' }} />
+            <div className="h-px bg-border-light my-1" />
             <button
               type="button"
               onClick={handleCopyLink}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                width: '100%',
-                padding: '0.6rem 0.75rem',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-                color: 'var(--text-secondary)',
-                textAlign: 'left',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--bg-muted)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-              }}
+              className="flex items-center gap-2 w-full px-3 py-2.5 bg-transparent border-none cursor-pointer text-sm text-text-secondary text-left hover:bg-bg-muted transition-colors"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
               Copy link
-              {copied === 'link' && <span style={{ color: 'var(--status-confirmed)', marginLeft: 'auto' }}>✓</span>}
+              {copied === 'link' && <span className="text-status-confirmed ml-auto">✓</span>}
             </button>
           </div>
         </>
