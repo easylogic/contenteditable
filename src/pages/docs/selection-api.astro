@@ -163,7 +163,74 @@ selection.addRange(range);`;
           <p style="margin: 0 0 1rem 0;">
             Unlike text selection, which selects characters within text nodes, <strong>node selection</strong> selects entire element nodes (like images, divs, or other HTML elements). This is useful when you want to select non-text content or entire blocks of content.
           </p>
+
+          <div style="margin: 1.5rem 0; padding: 1.5rem; background: var(--bg-muted); border-radius: 0.5rem; border: 1px solid var(--border-light);">
+            <h3 style="font-size: 1rem; margin: 0 0 1rem 0; color: var(--text-primary);">
+              Text Selection vs Node Selection
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+              <!-- Text Selection -->
+              <div style="background: var(--bg-surface); padding: 1rem; border-radius: 0.375rem; border: 1px solid var(--border-light);">
+                <h4 style="font-size: 0.9rem; margin: 0 0 0.75rem 0; color: var(--text-primary); font-weight: 600;">
+                  Text Selection
+                </h4>
+                <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                  <p style="margin: 0; padding: 0.5rem; background: var(--bg-page); border-radius: 0.25rem; border: 1px solid var(--border-light);">
+                    This is a <span style="background: rgba(66, 133, 244, 0.3); padding: 0 2px; border-radius: 2px;">paragraph</span> with text.
+                  </p>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                  <div><strong>Container:</strong> #text node</div>
+                  <div><strong>Offset:</strong> Character position (0, 1, 2...)</div>
+                  <div><strong>Example:</strong> startOffset: 10, endOffset: 19</div>
+                </div>
+              </div>
+
+              <!-- Node Selection -->
+              <div style="background: var(--bg-surface); padding: 1rem; border-radius: 0.375rem; border: 1px solid var(--border-light);">
+                <h4 style="font-size: 0.9rem; margin: 0 0 0.75rem 0; color: var(--text-primary); font-weight: 600;">
+                  Node Selection
+                </h4>
+                <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 0.75rem;">
+                  <div style="padding: 0.5rem; background: var(--bg-page); border-radius: 0.25rem; border: 2px solid rgba(66, 133, 244, 0.5);">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Crect fill='%23e5e7eb' width='100' height='60'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='12' fill='%236b7280'%3EImage%3C/text%3E%3C/svg%3E" alt="Selected image" style="display: block; max-width: 100%; height: auto;" />
+                  </div>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                  <div><strong>Container:</strong> Element node (IMG, DIV, etc.)</div>
+                  <div><strong>Offset:</strong> Child index (0, 1, 2...)</div>
+                  <div><strong>Example:</strong> startOffset: 0, endOffset: 1</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-surface); border-radius: 0.375rem; border: 1px solid var(--border-light);">
+              <h4 style="font-size: 0.9rem; margin: 0 0 0.75rem 0; color: var(--text-primary); font-weight: 600;">
+                Visual Comparison
+              </h4>
+              <div style="font-size: 0.85rem; line-height: 1.8; color: var(--text-secondary);">
+                <div style="margin-bottom: 0.5rem;">
+                  <strong style="color: var(--text-primary);">Text Selection:</strong> Highlights characters within a text node. The selection appears as a colored background over the selected text.
+                </div>
+                <div>
+                  <strong style="color: var(--text-primary);">Node Selection:</strong> Selects the entire element. Visual representation varies by browser - some show borders, some show background, some may not show any visual indication.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin: 1.5rem 0; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 0.5rem;">
+            <p style="margin: 0; font-size: 0.9rem; color: #856404;">
+              <strong>Important:</strong> You cannot create a selection using just a node object. You must use the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Range</code> API to define the selection boundaries, then apply it to the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Selection</code> object. A node alone is not enough - you need to create a Range that encompasses the node.
+            </p>
+          </div>
           
+          <div style="margin: 1.5rem 0; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 0.5rem;">
+            <p style="margin: 0; font-size: 0.9rem; color: #856404;">
+              <strong>⚠️ Important:</strong> You cannot create a selection using just a node object. A node by itself is not selectable - you must use the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Range</code> API to define selection boundaries, then apply it to the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Selection</code> object. The Range acts as a bridge between the node and the selection.
+            </p>
+          </div>
+
           <h3
             style="
               font-size: 1.1rem;
@@ -174,7 +241,7 @@ selection.addRange(range);`;
             Selecting Entire Nodes
           </h3>
           <p style="margin: 0 0 1rem 0;">
-            Use <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.selectNode(node)</code> to select an entire element node, including the element itself:
+            Use <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.selectNode(node)</code> to select an entire element node, including the element itself. This requires creating a Range first:
           </p>
           <pre
             style="
@@ -212,6 +279,32 @@ selection.addRange(range);`;
               <strong>Common use cases:</strong> Selecting images, selecting entire paragraphs or blocks, programmatically selecting content for clipboard operations.
             </li>
           </ul>
+
+          <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-surface); border-radius: 0.5rem; border: 1px solid var(--border-light);">
+            <h4 style="font-size: 0.95rem; margin: 0 0 0.75rem 0; color: var(--text-primary);">
+              Why Range is Required
+            </h4>
+            <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: var(--text-secondary);">
+              A node object alone cannot be directly selected. The Selection API requires a Range object that defines the boundaries of what to select. Here's the process:
+            </p>
+            <ol style="margin: 0 0 0.75rem 0; padding-left: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+              <li style="margin-bottom: 0.5rem;">
+                <strong>Get the node:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">const node = document.getElementById('myImage');</code>
+              </li>
+              <li style="margin-bottom: 0.5rem;">
+                <strong>Create a Range:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">const range = document.createRange();</code>
+              </li>
+              <li style="margin-bottom: 0.5rem;">
+                <strong>Select the node with Range:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.selectNode(node);</code>
+              </li>
+              <li style="margin-bottom: 0.5rem;">
+                <strong>Apply Range to Selection:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">selection.addRange(range);</code>
+              </li>
+            </ol>
+            <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
+              Without the Range step, you cannot select a node. The Range object is the mechanism that tells the browser "select this node" or "select from this position to that position."
+            </p>
+          </div>
 
           <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-muted); border-radius: 0.5rem; border: 1px solid var(--border-light);">
             <h4 style="font-size: 0.95rem; margin: 0 0 0.75rem 0; color: var(--text-primary);">
