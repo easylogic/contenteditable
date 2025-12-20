@@ -1,0 +1,194 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteContentBackward"
+  description="How deleteContentBackward inputType deletes content backward (Backspace key) and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContentBackward</code> inputType is triggered when the user presses the <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Backspace</kbd> key. It deletes the character or content before the cursor position (backward delete).
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Cursor position">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 5)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Backspace key</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hell<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Character before cursor deleted</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + Backspace">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing Backspace may cancel the composition or delete more than expected. The behavior varies significantly between browsers and IME implementations.
+            </p>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/ime-composition" class="text-accent-primary underline">IME & Composition</a> for more details.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor Internal Model & DOM Synchronization">
+          <DocAlert type="warning" title="⚠️ Exception: preventDefault() and Model Updates">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When editors use preventDefault() and update internal models:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Browser's default deletion is prevented</li>
+              <li class="mb-1">Editor deletes from its internal model, then re-renders DOM</li>
+              <li class="mb-1">Browser's undo stack may not include the deletion (because default was prevented)</li>
+              <li class="mb-1">If editor re-renders entire DOM from model, browser may lose track of what was deleted</li>
+              <li class="mb-1">Selection may become invalid after DOM re-render, requiring manual restoration</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Best Practice:</strong> Always restore selection after model update and DOM re-render to ensure cursor position is correct.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle backward deletion differently. Here's how major editors implement deleteContentBackward:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Backward Deletion"
+            description="Slate uses Transforms.delete() to delete content backward:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteContentBackward') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Delete selected content
+      Transforms.delete(editor);
+    } else if (selection) {
+      // Delete character before cursor
+      Transforms.delete(editor, { reverse: true, unit: 'character' });
+    }
+  }
+});`}
+            features={[
+              '<strong>Transforms.delete:</strong> Deletes content with <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">reverse: true</code> for backward deletion.',
+              '<strong>Unit control:</strong> Can delete by character, word, or line.',
+              '<strong>Selection handling:</strong> Automatically handles collapsed and non-collapsed selections.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Backward Deletion"
+            description="ProseMirror uses deleteSelection and backspace commands:"
+            code={`import { deleteSelection, backspace } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteContentBackward') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (state.selection.empty) {
+      // Collapsed selection - use backspace command
+      if (backspace(state, dispatch)) {
+        // Handled
+      }
+    } else {
+      // Non-collapsed - delete selection
+      if (deleteSelection(state, dispatch)) {
+        // Handled
+      }
+    }
+  }
+});`}
+            features={[
+              '<strong>backspace command:</strong> Handles backward deletion for collapsed selections.',
+              '<strong>deleteSelection command:</strong> Handles deletion of selected content.',
+              '<strong>Schema-aware:</strong> Deletion respects schema constraints and block boundaries.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Backward Deletion"
+            description="Draft.js uses Modifier.removeRange() to delete content:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleDeleteBackward(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  let newSelection = selection;
+  if (selection.isCollapsed) {
+    // Move selection backward by one character
+    newSelection = selection.merge({
+      anchorOffset: Math.max(0, selection.anchorOffset - 1),
+    });
+  }
+  
+  const newContentState = Modifier.removeRange(
+    contentState,
+    newSelection,
+    'backward'
+  );
+  
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'remove-range'
+  );
+}`}
+            features={[
+              '<strong>Modifier.removeRange:</strong> Removes content in the specified range.',
+              '<strong>Selection adjustment:</strong> For collapsed selection, extends selection backward before deleting.',
+              '<strong>ContentState updates:</strong> Creates new immutable ContentState with deletion applied.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContentForward" class="text-accent-primary no-underline">
+                deleteContentForward →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+                IME & Composition →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

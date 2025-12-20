@@ -1,0 +1,496 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../components/EditorExample.astro';
+import '../../styles/global.css';
+
+const beforeInputExample = `element.addEventListener('beforeinput', (e) => {
+  console.log('beforeinput:', e.inputType);
+  if (e.inputType === 'formatBold') {
+    e.preventDefault(); // Can prevent default behavior
+    // Apply custom formatting
+  }
+});
+
+element.addEventListener('input', (e) => {
+  console.log('input:', e.inputType);
+  // DOM already updated, cannot prevent
+});`;
+
+const compositionIssue = `// Problem: During IME composition, beforeinput may not fire
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault(); // This may not fire during composition!
+    applyBold();
+  }
+});
+
+// Solution: Check composition state
+element.addEventListener('beforeinput', (e) => {
+  if (e.isComposing) {
+    // IME composition is active
+    // beforeinput may not fire for formatBold
+    return;
+  }
+  
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    applyBold();
+  }
+});`;
+
+const collapsedSelectionIssue = `// Problem: Collapsed selection + Cmd+B may not fire input event
+const selection = window.getSelection();
+if (selection.isCollapsed) {
+  // Cursor position, no text selected
+  // Cmd+B may not trigger input event
+  // Only beforeinput might fire, or neither
+}
+
+// Solution: Handle both events and check selection state
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    const selection = window.getSelection();
+    if (selection.isCollapsed) {
+      // Apply bold to next typed character
+      // or toggle bold state for current position
+      e.preventDefault();
+      toggleBoldState();
+    } else {
+      e.preventDefault();
+      applyBoldToSelection();
+    }
+  }
+});
+
+element.addEventListener('input', (e) => {
+  // May not fire for collapsed selection + formatBold
+  // Always check selection state
+  const selection = window.getSelection();
+  if (!selection.isCollapsed && e.inputType === 'formatBold') {
+    // Handle formatting after the fact
+  }
+});`;
+
+const slateComposition = `import { Editor, Transforms } from 'slate';
+
+function handleFormatBold(editor: Editor, e: InputEvent) {
+  // Check if composition is active
+  if (e.isComposing) {
+    // During IME composition, formatBold may not work as expected
+    // Store intent and apply after composition ends
+    return;
+  }
+  
+  const isActive = isBoldActive(editor);
+  Transforms.setNodes(
+    editor,
+    { bold: !isActive },
+    { match: n => Text.isText(n), split: true }
+  );
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    handleFormatBold(editor, e);
+  }
+});`;
+
+const prosemirrorComposition = `import { toggleMark } from 'prosemirror-commands';
+
+// ProseMirror handles composition in keymap
+const keymap = {
+  'Mod-b': (state, dispatch, view) => {
+    // Check if IME composition is active
+    if (view.composing) {
+      // Defer formatting until composition ends
+      return false;
+    }
+    return toggleMark(schema.marks.strong)(state, dispatch);
+  }
+};
+
+// Or handle in beforeinput
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold' && e.isComposing) {
+    e.preventDefault();
+    // Handle composition-aware formatting
+  }
+});`;
+---
+
+<DocLayout
+  title="Input Types & Formatting Events"
+  description="Understanding inputType values, their behavior, and edge cases in contenteditable elements."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> property in <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> events indicates what kind of operation is being performed. However, the behavior can vary significantly based on:
+          </p>
+          <ul class="m-0 mb-4 pl-6">
+            <li class="mb-2">Whether IME composition is active</li>
+            <li class="mb-2">Whether the selection is collapsed or has text selected</li>
+            <li class="mb-2">The browser and operating system</li>
+            <li class="mb-2">Whether the event is <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code></li>
+          </ul>
+        </DocSection>
+
+        <DocSection title="Editor Internal Models & DOM Synchronization">
+          <DocAlert type="error" title="⚠️ Critical Exception: preventDefault() and Internal Models">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When editors use internal models and preventDefault():</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> events may fire, but editors intercept them with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code></li>
+              <li class="mb-1">Editors update their internal model, then re-render DOM programmatically</li>
+              <li class="mb-1">Browser's undo stack may not be updated (because default behavior was prevented)</li>
+              <li class="mb-1">Browser and editor undo stacks become out of sync</li>
+              <li class="mb-1">Programmatic DOM updates (especially in Safari) may clear the browser's undo stack</li>
+              <li class="mb-1">Selection may become invalid after DOM re-render, requiring manual restoration</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> Events like <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">historyUndo</code> may not fire when expected, or may fire but be ignored by the editor. Undo/redo operations may not work correctly if browser and editor stacks are out of sync.
+            </p>
+          </DocAlert>
+
+          <DocInfoBox title="Common Scenarios" class="mt-4">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">1. preventDefault() on beforeinput</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Editor prevents default, updates model, re-renders DOM</li>
+                  <li class="mb-1">Browser's undo stack not updated</li>
+                  <li class="mb-1">Editor maintains separate undo stack</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">2. Programmatic DOM Updates</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Using <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">innerHTML</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">textContent</code>, or React re-renders</li>
+                  <li class="mb-1">May clear browser's undo stack (especially Safari)</li>
+                  <li class="mb-1">Browser doesn't recognize programmatic changes as user actions</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">3. Model-to-DOM Re-rendering</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">After undo in editor's model, DOM is re-rendered</li>
+                  <li class="mb-1">Browser sees DOM change but doesn't know it's from undo</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1 py-0.5 rounded text-xs">historyUndo</code> event may not fire</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Best Practices" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Always preventDefault() on historyUndo/historyRedo:</strong> Intercept these events and use your own undo stack</li>
+              <li class="mb-2"><strong>Maintain separate undo stack:</strong> Don't rely on browser's undo stack when using internal models</li>
+              <li class="mb-2"><strong>Sync selection after DOM updates:</strong> Always restore selection after model changes and DOM re-renders</li>
+              <li class="mb-2"><strong>Avoid programmatic DOM updates during undo:</strong> If possible, use browser's undo stack for simple cases, or fully manage your own</li>
+              <li class="mb-2"><strong>Use document.execCommand() carefully:</strong> May trigger browser undo, which can conflict with internal undo</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Critical Edge Cases">
+          <DocAlert type="error" title="⚠️ macOS + Korean IME + Collapsed Cursor + Formatting Shortcuts">
+            <p class="m-0 mb-2 text-sm">
+              <strong>macOS specific critical issue:</strong> During Korean IME composition with a collapsed cursor, pressing formatting shortcuts (e.g., <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + B</kbd>, <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + I</kbd>, <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + U</kbd>, <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + K</kbd>) behaves unexpectedly:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Formatting events (e.g., <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatBold</code>) do <strong>not</strong> fire</li>
+              <li class="mb-1">Instead, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> event fires again</li>
+              <li class="mb-1">Formatting is completely ignored</li>
+              <li class="mb-1">The composition text may be inserted/committed instead</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> Formatting shortcuts are completely non-functional during Korean IME composition on macOS, making it impossible to apply formatting.
+            </p>
+          </DocAlert>
+
+          <DocAlert type="error" title="⚠️ General IME Composition + Formatting Shortcuts" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Problem:</strong> During IME composition (e.g., typing Japanese, Korean, Chinese), pressing formatting shortcuts like <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd/Ctrl + B</kbd> may cause <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> to <strong>not fire</strong>, and only <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> fires. This means you cannot prevent the default behavior.
+            </p>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> You lose the ability to intercept and customize formatting during composition, and the browser's default formatting is applied.
+            </p>
+          </DocAlert>
+
+          <DocCodeBlock code={compositionIssue} />
+
+          <DocAlert type="error" title="⚠️ Collapsed Selection + Formatting Shortcuts" class="mt-6">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Problem:</strong> When the selection is collapsed (cursor position, no text selected), pressing formatting shortcuts like <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd/Ctrl + B</kbd> may result in:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Only <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> fires (no <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> event)</li>
+              <li class="mb-1">Neither event fires (browser handles silently)</li>
+              <li class="mb-1">Browser applies "bold state" to next typed character (toggle behavior)</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> You cannot reliably detect or prevent formatting when the cursor is collapsed, making it difficult to implement custom formatting logic.
+            </p>
+          </DocAlert>
+
+          <DocCodeBlock code={collapsedSelectionIssue} />
+        </DocSection>
+
+        <DocSection title="Event Firing Patterns">
+          <DocInfoBox title="When beforeinput vs input Fires">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Normal Case (Non-composition, Non-collapsed)</h4>
+                <ol class="m-0 pl-6 text-sm text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">beforeinput</code> fires with <code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">inputType</code></li>
+                  <li class="mb-1">You can call <code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">e.preventDefault()</code></li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">input</code> fires after DOM is updated (if not prevented)</li>
+                </ol>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">IME Composition Active</h4>
+                <ol class="m-0 pl-6 text-sm text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">beforeinput</code> may <strong>not fire</strong> for formatting shortcuts</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">input</code> fires directly (cannot prevent)</li>
+                  <li class="mb-1">Browser applies default formatting</li>
+                </ol>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Collapsed Selection</h4>
+                <ol class="m-0 pl-6 text-sm text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">beforeinput</code> may or may not fire (browser-dependent)</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">input</code> typically <strong>does not fire</strong></li>
+                  <li class="mb-1">Browser may toggle "formatting state" for next character</li>
+                </ol>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Collapsed + IME Composition</h4>
+                <ol class="m-0 pl-6 text-sm text-text-secondary">
+                  <li class="mb-1">Most unpredictable case</li>
+                  <li class="mb-1">Events may fire in unexpected order or not at all</li>
+                  <li class="mb-1">Browser behavior varies significantly</li>
+                </ol>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Mobile Text Prediction (Android Samsung Keyboard)</h4>
+                <ol class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">beforeinput</code> may not fire before suggestion insertion</li>
+                  <li class="mb-1">Multiple <code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">input</code> events may fire for a single suggestion</li>
+                  <li class="mb-1">Suggested text inserted as bulk (full phrase) rather than character-by-character</li>
+                  <li class="mb-1">Event timing differs from manual typing</li>
+                </ol>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox title="Known Browser Differences">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">During IME composition: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> may not fire for <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">formatBold</code></li>
+                  <li class="mb-1">Collapsed selection: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">input</code> does not fire, only <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code></li>
+                  <li class="mb-1">Toggles formatting state for next typed character</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">More consistent event firing during composition</li>
+                  <li class="mb-1">Collapsed selection: May fire both events or neither</li>
+                  <li class="mb-1">Behavior can vary by OS</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Different event patterns, especially on macOS</li>
+                  <li class="mb-1">IME composition handling differs from Chrome</li>
+                  <li class="mb-1">May use different <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">inputType</code> values</li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome on Android (Samsung Keyboard)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Text prediction/suggestion: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> may not fire before suggestion insertion</li>
+                  <li class="mb-1">Suggested text inserted as bulk, causing multiple <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">input</code> events</li>
+                  <li class="mb-1">Event timing differs from manual typing</li>
+                  <li class="mb-1">May replace more content than expected when selecting suggestions</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editors handle these edge cases differently. Here's how they approach IME composition and collapsed selection:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Handling Composition + Formatting"
+            description="Slate checks composition state before applying formatting:"
+            code={slateComposition}
+            features={[
+              '<strong>Composition detection:</strong> Checks <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.isComposing</code> before handling formatBold.',
+              '<strong>Deferred formatting:</strong> Can store formatting intent and apply after composition ends.',
+              '<strong>State management:</strong> Maintains formatting state separately from DOM.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Handling Composition + Formatting"
+            description="ProseMirror uses keymap and composition state:"
+            code={prosemirrorComposition}
+            features={[
+              '<strong>View.composing:</strong> Checks <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">view.composing</code> to detect active composition.',
+              '<strong>Keymap handling:</strong> Can defer formatting in keymap when composition is active.',
+              '<strong>Transaction-based:</strong> Formats are applied as transactions, allowing better control.',
+            ]}
+          />
+
+          <DocInfoBox title="Best Practices" class="mt-6">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">
+                <strong>Always check composition state:</strong> Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.isComposing</code> or <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">view.composing</code> before handling formatting.
+              </li>
+              <li class="mb-2">
+                <strong>Handle collapsed selection separately:</strong> Check <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">selection.isCollapsed</code> and implement toggle behavior for formatting state.
+              </li>
+              <li class="mb-2">
+                <strong>Listen to both events:</strong> Handle both <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> to catch all cases.
+              </li>
+              <li class="mb-2">
+                <strong>Test across browsers:</strong> Behavior varies significantly, especially for IME composition.
+              </li>
+              <li class="mb-2">
+                <strong>Maintain formatting state:</strong> Don't rely solely on DOM state; maintain your own formatting state for collapsed selections.
+              </li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Mobile-Specific Input Types">
+          <p class="m-0 mb-4">
+            Mobile devices and modern browsers support additional inputType values that are particularly relevant for mobile input methods:
+          </p>
+          
+          <DocInfoBox title="Mobile Input Types">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Paste & Drop</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">insertFromPaste</code> - Content pasted from clipboard</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">insertFromDrop</code> - Content dropped via drag-and-drop</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">insertFromYank</code> - Content yanked (some browsers)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">IME Composition</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">insertCompositionText</code> - Text inserted during IME composition</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">deleteByComposition</code> - Content deleted during IME composition</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Auto-complete & Prediction</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">insertReplacementText</code> - Text replaced by auto-complete or suggestion</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">insertFromPredictiveText</code> - Predictive text insertion (some browsers)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Word-level Deletion</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">deleteWordBackward</code> - Delete word backward (Ctrl+Backspace)</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">deleteWordForward</code> - Delete word forward (Ctrl+Delete)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Other Deletion Types</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">deleteByCut</code> - Content deleted via cut operation</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-xs">deleteByDrag</code> - Content deleted via drag operation</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+          
+          <DocAlert type="info" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Note:</strong> Not all browsers support all inputType values. Mobile browsers, especially Android keyboards (like Samsung Keyboard), may trigger non-standard inputType values or use standard ones in unexpected ways.
+            </p>
+            <p class="m-0 text-sm">
+              See <a href="/docs/input-types/insertText#mobile-keyboard-text-prediction-android" class="text-accent-primary underline">insertText - Mobile Keyboard Text Prediction</a> for Android-specific behavior.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Testing & Debugging">
+          <p class="m-0 mb-4">
+            To test these edge cases, use the playground and monitor both <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> events:
+          </p>
+          <DocCodeBlock code={beforeInputExample} />
+          
+          <DocAlert type="info" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Test scenarios:</strong>
+            </p>
+            <ul class="m-0 mt-2 pl-6 text-sm">
+              <li class="mb-1">Select text → Press Cmd/Ctrl + B (normal case)</li>
+              <li class="mb-1">Collapsed cursor → Press Cmd/Ctrl + B (collapsed case)</li>
+              <li class="mb-1">Start IME composition → Press Cmd/Ctrl + B (composition case)</li>
+              <li class="mb-1">Collapsed + IME composition → Press Cmd/Ctrl + B (worst case)</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/events" class="text-accent-primary no-underline">
+                Events in contenteditable →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+                IME & Composition →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/execCommand-alternatives" class="text-accent-primary no-underline">
+                execCommand alternatives →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/playground" class="text-accent-primary no-underline">
+                Test in the playground →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

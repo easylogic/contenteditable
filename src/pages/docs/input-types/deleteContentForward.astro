@@ -1,0 +1,193 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteContentForward"
+  description="How deleteContentForward inputType deletes content forward (Delete key) and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContentForward</code> inputType is triggered when the user presses the <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Delete</kbd> key. It deletes the character or content after the cursor position (forward delete).
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Cursor position">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 5)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Delete key</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>orld&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Character after cursor deleted</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Difference from deleteContentBackward">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteContentForward (Delete key)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Deletes character/content <strong>after</strong> cursor</li>
+                  <li class="mb-1">Forward deletion</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteContentBackward (Backspace key)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Deletes character/content <strong>before</strong> cursor</li>
+                  <li class="mb-1">Backward deletion</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + deleteContentForward">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing the Delete key may cancel the composition or delete more than expected. The behavior varies significantly between browsers and IME implementations.
+            </p>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/input-types/deleteContentBackward#ime-composition--backspace" class="text-accent-primary underline">deleteContentBackward</a> for similar issues with Backspace.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle forward deletion similarly to backward deletion. Here's how major editors implement deleteContentForward:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Forward Deletion"
+            description="Slate uses Transforms.delete() without reverse flag:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteContentForward') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Delete selected content
+      Transforms.delete(editor);
+    } else if (selection) {
+      // Delete character after cursor (forward)
+      Transforms.delete(editor, { unit: 'character' });
+    }
+  }
+});`}
+            features={[
+              '<strong>Transforms.delete:</strong> Deletes content forward (default direction).',
+              '<strong>Same API:</strong> Uses same method as backward deletion, just without <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">reverse: true</code>.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Forward Deletion"
+            description="ProseMirror uses deleteSelection and forwardDelete commands:"
+            code={`import { deleteSelection, forwardDelete } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteContentForward') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (state.selection.empty) {
+      // Collapsed selection - use forwardDelete command
+      if (forwardDelete(state, dispatch)) {
+        // Handled
+      }
+    } else {
+      // Non-collapsed - delete selection
+      if (deleteSelection(state, dispatch)) {
+        // Handled
+      }
+    }
+  }
+});`}
+            features={[
+              '<strong>forwardDelete command:</strong> Handles forward deletion for collapsed selections.',
+              '<strong>Same pattern:</strong> Similar to backspace handling but uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">forwardDelete</code> command.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Forward Deletion"
+            description="Draft.js uses Modifier.removeRange() with forward direction:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleDeleteForward(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  let newSelection = selection;
+  if (selection.isCollapsed) {
+    // Move selection forward by one character
+    newSelection = selection.merge({
+      focusOffset: Math.min(
+        selection.focusOffset + 1,
+        selection.focusBlock.getLength()
+      ),
+    });
+  }
+  
+  const newContentState = Modifier.removeRange(
+    contentState,
+    newSelection,
+    'forward'
+  );
+  
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'remove-range'
+  );
+}`}
+            features={[
+              '<strong>Selection adjustment:</strong> For collapsed selection, extends selection forward before deleting.',
+              '<strong>Forward direction:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'forward\'</code> direction in <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">removeRange</code>.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContentBackward" class="text-accent-primary no-underline">
+                deleteContentBackward →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

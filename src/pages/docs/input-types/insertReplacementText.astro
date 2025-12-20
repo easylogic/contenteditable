@@ -1,0 +1,219 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertReplacementText"
+  description="How insertReplacementText inputType handles auto-complete and text replacement operations, especially on mobile devices."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> inputType is triggered when text is replaced by auto-complete, predictive text, or suggestion features. This is particularly common on mobile devices with smart keyboards that offer word suggestions and auto-complete.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Auto-complete suggestion selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (User typing "hel")</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40">hel</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Keyboard suggests "hello"</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After selecting suggestion "hello"</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40">hello</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Partial text replaced with full suggestion</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Mobile-Specific Behavior">
+          <DocAlert type="error" title="⚠️ Android Samsung Keyboard">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Android + Samsung Keyboard:</strong> When text prediction/suggestion features are enabled, selecting suggested text may cause unexpected behavior:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> may fire with the full suggested phrase</li>
+              <li class="mb-1">Multiple <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events may fire for a single suggestion selection</li>
+              <li class="mb-1">The <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event may not fire before replacement</li>
+              <li class="mb-1">Suggested text may replace more content than expected (entire words instead of partial words)</li>
+              <li class="mb-1">Event timing may differ from manual typing, making it difficult to track changes accurately</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> Text replacement can interfere with custom editing logic, undo/redo stacks, and change tracking systems.
+            </p>
+          </DocAlert>
+
+          <DocInfoBox title="iOS Auto-complete" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">iOS keyboards may use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> for QuickType suggestions</li>
+              <li class="mb-2">Behavior is generally more predictable than Android keyboards</li>
+              <li class="mb-2">May replace partial words or entire words depending on context</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser Support">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge (Desktop)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">May use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">insertReplacementText</code> for browser autocomplete features</li>
+                  <li class="mb-1">Less common than on mobile devices</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Mobile Browsers</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">More commonly used for keyboard suggestions and auto-complete</li>
+                  <li class="mb-1">Behavior varies significantly between keyboard apps and browsers</li>
+                  <li class="mb-1">May trigger multiple events for a single replacement</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Handling insertReplacementText">
+          <DocInfoBox title="Best Practices">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Monitor both <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> events to catch all text replacements</li>
+              <li class="mb-2">Compare DOM state before and after events to detect bulk text replacements</li>
+              <li class="mb-2">Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.data</code> property to identify replaced text vs manual typing</li>
+              <li class="mb-2">Consider disabling text prediction via <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">autocomplete="off"</code> or <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">spellcheck="false"</code> if it interferes with your use case</li>
+              <li class="mb-2">Handle <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> similarly to <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertText</code>, but be aware that it may replace existing content</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle text replacement similarly to text insertion. Here's how major editors implement insertReplacementText:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Text Replacement Handling"
+            description="Slate handles replacement by deleting old text and inserting new text:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertReplacementText' && e.data) {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Delete selected text first
+      Transforms.delete(editor);
+    }
+    
+    // Insert replacement text
+    Transforms.insertText(editor, e.data);
+  }
+});`}
+            features={[
+              '<strong>Two-step process:</strong> Deletes old text, then inserts replacement text.',
+              '<strong>Selection handling:</strong> Handles both collapsed and non-collapsed selections.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Text Replacement Handling"
+            description="ProseMirror uses replaceSelection to handle replacement:"
+            code={`import { insertText } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertReplacementText' && e.data) {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Replace selection with new text
+    if (insertText(state, e.data, state.selection.$from.marks(), dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>insertText command:</strong> Automatically replaces selection with new text.',
+              '<strong>Mark preservation:</strong> Current marks are applied to replacement text.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Text Replacement Handling"
+            description="Draft.js uses Modifier.replaceText to handle replacement:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleReplacementText(editorState, text) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  // Replace selection with new text
+  const newContentState = Modifier.replaceText(
+    contentState,
+    selection,
+    text,
+    editorState.getCurrentInlineStyle()
+  );
+  
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'insert-characters'
+  );
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertReplacementText' && e.data) {
+    e.preventDefault();
+    const newState = handleReplacementText(editorState, e.data);
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>Modifier.replaceText:</strong> Replaces selection with new text in one operation.',
+              '<strong>Style preservation:</strong> Current inline styles are applied to replacement text.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertText" class="text-accent-primary no-underline">
+                insertText →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertText#mobile-keyboard-text-prediction-android" class="text-accent-primary no-underline">
+                insertText - Mobile Keyboard Text Prediction →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

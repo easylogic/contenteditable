@@ -1,0 +1,207 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatRemove"
+  description="How formatRemove inputType removes formatting from selected text and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatRemove</code> inputType is triggered when the user removes formatting from selected text (typically via a "Remove Formatting" command or toolbar button). The browser removes formatting elements (bold, italic, underline, etc.) from the selected content.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Formatted text selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Formatted text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold italic">&lt;strong&gt;&lt;em&gt;world&lt;/em&gt;&lt;/strong&gt;</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After formatRemove</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">All formatting removed, plain text remains</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="What Formatting is Removed">
+          <DocInfoBox>
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">formatRemove</code> typically removes:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Text formatting: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;strong&gt;</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;em&gt;</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;u&gt;</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;s&gt;</code></li>
+              <li class="mb-2">Font styling: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">font-size</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">font-family</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">color</code></li>
+              <li class="mb-2">Inline styles applied via <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;span&gt;</code> elements</li>
+              <li class="mb-2">May or may not remove links (<code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;a&gt;</code>) depending on browser</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Removes most inline formatting elements</li>
+                  <li class="mb-1">May preserve block-level formatting (paragraphs, lists)</li>
+                  <li class="mb-1">Links may or may not be removed depending on context</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">May handle certain formatting elements differently</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Formatting removal behavior may differ</li>
+                  <li class="mb-1">May preserve more formatting than other browsers</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle format removal differently. Here's how major editors implement formatRemove:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Format Removal"
+            description="Slate removes all marks from selected text:"
+            code={`import { Editor, Transforms, Text } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatRemove') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection) {
+      // Remove all marks from selected text
+      Transforms.unsetNodes(editor, Object.keys(Editor.marks(editor) || {}), {
+        match: n => Text.isText(n),
+        split: true,
+      });
+    }
+  }
+});`}
+            features={[
+              '<strong>Transforms.unsetNodes:</strong> Removes all marks from text nodes in selection.',
+              '<strong>Mark removal:</strong> Clears all formatting marks (bold, italic, underline, etc.).',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Format Removal"
+            description="ProseMirror removes all marks from selection:"
+            code={`import { removeMark } from 'prosemirror-commands';
+import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatRemove') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Remove all marks from selection
+    const { from, to } = state.selection;
+    const tr = state.tr.removeMark(from, to);
+    
+    // Remove each mark type individually
+    Object.values(schema.marks).forEach(mark => {
+      tr.removeMark(from, to, mark);
+    });
+    
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>removeMark:</strong> Removes marks from selection range.',
+              '<strong>All marks:</strong> Iterates through all mark types in schema to remove them.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Format Removal"
+            description="Draft.js removes inline styles:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleFormatRemove(editorState) {
+  // Remove all inline styles
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  // Get all inline styles
+  const inlineStyles = editorState.getCurrentInlineStyle();
+  
+  // Remove each style
+  let newState = editorState;
+  inlineStyles.forEach(style => {
+    newState = RichUtils.toggleInlineStyle(newState, style);
+  });
+  
+  return newState;
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatRemove') {
+    e.preventDefault();
+    const newState = handleFormatRemove(editorState);
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>RichUtils.toggleInlineStyle:</strong> Toggles each inline style off to remove formatting.',
+              '<strong>Style iteration:</strong> Iterates through all active inline styles to remove them.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatBold" class="text-accent-primary no-underline">
+                formatBold →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatItalic" class="text-accent-primary no-underline">
+                formatItalic →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

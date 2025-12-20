@@ -1,7 +1,10 @@
 ---
-import SiteNav from '../../components/SiteNav.astro';
-import DocsSidebar from '../../components/DocsSidebar.astro';
-import BaseHead from '../../components/BaseHead.astro';
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../components/EditorExample.astro';
 import '../../styles/global.css';
 
 const applyBoldCode = `function applyBold() {
@@ -28,254 +31,456 @@ const beforeInputCode = `element.addEventListener('beforeinput', (e) => {
     applyBold();
   }
 });`;
+
+const slateBoldCode = `import { Editor, Transforms } from 'slate';
+import { ReactEditor } from 'slate-react';
+
+function handleFormatBold(editor: Editor) {
+  const isActive = isBoldActive(editor);
+  Transforms.setNodes(
+    editor,
+    { bold: !isActive },
+    { match: n => Text.isText(n), split: true }
+  );
+}
+
+// In beforeinput handler
+if (e.inputType === 'formatBold') {
+  e.preventDefault();
+  handleFormatBold(editor);
+}`;
+
+const prosemirrorBoldCode = `import { toggleMark } from 'prosemirror-commands';
+import { schema } from './schema';
+
+function handleFormatBold(state, dispatch) {
+  return toggleMark(schema.marks.strong)(state, dispatch);
+}
+
+// In keymap
+{
+  'Mod-b': (state, dispatch) => {
+    return handleFormatBold(state, dispatch);
+  }
+}`;
+
+const draftjsBoldCode = `import { RichUtils } from 'draft-js';
+
+function handleFormatBold(editorState) {
+  return RichUtils.toggleInlineStyle(editorState, 'BOLD');
+}
+
+// In key binding function
+function myKeyBindingFn(e) {
+  if (e.keyCode === 66 && (e.ctrlKey || e.metaKey)) {
+    return 'bold';
+  }
+  return getDefaultKeyBinding(e);
+}
+
+// In key command handler
+function handleKeyCommand(command) {
+  if (command === 'bold') {
+    const newState = handleFormatBold(editorState);
+    setEditorState(newState);
+    return 'handled';
+  }
+  return 'not-handled';
+}`;
 ---
 
-<html lang="en">
-  <head>
-    <BaseHead title="execCommand alternatives – contenteditable.lab" description="Modern alternatives to the deprecated execCommand API." />
-  </head>
-  <body>
-    <SiteNav />
-    <main
-      style="
-        display: flex;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-      "
-    >
-      <DocsSidebar currentPath={Astro.url.pathname} />
-
-      <section
-        style="
-          flex: 1;
-          max-width: 1120px;
-          margin: 0 auto;
-          padding: 1.75rem 1.25rem 2.5rem;
-          width: 100%;
-        "
-      >
-      <header style="margin-bottom: 2rem;">
-        <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
-          <a href="/docs" style="color: var(--text-muted); text-decoration: none;">Documentation</a>
-          <span style="color: var(--text-faint); margin: 0 0.5rem;">/</span>
-          <span style="color: var(--text-primary);">execCommand alternatives</span>
-        </nav>
-        <h1
-          style="
-            font-size: 2rem;
-            line-height: 1.1;
-            margin: 0 0 0.5rem 0;
-          "
-        >
-          execCommand alternatives
-        </h1>
-        <p style="margin: 0; font-size: 0.95rem; color: var(--text-secondary);">
-          Modern alternatives to the deprecated execCommand API for formatting and editing operations.
-        </p>
-      </header>
-
-      <article
-        style="
-          border-radius: 0.75rem;
-          border: 1px solid var(--border-light);
-          background: var(--bg-surface);
-          padding: 1.5rem 1.75rem;
-          font-size: 0.9rem;
-          line-height: 1.7;
-        "
-      >
-        <section style="margin-bottom: 2rem;">
-          <div style="background: var(--accent-secondary-light); border-left: 4px solid var(--accent-secondary); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
-            <strong style="display: block; margin-bottom: 0.3rem;">⚠️ Deprecated</strong>
-            <p style="margin: 0; font-size: 0.85rem;">
-              The <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">document.execCommand()</code> API has been deprecated and may stop working in future browser versions. Modern alternatives should be used instead.
-            </p>
-          </div>
-        </section>
-
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Using the Selection API
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
-            Instead of <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">execCommand('bold')</code>, you can wrap the selected text in a <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;strong&gt;</code> element using the Selection and Range APIs.
+<DocLayout
+  title="execCommand alternatives"
+  description="Modern alternatives to the deprecated execCommand API for formatting and editing operations."
+  currentPath={Astro.url.pathname}
+>
+        <DocAlert type="error" title="⚠️ Deprecated - Do Not Use">
+          <p class="m-0 mb-2 text-sm">
+            The <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">document.execCommand()</code> API has been <strong>deprecated</strong> and should not be used in new code. It may stop working in future browser versions, and its behavior is inconsistent across browsers.
           </p>
-          <pre
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              overflow-x: auto;
-              font-size: 0.85rem;
-              line-height: 1.6;
-            "
-          ><code>{applyBoldCode}</code></pre>
-        </section>
+          <p class="m-0 text-sm">
+            <strong>Always use modern alternatives:</strong> Selection API, Range API, and the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> instead.
+          </p>
+        </DocAlert>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Using beforeinput event
-          </h2>
-            <p style="margin: 0 0 1rem 0;">
-              The <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> event allows you to intercept and modify input before it's committed to the DOM. Browser support varies by version, so always test in your target browsers.
-            </p>
-          <pre
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              overflow-x: auto;
-              font-size: 0.85rem;
-              line-height: 1.6;
-            "
-          ><code>{beforeInputCode}</code></pre>
-        </section>
+        <DocSection title="execCommand to inputType Mapping">
+          <p class="m-0 mb-4">
+            Many <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">execCommand</code> operations are now available as <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values in the <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> events. This allows you to intercept and handle formatting operations before they're applied to the DOM.
+          </p>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Common operations
-          </h2>
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
-              Bold, Italic, Underline
-            </h3>
-            <p style="margin: 0 0 0.5rem 0;">
-              Wrap selected text in <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;strong&gt;</code>, <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;em&gt;</code>, or <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">&lt;u&gt;</code> elements using the Selection API.
-            </p>
-          </div>
+          <DocInfoBox title="Common execCommand to inputType Mappings">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-border-light">
+                    <th class="text-left p-2 font-semibold text-text-primary">execCommand</th>
+                    <th class="text-left p-2 font-semibold text-text-primary">inputType</th>
+                    <th class="text-left p-2 font-semibold text-text-primary">Browser Behavior</th>
+                    <th class="text-left p-2 font-semibold text-text-primary">Keyboard Shortcut</th>
+                  </tr>
+                </thead>
+                <tbody class="text-text-secondary">
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">bold</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatBold</code></td>
+                    <td class="p-2">Wraps selected text in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;strong&gt;</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;b&gt;</code> element. If already bold, removes formatting.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + B</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">italic</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatItalic</code></td>
+                    <td class="p-2">Wraps selected text in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;em&gt;</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;i&gt;</code> element. Toggles italic formatting.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + I</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">underline</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatUnderline</code></td>
+                    <td class="p-2">Wraps selected text in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;u&gt;</code> element. Toggles underline formatting.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + U</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">strikeThrough</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatStrikeThrough</code></td>
+                    <td class="p-2">Wraps selected text in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;s&gt;</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;strike&gt;</code> element. Toggles strikethrough.</td>
+                    <td class="p-2">No standard shortcut</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">createLink</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatCreateLink</code></td>
+                    <td class="p-2">Wraps selected text in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;a href="..."&gt;</code> element. Prompts for URL if not provided.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + K</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertUnorderedList</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertUnorderedList</code></td>
+                    <td class="p-2">Wraps selected paragraphs in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;ul&gt;</code> with <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;li&gt;</code> items. Converts existing list if present.</td>
+                    <td class="p-2">No standard shortcut</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertOrderedList</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertOrderedList</code></td>
+                    <td class="p-2">Wraps selected paragraphs in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;ol&gt;</code> with <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;li&gt;</code> items. Converts existing list if present.</td>
+                    <td class="p-2">No standard shortcut</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatBlock</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatBlock</code></td>
+                    <td class="p-2">Wraps selected content in block element (e.g., <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;h1&gt;</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;div&gt;</code>). Replaces existing block if selection spans entire block.</td>
+                    <td class="p-2">No standard shortcut</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertHTML</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertHTML</code></td>
+                    <td class="p-2">Inserts HTML string at selection. Replaces selection if text is selected. Parses HTML and inserts as DOM nodes.</td>
+                    <td class="p-2">N/A (programmatic only)</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">delete</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContent</code></td>
+                    <td class="p-2">Deletes selected content. If collapsed, deletes character after cursor (forward delete).</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Delete</kbd> or <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Backspace</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">forwardDelete</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContentForward</code></td>
+                    <td class="p-2">Deletes character after cursor (forward delete). Equivalent to Delete key.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Delete</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">undo</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">historyUndo</code></td>
+                    <td class="p-2">Undoes last operation. Browser maintains undo stack for contenteditable regions.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Z</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">redo</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">historyRedo</code></td>
+                    <td class="p-2">Redoes last undone operation. Browser maintains redo stack.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Shift + Z</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">selectAll</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">selectAll</code></td>
+                    <td class="p-2">Selects all content in the contenteditable element.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + A</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">copy</code></td>
+                    <td class="p-2">N/A (Clipboard API)</td>
+                    <td class="p-2">Copies selected content to clipboard. Use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">navigator.clipboard.writeText()</code> or Clipboard API instead.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + C</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">cut</code></td>
+                    <td class="p-2">N/A (Clipboard API)</td>
+                    <td class="p-2">Cuts selected content to clipboard. Use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">navigator.clipboard.writeText()</code> and <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">range.deleteContents()</code> instead.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + X</kbd></td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">paste</code></td>
+                    <td class="p-2"><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code></td>
+                    <td class="p-2">Pastes content from clipboard. Use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">navigator.clipboard.readText()</code> or Clipboard API, then insert at selection.</td>
+                    <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + V</kbd></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </DocInfoBox>
 
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
-              Insert HTML
-            </h3>
-            <p style="margin: 0 0 0.5rem 0;">
-              Instead of <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">execCommand('insertHTML')</code>, create DOM nodes and insert them at the selection position.
+          <DocAlert type="info" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Note:</strong> Not all <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">execCommand</code> operations have corresponding <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values. Some operations (like <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">copy</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">cut</code>) should use the Clipboard API instead.
             </p>
-          </div>
+          </DocAlert>
+        </DocSection>
 
-          <div>
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
-              Delete content
-            </h3>
-            <p style="margin: 0 0 0.5rem 0;">
-              Use <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.deleteContents()</code> to remove selected content programmatically.
-            </p>
-          </div>
-        </section>
+        <DocSection title="Using beforeinput with inputType">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event fires before formatting operations are applied. You can intercept these events, prevent the default behavior, and implement your own formatting logic using the Selection API.
+          </p>
+          <DocCodeBlock code={beforeInputCode} />
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Challenges
-          </h2>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
-              <strong>Complexity:</strong> The Selection API approach is more complex than execCommand and requires careful handling of edge cases (empty selections, collapsed ranges, etc.).
-            </p>
-          </div>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
-              <strong>Browser differences:</strong> Selection and Range behavior varies across browsers, especially when dealing with complex DOM structures or IME composition.
-            </p>
-          </div>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
-              <strong>No standard replacement:</strong> There is no single, standardized replacement for execCommand. Each operation must be implemented separately using the Selection API.
-            </p>
-          </div>
-        </section>
+        <DocSection title="Editor-Specific Implementations">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle formatting operations differently. Here's how major editors implement bold formatting as an example:
+          </p>
 
-        <section>
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Related resources
-          </h2>
-          <ul style="margin: 0; padding-left: 1.5rem;">
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/docs/selection-api"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+          <EditorExample
+            editor="slate"
+            title="Bold Formatting"
+            description="Slate uses Transforms.setNodes() to toggle formatting marks on text nodes:"
+            code={slateBoldCode}
+            features={[
+              '<strong>Mark-based:</strong> Formatting is stored as properties on text nodes (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">{ bold: true }</code>).',
+              '<strong>Transforms API:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Transforms.setNodes()</code> to apply/remove formatting.',
+              '<strong>Serialization:</strong> Marks are converted to HTML elements (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;</code>) during rendering.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Bold Formatting"
+            description="ProseMirror uses mark commands and keymaps to handle formatting:"
+            code={prosemirrorBoldCode}
+            features={[
+              '<strong>Mark system:</strong> Formatting is represented as marks in the document schema (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">schema.marks.strong</code>).',
+              '<strong>Commands:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">toggleMark()</code> command to apply/remove marks.',
+              '<strong>Keymap:</strong> Keyboard shortcuts are defined in keymap plugins (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Mod-b</code> for bold).',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Bold Formatting"
+            description="Draft.js uses inline styles and RichUtils to handle formatting:"
+            code={draftjsBoldCode}
+            features={[
+              '<strong>Inline styles:</strong> Formatting is stored as inline style strings (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'BOLD\'</code>) in the ContentState.',
+              '<strong>RichUtils:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">RichUtils.toggleInlineStyle()</code> to toggle formatting.',
+              '<strong>Key bindings:</strong> Custom key binding function maps keyboard shortcuts to commands.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Using the Selection API">
+          <p class="m-0 mb-4">
+            Instead of <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">execCommand('bold')</code>, you can wrap the selected text in a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;</code> element using the Selection and Range APIs.
+          </p>
+          <DocCodeBlock code={applyBoldCode} />
+        </DocSection>
+
+        <DocSection title="Platform-Specific Issues & Edge Cases">
+          <p class="m-0 mb-4">
+            The behavior of <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> events and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values can vary significantly depending on browser, device, OS, and keyboard type. These variations can cause unexpected behavior when implementing execCommand alternatives.
+          </p>
+
+          <DocSection title="Browser-Specific Issues">
+            <DocAlert type="warning" title="⚠️ Safari: beforeinput Limitations" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Safari:</strong> While Safari supports <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> events, there may be differences in behavior compared to Chrome/Edge:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Some <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values may not be supported or may behave differently</li>
+                <li class="mb-1">Event timing may differ, especially during IME composition</li>
+                <li class="mb-1">Formatting operations may fire in different order or with different properties</li>
+                <li class="mb-1">Older Safari versions may have limited or no support</li>
+              </ul>
+              <p class="m-0 text-sm">
+                <strong>Best Practice:</strong> Always test <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> behavior in Safari and provide fallbacks for unsupported <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values.
+              </p>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Chrome/Edge: Event Order Variations" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Chrome/Edge:</strong> The order of <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> events may differ from other browsers, especially during IME composition.
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">In some cases, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> may fire before <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code></li>
+                <li class="mb-1">This can cause timing issues when handling formatting during composition</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Firefox: Different inputType Values" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Firefox:</strong> May use different <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values or fire events in different orders than Chrome/Edge.
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Some formatting operations may not have corresponding <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values</li>
+                <li class="mb-1">Event timing may differ, especially for complex operations</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="OS & Keyboard-Specific Issues">
+            <DocAlert type="error" title="⚠️ macOS + Korean IME: Formatting Events Don't Fire" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>macOS + Korean IME (2벌식, 3벌식, etc.):</strong> During IME composition with a collapsed cursor, pressing formatting shortcuts (e.g., <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + B</kbd>, <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + I</kbd>) may cause unexpected behavior:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatBold</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatItalic</code>, etc. do <strong>not fire</strong></li>
+                <li class="mb-1">Instead, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> may fire</li>
+                <li class="mb-1">Formatting is completely ignored during composition</li>
+                <li class="mb-1">User must commit composition first, then apply formatting</li>
+              </ul>
+              <p class="m-0 text-sm">
+                <strong>Impact:</strong> Users cannot apply formatting while composing Korean text, breaking expected workflow.
+              </p>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Windows: IME Behavior Varies" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Windows:</strong> IME behavior varies by Windows version and IME provider (Microsoft IME, Google IME, etc.).
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Different IME engines may fire events at different times</li>
+                <li class="mb-1">Formatting shortcuts during composition may behave differently</li>
+                <li class="mb-1">Event timing can vary between Windows 10 and Windows 11</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Keyboard Layout Differences" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Different keyboard layouts:</strong> Korean IME layouts (2벌식, 3벌식, 390 자판) may affect when formatting events fire.
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Composition event timing differs between layouts</li>
+                <li class="mb-1">Formatting shortcuts may be intercepted differently</li>
+                <li class="mb-1">Event patterns can vary even for the same text input</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="Device-Specific Issues">
+            <DocAlert type="error" title="⚠️ Mobile Keyboards: Text Prediction Interference" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile devices (Android/iOS):</strong> Virtual keyboards with text prediction features can interfere with formatting operations:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>Android Samsung Keyboard:</strong> Text prediction may cause <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> to not fire before suggestion insertion</li>
+                <li class="mb-1"><strong>iOS QuickType:</strong> May use different <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values (<code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> vs <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromPredictiveText</code>)</li>
+                <li class="mb-1">Multiple <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events may fire for a single suggestion</li>
+                <li class="mb-1">Formatting shortcuts may not work as expected on mobile keyboards</li>
+                <li class="mb-1">Physical keyboard attachments may behave differently than virtual keyboards</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Tablet vs Desktop" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Tablets:</strong> Hybrid behavior between desktop and mobile:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">External keyboard may behave like desktop</li>
+                <li class="mb-1">On-screen keyboard may behave like mobile</li>
+                <li class="mb-1">Event patterns can switch dynamically</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="Selection State Issues">
+            <DocAlert type="warning" title="⚠️ Collapsed Selection: Events May Not Fire" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Collapsed selection (cursor only):</strong> When the selection is collapsed (no text selected), formatting operations may behave unexpectedly:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> may or may not fire (browser-dependent)</li>
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> typically <strong>does not fire</strong></li>
+                <li class="mb-1">Browser may toggle "formatting state" for next character instead</li>
+                <li class="mb-1">This makes it difficult to detect when formatting is applied</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ IME Composition + Collapsed Selection" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Most unpredictable case:</strong> Collapsed selection during IME composition:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Formatting events may fire in unexpected order or not at all</li>
+                <li class="mb-1">Browser behavior varies significantly</li>
+                <li class="mb-1">macOS Korean IME: Formatting shortcuts completely ignored</li>
+                <li class="mb-1">Windows IME: May or may not fire formatting events</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocInfoBox title="Best Practices for Handling Platform Differences" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Detect browser capabilities:</strong> Check if <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> is supported before relying on it</li>
+              <li class="mb-2"><strong>Handle both events:</strong> Listen to both <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> to catch all cases</li>
+              <li class="mb-2"><strong>Check composition state:</strong> Always check <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">isComposing</code> flag before handling formatting</li>
+              <li class="mb-2"><strong>Test across platforms:</strong> Test with different browsers, OS, keyboards, and devices</li>
+              <li class="mb-2"><strong>Provide fallbacks:</strong> Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">keydown</code> events as fallback for Safari</li>
+              <li class="mb-2"><strong>Monitor DOM changes:</strong> Compare DOM state before/after events to detect what actually changed</li>
+              <li class="mb-2"><strong>Handle edge cases:</strong> Account for collapsed selections, IME composition, and mobile keyboards</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Challenges">
+          <DocAlert type="warning" class="mb-4">
+            <p class="m-0 text-sm">
+              <strong>Complexity:</strong> The Selection API approach is more complex than execCommand and requires careful handling of edge cases (empty selections, collapsed ranges, cross-element selections, etc.).
+            </p>
+          </DocAlert>
+          <DocAlert type="warning" class="mb-4">
+            <p class="m-0 text-sm">
+              <strong>Browser differences:</strong> Selection and Range behavior varies across browsers, especially when dealing with complex DOM structures, IME composition, or nested formatting.
+            </p>
+          </DocAlert>
+          <DocAlert type="warning">
+            <p class="m-0 text-sm">
+              <strong>No standard replacement:</strong> There is no single, standardized replacement for execCommand. Each operation must be implemented separately using the Selection API, and behavior may differ from execCommand's original implementation.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types & Formatting Events →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/selection-api" class="text-accent-primary no-underline">
                 Selection API →
               </a>
             </li>
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/scenarios/scenario-execCommand-alternatives"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+            <li class="mb-2">
+              <a href="/docs/events" class="text-accent-primary no-underline">
+                Events in contenteditable →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/scenarios/scenario-execCommand-alternatives" class="text-accent-primary no-underline">
                 Browse execCommand-related cases →
               </a>
             </li>
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand"
-                target="_blank"
-                rel="noopener noreferrer"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+            <li class="mb-2">
+              <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand" target="_blank" rel="noopener noreferrer" class="text-accent-primary no-underline">
                 MDN: execCommand (deprecated) (external) →
               </a>
             </li>
           </ul>
-        </section>
-      </article>
-      </section>
-    </main>
-  </body>
-</html>
-
+        </DocSection>
+</DocLayout>

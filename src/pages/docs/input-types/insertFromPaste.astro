@@ -1,0 +1,279 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertFromPaste"
+  description="How insertFromPaste inputType handles paste operations and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code> inputType is triggered when the user pastes content from the clipboard (typically via <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + V</kbd>). The browser inserts the pasted content at the current selection position.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Text pasted at cursor">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor position)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After pasting "text "</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40">text </span>world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Pasted content inserted at cursor position</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Scenario: Rich text pasted (replaces selection)" class="mt-6">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After pasting "&lt;strong&gt;bold&lt;/strong&gt;"</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold">&lt;strong&gt;bold&lt;/strong&gt;</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Selected text replaced with pasted HTML</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Clipboard Data Access">
+          <DocInfoBox>
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              The <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event provides access to clipboard data via <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer</code>:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer.getData('text/plain')</code> - Plain text</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer.getData('text/html')</code> - HTML content</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer.files</code> - File list (for images, etc.)</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Preserves HTML structure when pasting from rich text sources</li>
+                  <li class="mb-1">May sanitize certain HTML elements for security</li>
+                  <li class="mb-1">Supports pasting images as <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;img&gt;</code> elements</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">May strip or modify HTML structure more aggressively</li>
+                  <li class="mb-1">Table structure may be lost when pasting from Excel/Sheets</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Preserves formatting by default</li>
+                  <li class="mb-1">No built-in "Paste as plain text" option</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Security Considerations">
+          <DocAlert type="warning" title="⚠️ XSS Risk">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Warning:</strong> Pasting HTML content can introduce XSS vulnerabilities. Always sanitize pasted HTML before inserting it into the DOM.
+            </p>
+            <p class="m-0 text-sm">
+              Use libraries like <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">DOMPurify</code> to sanitize HTML before insertion.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="IME Composition + Paste">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              Pasting during IME composition may cancel the active composition. The composition text may be lost or the paste may occur in an unexpected location.
+            </p>
+            <p class="m-0 text-sm">
+              When handling paste operations, check for active composition state before inserting content to avoid interrupting the user's input.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor Internal Model & DOM Synchronization">
+          <DocAlert type="warning" title="⚠️ Exception: Programmatic DOM Updates Clear Undo Stack">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When editors programmatically update DOM after paste:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">After converting pasted HTML to internal model and re-rendering DOM, browser's undo stack may be cleared</li>
+              <li class="mb-1">This is especially common in Safari - programmatic DOM changes clear the undo stack</li>
+              <li class="mb-1">Users may lose ability to undo previous operations after paste</li>
+              <li class="mb-1">Editor's internal undo stack and browser's undo stack become out of sync</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Workaround:</strong> Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">document.execCommand('insertHTML', false, html)</code> carefully, or fully manage your own undo stack when using preventDefault().
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle paste operations differently, often converting pasted HTML to their internal model format. Here's how major editors implement insertFromPaste:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Paste Handling"
+            description="Slate intercepts paste and converts HTML to Slate nodes:"
+            code={`import { Editor, Transforms } from 'slate';
+import { jsx } from 'slate-hyperscript';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPaste' && e.dataTransfer) {
+    e.preventDefault();
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    const plainText = e.dataTransfer.getData('text/plain');
+    
+    // Parse HTML and convert to Slate nodes
+    const fragment = new DOMParser().parseFromString(htmlString || plainText, 'text/html');
+    const nodes = Array.from(fragment.body.childNodes).map(node => {
+      // Convert DOM node to Slate node structure
+      // This is simplified - real implementation would be more complex
+      return jsx('element', { type: 'paragraph' }, [{ text: node.textContent || '' }]);
+    });
+    
+    // Insert nodes at selection
+    Transforms.insertNodes(editor, nodes);
+  }
+});`}
+            features={[
+              '<strong>HTML parsing:</strong> Parses HTML string into DOM, then converts to Slate nodes.',
+              '<strong>Model conversion:</strong> Converts browser HTML structure to Slate internal node model.',
+              '<strong>Sanitization:</strong> Should sanitize HTML before parsing to prevent XSS.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Paste Handling"
+            description="ProseMirror uses DOMParser to parse HTML into ProseMirror nodes:"
+            code={`import { DOMParser } from 'prosemirror-model';
+import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPaste' && e.dataTransfer) {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    const dom = new DOMParser(window).parseFromString(htmlString, 'text/html');
+    
+    // Parse HTML into ProseMirror nodes using schema
+    const fragment = DOMParser.fromSchema(schema).parse(dom.body);
+    
+    // Insert fragment at selection
+    const tr = state.tr.replaceSelection(fragment);
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>DOMParser:</strong> Uses ProseMirror\'s <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">DOMParser.fromSchema()</code> to parse HTML.',
+              '<strong>Schema-aware:</strong> HTML is parsed according to ProseMirror schema rules.',
+              '<strong>Transaction-based:</strong> Creates a transaction for undo/redo support.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Paste Handling"
+            description="Draft.js uses convertFromHTML to convert HTML to ContentState:"
+            code={`import { EditorState, ContentState } from 'draft-js';
+import { stateFromHTML } from 'draft-js-import-html';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPaste' && e.dataTransfer) {
+    e.preventDefault();
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    
+    // Convert HTML to ContentState
+    const contentState = stateFromHTML(htmlString);
+    
+    // Get current selection
+    const selection = editorState.getSelection();
+    
+    // Insert content at selection
+    const newContentState = Modifier.replaceWithFragment(
+      editorState.getCurrentContent(),
+      selection,
+      contentState.getBlockMap()
+    );
+    
+    const newState = EditorState.push(
+      editorState,
+      newContentState,
+      'insert-fragment'
+    );
+    
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>HTML import:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">stateFromHTML</code> to convert HTML to ContentState.',
+              '<strong>Block conversion:</strong> Converts HTML elements to Draft.js ContentBlocks.',
+              '<strong>Modifier API:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Modifier.replaceWithFragment</code> to insert content.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertHTML" class="text-accent-primary no-underline">
+                insertHTML →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertFromDrop" class="text-accent-primary no-underline">
+                insertFromDrop →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

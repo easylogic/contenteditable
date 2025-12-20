@@ -1,0 +1,176 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatIndent"
+  description="How formatIndent inputType applies indentation to paragraphs and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatIndent</code> inputType is triggered when the user increases indentation of selected paragraphs (typically via <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Tab</kbd> or toolbar button). The browser increases the left margin or padding of the affected elements.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Paragraph selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Paragraph selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">This is a paragraph.</span>&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After formatIndent</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p style="margin-left: 40px;"&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">This is a paragraph.</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Left margin increased (indented)</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Applies <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">margin-left</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">padding-left</code> via inline style</li>
+                  <li class="mb-1">Increment amount varies (typically 40px)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">May use different increment values</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Indentation behavior may differ</li>
+                  <li class="mb-1">May use different CSS properties</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle indentation differently. Here's how major editors implement formatIndent:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Indentation"
+            description="Slate applies indentation as a block property:"
+            code={`import { Editor, Transforms, Element } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatIndent') {
+    e.preventDefault();
+    
+    // Get current indent level
+    const [match] = Editor.nodes(editor, {
+      match: n => Element.isElement(n) && Editor.isBlock(editor, n),
+    });
+    
+    const currentIndent = match?.[0]?.indent || 0;
+    
+    // Increase indent
+    Transforms.setNodes(editor, {
+      indent: currentIndent + 1,
+    }, {
+      match: n => Element.isElement(n) && Editor.isBlock(editor, n),
+    });
+  }
+});`}
+            features={[
+              '<strong>Block property:</strong> Indentation is stored as a property on block elements.',
+              '<strong>Incremental:</strong> Increases indent level by 1 each time.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Indentation"
+            description="ProseMirror uses block attribute:"
+            code={`view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatIndent') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    const { $from } = state.selection;
+    
+    // Get current indent
+    const currentIndent = $from.node(-1)?.attrs.indent || 0;
+    
+    // Increase indent
+    const tr = state.tr.setNodeMarkup($from.before(-1), null, {
+      ...$from.node(-1).attrs,
+      indent: currentIndent + 1,
+    });
+    
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>Block attribute:</strong> Indentation is stored as an attribute on block nodes.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Indentation"
+            description="Draft.js uses block-level styles:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleIndent(editorState) {
+  // Draft.js may use block-level styles or custom block types for indentation
+  return RichUtils.onTab({ preventDefault: () => {} }, editorState, 4);
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatIndent') {
+    e.preventDefault();
+    const newState = handleIndent(editorState);
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>Tab handling:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">RichUtils.onTab()</code> for indentation.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatOutdent" class="text-accent-primary no-underline">
+                formatOutdent →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

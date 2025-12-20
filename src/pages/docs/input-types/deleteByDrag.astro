@@ -1,0 +1,191 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteByDrag"
+  description="How deleteByDrag inputType handles content deletion via drag operations and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteByDrag</code> inputType is triggered when content is deleted by dragging it out of a contenteditable element (typically to a non-editable area or external application). The browser removes the dragged content from the DOM.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Text dragged out of contenteditable">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After dragging "world" outside contenteditable</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Dragged content removed from DOM</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser Support">
+          <DocAlert type="info" title="ℹ️ Limited Browser Support">
+            <p class="m-0 mb-2 text-sm">
+              <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">deleteByDrag</code> is not widely supported across all browsers. Some browsers may use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">deleteContent</code> or other inputType values instead.
+            </p>
+            <p class="m-0 text-sm">
+              Always test drag-and-drop deletion behavior across different browsers and platforms.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Difference from deleteContent">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteByDrag</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Content is deleted by dragging it out of the element</li>
+                  <li class="mb-1">Requires drag-and-drop interaction</li>
+                  <li class="mb-1">May be used when dragging to external applications</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteContent</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Content is deleted via keyboard (Delete key) or programmatically</li>
+                  <li class="mb-1">No drag interaction required</li>
+                  <li class="mb-1">More commonly used inputType</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle drag deletion similarly to regular deletion. Here's how major editors implement deleteByDrag:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Drag Deletion Handling"
+            description="Slate handles drag deletion through drag events:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteByDrag') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Delete selected content
+      Transforms.delete(editor);
+    }
+  }
+});
+
+// Also handle dragend event
+element.addEventListener('dragend', (e) => {
+  // Content has been dragged out
+  // Selection may need to be updated
+});`}
+            features={[
+              '<strong>Transforms.delete:</strong> Uses same deletion method as regular delete operations.',
+              '<strong>Drag event handling:</strong> May need to handle <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">dragend</code> event separately.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Drag Deletion Handling"
+            description="ProseMirror handles drag deletion:"
+            code={`import { deleteSelection } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteByDrag') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (!state.selection.empty) {
+      if (deleteSelection(state, dispatch)) {
+        // Handled
+      }
+    }
+  }
+});`}
+            features={[
+              '<strong>deleteSelection command:</strong> Uses same deletion command as regular delete operations.',
+              '<strong>Selection handling:</strong> Requires non-empty selection.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Drag Deletion Handling"
+            description="Draft.js handles drag deletion:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleDragDeletion(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  if (!selection.isCollapsed) {
+    // Delete selected content
+    const newContentState = Modifier.removeRange(
+      contentState,
+      selection,
+      'forward'
+    );
+    
+    return EditorState.push(
+      editorState,
+      newContentState,
+      'remove-range'
+    );
+  }
+  
+  return editorState;
+}`}
+            features={[
+              '<strong>Modifier.removeRange:</strong> Uses same deletion method as regular delete operations.',
+              '<strong>Selection required:</strong> Requires non-empty selection.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContent" class="text-accent-primary no-underline">
+                deleteContent →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertFromDrop" class="text-accent-primary no-underline">
+                insertFromDrop →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

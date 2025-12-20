@@ -1,0 +1,206 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertFromPredictiveText"
+  description="How insertFromPredictiveText inputType handles predictive text insertion and varies across browsers and mobile devices."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromPredictiveText</code> inputType is triggered when text is inserted via predictive text features on mobile devices or smart keyboards. This is similar to <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> but specifically indicates that the text came from a predictive text system.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Predictive text suggestion selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (User typing "hel")</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40">hel</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Keyboard suggests "hello"</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After selecting suggestion "hello"</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40">hello</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Predictive text inserted, partial text replaced</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser Support">
+          <DocAlert type="info" title="ℹ️ Limited Browser Support">
+            <p class="m-0 mb-2 text-sm">
+              <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromPredictiveText</code> is not widely supported across all browsers. Many browsers and keyboards may use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> or <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertText</code> instead.
+            </p>
+            <p class="m-0 text-sm">
+              This inputType is more commonly found on mobile devices with advanced keyboard features.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Difference from insertReplacementText">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">insertFromPredictiveText</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Specifically indicates text from predictive text system</li>
+                  <li class="mb-1">Less commonly used</li>
+                  <li class="mb-1">May be used by some mobile keyboards</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">insertReplacementText</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">More general - covers auto-complete, suggestions, and replacements</li>
+                  <li class="mb-1">More widely supported</li>
+                  <li class="mb-1">Used by most browsers and keyboards</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Mobile-Specific Behavior">
+          <DocInfoBox>
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              On mobile devices, predictive text behavior may vary:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">iOS QuickType may use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertFromPredictiveText</code> or <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code></li>
+              <li class="mb-2">Android keyboards (Gboard, Samsung Keyboard) may use different inputType values</li>
+              <li class="mb-2">Behavior may differ between keyboard apps and browser combinations</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle predictive text insertion similarly to replacement text. Here's how major editors implement insertFromPredictiveText:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Predictive Text Handling"
+            description="Slate handles predictive text similarly to replacement text:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPredictiveText' && e.data) {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Delete selected text first
+      Transforms.delete(editor);
+    }
+    
+    // Insert predictive text
+    Transforms.insertText(editor, e.data);
+  }
+});`}
+            features={[
+              '<strong>Same pattern:</strong> Uses same handling as <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code>.',
+              '<strong>Text insertion:</strong> Inserts predictive text at selection position.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Predictive Text Handling"
+            description="ProseMirror handles predictive text:"
+            code={`import { insertText } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPredictiveText' && e.data) {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Replace selection with predictive text
+    if (insertText(state, e.data, state.selection.$from.marks(), dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>insertText command:</strong> Uses same command as regular text insertion.',
+              '<strong>Mark preservation:</strong> Current marks are applied to predictive text.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Predictive Text Handling"
+            description="Draft.js handles predictive text:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handlePredictiveText(editorState, text) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  // Replace selection with predictive text
+  const newContentState = Modifier.replaceText(
+    contentState,
+    selection,
+    text,
+    editorState.getCurrentInlineStyle()
+  );
+  
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'insert-characters'
+  );
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPredictiveText' && e.data) {
+    e.preventDefault();
+    const newState = handlePredictiveText(editorState, e.data);
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>Modifier.replaceText:</strong> Replaces selection with predictive text.',
+              '<strong>Style preservation:</strong> Current inline styles are applied.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertReplacementText" class="text-accent-primary no-underline">
+                insertReplacementText →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertText" class="text-accent-primary no-underline">
+                insertText →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

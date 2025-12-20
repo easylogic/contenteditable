@@ -1,0 +1,435 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const writeTextCode = `// Copy text to clipboard
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    console.log('Text copied to clipboard');
+  } catch (err) {
+    console.error('Failed to copy:', err);
+  }
+}`;
+
+const readTextCode = `// Read text from clipboard
+async function pasteText() {
+  try {
+    const text = await navigator.clipboard.readText();
+    console.log('Pasted text:', text);
+    return text;
+  } catch (err) {
+    console.error('Failed to read clipboard:', err);
+  }
+}`;
+
+const writeHTMLCode = `// Copy HTML to clipboard
+async function copyHTML(html) {
+  try {
+    const blob = new Blob([html], { type: 'text/html' });
+    const clipboardItem = new ClipboardItem({ 'text/html': blob });
+    await navigator.clipboard.write([clipboardItem]);
+  } catch (err) {
+    console.error('Failed to copy HTML:', err);
+  }
+}`;
+
+const readHTMLCode = `// Read HTML from clipboard
+async function pasteHTML() {
+  try {
+    const clipboardItems = await navigator.clipboard.read();
+    for (const item of clipboardItems) {
+      if (item.types.includes('text/html')) {
+        const blob = await item.getType('text/html');
+        const html = await blob.text();
+        return html;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to read HTML:', err);
+  }
+}`;
+
+const pasteEventCode = `// Handle paste event
+element.addEventListener('paste', async (e) => {
+  e.preventDefault(); // Prevent default paste behavior
+  
+  const clipboardData = e.clipboardData || window.clipboardData;
+  
+  // Get plain text
+  const text = clipboardData.getData('text/plain');
+  
+  // Get HTML (if available)
+  const html = clipboardData.getData('text/html');
+  
+  // Insert at selection
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    
+    if (html) {
+      // Parse and insert HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      const fragment = document.createDocumentFragment();
+      while (tempDiv.firstChild) {
+        fragment.appendChild(tempDiv.firstChild);
+      }
+      range.insertNode(fragment);
+    } else {
+      // Insert plain text
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+    }
+  }
+});`;
+
+const copyEventCode = `// Handle copy event
+element.addEventListener('copy', (e) => {
+  e.preventDefault(); // Prevent default copy behavior
+  
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const text = range.toString();
+    const html = range.cloneContents();
+    
+    // Set clipboard data
+    const clipboardData = e.clipboardData || window.clipboardData;
+    clipboardData.setData('text/plain', text);
+    
+    // Create HTML string from fragment
+    const tempDiv = document.createElement('div');
+    tempDiv.appendChild(html.cloneNode(true));
+    clipboardData.setData('text/html', tempDiv.innerHTML);
+  }
+});`;
+
+const cutEventCode = `// Handle cut event
+element.addEventListener('cut', (e) => {
+  e.preventDefault(); // Prevent default cut behavior
+  
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const text = range.toString();
+    const html = range.cloneContents();
+    
+    // Set clipboard data
+    const clipboardData = e.clipboardData || window.clipboardData;
+    clipboardData.setData('text/plain', text);
+    
+    // Create HTML string from fragment
+    const tempDiv = document.createElement('div');
+    tempDiv.appendChild(html.cloneNode(true));
+    clipboardData.setData('text/html', tempDiv.innerHTML);
+    
+    // Delete selected content
+    range.deleteContents();
+  }
+});`;
+
+const sanitizeHTMLCode = `// Sanitize HTML before pasting
+function sanitizeHTML(html) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  
+  // Remove script tags
+  const scripts = tempDiv.querySelectorAll('script');
+  scripts.forEach(script => script.remove());
+  
+  // Remove event handlers (onclick, etc.)
+  const allElements = tempDiv.querySelectorAll('*');
+  allElements.forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      if (attr.name.startsWith('on')) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  
+  return tempDiv.innerHTML;
+}`;
+
+const permissionCode = `// Check clipboard permissions
+async function checkClipboardPermission() {
+  try {
+    const result = await navigator.permissions.query({ name: 'clipboard-read' });
+    console.log('Clipboard read permission:', result.state);
+    
+    if (result.state === 'granted') {
+      // Can read clipboard
+    } else if (result.state === 'prompt') {
+      // Will prompt user
+    } else {
+      // Permission denied
+    }
+  } catch (err) {
+    // Permission API not supported
+    console.error('Permission check failed:', err);
+  }
+}`;
+---
+
+<DocLayout
+  title="Clipboard API"
+  description="Using the Clipboard API and paste events to handle copy, cut, and paste operations in contenteditable elements."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The Clipboard API provides programmatic access to the system clipboard. In contenteditable elements, you can use it alongside paste/copy/cut events to control how content is copied and pasted.
+          </p>
+          <DocAlert type="error" title="⚠️ Security Restrictions" class="mb-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Clipboard API requires secure context:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Must be served over HTTPS (or localhost)</li>
+              <li class="mb-1">User interaction required (cannot access clipboard in background)</li>
+              <li class="mb-1">Browser may prompt user for permission</li>
+            </ul>
+            <p class="m-0 text-sm">
+              For older browsers or when Clipboard API is unavailable, use the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">paste</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">copy</code>, and <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">cut</code> events with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">clipboardData</code>.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Writing Text to Clipboard">
+          <p class="m-0 mb-4">
+            Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">navigator.clipboard.writeText()</code> to copy plain text to the clipboard.
+          </p>
+          <DocCodeBlock code={writeTextCode} />
+        </DocSection>
+
+        <DocSection title="Reading Text from Clipboard">
+          <p class="m-0 mb-4">
+            Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">navigator.clipboard.readText()</code> to read plain text from the clipboard.
+          </p>
+          <DocCodeBlock code={readTextCode} />
+          
+          <DocAlert type="warning" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Permission required:</strong> Reading from clipboard requires user permission. The browser will prompt the user if permission hasn't been granted.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Writing HTML to Clipboard">
+          <p class="m-0 mb-4">
+            To copy HTML content, use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">ClipboardItem</code> with a Blob containing the HTML.
+          </p>
+          <DocCodeBlock code={writeHTMLCode} />
+        </DocSection>
+
+        <DocSection title="Reading HTML from Clipboard">
+          <p class="m-0 mb-4">
+            Read HTML from clipboard by checking for <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">text/html</code> type in clipboard items.
+          </p>
+          <DocCodeBlock code={readHTMLCode} />
+        </DocSection>
+
+        <DocSection title="Handling Paste Events">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">paste</code> event fires when the user pastes content. You can intercept it and customize how content is inserted.
+          </p>
+          <DocCodeBlock code={pasteEventCode} />
+          
+          <DocAlert type="warning" title="⚠️ Security: Sanitize HTML" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Always sanitize pasted HTML:</strong> Pasted content may contain malicious scripts or event handlers. Always sanitize HTML before inserting it into the DOM.
+            </p>
+            <DocCodeBlock code={sanitizeHTMLCode} />
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Handling Copy Events">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">copy</code> event fires when the user copies content. You can customize what gets copied.
+          </p>
+          <DocCodeBlock code={copyEventCode} />
+        </DocSection>
+
+        <DocSection title="Handling Cut Events">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">cut</code> event fires when the user cuts content. Similar to copy, but also removes the content.
+          </p>
+          <DocCodeBlock code={cutEventCode} />
+        </DocSection>
+
+        <DocSection title="Checking Permissions">
+          <p class="m-0 mb-4">
+            Use the Permissions API to check clipboard access permissions before attempting to read from clipboard.
+          </p>
+          <DocCodeBlock code={permissionCode} />
+          
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              <strong>Permission states:</strong>
+            </p>
+            <ul class="m-0 mt-2 pl-6 text-sm text-text-secondary">
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">granted</code> - Permission granted, can access clipboard</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">prompt</code> - Browser will prompt user when accessing clipboard</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">denied</code> - Permission denied, cannot access clipboard</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Platform-Specific Issues & Edge Cases">
+          <p class="m-0 mb-4">
+            Clipboard API behavior and paste events can vary significantly depending on browser, OS, device, and keyboard type. These variations can affect how content is copied and pasted.
+          </p>
+
+          <DocSection title="Browser-Specific Issues">
+            <DocAlert type="error" title="⚠️ Safari: Clipboard API Limitations" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Safari:</strong> Clipboard API has limitations and differences:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Clipboard API requires macOS 10.12+ or iOS 10+</li>
+                <li class="mb-1">Reading HTML from clipboard may not work in all Safari versions</li>
+                <li class="mb-1">Permission prompts may appear more frequently</li>
+                <li class="mb-1">Paste events may fire in different order than Chrome/Edge</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Chrome/Edge: HTML Format Variations" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Chrome/Edge:</strong> Pasted HTML format may vary:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">HTML from different sources (Word, Google Docs, etc.) may have different structures</li>
+                <li class="mb-1">Inline styles vs semantic HTML may differ</li>
+                <li class="mb-1">Event timing: <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">paste</code> may fire before <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> event</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Firefox: Clipboard Permissions" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Firefox:</strong> Clipboard API permissions may behave differently:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Permission prompts may be more restrictive</li>
+                <li class="mb-1">Reading clipboard may require explicit user gesture in some versions</li>
+                <li class="mb-1">HTML clipboard format may differ from Chrome</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="OS & Keyboard-Specific Issues">
+            <DocAlert type="error" title="⚠️ macOS: Permission Prompts" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>macOS:</strong> Clipboard access may trigger system-level permission prompts:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">First clipboard read may require user approval in system preferences</li>
+                <li class="mb-1">Korean IME composition may interfere with clipboard operations</li>
+                <li class="mb-1">Paste operations during composition may be delayed or fail</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Windows: IME and Clipboard" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Windows:</strong> IME composition may affect clipboard operations:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Pasting during active IME composition may cancel composition</li>
+                <li class="mb-1">Clipboard content may include composition text unexpectedly</li>
+                <li class="mb-1">Different IME providers may handle clipboard differently</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Linux: Clipboard Integration" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Linux:</strong> Clipboard behavior varies by desktop environment:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">X11 vs Wayland may have different clipboard behavior</li>
+                <li class="mb-1">Primary selection (middle-click paste) may interfere</li>
+                <li class="mb-1">IME integration may vary by distribution</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="Device-Specific Issues">
+            <DocAlert type="error" title="⚠️ Mobile: Clipboard API Restrictions" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile devices (Android/iOS):</strong> Clipboard API has additional restrictions:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>iOS:</strong> Clipboard access requires user interaction and may show permission alerts</li>
+                <li class="mb-1"><strong>Android:</strong> Clipboard access may be restricted by browser or OS security policies</li>
+                <li class="mb-1">Virtual keyboard may interfere with paste operations</li>
+                <li class="mb-1">Paste events may fire differently than desktop</li>
+                <li class="mb-1">HTML clipboard format may be simplified or missing on mobile</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Mobile Keyboards: Text Prediction Interference" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile keyboards with text prediction:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Samsung Keyboard: Paste operations may trigger text prediction suggestions</li>
+                <li class="mb-1">Gboard: Clipboard suggestions may interfere with paste events</li>
+                <li class="mb-1">iOS QuickType: May modify pasted content</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Tablet: Hybrid Clipboard Behavior" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Tablets:</strong> Clipboard behavior may vary based on input method:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">External keyboard: behaves like desktop</li>
+                <li class="mb-1">Touch input: behaves like mobile</li>
+                <li class="mb-1">Stylus input: may have different paste behavior</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="General Browser Differences">
+            <DocAlert type="warning" class="mb-4">
+              <p class="m-0 text-sm">
+                <strong>Clipboard API support:</strong> The modern Clipboard API is supported in Chrome, Edge, Firefox, and Safari (Safari 13.1+). Older browsers require the event-based approach with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">clipboardData</code>.
+              </p>
+            </DocAlert>
+            <DocAlert type="warning" class="mb-4">
+              <p class="m-0 text-sm">
+                <strong>Event timing:</strong> The <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">paste</code> event may fire before or after the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> event with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType: 'insertFromPaste'</code>, depending on the browser.
+              </p>
+            </DocAlert>
+            <DocAlert type="warning">
+              <p class="m-0 text-sm">
+                <strong>HTML format:</strong> Different applications may paste HTML in different formats. Some include inline styles, others use semantic HTML. Always normalize pasted HTML to match your editor's format.
+              </p>
+            </DocAlert>
+          </DocSection>
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types/insertFromPaste" class="text-accent-primary no-underline">
+                insertFromPaste inputType →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/execCommand-alternatives" class="text-accent-primary no-underline">
+                execCommand alternatives →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API" target="_blank" rel="noopener noreferrer" class="text-accent-primary no-underline">
+                MDN: Clipboard API (external) →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

@@ -1,0 +1,319 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertParagraph"
+  description="How insertParagraph inputType creates new paragraphs and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code> inputType is triggered when the user presses Enter to create a new paragraph. The DOM structure created varies significantly between browsers.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <p class="m-0 mb-4">
+            When Enter is pressed in a contenteditable element, the browser splits the current paragraph and creates a new one. However, the exact DOM structure depends on the browser and the current selection state.
+          </p>
+
+          <DocInfoBox title="Scenario 1: Cursor in middle of paragraph">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 5)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                  <div class="text-text-primary mt-2">Visual: Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Enter (Chrome/Edge)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Creates empty paragraph between</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Enter (Firefox)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;br&gt;&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Adds &lt;br&gt; in empty paragraph</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Enter (Safari)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;div&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/div&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Uses &lt;div&gt; instead of &lt;p&gt;</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Edge Cases">
+          <DocInfoBox title="Scenario 2: Cursor at end of paragraph">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-primary">&lt;p&gt;Hello world<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Enter (Most browsers)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-primary">&lt;p&gt;Hello world&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Creates new empty paragraph</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Scenario 3: Cursor at start of paragraph" class="mt-6">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>Hello world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Enter (Chrome/Edge)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-primary">&lt;p&gt;&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>Hello world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Creates empty paragraph before</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Scenario 4: Text selected across paragraphs" class="mt-6">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Selection spans multiple paragraphs)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-primary">&lt;p&gt;Para<span class="bg-yellow-200 dark:bg-yellow-900/40">graph 1</span>&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">Para</span>graph 2&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Enter (Replaces selection)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-primary">&lt;p&gt;Para&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;graph 2&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Selection deleted, new paragraph inserted</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Differences">
+          <DocInfoBox title="DOM Element Used for Paragraphs">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Uses <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;</code> elements</li>
+                  <li class="mb-1">Empty paragraphs: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;&lt;/p&gt;</code></li>
+                  <li class="mb-1">May add <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;br&gt;</code> in some cases</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Uses <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;</code> elements</li>
+                  <li class="mb-1">Empty paragraphs: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;&lt;br&gt;&lt;/p&gt;</code></li>
+                  <li class="mb-1">Always includes <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;br&gt;</code> in empty paragraphs</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">May use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;div&gt;</code> instead of <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;</code></li>
+                  <li class="mb-1">Behavior can vary by macOS version</li>
+                  <li class="mb-1">Empty paragraphs: <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;div&gt;&lt;br&gt;&lt;/div&gt;</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;div&gt;&lt;/div&gt;</code></li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="warning" class="mt-6">
+            <p class="m-0 text-sm">
+              <strong>Important:</strong> These differences mean that the same <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code> operation can produce different DOM structures across browsers. Your code must handle all variations.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="IME Composition + insertParagraph">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              When IME composition is active and the user presses Enter, the behavior becomes unpredictable:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code> may fire before <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em">compositionend</code></li>
+              <li class="mb-1">Composition may be cancelled, losing partial input</li>
+              <li class="mb-1">The new paragraph may contain incomplete composition text</li>
+            </ul>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/ime-composition" class="text-accent-primary underline">IME & Composition</a> for more details.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor Internal Model & DOM Synchronization">
+          <DocAlert type="warning" title="⚠️ Exception: preventDefault() and Block Splitting">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When editors use preventDefault() and split blocks in their model:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Browser's default paragraph insertion is prevented</li>
+              <li class="mb-1">Editor splits block in its internal model, then re-renders DOM</li>
+              <li class="mb-1">Browser may not recognize the new paragraph structure if DOM is completely re-rendered</li>
+              <li class="mb-1">Selection position may need manual restoration after DOM update</li>
+              <li class="mb-1">Browser's undo stack may not include the paragraph split if default was prevented</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Best Practice:</strong> After splitting blocks and re-rendering, ensure the cursor is positioned correctly in the new paragraph block.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <EditorExample
+            editor="slate"
+            title="Handling insertParagraph"
+            description="Slate normalizes paragraph structure to ensure consistency:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault();
+    
+    // Slate handles paragraph insertion through Transforms
+    Transforms.splitNodes(editor, {
+      always: true, // Always split, even at edges
+    });
+    
+    // Ensure new node is a paragraph
+    Transforms.setNodes(editor, { type: 'paragraph' });
+  }
+});`}
+            features={[
+              '<strong>Normalization:</strong> Always creates consistent paragraph structure regardless of browser.',
+              '<strong>Transforms.splitNodes:</strong> Splits the current block and creates a new one.',
+              '<strong>Type enforcement:</strong> Ensures new blocks are paragraphs, not divs or other elements.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Handling insertParagraph"
+            description="ProseMirror uses commands to handle paragraph insertion:"
+            code={`import { splitBlock } from 'prosemirror-commands';
+
+// In keymap
+{
+  Enter: (state, dispatch) => {
+    // ProseMirror's splitBlock command handles insertParagraph
+    return splitBlock(state, dispatch);
+  }
+}
+
+// Or intercept beforeinput
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    if (splitBlock(state, dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>Command-based:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">splitBlock</code> command.',
+              '<strong>Schema enforcement:</strong> Schema defines what block types are allowed.',
+              '<strong>Consistent structure:</strong> Always produces schema-compliant DOM.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Handling insertParagraph"
+            description="Draft.js handles paragraph insertion through block splitting:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleReturn(e, editorState) {
+  // Draft.js splits ContentBlocks on Enter
+  const newState = RichUtils.insertSoftNewline(editorState);
+  // Or use insertData to insert paragraph break
+  
+  // Normalize to ensure consistent block structure
+  return newState;
+}
+
+// In key binding
+function myKeyBindingFn(e) {
+  if (e.keyCode === 13) { // Enter
+    return 'insert-paragraph';
+  }
+  return getDefaultKeyBinding(e);
+}`}
+            features={[
+              '<strong>Block-based:</strong> Splits ContentBlocks, not DOM elements.',
+              '<strong>RichUtils:</strong> Provides utilities for block manipulation.',
+              '<strong>Serialization:</strong> Converts blocks to consistent HTML on render.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+                IME & Composition →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/playground" class="text-accent-primary no-underline">
+                Test in the playground →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

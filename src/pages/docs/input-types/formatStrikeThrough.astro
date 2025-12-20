@@ -1,0 +1,182 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatStrikeThrough"
+  description="How formatStrikeThrough inputType applies strikethrough formatting and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatStrikeThrough</code> inputType is triggered when the user applies strikethrough formatting (typically via context menu or programmatically). The browser wraps selected text in a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;s&gt;</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strike&gt;</code> element.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Text selected within paragraph">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After formatStrikeThrough (Chrome/Edge)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 line-through">&lt;s&gt;world&lt;/s&gt;</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Uses &lt;s&gt; element</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After formatStrikeThrough (Firefox)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 line-through">&lt;strike&gt;world&lt;/strike&gt;</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Uses &lt;strike&gt; element (deprecated)</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Differences">
+          <DocInfoBox title="Element Used for Strikethrough">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Uses <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;s&gt;</code> element</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Uses <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;strike&gt;</code> element (deprecated HTML)</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + formatStrikeThrough">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, formatStrikeThrough may not work as expected. On macOS with Korean IME, the event may not fire; <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> may fire instead.
+            </p>
+            <p class="m-0 text-sm">
+              See <a href="/docs/input-types/formatBold#ime-composition--formatbold" class="text-accent-primary underline">formatBold</a> for detailed workarounds.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle strikethrough formatting similarly to other text formatting. Here's how major editors implement formatStrikeThrough:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Strikethrough Formatting"
+            description="Slate uses Transforms.setNodes() to toggle strikethrough marks:"
+            code={`import { Editor, Transforms, Text } from 'slate';
+
+function isStrikethroughActive(editor: Editor) {
+  const marks = Editor.marks(editor);
+  return marks?.strikethrough === true;
+}
+
+function handleFormatStrikethrough(editor: Editor) {
+  const isActive = isStrikethroughActive(editor);
+  Transforms.setNodes(
+    editor,
+    { strikethrough: !isActive },
+    { match: n => Text.isText(n), split: true }
+  );
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatStrikeThrough') {
+    e.preventDefault();
+    handleFormatStrikethrough(editor);
+  }
+});`}
+            features={[
+              '<strong>Mark-based:</strong> Formatting stored as <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">{ strikethrough: true }</code> on text nodes.',
+              '<strong>Same pattern:</strong> Uses identical Transforms API as other formatting marks.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Strikethrough Formatting"
+            description="ProseMirror uses toggleMark with strikethrough mark:"
+            code={`import { toggleMark } from 'prosemirror-commands';
+import { schema } from './schema';
+
+function handleFormatStrikethrough(state, dispatch) {
+  return toggleMark(schema.marks.strikethrough)(state, dispatch);
+}
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatStrikeThrough') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    if (handleFormatStrikethrough(state, dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>Mark system:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">schema.marks.strikethrough</code> mark type.',
+              '<strong>Same command:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">toggleMark()</code> like other formatting.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Strikethrough Formatting"
+            description="Draft.js uses RichUtils.toggleInlineStyle() with STRIKETHROUGH:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleFormatStrikethrough(editorState) {
+  return RichUtils.toggleInlineStyle(editorState, 'STRIKETHROUGH');
+}
+
+function handleKeyCommand(command) {
+  if (command === 'strikethrough') {
+    const newState = handleFormatStrikethrough(editorState);
+    setEditorState(newState);
+    return 'handled';
+  }
+  return 'not-handled';
+}`}
+            features={[
+              '<strong>Inline style:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'STRIKETHROUGH\'</code> style string.',
+              '<strong>Same utility:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">RichUtils.toggleInlineStyle</code> like other formatting.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

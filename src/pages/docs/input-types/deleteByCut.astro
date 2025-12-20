@@ -1,0 +1,247 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteByCut"
+  description="How deleteByCut inputType handles cut operations (Ctrl/Cmd+X) and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteByCut</code> inputType is triggered when the user cuts selected content (typically via <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + X</kbd>). The browser removes the selected content and places it in the clipboard.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Text selected and cut">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Ctrl/Cmd + X (Cut)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Selected text removed and copied to clipboard</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Difference from deleteContent">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteByCut (Ctrl/Cmd + X)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Removes selected content <strong>and</strong> copies it to clipboard</li>
+                  <li class="mb-1">Content can be pasted later</li>
+                  <li class="mb-1">Typically requires a selection (non-collapsed)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteContent (Delete key)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Removes content without copying to clipboard</li>
+                  <li class="mb-1">Content cannot be recovered via paste</li>
+                  <li class="mb-1">Can work with collapsed selection (forward delete)</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Clipboard Interaction">
+          <DocInfoBox>
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              When <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">deleteByCut</code> is triggered:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Selected content is copied to the system clipboard</li>
+              <li class="mb-2">Content is removed from the DOM</li>
+              <li class="mb-2">Clipboard contains both plain text and HTML representations (if applicable)</li>
+              <li class="mb-2">The <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">cut</code> event also fires (in addition to <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code>/<code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code>)</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Preserves HTML structure in clipboard</li>
+                  <li class="mb-1">Both <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">cut</code> and <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> events fire</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">Clipboard format may differ slightly</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Clipboard handling may differ, especially on macOS</li>
+                  <li class="mb-1">May require additional permissions for clipboard access</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle cut operations similarly to delete operations, but also need to handle clipboard copying. Here's how major editors implement deleteByCut:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Cut Handling"
+            description="Slate deletes content and handles clipboard:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteByCut') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Get selected content
+      const fragment = Editor.fragment(editor, selection);
+      
+      // Copy to clipboard (simplified - real implementation would serialize to HTML)
+      const text = Editor.string(editor, selection);
+      navigator.clipboard.writeText(text).catch(() => {
+        // Fallback for older browsers
+      });
+      
+      // Delete selected content
+      Transforms.delete(editor);
+    }
+  }
+});`}
+            features={[
+              '<strong>Fragment extraction:</strong> Extracts selected content before deletion.',
+              '<strong>Clipboard API:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">navigator.clipboard</code> to copy to clipboard.',
+              '<strong>Delete operation:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Transforms.delete()</code> to remove content.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Cut Handling"
+            description="ProseMirror uses deleteSelection and clipboard:"
+            code={`import { deleteSelection } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteByCut') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (!state.selection.empty) {
+      // Copy to clipboard
+      const text = state.doc.textBetween(
+        state.selection.from,
+        state.selection.to
+      );
+      navigator.clipboard.writeText(text).catch(() => {});
+      
+      // Delete selection
+      if (deleteSelection(state, dispatch)) {
+        // Handled
+      }
+    }
+  }
+});`}
+            features={[
+              '<strong>Text extraction:</strong> Extracts text from selection before deletion.',
+              '<strong>Clipboard API:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">navigator.clipboard</code> to copy.',
+              '<strong>deleteSelection command:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">deleteSelection()</code> to remove content.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Cut Handling"
+            description="Draft.js uses Modifier and clipboard:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleCut(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  if (!selection.isCollapsed) {
+    // Get selected text
+    const text = contentState.getPlainText().slice(
+      selection.getStartOffset(),
+      selection.getEndOffset()
+    );
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(text).catch(() => {});
+    
+    // Delete selection
+    const newContentState = Modifier.removeRange(
+      contentState,
+      selection,
+      'forward'
+    );
+    
+    return EditorState.push(
+      editorState,
+      newContentState,
+      'remove-range'
+    );
+  }
+  
+  return editorState;
+}`}
+            features={[
+              '<strong>Text extraction:</strong> Gets plain text from selection.',
+              '<strong>Clipboard API:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">navigator.clipboard</code> to copy.',
+              '<strong>Modifier.removeRange:</strong> Removes selected content.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContent" class="text-accent-primary no-underline">
+                deleteContent →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertFromPaste" class="text-accent-primary no-underline">
+                insertFromPaste →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

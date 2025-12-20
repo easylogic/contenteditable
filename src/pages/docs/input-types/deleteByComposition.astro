@@ -1,0 +1,251 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteByComposition"
+  description="How deleteByComposition inputType handles content deletion during IME composition and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteByComposition</code> inputType is triggered when content is deleted during IME (Input Method Editor) composition. This typically occurs when the user presses Backspace or Delete while composing text in languages that require composition, such as Chinese, Japanese, and Korean.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Deleting during Korean IME composition">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">During composition (typing "한")</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-orange-200 dark:bg-orange-900/40">한</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Composition text is shown with underline or highlight</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After pressing Backspace during composition</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Composition text deleted, composition may be cancelled</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition Deletion Behavior">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing Backspace or Delete may cause unexpected behavior:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Composition may be cancelled entirely</li>
+              <li class="mb-1">More text than expected may be deleted (entire syllable or word)</li>
+              <li class="mb-1">Composition text may be partially committed before deletion</li>
+              <li class="mb-1">Event order may be unpredictable</li>
+              <li class="mb-1">Behavior varies significantly between browsers and IME implementations</li>
+            </ul>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/input-types/deleteContentBackward#ime-composition--backspace" class="text-accent-primary underline">deleteContentBackward</a> and <a href="/docs/input-types/deleteContentForward#ime-composition--deletecontentforward" class="text-accent-primary underline">deleteContentForward</a> for similar issues.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">May cancel composition when Backspace is pressed</li>
+                  <li class="mb-1">May delete entire composition text at once</li>
+                  <li class="mb-1">Event timing may differ from regular deletion</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">May handle composition cancellation differently</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">IME composition deletion behavior may differ, especially on macOS</li>
+                  <li class="mb-1">May use different event patterns</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle composition deletion similarly to regular deletion, but need to account for composition state. Here's how major editors implement deleteByComposition:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Composition Deletion Handling"
+            description="Slate handles composition deletion with composition state awareness:"
+            code={`import { Editor, Transforms } from 'slate';
+
+let isComposing = false;
+
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteByComposition') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Delete selected content
+      Transforms.delete(editor);
+    } else if (selection) {
+      // Delete backward during composition
+      Transforms.delete(editor, { reverse: true, unit: 'character' });
+    }
+  }
+});
+
+element.addEventListener('compositionend', () => {
+  isComposing = false;
+});`}
+            features={[
+              '<strong>Composition state:</strong> Tracks composition state to handle deletion appropriately.',
+              '<strong>Transforms.delete:</strong> Uses same deletion method as regular delete operations.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Composition Deletion Handling"
+            description="ProseMirror handles composition deletion:"
+            code={`import { backspace } from 'prosemirror-commands';
+
+view.dom.addEventListener('compositionstart', () => {
+  view.composing = true;
+});
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteByComposition') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (state.selection.empty) {
+      // Use backspace command during composition
+      if (backspace(state, dispatch)) {
+        // Handled
+      }
+    } else {
+      // Delete selection
+      if (deleteSelection(state, dispatch)) {
+        // Handled
+      }
+    }
+  }
+});
+
+view.dom.addEventListener('compositionend', () => {
+  view.composing = false;
+});`}
+            features={[
+              '<strong>View.composing:</strong> Tracks composition state in ProseMirror view.',
+              '<strong>backspace command:</strong> Uses backspace command for composition deletion.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Composition Deletion Handling"
+            description="Draft.js handles composition deletion:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+let isComposing = false;
+
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteByComposition') {
+    e.preventDefault();
+    
+    const contentState = editorState.getCurrentContent();
+    const selection = editorState.getSelection();
+    
+    // Delete backward during composition
+    let newSelection = selection;
+    if (selection.isCollapsed) {
+      newSelection = selection.merge({
+        anchorOffset: Math.max(0, selection.anchorOffset - 1),
+      });
+    }
+    
+    const newContentState = Modifier.removeRange(
+      contentState,
+      newSelection,
+      'backward'
+    );
+    
+    const newState = EditorState.push(
+      editorState,
+      newContentState,
+      'remove-range'
+    );
+    
+    setEditorState(newState);
+  }
+});
+
+element.addEventListener('compositionend', () => {
+  isComposing = false;
+});`}
+            features={[
+              '<strong>Composition tracking:</strong> Tracks composition state to handle deletion.',
+              '<strong>Modifier.removeRange:</strong> Uses same deletion method as regular delete operations.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertCompositionText" class="text-accent-primary no-underline">
+                insertCompositionText →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContentBackward" class="text-accent-primary no-underline">
+                deleteContentBackward →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+                IME & Composition →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

@@ -1,0 +1,183 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatJustifyFull"
+  description="How formatJustifyFull inputType applies full justification (justify) alignment and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatJustifyFull</code> inputType is triggered when the user applies full justification (justify) alignment to selected paragraphs. The browser sets <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">text-align: justify</code> on the affected elements.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Paragraph selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Paragraph selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">This is a paragraph with some text that spans multiple lines.</span>&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After formatJustifyFull</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p style="text-align: justify;"&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">This is a paragraph with some text that spans multiple lines.</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Text aligned to both left and right edges</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Applies <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">text-align: justify</code> via inline style</li>
+                  <li class="mb-1">May apply to <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;div&gt;</code> elements</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">May use different element types</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Justification behavior may differ</li>
+                  <li class="mb-1">May apply alignment differently</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle text alignment differently. Here's how major editors implement formatJustifyFull:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Full Justification"
+            description="Slate applies alignment as a block property:"
+            code={`import { Editor, Transforms, Element } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatJustifyFull') {
+    e.preventDefault();
+    
+    // Apply justify alignment to selected blocks
+    Transforms.setNodes(editor, {
+      align: 'justify',
+    }, {
+      match: n => Element.isElement(n) && Editor.isBlock(editor, n),
+    });
+  }
+});`}
+            features={[
+              '<strong>Block property:</strong> Alignment is stored as a property on block elements.',
+              '<strong>Transforms.setNodes:</strong> Sets <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">align: \'justify\'</code> on selected blocks.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Full Justification"
+            description="ProseMirror uses text alignment mark or attribute:"
+            code={`import { setBlockType } from 'prosemirror-commands';
+import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatJustifyFull') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Set text-align attribute on block
+    const { $from } = state.selection;
+    const blockType = schema.nodes.paragraph;
+    
+    const tr = state.tr.setBlockType($from.before(), $from.after(), blockType, {
+      ...blockType.attrs,
+      align: 'justify',
+    });
+    
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>Block attribute:</strong> Alignment is stored as an attribute on block nodes.',
+              '<strong>setBlockType:</strong> Updates block type with alignment attribute.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Full Justification"
+            description="Draft.js uses block-level styles:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleJustifyFull(editorState) {
+  // Draft.js uses block-level styles for alignment
+  return RichUtils.toggleBlockType(editorState, 'justify');
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatJustifyFull') {
+    e.preventDefault();
+    const newState = handleJustifyFull(editorState);
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>Block type:</strong> Uses block type (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'justify\'</code>) for alignment.',
+              '<strong>RichUtils.toggleBlockType:</strong> Toggles block type to apply alignment.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatJustifyCenter" class="text-accent-primary no-underline">
+                formatJustifyCenter →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatJustifyLeft" class="text-accent-primary no-underline">
+                formatJustifyLeft →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatJustifyRight" class="text-accent-primary no-underline">
+                formatJustifyRight →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

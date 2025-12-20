@@ -1,0 +1,642 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../components/EditorExample.astro';
+import '../../styles/global.css';
+
+const formatToggleCode = `// Toggle formatting (bold, italic, etc.)
+function toggleFormat(inputType) {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  if (range.collapsed) {
+    // Collapsed selection: toggle state for next character
+    // Store formatting intent (implementation depends on your editor)
+    return;
+  }
+  
+  // Non-collapsed: apply/remove formatting
+  const isFormatted = checkIfFormatted(range);
+  
+  if (isFormatted) {
+    removeFormatting(range);
+  } else {
+    applyFormatting(range, inputType);
+  }
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold' || e.inputType === 'formatItalic') {
+    e.preventDefault();
+    toggleFormat(e.inputType);
+  }
+});`;
+
+const insertTextCode = `// Insert text at selection
+function insertText(text) {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  // Delete selected content if any
+  if (!range.collapsed) {
+    range.deleteContents();
+  }
+  
+  // Insert text node
+  const textNode = document.createTextNode(text);
+  range.insertNode(textNode);
+  
+  // Move cursor after inserted text
+  range.setStartAfter(textNode);
+  range.collapse(true);
+  
+  // Update selection
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertText' && e.data) {
+    e.preventDefault();
+    insertText(e.data);
+  }
+});`;
+
+const wrapSelectionCode = `// Wrap selected text in an element
+function wrapSelection(tagName, attributes = {}) {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  if (range.collapsed) return; // Nothing to wrap
+  
+  try {
+    // Extract selected content
+    const contents = range.extractContents();
+    
+    // Create wrapper element
+    const wrapper = document.createElement(tagName);
+    Object.entries(attributes).forEach(([key, value]) => {
+      wrapper.setAttribute(key, value);
+    });
+    
+    // Wrap content
+    wrapper.appendChild(contents);
+    
+    // Insert wrapper
+    range.insertNode(wrapper);
+    
+    // Update selection to wrapper
+    selection.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.selectNode(wrapper);
+    selection.addRange(newRange);
+  } catch (e) {
+    console.error('Failed to wrap selection:', e);
+  }
+}
+
+// Usage: wrapSelection('strong') or wrapSelection('a', { href: 'https://example.com' })`;
+
+const normalizeSelectionCode = `// Normalize selection to avoid partial node selections
+function normalizeSelection() {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  // If start is in middle of text node, expand to start of node
+  if (range.startContainer.nodeType === Node.TEXT_NODE) {
+    if (range.startOffset > 0) {
+      // Check if we should expand to include full node
+      // (This is a simplified example)
+    }
+  }
+  
+  // If end is in middle of text node, expand to end of node
+  if (range.endContainer.nodeType === Node.TEXT_NODE) {
+    if (range.endOffset < range.endContainer.textContent.length) {
+      // Check if we should expand to include full node
+    }
+  }
+}`;
+
+const handleCompositionCode = `// Handle IME composition properly
+let compositionState = {
+  isComposing: false,
+  pendingFormat: null
+};
+
+element.addEventListener('compositionstart', () => {
+  compositionState.isComposing = true;
+});
+
+element.addEventListener('compositionend', () => {
+  compositionState.isComposing = false;
+  
+  // Apply any pending formatting
+  if (compositionState.pendingFormat) {
+    applyFormatting(compositionState.pendingFormat);
+    compositionState.pendingFormat = null;
+  }
+});
+
+element.addEventListener('beforeinput', (e) => {
+  if (compositionState.isComposing) {
+    // During composition, some formatting may not work
+    if (e.inputType === 'formatBold' || e.inputType === 'formatItalic') {
+      e.preventDefault();
+      // Store intent to apply after composition
+      compositionState.pendingFormat = e.inputType;
+    }
+    return;
+  }
+  
+  // Normal formatting handling
+});`;
+
+const undoRedoCode = `// Implement undo/redo stack
+class UndoRedoStack {
+  constructor() {
+    this.undoStack = [];
+    this.redoStack = [];
+    this.maxSize = 50;
+  }
+  
+  push(state) {
+    this.undoStack.push(state);
+    if (this.undoStack.length > this.maxSize) {
+      this.undoStack.shift();
+    }
+    this.redoStack = []; // Clear redo when new action
+  }
+  
+  undo() {
+    if (this.undoStack.length === 0) return null;
+    const state = this.undoStack.pop();
+    this.redoStack.push(state);
+    return this.undoStack[this.undoStack.length - 1] || null;
+  }
+  
+  redo() {
+    if (this.redoStack.length === 0) return null;
+    const state = this.redoStack.pop();
+    this.undoStack.push(state);
+    return state;
+  }
+}
+
+const undoRedo = new UndoRedoStack();
+
+// Save state before changes
+element.addEventListener('beforeinput', (e) => {
+  const currentState = element.innerHTML;
+  undoRedo.push(currentState);
+});
+
+// Handle undo/redo
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'historyUndo') {
+    e.preventDefault();
+    const state = undoRedo.undo();
+    if (state) {
+      element.innerHTML = state;
+    }
+  } else if (e.inputType === 'historyRedo') {
+    e.preventDefault();
+    const state = undoRedo.redo();
+    if (state) {
+      element.innerHTML = state;
+    }
+  }
+});`;
+
+const pasteHandlerCode = `// Handle paste with sanitization
+element.addEventListener('paste', (e) => {
+  e.preventDefault();
+  
+  const clipboardData = e.clipboardData || window.clipboardData;
+  const html = clipboardData.getData('text/html');
+  const text = clipboardData.getData('text/plain');
+  
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  // Delete selected content
+  if (!range.collapsed) {
+    range.deleteContents();
+  }
+  
+  // Sanitize and insert HTML
+  if (html) {
+    const sanitized = sanitizeHTML(html);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = sanitized;
+    
+    const fragment = document.createDocumentFragment();
+    while (tempDiv.firstChild) {
+      fragment.appendChild(tempDiv.firstChild);
+    }
+    
+    range.insertNode(fragment);
+  } else if (text) {
+    const textNode = document.createTextNode(text);
+    range.insertNode(textNode);
+  }
+  
+  // Move cursor after inserted content
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+});`;
+
+const selectionChangeCode = `// Track selection changes
+let lastSelection = null;
+
+document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+  
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    
+    // Only update if selection actually changed
+    if (!lastSelection || 
+        lastSelection.startContainer !== range.startContainer ||
+        lastSelection.startOffset !== range.startOffset ||
+        lastSelection.endContainer !== range.endContainer ||
+        lastSelection.endOffset !== range.endOffset) {
+      
+      // Selection changed
+      onSelectionChange(range);
+      lastSelection = range.cloneRange();
+    }
+  } else {
+    lastSelection = null;
+  }
+});
+
+function onSelectionChange(range) {
+  // Update UI based on selection
+  // e.g., show formatting toolbar, update button states
+}`;
+
+const crossBrowserCode = `// Cross-browser compatibility helper
+function handleFormatting(inputType) {
+  // Check if beforeinput is supported
+  if (!('InputEvent' in window) || 
+      !InputEvent.prototype.hasOwnProperty('inputType')) {
+    // Fallback for older browsers
+    return handleFormattingLegacy(inputType);
+  }
+  
+  // Modern browser
+  element.addEventListener('beforeinput', (e) => {
+    if (e.inputType === inputType) {
+      e.preventDefault();
+      applyFormatting(inputType);
+    }
+  });
+}
+
+function handleFormattingLegacy(inputType) {
+  // Use keydown events as fallback
+  element.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'b' && inputType === 'formatBold') {
+      e.preventDefault();
+      applyFormatting(inputType);
+    }
+    // ... other shortcuts
+  });
+}`;
+---
+
+<DocLayout
+  title="Practical Patterns"
+  description="Common patterns and code examples for implementing rich text editing features in contenteditable elements."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            This guide provides practical code patterns for common rich text editing operations. These patterns handle edge cases, browser differences, and IME composition issues that you'll encounter when building contenteditable-based editors.
+          </p>
+        </DocSection>
+
+        <DocSection title="Format Toggle Pattern">
+          <p class="m-0 mb-4">
+            Toggle formatting (bold, italic, etc.) on selected text. Handles both collapsed and non-collapsed selections.
+          </p>
+          <DocCodeBlock code={formatToggleCode} />
+          
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              <strong>Key points:</strong>
+            </p>
+            <ul class="m-0 mt-2 pl-6 text-sm text-text-secondary">
+              <li class="mb-1">Check if selection is collapsed (cursor only) vs non-collapsed (text selected)</li>
+              <li class="mb-1">For collapsed selections, you may want to toggle a "formatting state" for the next character</li>
+              <li class="mb-1">For non-collapsed selections, apply or remove formatting from the selected range</li>
+              <li class="mb-1">Always use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> in <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> to prevent browser's default behavior</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Insert Text Pattern">
+          <p class="m-0 mb-4">
+            Insert text at the current selection, replacing any selected content.
+          </p>
+          <DocCodeBlock code={insertTextCode} />
+        </DocSection>
+
+        <DocSection title="Wrap Selection Pattern">
+          <p class="m-0 mb-4">
+            Wrap selected text in an element (e.g., wrap in <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;a&gt;</code>).
+          </p>
+          <DocCodeBlock code={wrapSelectionCode} />
+          
+          <DocAlert type="warning" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Error handling:</strong> Always wrap Range operations in try-catch blocks. Invalid ranges or DOM mutations can cause errors.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Normalize Selection Pattern">
+          <p class="m-0 mb-4">
+            Normalize selection to avoid partial node selections that can cause issues.
+          </p>
+          <DocCodeBlock code={normalizeSelectionCode} />
+          
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              Selection normalization helps ensure consistent behavior when applying formatting or other operations. You may want to expand selections to include full nodes in some cases, or collapse to specific boundaries in others.
+            </p>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition Handling">
+          <p class="m-0 mb-4">
+            Properly handle IME composition to avoid breaking user input during text composition.
+          </p>
+          <DocCodeBlock code={handleCompositionCode} />
+          
+          <DocAlert type="error" title="⚠️ Critical: Composition State" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Always check composition state:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Formatting operations may not work during IME composition</li>
+              <li class="mb-1">Store formatting intent and apply after composition ends</li>
+              <li class="mb-1">Never modify DOM during active composition</li>
+              <li class="mb-1">Check <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">e.isComposing</code> flag in event handlers</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Undo/Redo Implementation">
+          <p class="m-0 mb-4">
+            Implement custom undo/redo stack when using <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>.
+          </p>
+          <DocCodeBlock code={undoRedoCode} />
+          
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              When you use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>, the browser's native undo stack may not work correctly. You need to maintain your own undo/redo stack.
+            </p>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Paste Handler with Sanitization">
+          <p class="m-0 mb-4">
+            Handle paste events with HTML sanitization to prevent XSS attacks.
+          </p>
+          <DocCodeBlock code={pasteHandlerCode} />
+          
+          <DocAlert type="error" title="⚠️ Security: Always Sanitize" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Never trust pasted HTML:</strong> Always sanitize HTML content before inserting it into the DOM. Use a library like DOMPurify or implement your own sanitization logic.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Selection Change Tracking">
+          <p class="m-0 mb-4">
+            Track selection changes to update UI (e.g., formatting toolbar) based on current selection.
+          </p>
+          <DocCodeBlock code={selectionChangeCode} />
+          
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">selectionchange</code> fires frequently. Compare ranges to avoid unnecessary UI updates.
+            </p>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Cross-Browser Compatibility">
+          <p class="m-0 mb-4">
+            Handle browser differences and provide fallbacks for older browsers.
+          </p>
+          <DocCodeBlock code={crossBrowserCode} />
+        </DocSection>
+
+        <DocSection title="Platform-Specific Considerations">
+          <p class="m-0 mb-4">
+            The patterns described above may behave differently depending on browser, OS, device, and keyboard type. Here are platform-specific considerations for each pattern.
+          </p>
+
+          <DocSection title="Format Toggle Pattern">
+            <DocAlert type="error" title="⚠️ macOS + Korean IME: Formatting During Composition" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>macOS + Korean IME:</strong> Format toggle may not work during IME composition:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatBold</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatItalic</code> events may not fire</li>
+                <li class="mb-1">Store formatting intent and apply after <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code></li>
+                <li class="mb-1">Different keyboard layouts (2벌식, 3벌식) may behave differently</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Safari: beforeinput Limitations" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Safari:</strong> Some <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values may not be supported:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">keydown</code> events as fallback</li>
+                <li class="mb-1">Detect Safari and handle formatting differently</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Mobile: Touch Selection" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile devices:</strong> Touch-based selection may affect format toggle:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Selection may be less precise than mouse selection</li>
+                <li class="mb-1">Format toolbar may need different positioning logic</li>
+                <li class="mb-1">Android vs iOS may handle selection differently</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="IME Composition Handling">
+            <DocAlert type="error" title="⚠️ Browser Differences in Composition Events" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Composition event timing varies:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>Chrome/Edge:</strong> <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> may fire before <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code></li>
+                <li class="mb-1"><strong>Firefox:</strong> Different event ordering</li>
+                <li class="mb-1"><strong>Safari:</strong> May have unique composition patterns</li>
+                <li class="mb-1">Always check <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">isComposing</code> flag, don't rely on event order</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ OS & Keyboard Layout Differences" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>IME behavior varies by OS and keyboard:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>macOS:</strong> System-level IME, different timing than Windows</li>
+                <li class="mb-1"><strong>Windows:</strong> IME behavior varies by Windows version and IME provider</li>
+                <li class="mb-1"><strong>Korean IME:</strong> 2벌식, 3벌식, 390 자판 may fire events at different times</li>
+                <li class="mb-1">Test with different keyboard layouts if supporting multiple input methods</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="Undo/Redo Implementation">
+            <DocAlert type="warning" title="⚠️ Browser Undo Stack Differences" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Browser undo behavior varies:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>Chrome/Edge:</strong> May undo individual keystrokes vs larger operations</li>
+                <li class="mb-1"><strong>Firefox:</strong> Different undo granularity</li>
+                <li class="mb-1"><strong>Safari:</strong> Undo stack may be cleared when focus changes</li>
+                <li class="mb-1">When using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>, browser undo may not work - maintain your own stack</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Mobile: Undo/Redo Limitations" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile devices:</strong> Undo/redo may have limitations:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Virtual keyboard may interfere with undo/redo shortcuts</li>
+                <li class="mb-1">Mobile browsers may have different undo stack behavior</li>
+                <li class="mb-1">Text prediction may affect undo stack</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="Paste Handler">
+            <DocAlert type="error" title="⚠️ Mobile Keyboards: Paste Interference" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile keyboards with text prediction:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>Samsung Keyboard:</strong> Paste may trigger text prediction, causing multiple paste events</li>
+                <li class="mb-1"><strong>Gboard:</strong> Clipboard suggestions may interfere</li>
+                <li class="mb-1"><strong>iOS QuickType:</strong> May modify pasted content</li>
+                <li class="mb-1">Handle multiple paste events and sanitize carefully</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Browser: HTML Format Variations" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Pasted HTML format varies:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Different applications (Word, Google Docs, etc.) paste different HTML structures</li>
+                <li class="mb-1">Chrome vs Firefox vs Safari may normalize HTML differently</li>
+                <li class="mb-1">Always sanitize and normalize pasted HTML</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ OS: Clipboard Permissions" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Clipboard access permissions:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>macOS:</strong> May require system-level permission prompts</li>
+                <li class="mb-1"><strong>iOS:</strong> Clipboard access may show alerts</li>
+                <li class="mb-1"><strong>Android:</strong> Browser or OS may restrict clipboard access</li>
+                <li class="mb-1">Provide fallback using paste events with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">clipboardData</code></li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="Selection Change Tracking">
+            <DocAlert type="warning" title="⚠️ Mobile: Touch Selection Changes" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile devices:</strong> Selection change tracking may differ:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Touch selection may fire <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">selectionchange</code> more frequently</li>
+                <li class="mb-1">Selection boundaries may be less precise</li>
+                <li class="mb-1">Virtual keyboard may interfere with selection</li>
+                <li class="mb-1">Debounce selection change handlers on mobile</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Browser: selectionchange Frequency" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>selectionchange fires frequently:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Compare ranges to avoid unnecessary UI updates</li>
+                <li class="mb-1">Some browsers may fire more events than others</li>
+                <li class="mb-1">During IME composition, selection changes may be more frequent</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+        </DocSection>
+
+        <DocSection title="Best Practices">
+          <DocInfoBox>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Always use try-catch:</strong> Range operations can throw errors. Always wrap them in try-catch blocks.</li>
+              <li class="mb-2"><strong>Check selection state:</strong> Always verify selection exists and has ranges before operating on it.</li>
+              <li class="mb-2"><strong>Handle edge cases:</strong> Collapsed selections, empty nodes, cross-element selections all need special handling.</li>
+              <li class="mb-2"><strong>Test across platforms:</strong> Test with different browsers, OS, keyboards, and IMEs.</li>
+              <li class="mb-2"><strong>Sanitize input:</strong> Always sanitize pasted HTML and user input to prevent XSS attacks.</li>
+              <li class="mb-2"><strong>Maintain undo stack:</strong> If using preventDefault(), maintain your own undo/redo stack.</li>
+              <li class="mb-2"><strong>Respect composition:</strong> Never modify DOM during active IME composition.</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/range-api" class="text-accent-primary no-underline">
+                Range API →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/selection-api" class="text-accent-primary no-underline">
+                Selection API →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/execCommand-alternatives" class="text-accent-primary no-underline">
+                execCommand alternatives →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/clipboard-api" class="text-accent-primary no-underline">
+                Clipboard API →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

@@ -1,0 +1,173 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatUnderline"
+  description="How formatUnderline inputType applies underline formatting and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatUnderline</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + U</kbd>. The browser wraps selected text in a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;u&gt;</code> element.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Text selected within paragraph">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + U</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 underline">&lt;u&gt;world&lt;/u&gt;</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Uses &lt;u&gt; element (consistent across browsers)</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Collapsed Selection">
+          <DocAlert type="error" title="⚠️ Critical Edge Case">
+            <p class="m-0 mb-2 text-sm">
+              When the selection is collapsed, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd/Ctrl + U</kbd> toggles underline state for the next character. <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> event typically does not fire.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="IME Composition + formatUnderline">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd/Ctrl + U</kbd> may not work as expected. On macOS with Korean IME, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatUnderline</code> does not fire; <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> may fire instead.
+            </p>
+            <p class="m-0 text-sm">
+              See <a href="/docs/input-types/formatBold#ime-composition--formatbold" class="text-accent-primary underline">formatBold</a> for detailed workarounds.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle underline formatting similarly to other text formatting. Here's how major editors implement formatUnderline:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Underline Formatting"
+            description="Slate uses Transforms.setNodes() to toggle underline marks:"
+            code={`import { Editor, Transforms, Text } from 'slate';
+
+function isUnderlineActive(editor: Editor) {
+  const marks = Editor.marks(editor);
+  return marks?.underline === true;
+}
+
+function handleFormatUnderline(editor: Editor) {
+  const isActive = isUnderlineActive(editor);
+  Transforms.setNodes(
+    editor,
+    { underline: !isActive },
+    { match: n => Text.isText(n), split: true }
+  );
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatUnderline') {
+    e.preventDefault();
+    handleFormatUnderline(editor);
+  }
+});`}
+            features={[
+              '<strong>Mark-based:</strong> Formatting stored as <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">{ underline: true }</code> on text nodes.',
+              '<strong>Same pattern:</strong> Uses identical Transforms API as other formatting marks.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Underline Formatting"
+            description="ProseMirror uses toggleMark with underline mark:"
+            code={`import { toggleMark } from 'prosemirror-commands';
+import { schema } from './schema';
+
+function handleFormatUnderline(state, dispatch) {
+  return toggleMark(schema.marks.underline)(state, dispatch);
+}
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatUnderline') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    if (handleFormatUnderline(state, dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>Mark system:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">schema.marks.underline</code> mark type.',
+              '<strong>Same command:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">toggleMark()</code> like other formatting.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Underline Formatting"
+            description="Draft.js uses RichUtils.toggleInlineStyle() with UNDERLINE:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleFormatUnderline(editorState) {
+  return RichUtils.toggleInlineStyle(editorState, 'UNDERLINE');
+}
+
+function myKeyBindingFn(e) {
+  if (e.keyCode === 85 && (e.ctrlKey || e.metaKey)) {
+    return 'underline';
+  }
+  return getDefaultKeyBinding(e);
+}
+
+function handleKeyCommand(command) {
+  if (command === 'underline') {
+    const newState = handleFormatUnderline(editorState);
+    setEditorState(newState);
+    return 'handled';
+  }
+  return 'not-handled';
+}`}
+            features={[
+              '<strong>Inline style:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'UNDERLINE\'</code> style string.',
+              '<strong>Same utility:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">RichUtils.toggleInlineStyle</code> like other formatting.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatBold" class="text-accent-primary no-underline">
+                formatBold →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

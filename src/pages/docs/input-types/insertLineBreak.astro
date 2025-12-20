@@ -1,0 +1,186 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertLineBreak"
+  description="How insertLineBreak inputType creates line breaks and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertLineBreak</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Shift + Enter</kbd>. The browser inserts a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;br&gt;</code> element instead of creating a new paragraph.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Cursor in middle of paragraph">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 5)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Shift + Enter</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;br&gt;world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Inserts &lt;br&gt; within same paragraph</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Difference from insertParagraph">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">insertLineBreak (Shift + Enter)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Inserts <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;br&gt;</code> element</li>
+                  <li class="mb-1">Stays within the same paragraph/block</li>
+                  <li class="mb-1">Creates a line break without creating a new block element</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">insertParagraph (Enter)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Creates a new <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;p&gt;</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;div&gt;</code> element</li>
+                  <li class="mb-1">Splits the current paragraph into two separate blocks</li>
+                  <li class="mb-1">Browser-dependent structure (see <a href="/docs/input-types/insertParagraph" class="text-accent-primary underline">insertParagraph</a>)</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + insertLineBreak">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Shift + Enter</kbd> may cancel the composition or commit it partially, similar to <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code>.
+            </p>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/input-types/insertParagraph#ime-composition--insertparagraph" class="text-accent-primary underline">insertParagraph</a> for detailed information about composition cancellation.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle line breaks differently from paragraph breaks. Here's how major editors implement insertLineBreak:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Line Break Insertion"
+            description="Slate uses Transforms.insertNodes() to insert a line break node:"
+            code={`import { Editor, Transforms, Element } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertLineBreak') {
+    e.preventDefault();
+    
+    // Insert a line break node (not a new block)
+    Transforms.insertNodes(editor, {
+      type: 'line-break',
+      children: [{ text: '' }],
+    });
+    
+    // Or insert a soft break within the current block
+    // depending on your schema design
+  }
+});`}
+            features={[
+              '<strong>Node insertion:</strong> Inserts a line break node instead of splitting blocks.',
+              '<strong>Block preservation:</strong> Keeps content within the same block element.',
+              '<strong>Schema-dependent:</strong> Line break representation depends on your Slate schema design.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Line Break Insertion"
+            description="ProseMirror uses insertHardBreak command:"
+            code={`import { insertHardBreak } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertLineBreak') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    if (insertHardBreak(state, dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>insertHardBreak command:</strong> Inserts a hard break node (<code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">&lt;br&gt;</code> equivalent).',
+              '<strong>Block preservation:</strong> Stays within the current block, unlike <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">splitBlock</code>.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Line Break Insertion"
+            description="Draft.js uses Modifier.insertText() with newline character:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleInsertLineBreak(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  // Insert newline character (rendered as <br>)
+  const newContentState = Modifier.insertText(
+    contentState,
+    selection,
+    '\\n',
+    editorState.getCurrentInlineStyle()
+  );
+  
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'insert-characters'
+  );
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertLineBreak') {
+    e.preventDefault();
+    const newState = handleInsertLineBreak(editorState);
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>Newline character:</strong> Inserts <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\\n</code> which is rendered as <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">&lt;br&gt;</code>.',
+              '<strong>Block preservation:</strong> Stays within the same ContentBlock.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertParagraph" class="text-accent-primary no-underline">
+                insertParagraph →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

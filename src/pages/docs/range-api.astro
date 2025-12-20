@@ -1,0 +1,425 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const createRangeCode = `// Create a new Range object
+const range = document.createRange();
+
+// Range is initially empty and not attached to the document
+console.log(range.collapsed); // true`;
+
+const setStartEndCode = `const range = document.createRange();
+const textNode = element.firstChild; // Assuming first child is a text node
+
+// Set start position: node, offset
+range.setStart(textNode, 5);  // Start at character 5
+range.setEnd(textNode, 10);   // End at character 10
+
+// Now the range covers characters 5-10
+console.log(range.toString()); // Text from position 5 to 10`;
+
+const selectNodeCode = `// Select an entire element node
+const range = document.createRange();
+range.selectNode(element); // Selects the element and all its children
+
+// Or select only the contents (children, not the element itself)
+range.selectNodeContents(element); // Selects all children`;
+
+const extractContentsCode = `// Extract selected content from DOM (removes it)
+const range = document.createRange();
+range.setStart(startNode, startOffset);
+range.setEnd(endNode, endOffset);
+
+const fragment = range.extractContents(); // Returns DocumentFragment, removes from DOM
+// fragment contains the extracted nodes`;
+
+const cloneContentsCode = `// Clone selected content (keeps original in DOM)
+const range = document.createRange();
+range.setStart(startNode, startOffset);
+range.setEnd(endNode, endOffset);
+
+const fragment = range.cloneContents(); // Returns DocumentFragment, original stays
+// fragment contains cloned nodes`;
+
+const insertNodeCode = `// Insert a node at the start of the range
+const range = document.createRange();
+range.setStart(textNode, 5);
+range.setEnd(textNode, 10);
+
+const newNode = document.createTextNode('INSERTED');
+range.insertNode(newNode); // Inserts before the range start`;
+
+const deleteContentsCode = `// Delete content within the range
+const range = document.createRange();
+range.setStart(startNode, startOffset);
+range.setEnd(endNode, endOffset);
+
+range.deleteContents(); // Removes content, range becomes collapsed`;
+
+const collapseCode = `// Collapse range to start or end
+const range = document.createRange();
+range.setStart(textNode, 5);
+range.setEnd(textNode, 10);
+
+range.collapse(true);  // Collapse to start (position 5)
+range.collapse(false); // Collapse to end (position 10)`;
+
+const compareBoundaryPointsCode = `// Compare ranges
+const range1 = document.createRange();
+const range2 = document.createRange();
+
+// Compare start of range1 with start of range2
+const result = range1.compareBoundaryPoints(
+  Range.START_TO_START,
+  range2
+);
+
+// Returns: -1 (range1 before range2), 0 (same), 1 (range1 after range2)`;
+
+const getClientRectsCode = `// Get visual rectangles for the range
+const range = document.createRange();
+range.setStart(startNode, startOffset);
+range.setEnd(endNode, endOffset);
+
+const rects = range.getClientRects(); // Returns DOMRectList
+// Each rect represents a visual box (for multi-line selections)`;
+
+const commonPatternCode = `// Common pattern: Wrap selected text
+function wrapSelection(tagName) {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  const wrapper = document.createElement(tagName);
+  
+  try {
+    const contents = range.extractContents();
+    wrapper.appendChild(contents);
+    range.insertNode(wrapper);
+    
+    // Update selection to the new wrapper
+    selection.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.selectNode(wrapper);
+    selection.addRange(newRange);
+  } catch (e) {
+    console.error('Failed to wrap selection:', e);
+  }
+}`;
+---
+
+<DocLayout
+  title="Range API"
+  description="Comprehensive guide to the Range API for manipulating document content in contenteditable elements."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Range</code> API provides methods to select, extract, insert, and manipulate content in the DOM. Unlike the Selection API (which represents the user's current selection), Range objects are programmatic and can be created, modified, and applied to selections.
+          </p>
+          <DocInfoBox>
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              <strong>Key Concepts:</strong>
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-1">A Range represents a contiguous portion of the document</li>
+              <li class="mb-1">Ranges are defined by start and end positions (node + offset)</li>
+              <li class="mb-1">Ranges can be collapsed (empty, like a cursor position)</li>
+              <li class="mb-1">Ranges can be used to extract, clone, insert, or delete content</li>
+              <li class="mb-1">Ranges must be applied to Selection to become visible to the user</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Creating Ranges">
+          <p class="m-0 mb-4">
+            Create a new Range object using <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">document.createRange()</code>. The range is initially empty and collapsed.
+          </p>
+          <DocCodeBlock code={createRangeCode} />
+        </DocSection>
+
+        <DocSection title="Setting Range Boundaries">
+          <p class="m-0 mb-4">
+            Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">setStart()</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">setEnd()</code> to define the range boundaries. Both methods take a node and an offset within that node.
+          </p>
+          <DocCodeBlock code={setStartEndCode} />
+          
+          <DocAlert type="warning" title="⚠️ Offset Behavior" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Offset depends on node type:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><strong>Text nodes:</strong> Offset is character position (0 to text.length)</li>
+              <li class="mb-1"><strong>Element nodes:</strong> Offset is child index (0 to childNodes.length)</li>
+            </ul>
+            <p class="m-0 text-sm">
+              Setting an offset beyond the node's length will throw an error.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Selecting Nodes">
+          <p class="m-0 mb-4">
+            Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">selectNode()</code> to select an entire element, or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">selectNodeContents()</code> to select only its children.
+          </p>
+          <DocCodeBlock code={selectNodeCode} />
+          
+          <DocInfoBox title="Difference: selectNode vs selectNodeContents" class="mt-4">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">selectNode(element)</h4>
+                <p class="m-0 text-text-secondary">
+                  Selects the element itself, including the element and all its children. The range starts before the element and ends after it.
+                </p>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm mt-2">
+                  <div class="text-text-secondary">Example:</div>
+                  <div class="text-text-primary mt-1">&lt;div&gt;Hello&lt;/div&gt;</div>
+                  <div class="text-text-primary">Range includes: &lt;div&gt;Hello&lt;/div&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">selectNodeContents(element)</h4>
+                <p class="m-0 text-text-secondary">
+                  Selects only the children of the element, not the element itself. The range starts at the first child and ends at the last child.
+                </p>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm mt-2">
+                  <div class="text-text-secondary">Example:</div>
+                  <div class="text-text-primary mt-1">&lt;div&gt;Hello&lt;/div&gt;</div>
+                  <div class="text-text-primary">Range includes: Hello (text node only)</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Extracting Content">
+          <p class="m-0 mb-4">
+            <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">extractContents()</code> removes the range's content from the DOM and returns it as a DocumentFragment.
+          </p>
+          <DocCodeBlock code={extractContentsCode} />
+          
+          <DocAlert type="warning" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Important:</strong> After extraction, the range becomes collapsed at the extraction point. The original content is removed from the DOM.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Cloning Content">
+          <p class="m-0 mb-4">
+            <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">cloneContents()</code> creates a copy of the range's content without removing it from the DOM.
+          </p>
+          <DocCodeBlock code={cloneContentsCode} />
+          
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">cloneContents()</code> when you need to copy content without modifying the original DOM, such as for undo/redo operations or preview functionality.
+            </p>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Inserting Nodes">
+          <p class="m-0 mb-4">
+            <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertNode()</code> inserts a node at the start of the range. The range expands to include the inserted node.
+          </p>
+          <DocCodeBlock code={insertNodeCode} />
+          
+          <DocAlert type="info" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Note:</strong> The inserted node is placed immediately before the range start. If you want to replace the range content, extract it first, then insert the new node.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Deleting Content">
+          <p class="m-0 mb-4">
+            <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContents()</code> removes all content within the range. The range becomes collapsed at the deletion point.
+          </p>
+          <DocCodeBlock code={deleteContentsCode} />
+        </DocSection>
+
+        <DocSection title="Collapsing Ranges">
+          <p class="m-0 mb-4">
+            <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">collapse()</code> collapses the range to a single point (like a cursor position).
+          </p>
+          <DocCodeBlock code={collapseCode} />
+        </DocSection>
+
+        <DocSection title="Comparing Ranges">
+          <p class="m-0 mb-4">
+            <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compareBoundaryPoints()</code> compares the boundaries of two ranges.
+          </p>
+          <DocCodeBlock code={compareBoundaryPointsCode} />
+          
+          <DocInfoBox title="Comparison Constants" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Range.START_TO_START</code> - Compare start of range1 with start of range2</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Range.START_TO_END</code> - Compare start of range1 with end of range2</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Range.END_TO_START</code> - Compare end of range1 with start of range2</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Range.END_TO_END</code> - Compare end of range1 with end of range2</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Getting Visual Positions">
+          <p class="m-0 mb-4">
+            <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">getClientRects()</code> returns a list of rectangles representing the visual position of the range. Useful for positioning UI elements relative to selections.
+          </p>
+          <DocCodeBlock code={getClientRectsCode} />
+          
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              For multi-line selections, <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">getClientRects()</code> returns multiple rectangles (one per line). Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">getBoundingClientRect()</code> for a single bounding rectangle.
+            </p>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Common Patterns">
+          <p class="m-0 mb-4">
+            Here's a common pattern for wrapping selected text in a formatting element:
+          </p>
+          <DocCodeBlock code={commonPatternCode} />
+        </DocSection>
+
+        <DocSection title="Platform-Specific Issues & Edge Cases">
+          <p class="m-0 mb-4">
+            Range API behavior can vary significantly depending on browser, OS, device, and keyboard type. These variations can cause unexpected behavior when manipulating ranges.
+          </p>
+
+          <DocSection title="Browser-Specific Issues">
+            <DocAlert type="error" title="⚠️ Safari: Range Boundary Issues" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Safari:</strong> Range boundaries may be reported incorrectly when selecting across multiple elements or complex DOM structures.
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">getClientRects()</code> may return incorrect positions for multi-line selections</li>
+                <li class="mb-1">Range offsets may be off by one in some edge cases</li>
+                <li class="mb-1">Selecting across element boundaries can produce unexpected results</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Chrome/Edge: IME Composition Ranges" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Chrome/Edge:</strong> During IME composition, Range objects may behave unexpectedly:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Range boundaries may include composition text in unexpected ways</li>
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">extractContents()</code> during composition may fail or produce incorrect results</li>
+                <li class="mb-1">Range operations may need to wait until <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code></li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Firefox: Cross-Element Selection" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Firefox:</strong> Selecting across element boundaries may produce different Range structures than Chrome/Edge:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Range start/end containers may differ for the same visual selection</li>
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">cloneContents()</code> may include or exclude element boundaries differently</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="OS & Keyboard-Specific Issues">
+            <DocAlert type="error" title="⚠️ macOS + Korean IME: Range Operations During Composition" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>macOS + Korean IME:</strong> Range operations during active IME composition may fail or produce incorrect results:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">extractContents()</code> may throw errors or return incomplete fragments</li>
+                <li class="mb-1">Range boundaries may not accurately reflect composition text position</li>
+                <li class="mb-1">Operations should be deferred until after <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code></li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Windows: IME Provider Differences" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Windows:</strong> Different IME providers (Microsoft IME, Google IME, etc.) may affect Range behavior:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Range operations during composition may vary by IME provider</li>
+                <li class="mb-1">Windows 10 vs Windows 11 may have different Range behavior</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Keyboard Layout: Range Offsets" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Different keyboard layouts:</strong> Korean IME layouts (2벌식, 3벌식, 390 자판) may affect Range offset calculations:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Character offsets may differ due to composition method</li>
+                <li class="mb-1">Range boundaries during composition may vary between layouts</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="Device-Specific Issues">
+            <DocAlert type="error" title="⚠️ Mobile: Touch Selection Ranges" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Mobile devices:</strong> Touch-based selection creates Ranges differently than mouse selection:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">Range boundaries may be less precise on mobile</li>
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">getClientRects()</code> may return incorrect positions due to viewport scaling</li>
+                <li class="mb-1">Virtual keyboard may interfere with Range operations</li>
+                <li class="mb-1">Android vs iOS may handle touch selection ranges differently</li>
+              </ul>
+            </DocAlert>
+
+            <DocAlert type="warning" title="⚠️ Tablet: Hybrid Behavior" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Tablets:</strong> Range behavior may switch between desktop and mobile patterns:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1">External keyboard: behaves like desktop</li>
+                <li class="mb-1">Touch input: behaves like mobile</li>
+                <li class="mb-1">Range operations may need to detect input method</li>
+              </ul>
+            </DocAlert>
+          </DocSection>
+
+          <DocSection title="General Edge Cases">
+            <DocAlert type="warning" class="mb-4">
+              <p class="m-0 text-sm">
+                <strong>Range behavior varies:</strong> Some Range methods may behave differently across browsers, especially when dealing with complex DOM structures, IME composition, or edge cases (empty nodes, collapsed ranges, etc.).
+              </p>
+            </DocAlert>
+            <DocAlert type="warning" class="mb-4">
+              <p class="m-0 text-sm">
+                <strong>Error handling:</strong> Range methods can throw errors if given invalid parameters (e.g., offset beyond node length, invalid node references). Always wrap Range operations in try-catch blocks.
+              </p>
+            </DocAlert>
+            <DocAlert type="warning">
+              <p class="m-0 text-sm">
+                <strong>DOM mutations:</strong> After extracting or deleting content, the DOM structure changes. Any stored node references may become invalid. Always re-query the DOM after Range operations.
+              </p>
+            </DocAlert>
+          </DocSection>
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/selection-api" class="text-accent-primary no-underline">
+                Selection API →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/execCommand-alternatives" class="text-accent-primary no-underline">
+                execCommand alternatives →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="https://developer.mozilla.org/en-US/docs/Web/API/Range" target="_blank" rel="noopener noreferrer" class="text-accent-primary no-underline">
+                MDN: Range API (external) →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

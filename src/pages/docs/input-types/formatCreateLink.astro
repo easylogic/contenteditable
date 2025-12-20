@@ -1,0 +1,222 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatCreateLink"
+  description="How formatCreateLink inputType creates links and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatCreateLink</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + K</kbd> or uses the browser's link creation feature. The browser wraps selected text in an <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;a href="..."&gt;</code> element.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario 1: Text selected, URL provided">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Visit <span class="bg-yellow-200 dark:bg-yellow-900/40">Google</span> now&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + K (URL: https://google.com)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Visit <span class="bg-yellow-200 dark:bg-yellow-900/40 text-blue-600">&lt;a href="https://google.com"&gt;Google&lt;/a&gt;</span> now&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Wraps selected text in &lt;a&gt; element</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Scenario 2: Collapsed cursor (no text selected)" class="mt-6">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor position)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Visit Google<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span> now&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + K (URL: https://google.com)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Visit Google<span class="bg-blue-200 dark:bg-blue-900/40 text-blue-600">&lt;a href="https://google.com"&gt;&lt;/a&gt;</span> now&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Creates empty link at cursor position</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Most browsers prompt for URL via a dialog when <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Cmd/Ctrl + K</kbd> is pressed</li>
+              <li class="mb-2">If no URL is provided, some browsers create an empty link or do nothing</li>
+              <li class="mb-2">The <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event may include the URL in <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.data</code> or <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer</code></li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + formatCreateLink">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd/Ctrl + K</kbd> may not work as expected. On macOS with Korean IME, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatCreateLink</code> does not fire; <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> may fire instead.
+            </p>
+            <p class="m-0 text-sm">
+              See <a href="/docs/input-types/formatBold#ime-composition--formatbold" class="text-accent-primary underline">formatBold</a> for detailed workarounds.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle link creation differently, as links are more complex than simple text formatting. Here's how major editors implement formatCreateLink:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Link Creation"
+            description="Slate wraps selected text in a link element node:"
+            code={`import { Editor, Transforms, Element } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatCreateLink') {
+    e.preventDefault();
+    
+    const url = e.dataTransfer?.getData('text/uri-list') || 
+                prompt('Enter URL:') || '';
+    
+    if (!url) return;
+    
+    // Check if selection is already in a link
+    const [match] = Editor.nodes(editor, {
+      match: n => Element.isElement(n) && n.type === 'link',
+    });
+    
+    if (match) {
+      // Update existing link URL
+      Transforms.setNodes(editor, { url }, { at: match[1] });
+    } else {
+      // Wrap selection in link
+      Transforms.wrapNodes(editor, {
+        type: 'link',
+        url,
+        children: [],
+      }, { split: true });
+    }
+  }
+});`}
+            features={[
+              '<strong>Element node:</strong> Links are represented as element nodes, not marks.',
+              '<strong>wrapNodes:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Transforms.wrapNodes()</code> to wrap selection in link element.',
+              '<strong>URL storage:</strong> URL is stored as a property on the link element node.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Link Creation"
+            description="ProseMirror uses mark system for links:"
+            code={`import { toggleMark } from 'prosemirror-commands';
+import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatCreateLink') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    const url = e.dataTransfer?.getData('text/uri-list') || 
+                prompt('Enter URL:') || '';
+    
+    if (!url) return;
+    
+    // ProseMirror uses marks for links
+    const linkMark = schema.marks.link.create({ href: url });
+    const { from, to } = state.selection;
+    
+    const tr = state.tr.addMark(from, to, linkMark);
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>Mark system:</strong> Links are represented as marks (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">schema.marks.link</code>).',
+              '<strong>addMark:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">tr.addMark()</code> to apply link mark to selection.',
+              '<strong>URL in mark:</strong> URL is stored as an attribute on the link mark.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Link Creation"
+            description="Draft.js uses entity system for links:"
+            code={`import { EditorState, Modifier, RichUtils } from 'draft-js';
+import { Entity } from 'draft-js';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatCreateLink') {
+    e.preventDefault();
+    
+    const url = e.dataTransfer?.getData('text/uri-list') || 
+                prompt('Enter URL:') || '';
+    
+    if (!url) return;
+    
+    // Create entity for link
+    const contentState = editorState.getCurrentContent();
+    const contentStateWithEntity = contentState.createEntity(
+      'LINK',
+      'MUTABLE',
+      { url }
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    
+    // Apply entity to selection
+    const newContentState = Modifier.applyEntity(
+      contentStateWithEntity,
+      editorState.getSelection(),
+      entityKey
+    );
+    
+    const newState = EditorState.push(
+      editorState,
+      newContentState,
+      'apply-entity'
+    );
+    
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>Entity system:</strong> Links are represented as entities (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'LINK\'</code> entity type).',
+              '<strong>createEntity:</strong> Creates an entity with URL metadata.',
+              '<strong>applyEntity:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Modifier.applyEntity()</code> to apply entity to selection.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

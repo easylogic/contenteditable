@@ -1,0 +1,228 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertFromDrop"
+  description="How insertFromDrop inputType handles drag-and-drop operations and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromDrop</code> inputType is triggered when the user drops content into a contenteditable element via drag-and-drop. The browser inserts the dropped content at the drop position.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Text dropped at cursor">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor position)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After dropping "text "</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40">text </span>world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Dropped content inserted at drop position</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="DataTransfer Access">
+          <DocInfoBox>
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              The <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event provides access to dropped data via <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer</code>:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer.getData('text/plain')</code> - Plain text</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer.getData('text/html')</code> - HTML content</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer.files</code> - File list (for images, etc.)</li>
+              <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer.types</code> - Available data types</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Preserves HTML structure when dropping rich text</li>
+                  <li class="mb-1">Supports dropping images as <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;img&gt;</code> elements</li>
+                  <li class="mb-1">May sanitize certain HTML elements for security</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">May strip or modify HTML structure more aggressively</li>
+                  <li class="mb-1">File handling may differ from Chrome</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Drag-and-drop behavior may differ, especially on mobile</li>
+                  <li class="mb-1">File handling may require additional permissions</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Mobile Considerations">
+          <DocAlert type="info" title="ℹ️ Mobile Drag-and-Drop">
+            <p class="m-0 mb-2 text-sm">
+              On mobile devices, drag-and-drop behavior may differ significantly:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Touch-based drag-and-drop may not work the same way as mouse-based drag-and-drop</li>
+              <li class="mb-1">Some mobile browsers may not support <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromDrop</code> inputType</li>
+              <li class="mb-1">File dropping from external apps may require special handling</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle drop operations similarly to paste operations. Here's how major editors implement insertFromDrop:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Drop Handling"
+            description="Slate intercepts drop and converts dropped content to Slate nodes:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromDrop' && e.dataTransfer) {
+    e.preventDefault();
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    const plainText = e.dataTransfer.getData('text/plain');
+    
+    // Parse HTML and convert to Slate nodes (similar to paste)
+    const fragment = new DOMParser().parseFromString(htmlString || plainText, 'text/html');
+    const nodes = Array.from(fragment.body.childNodes).map(node => {
+      // Convert DOM node to Slate node structure
+      return jsx('element', { type: 'paragraph' }, [{ text: node.textContent || '' }]);
+    });
+    
+    // Insert nodes at drop position
+    Transforms.insertNodes(editor, nodes);
+  }
+});`}
+            features={[
+              '<strong>Similar to paste:</strong> Uses same HTML parsing and conversion logic as paste operations.',
+              '<strong>Position handling:</strong> Drop position is determined by the drop event coordinates.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Drop Handling"
+            description="ProseMirror uses DOMParser to parse dropped HTML:"
+            code={`import { DOMParser } from 'prosemirror-model';
+import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromDrop' && e.dataTransfer) {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    const dom = new DOMParser(window).parseFromString(htmlString, 'text/html');
+    
+    // Parse HTML into ProseMirror nodes
+    const fragment = DOMParser.fromSchema(schema).parse(dom.body);
+    
+    // Insert fragment at drop position
+    const tr = state.tr.replaceSelection(fragment);
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>Schema-aware:</strong> HTML is parsed according to ProseMirror schema rules.',
+              '<strong>Position calculation:</strong> Drop position is calculated from event coordinates.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Drop Handling"
+            description="Draft.js uses convertFromHTML to convert dropped HTML:"
+            code={`import { EditorState } from 'draft-js';
+import { stateFromHTML } from 'draft-js-import-html';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromDrop' && e.dataTransfer) {
+    e.preventDefault();
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    
+    // Convert HTML to ContentState
+    const contentState = stateFromHTML(htmlString);
+    
+    // Get drop position from selection
+    const selection = editorState.getSelection();
+    
+    // Insert content at drop position
+    const newContentState = Modifier.replaceWithFragment(
+      editorState.getCurrentContent(),
+      selection,
+      contentState.getBlockMap()
+    );
+    
+    const newState = EditorState.push(
+      editorState,
+      newContentState,
+      'insert-fragment'
+    );
+    
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>HTML import:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">stateFromHTML</code> to convert HTML to ContentState.',
+              '<strong>Position handling:</strong> Drop position is determined from selection state.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertFromPaste" class="text-accent-primary no-underline">
+                insertFromPaste →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertHTML" class="text-accent-primary no-underline">
+                insertHTML →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

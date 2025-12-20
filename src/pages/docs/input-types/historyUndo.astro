@@ -1,0 +1,246 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="historyUndo"
+  description="How historyUndo inputType performs undo operations and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">historyUndo</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Z</kbd>. The browser reverts the last operation by restoring the previous DOM state from its undo stack.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Undo after text insertion">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Current state (after typing 'x')</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello x world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Ctrl/Cmd + Z (Undo)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Previous state restored from undo stack</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser Undo Stack">
+          <DocInfoBox>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Browsers maintain their own undo/redo stack for contenteditable regions</li>
+              <li class="mb-2">The stack may include multiple operations (typing, formatting, deletion, etc.)</li>
+              <li class="mb-2">Undo stack depth and behavior varies between browsers</li>
+              <li class="mb-2">Some browsers may group related operations into a single undo step</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + Undo">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              Pressing Undo during IME composition can cause unexpected behavior: the composition may be cancelled, and more text than expected may be removed from the undo stack.
+            </p>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/ime-composition" class="text-accent-primary underline">IME & Composition</a> for more details.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor Internal Model & DOM Synchronization">
+          <DocAlert type="error" title="⚠️ Critical Exception: historyUndo May Not Fire">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When editors use internal models and manipulate DOM directly:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">historyUndo</code> event may <strong>not fire</strong> when the editor programmatically updates the DOM</li>
+              <li class="mb-1">Editors that use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> and manipulate DOM directly bypass the browser's undo stack</li>
+              <li class="mb-1">When editors re-render DOM from their internal model (e.g., after undo in their own stack), the browser doesn't recognize this as a user-initiated undo</li>
+              <li class="mb-1">Browser's undo stack may become out of sync with the editor's internal undo stack</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> Users pressing Ctrl/Cmd+Z may trigger the editor's internal undo, but the browser's <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">historyUndo</code> event may not fire, or may fire but be ignored by the editor.
+            </p>
+          </DocAlert>
+
+          <DocInfoBox title="Why This Happens" class="mt-4">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">1. preventDefault() Breaks Browser Undo Stack</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  When editors call <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.preventDefault()</code> on <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> events and then manipulate DOM directly:
+                </p>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Browser's undo stack is not updated (because default behavior was prevented)</li>
+                  <li class="mb-1">Editor maintains its own undo stack separately</li>
+                  <li class="mb-1">When user presses Ctrl/Cmd+Z, browser may try to undo from its (empty or stale) stack</li>
+                  <li class="mb-1">Editor intercepts the undo and uses its own stack instead</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">2. Programmatic DOM Updates Clear Undo Stack</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  When editors programmatically update DOM (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">innerHTML</code>, <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">textContent</code>, or React re-renders):
+                </p>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Browser's undo stack may be cleared (especially in Safari)</li>
+                  <li class="mb-1">Browser doesn't recognize programmatic changes as user actions</li>
+                  <li class="mb-1">Subsequent undo operations may not work as expected</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">3. Model-to-DOM Re-rendering</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  When editors re-render DOM from their internal model after undo:
+                </p>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Browser sees a DOM change but doesn't know it's from an undo operation</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">historyUndo</code> event may not fire because the change wasn't initiated by browser's undo stack</li>
+                  <li class="mb-1">Editor handles undo internally, then updates DOM, bypassing browser's undo mechanism</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Best Practices for Editors" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Always preventDefault() on historyUndo:</strong> Intercept <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">historyUndo</code> and use your own undo stack to avoid conflicts</li>
+              <li class="mb-2"><strong>Maintain separate undo stack:</strong> Don't rely on browser's undo stack when using internal models</li>
+              <li class="mb-2"><strong>Sync selection after undo:</strong> After undoing in your model and updating DOM, restore the selection to match the model state</li>
+              <li class="mb-2"><strong>Use document.execCommand('undo', false, null) carefully:</strong> This may trigger browser undo, which can conflict with your internal undo</li>
+              <li class="mb-2"><strong>Avoid programmatic DOM updates during undo:</strong> If possible, use browser's undo stack for simple cases, or fully manage your own stack</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks maintain their own undo/redo stacks, separate from the browser's undo stack. Here's how major editors implement historyUndo:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Undo Operation"
+            description="Slate maintains its own undo/redo history using History plugin:"
+            code={`import { Editor, History } from 'slate';
+import { withHistory } from 'slate-history';
+
+// Initialize editor with history plugin
+const editor = withHistory(createEditor());
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'historyUndo') {
+    e.preventDefault();
+    
+    // Slate's History plugin handles undo
+    History.undo(editor);
+  }
+});
+
+// Or use React hook
+import { useSlateStatic } from 'slate-react';
+const editor = useSlateStatic();
+
+function handleUndo() {
+  History.undo(editor);
+}`}
+            features={[
+              '<strong>History plugin:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">slate-history</code> package for undo/redo.',
+              '<strong>Separate stack:</strong> Maintains its own undo stack independent of browser.',
+              '<strong>Operation-based:</strong> Tracks operations (transforms) rather than DOM states.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Undo Operation"
+            description="ProseMirror uses history plugin for undo/redo:"
+            code={`import { undo } from 'prosemirror-history';
+import { history } from 'prosemirror-history';
+
+// Add history plugin to editor
+const plugins = [history()];
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'historyUndo') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (undo(state, dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>history plugin:</strong> Built-in history plugin tracks transactions.',
+              '<strong>undo command:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">undo()</code> command to revert last transaction.',
+              '<strong>Transaction-based:</strong> Undo/redo operates on ProseMirror transactions.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Undo Operation"
+            description="Draft.js maintains undo/redo stack in EditorState:"
+            code={`import { EditorState } from 'draft-js';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'historyUndo') {
+    e.preventDefault();
+    
+    // Draft.js maintains undo stack in EditorState
+    const undoStack = editorState.getUndoStack();
+    if (!undoStack.isEmpty()) {
+      const newState = EditorState.undo(editorState);
+      setEditorState(newState);
+    }
+  }
+});
+
+// Or use built-in undo method
+function handleUndo() {
+  const newState = EditorState.undo(editorState);
+  setEditorState(newState);
+}`}
+            features={[
+              '<strong>Built-in stack:</strong> EditorState maintains undo/redo stacks internally.',
+              '<strong>EditorState.undo:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">EditorState.undo()</code> to revert to previous state.',
+              '<strong>State-based:</strong> Undo/redo operates on complete EditorState snapshots.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/historyRedo" class="text-accent-primary no-underline">
+                historyRedo →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

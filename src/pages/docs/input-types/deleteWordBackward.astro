@@ -1,0 +1,242 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteWordBackward"
+  description="How deleteWordBackward inputType deletes words backward (Ctrl+Backspace) and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteWordBackward</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Backspace</kbd>. The browser deletes the word before the cursor position (backward word deletion).
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Cursor in middle of word">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 8)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Ctrl/Cmd + Backspace</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Entire word "Hello " deleted</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Scenario: Cursor at word boundary" class="mt-6">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor after "Hello")</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span> world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Ctrl/Cmd + Backspace</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span> world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Word "Hello" deleted (including trailing space in some browsers)</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Word Boundary Detection">
+          <DocInfoBox>
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              Browsers determine word boundaries differently:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Whitespace characters (spaces, tabs, newlines) typically mark word boundaries</li>
+              <li class="mb-2">Punctuation may or may not be included in word deletion depending on browser</li>
+              <li class="mb-2">CJK (Chinese, Japanese, Korean) characters may be treated as individual words or grouped differently</li>
+              <li class="mb-2">Behavior may vary between browsers and languages</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Deletes word including trailing space</li>
+                  <li class="mb-1">Word boundary detection based on Unicode word boundaries</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">May handle punctuation differently</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Word boundary detection may differ</li>
+                  <li class="mb-1">May include or exclude trailing spaces differently</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + deleteWordBackward">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Ctrl/Cmd + Backspace</kbd> may cancel the composition or delete more than expected. The behavior varies significantly between browsers and IME implementations.
+            </p>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/input-types/deleteContentBackward#ime-composition--backspace" class="text-accent-primary underline">deleteContentBackward</a> for similar issues with regular Backspace.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle word-level deletion differently. Here's how major editors implement deleteWordBackward:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Word Backward Deletion"
+            description="Slate uses Transforms.delete() with word unit:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteWordBackward') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection) {
+      // Delete word backward
+      Transforms.delete(editor, { reverse: true, unit: 'word' });
+    }
+  }
+});`}
+            features={[
+              '<strong>Transforms.delete:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">unit: \'word\'</code> with <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">reverse: true</code>.',
+              '<strong>Word detection:</strong> Slate determines word boundaries based on whitespace and punctuation.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Word Backward Deletion"
+            description="ProseMirror uses deleteSelection with word boundary detection:"
+            code={`import { deleteSelection } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteWordBackward') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Extend selection backward to word boundary
+    const { $from } = state.selection;
+    const wordStart = $from.startOfWordback($from);
+    
+    if (wordStart !== null) {
+      const tr = state.tr.delete(wordStart.pos, $from.pos);
+      dispatch(tr);
+    }
+  }
+});`}
+            features={[
+              '<strong>Word boundary detection:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">startOfWordback()</code> to find word start.',
+              '<strong>Transaction-based:</strong> Creates transaction to delete word range.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Word Backward Deletion"
+            description="Draft.js uses SelectionState to find word boundaries:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleDeleteWordBackward(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  // Find word start
+  const block = contentState.getBlockForKey(selection.getStartKey());
+  const text = block.getText();
+  const offset = selection.getStartOffset();
+  
+  // Find word boundary (simplified - real implementation would be more complex)
+  let wordStart = offset;
+  while (wordStart > 0 && /\S/.test(text[wordStart - 1])) {
+    wordStart--;
+  }
+  
+  // Create new selection from word start to cursor
+  const newSelection = selection.merge({
+    anchorOffset: wordStart,
+    focusOffset: offset,
+  });
+  
+  // Delete selection
+  const newContentState = Modifier.removeRange(
+    contentState,
+    newSelection,
+    'backward'
+  );
+  
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'remove-range'
+  );
+}`}
+            features={[
+              '<strong>Word boundary detection:</strong> Manually finds word start by scanning backward for whitespace.',
+              '<strong>Selection extension:</strong> Extends selection to word boundary before deleting.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContentBackward" class="text-accent-primary no-underline">
+                deleteContentBackward →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteWordForward" class="text-accent-primary no-underline">
+                deleteWordForward →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

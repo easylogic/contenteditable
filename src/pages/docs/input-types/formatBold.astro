@@ -1,0 +1,354 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatBold"
+  description="How formatBold inputType applies bold formatting and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatBold</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + B</kbd>. The browser wraps selected text in a bold element, but the exact element and behavior varies.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario 1: Text selected within paragraph">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                  <div class="text-text-primary mt-2">Visual: Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold">world</span> text</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + B (Chrome/Edge)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold">&lt;strong&gt;world&lt;/strong&gt;</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Uses &lt;strong&gt; element</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + B (Firefox)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold">&lt;b&gt;world&lt;/b&gt;</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Uses &lt;b&gt; element</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + B (Safari)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold">&lt;strong&gt;world&lt;/strong&gt;</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Uses &lt;strong&gt; element (similar to Chrome)</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Toggle Behavior">
+          <DocInfoBox title="Scenario 2: Already bold text selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Bold text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold">&lt;strong&gt;world&lt;/strong&gt;</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + B (Removes bold)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Removes &lt;strong&gt; wrapper</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Scenario 3: Partial bold selection" class="mt-6">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Selection spans bold and normal)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;He<span class="bg-yellow-200 dark:bg-yellow-900/40">&lt;strong&gt;llo wo&lt;/strong&gt;rld</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Selection: "ello world" (partially bold)</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + B (Normalizes structure)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;He<span class="bg-yellow-200 dark:bg-yellow-900/40 font-bold">&lt;strong&gt;llo wo&lt;/strong&gt;&lt;strong&gt;rld&lt;/strong&gt;</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Splits and wraps all selected text in &lt;strong&gt;</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Collapsed Selection (Cursor Position)">
+          <DocAlert type="error" title="⚠️ Critical Edge Case">
+            <p class="m-0 mb-2 text-sm">
+              When the selection is collapsed (cursor position, no text selected), pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd/Ctrl + B</kbd> behaves differently:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> may or may not fire</li>
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> typically does <strong>not</strong> fire</li>
+              <li class="mb-1">Browser toggles "bold state" for the next character to be typed</li>
+            </ul>
+          </DocAlert>
+
+          <DocInfoBox title="Scenario 4: Collapsed cursor in normal text">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 5)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Cmd/Ctrl + B (Toggles bold state)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">No DOM change yet - browser sets "bold state"</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After typing 'x' (Bold applied)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 font-bold">&lt;strong&gt;x&lt;/strong&gt;</span>world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Next typed character is wrapped in &lt;strong&gt;</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + formatBold">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd/Ctrl + B</kbd> may not work as expected:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><strong>macOS + Korean IME:</strong> <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">formatBold</code> does <strong>not</strong> fire; <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> fires instead. Formatting is completely ignored.</li>
+              <li class="mb-1"><strong>Other platforms:</strong> <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> may not fire; only <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> fires (cannot prevent). Formatting may be applied unexpectedly.</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> Formatting shortcuts are unreliable during IME composition, making it difficult to intercept and customize formatting.
+            </p>
+          </DocAlert>
+
+          <DocInfoBox title="Workaround" class="mt-4">
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              To handle IME composition issues:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-1">Listen for <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> events during composition</li>
+              <li class="mb-1">Track formatting intent separately when composition is active</li>
+              <li class="mb-1">Apply formatting after composition ends if formatting was requested</li>
+              <li class="mb-1">Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">keydown</code> events to detect shortcuts during composition (may interfere with IME)</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Differences">
+          <DocInfoBox title="Element Used for Bold">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Uses <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;strong&gt;</code> element</li>
+                  <li class="mb-1">More semantic HTML</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Uses <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;b&gt;</code> element</li>
+                  <li class="mb-1">Less semantic, but visually equivalent</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Uses <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;strong&gt;</code> element</li>
+                  <li class="mb-1">Similar to Chrome</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor Internal Model & DOM Synchronization">
+          <DocAlert type="warning" title="⚠️ Exception: preventDefault() and DOM Manipulation">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When editors use preventDefault() and manipulate DOM directly:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Browser's default formatting behavior is prevented</li>
+              <li class="mb-1">Editor applies formatting to its internal model, then re-renders DOM</li>
+              <li class="mb-1">Browser's undo stack may not include the formatting operation (because default was prevented)</li>
+              <li class="mb-1">If editor re-renders entire DOM from model, browser may lose track of the specific formatting change</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> Undo operations may not work as expected, or formatting may be lost during undo/redo cycles if the editor's internal model and DOM become out of sync.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle bold formatting differently. Here's how major editors implement formatBold:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Bold Formatting"
+            description="Slate uses Transforms.setNodes() to toggle formatting marks on text nodes:"
+            code={`import { Editor, Transforms, Text } from 'slate';
+
+function isBoldActive(editor: Editor) {
+  const marks = Editor.marks(editor);
+  return marks?.bold === true;
+}
+
+function handleFormatBold(editor: Editor) {
+  const isActive = isBoldActive(editor);
+  Transforms.setNodes(
+    editor,
+    { bold: !isActive },
+    { match: n => Text.isText(n), split: true }
+  );
+}
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    handleFormatBold(editor);
+  }
+});`}
+            features={[
+              '<strong>Mark-based:</strong> Formatting is stored as properties on text nodes (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">{ bold: true }</code>).',
+              '<strong>Transforms API:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Transforms.setNodes()</code> to apply/remove formatting.',
+              '<strong>Serialization:</strong> Marks are converted to HTML elements (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;</code>) during rendering.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Bold Formatting"
+            description="ProseMirror uses mark commands and keymaps to handle formatting:"
+            code={`import { toggleMark } from 'prosemirror-commands';
+import { schema } from './schema';
+
+function handleFormatBold(state, dispatch) {
+  return toggleMark(schema.marks.strong)(state, dispatch);
+}
+
+// In keymap
+{
+  'Mod-b': (state, dispatch) => {
+    return handleFormatBold(state, dispatch);
+  }
+}
+
+// Or intercept beforeinput
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    if (handleFormatBold(state, dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>Mark system:</strong> Formatting is represented as marks in the document schema (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">schema.marks.strong</code>).',
+              '<strong>Commands:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">toggleMark()</code> command to apply/remove marks.',
+              '<strong>Keymap:</strong> Keyboard shortcuts are defined in keymap plugins (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Mod-b</code> for bold).',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Bold Formatting"
+            description="Draft.js uses inline styles and RichUtils to handle formatting:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleFormatBold(editorState) {
+  return RichUtils.toggleInlineStyle(editorState, 'BOLD');
+}
+
+// In key binding function
+function myKeyBindingFn(e) {
+  if (e.keyCode === 66 && (e.ctrlKey || e.metaKey)) {
+    return 'bold';
+  }
+  return getDefaultKeyBinding(e);
+}
+
+// In key command handler
+function handleKeyCommand(command) {
+  if (command === 'bold') {
+    const newState = handleFormatBold(editorState);
+    setEditorState(newState);
+    return 'handled';
+  }
+  return 'not-handled';
+}`}
+            features={[
+              '<strong>Inline styles:</strong> Formatting is stored as inline style strings (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'BOLD\'</code>) in the ContentState.',
+              '<strong>RichUtils:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">RichUtils.toggleInlineStyle()</code> to toggle formatting.',
+              '<strong>Key bindings:</strong> Custom key binding function maps keyboard shortcuts to commands.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types & Formatting Events →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/playground" class="text-accent-primary no-underline">
+                Test in the playground →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

@@ -1,0 +1,163 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="historyRedo"
+  description="How historyRedo inputType performs redo operations and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">historyRedo</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Shift + Z</kbd> (or <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Y</kbd> on some systems). The browser reapplies the last undone operation from its redo stack.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Redo after undo">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Current state (after undo)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Ctrl/Cmd + Shift + Z (Redo)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello x world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Previous undone operation reapplied</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser Redo Stack">
+          <DocInfoBox>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Browsers maintain a redo stack that stores undone operations</li>
+              <li class="mb-2">The redo stack is cleared when a new operation is performed after an undo</li>
+              <li class="mb-2">Redo stack depth and behavior varies between browsers</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor Internal Model & DOM Synchronization">
+          <DocAlert type="error" title="⚠️ Critical Exception: historyRedo May Not Fire">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Similar to historyUndo:</strong> When editors use internal models and manipulate DOM directly, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">historyRedo</code> event may not fire or may be ignored.
+            </p>
+            <p class="m-0 text-sm">
+              See <a href="/docs/input-types/historyUndo#editor-internal-model--dom-synchronization" class="text-accent-primary underline">historyUndo - Editor Internal Model & DOM Synchronization</a> for detailed explanation of why this happens and how to handle it.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks maintain their own redo stacks, separate from the browser's redo stack. Here's how major editors implement historyRedo:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Redo Operation"
+            description="Slate uses History.redo() to reapply undone operations:"
+            code={`import { Editor, History } from 'slate';
+import { withHistory } from 'slate-history';
+
+const editor = withHistory(createEditor());
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'historyRedo') {
+    e.preventDefault();
+    
+    // Slate's History plugin handles redo
+    History.redo(editor);
+  }
+});
+
+function handleRedo() {
+  History.redo(editor);
+}`}
+            features={[
+              '<strong>History.redo:</strong> Reapplies the last undone operation.',
+              '<strong>Operation-based:</strong> Reapplies operations from redo stack.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Redo Operation"
+            description="ProseMirror uses redo command:"
+            code={`import { redo } from 'prosemirror-history';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'historyRedo') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (redo(state, dispatch)) {
+      // Handled
+    }
+  }
+});`}
+            features={[
+              '<strong>redo command:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">redo()</code> command to reapply last undone transaction.',
+              '<strong>Transaction-based:</strong> Reapplies transactions from redo stack.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Redo Operation"
+            description="Draft.js uses EditorState.redo() to reapply undone state:"
+            code={`import { EditorState } from 'draft-js';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'historyRedo') {
+    e.preventDefault();
+    
+    const redoStack = editorState.getRedoStack();
+    if (!redoStack.isEmpty()) {
+      const newState = EditorState.redo(editorState);
+      setEditorState(newState);
+    }
+  }
+});
+
+function handleRedo() {
+  const newState = EditorState.redo(editorState);
+  setEditorState(newState);
+}`}
+            features={[
+              '<strong>EditorState.redo:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">EditorState.redo()</code> to reapply previous state.',
+              '<strong>State-based:</strong> Reapplies EditorState snapshots from redo stack.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/historyUndo" class="text-accent-primary no-underline">
+                historyUndo →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

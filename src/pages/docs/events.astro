@@ -1,7 +1,9 @@
 ---
-import SiteNav from '../../components/SiteNav.astro';
-import DocsSidebar from '../../components/DocsSidebar.astro';
-import BaseHead from '../../components/BaseHead.astro';
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
 
@@ -42,279 +44,117 @@ element.addEventListener('compositionend', (e) => {
 });`;
 ---
 
-<html lang="en">
-  <head>
-    <BaseHead title="Events – contenteditable.lab" description="Understanding input, beforeinput, composition, and other events in contenteditable." />
-  </head>
-  <body>
-    <SiteNav />
-    <main
-      style="
-        display: flex;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-      "
-    >
-      <DocsSidebar currentPath={Astro.url.pathname} />
-
-      <div
-        style="
-          flex: 1;
-          display: flex;
-          max-width: 1120px;
-          margin: 0 auto;
-          padding: 1.75rem 1.25rem 2.5rem;
-          gap: 1.5rem;
-        "
-      >
-      <section style="flex: 1; min-width: 0;">
-      <header style="margin-bottom: 2rem;">
-        <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
-          <a href="/docs" style="color: var(--text-muted); text-decoration: none;">Documentation</a>
-          <span style="color: var(--text-faint); margin: 0 0.5rem;">/</span>
-          <span style="color: var(--text-primary);">Events</span>
-        </nav>
-        <h1
-          style="
-            font-size: 2rem;
-            line-height: 1.1;
-            margin: 0 0 0.5rem 0;
-          "
-        >
-          Events in contenteditable
-        </h1>
-        <p style="margin: 0; font-size: 0.95rem; color: var(--text-secondary);">
-          Understanding the event lifecycle when users interact with contenteditable elements.
-        </p>
-      </header>
-
-      <article
-        style="
-          border-radius: 0.75rem;
-          border: 1px solid var(--border-light);
-          background: var(--bg-surface);
-          padding: 1.5rem 1.75rem;
-          font-size: 0.9rem;
-          line-height: 1.7;
-        "
-      >
-        <section style="margin-bottom: 2rem;">
-          <h2
-            id="event-order"
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Event order
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
+<DocLayout
+  title="Events in contenteditable"
+  description="Understanding the event lifecycle when users interact with contenteditable elements."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection id="event-order" title="Event order">
+          <p class="m-0 mb-4">
             When a user types in a contenteditable element, events fire in a specific order. The exact order can vary by browser and input method.
           </p>
-          <div
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              margin-bottom: 1rem;
-            "
-          >
-            <ol style="margin: 0; padding-left: 1.5rem;">
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">keydown</code> – Fires when a key is pressed
+          <DocInfoBox>
+            <ol class="m-0 pl-6">
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">keydown</code> – Fires when a key is pressed
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> – Fires before input is committed
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> – Fires before input is committed
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionstart</code> – Fires when IME composition begins
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code> – Fires when IME composition begins
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionupdate</code> – Fires during IME composition (may fire multiple times)
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> – Fires during IME composition (may fire multiple times)
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionend</code> – Fires when IME composition completes
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code> – Fires when IME composition completes
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">input</code> – Fires after the DOM has been updated
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> – Fires after the DOM has been updated
               </li>
             </ol>
-          </div>
-        </section>
+          </DocInfoBox>
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            id="key-events"
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Key events
-          </h2>
-
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              id="beforeinput"
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+        <DocSection id="key-events" title="Key events">
+          <div class="mb-6">
+            <h3 id="beforeinput" class="text-lg m-0 mb-2 text-text-primary">
               beforeinput
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               Fires before input is committed to the DOM. Allows you to prevent or modify the default behavior. Browser support varies by version.
             </p>
-            <pre
-              style="
-                background: var(--bg-muted);
-                border: 1px solid var(--border-light);
-                border-radius: 0.5rem;
-                padding: 1rem;
-                overflow-x: auto;
-                font-size: 0.85rem;
-                line-height: 1.6;
-              "
-            ><code>{beforeInputCode}</code></pre>
+            <DocCodeBlock code={beforeInputCode} />
           </div>
 
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              id="input"
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+          <div class="mb-6">
+            <h3 id="input" class="text-lg m-0 mb-2 text-text-primary">
               input
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               Fires after the DOM has been updated with the new content. This is the most reliable event for detecting changes, but you cannot prevent the change at this point.
             </p>
-            <pre
-              style="
-                background: var(--bg-muted);
-                border: 1px solid var(--border-light);
-                border-radius: 0.5rem;
-                padding: 1rem;
-                overflow-x: auto;
-                font-size: 0.85rem;
-                line-height: 1.6;
-              "
-            ><code>{inputCode}</code></pre>
+            <DocCodeBlock code={inputCode} />
           </div>
 
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              id="composition-events"
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+          <div class="mb-6">
+            <h3 id="composition-events" class="text-lg m-0 mb-2 text-text-primary">
               Composition events
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               Fired when using Input Method Editors (IME) for languages like Japanese, Korean, or Chinese. These events allow you to track the composition process.
             </p>
-            <pre
-              style="
-                background: var(--bg-muted);
-                border: 1px solid var(--border-light);
-                border-radius: 0.5rem;
-                padding: 1rem;
-                overflow-x: auto;
-                font-size: 0.85rem;
-                line-height: 1.6;
-              "
-            ><code>{compositionCode}</code></pre>
+            <DocCodeBlock code={compositionCode} />
           </div>
-        </section>
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            id="browser-differences"
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Browser differences
-          </h2>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
+        <DocSection id="browser-differences" title="Browser differences">
+          <DocAlert type="warning" class="mb-4">
+            <p class="m-0 text-sm">
               <strong>Event order varies:</strong> The exact order and timing of events differs between browsers, especially for IME composition and special keys (Enter, Backspace, etc.).
             </p>
-          </div>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
-              <strong>beforeinput support:</strong> Browser support for <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">beforeinput</code> varies by version. Some older browsers may not support it. Always test in your target browsers and consider <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">keydown</code> or <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">input</code> as fallbacks.
+          </DocAlert>
+          <DocAlert type="warning" class="mb-4">
+            <p class="m-0 text-sm">
+              <strong>beforeinput support:</strong> Browser support for <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> varies by version. Some older browsers may not support it. Always test in your target browsers and consider <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">keydown</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> as fallbacks.
             </p>
-          </div>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
+          </DocAlert>
+          <DocAlert type="warning">
+            <p class="m-0 text-sm">
               <strong>Event duplication:</strong> Some browsers may fire events multiple times for a single user action. Always test your event handlers across different browsers.
             </p>
-          </div>
-        </section>
+          </DocAlert>
+        </DocSection>
 
-        <section>
-          <h2
-            id="related-resources"
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Related resources
-          </h2>
-          <ul style="margin: 0; padding-left: 1.5rem;">
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/docs/ime-composition"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+        <DocSection id="related-resources" title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types & Formatting Events →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/ime-composition" class="text-accent-primary no-underline">
                 IME & Composition →
               </a>
             </li>
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/cases?tag=events"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+            <li class="mb-2">
+              <a href="/cases?tag=events" class="text-accent-primary no-underline">
                 Browse cases related to events →
               </a>
             </li>
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/playground"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+            <li class="mb-2">
+              <a href="/playground" class="text-accent-primary no-underline">
                 Test events in the playground →
               </a>
             </li>
           </ul>
-        </section>
-      </article>
-      </section>
-      
-      <TableOfContents headings={headings} />
-      </div>
-    </main>
-  </body>
-</html>
+        </DocSection>
+</DocLayout>
+
+<div class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6">
+  <div class="flex-1"></div>
+  <TableOfContents headings={headings} />
+</div>
 

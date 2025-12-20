@@ -1,0 +1,197 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertOrderedList"
+  description="How insertOrderedList inputType creates ordered lists and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertOrderedList</code> inputType is triggered when the user creates an ordered list (typically via toolbar or programmatically). The browser wraps selected paragraphs in an <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;ol&gt;</code> with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;li&gt;</code> items.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Multiple paragraphs selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Paragraphs selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">Item 1</span>&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">Item 2</span>&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;Item 3&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After insertOrderedList</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;ol&gt;</div>
+                  <div class="text-text-primary pl-4">&lt;li&gt;Item 1&lt;/li&gt;</div>
+                  <div class="text-text-primary pl-4">&lt;li&gt;Item 2&lt;/li&gt;</div>
+                  <div class="text-text-primary">&lt;/ol&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;Item 3&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Selected paragraphs converted to list items</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">If selection is within an existing list, behavior varies: some browsers convert to ordered list, others merge items</li>
+              <li class="mb-2">Empty paragraphs may be converted to empty list items or ignored</li>
+              <li class="mb-2">Nested lists may be created if selection spans multiple levels</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + insertOrderedList">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, creating an ordered list may cancel the composition or commit it partially. The composition text may be lost or inserted incorrectly into list items.
+            </p>
+            <p class="m-0 text-sm">
+              Similar issues may occur with other block-level operations during composition.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle list creation differently. Here's how major editors implement insertOrderedList:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Ordered List Creation"
+            description="Slate uses Transforms.wrapNodes() to wrap blocks in list containers:"
+            code={`import { Editor, Transforms, Element } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertOrderedList') {
+    e.preventDefault();
+    
+    // Check if already in a list
+    const [match] = Editor.nodes(editor, {
+      match: n => Element.isElement(n) && n.type === 'ordered-list',
+    });
+    
+    if (match) {
+      // Unwrap list
+      Transforms.unwrapNodes(editor, {
+        match: n => Element.isElement(n) && n.type === 'ordered-list',
+      });
+    } else {
+      // Wrap in ordered list
+      Transforms.wrapNodes(editor, {
+        type: 'ordered-list',
+        children: [],
+      });
+      
+      // Convert blocks to list items
+      Transforms.setNodes(editor, {
+        type: 'list-item',
+      });
+    }
+  }
+});`}
+            features={[
+              '<strong>Transforms.wrapNodes:</strong> Wraps selected blocks in a list container.',
+              '<strong>Block conversion:</strong> Converts paragraphs to list items using <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">setNodes</code>.',
+              '<strong>Toggle behavior:</strong> Can unwrap lists if already in a list.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Ordered List Creation"
+            description="ProseMirror uses wrapIn command to create lists:"
+            code={`import { wrapIn } from 'prosemirror-commands';
+import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertOrderedList') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Check if already in ordered list
+    const { $from } = state.selection;
+    const listType = schema.nodes.ordered_list;
+    const inList = $from.node(-1)?.type === listType;
+    
+    if (inList) {
+      // Lift out of list
+      const { lift } = require('prosemirror-transform');
+      if (lift(state, dispatch)) {
+        // Handled
+      }
+    } else {
+      // Wrap in ordered list
+      if (wrapIn(listType)(state, dispatch)) {
+        // Handled
+      }
+    }
+  }
+});`}
+            features={[
+              '<strong>wrapIn command:</strong> Wraps selection in a list node type.',
+              '<strong>Schema-based:</strong> Uses schema-defined list and list-item node types.',
+              '<strong>Lift command:</strong> Can lift content out of lists to toggle behavior.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Ordered List Creation"
+            description="Draft.js uses RichUtils.toggleBlockType() for lists:"
+            code={`import { EditorState, RichUtils } from 'draft-js';
+
+function handleInsertOrderedList(editorState) {
+  // Draft.js uses block-level styles for lists
+  return RichUtils.toggleBlockType(editorState, 'ordered-list-item');
+}
+
+// In beforeinput handler
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertOrderedList') {
+    e.preventDefault();
+    const newState = handleInsertOrderedList(editorState);
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>RichUtils.toggleBlockType:</strong> Toggles block type between paragraph and list-item.',
+              '<strong>Block types:</strong> Lists are represented as block types (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'ordered-list-item\'</code>).',
+              '<strong>Serialization:</strong> Block types are converted to HTML list elements during rendering.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertUnorderedList" class="text-accent-primary no-underline">
+                insertUnorderedList →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

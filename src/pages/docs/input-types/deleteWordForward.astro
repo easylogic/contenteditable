@@ -1,0 +1,197 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteWordForward"
+  description="How deleteWordForward inputType deletes words forward (Ctrl+Delete) and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteWordForward</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Delete</kbd>. The browser deletes the word after the cursor position (forward word deletion).
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Cursor in middle of word">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 8)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Ctrl/Cmd + Delete</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span> text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Entire word "world " deleted</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Difference from deleteWordBackward">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteWordForward (Ctrl/Cmd + Delete)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Deletes word/content <strong>after</strong> cursor</li>
+                  <li class="mb-1">Forward word deletion</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">deleteWordBackward (Ctrl/Cmd + Backspace)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Deletes word/content <strong>before</strong> cursor</li>
+                  <li class="mb-1">Backward word deletion</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + deleteWordForward">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Ctrl/Cmd + Delete</kbd> may cancel the composition or delete more than expected. The behavior varies significantly between browsers and IME implementations.
+            </p>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/input-types/deleteContentForward#ime-composition--deletecontentforward" class="text-accent-primary underline">deleteContentForward</a> for similar issues with regular Delete.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle word-level forward deletion similarly to backward deletion. Here's how major editors implement deleteWordForward:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Word Forward Deletion"
+            description="Slate uses Transforms.delete() with word unit (forward):"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteWordForward') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection) {
+      // Delete word forward
+      Transforms.delete(editor, { unit: 'word' });
+    }
+  }
+});`}
+            features={[
+              '<strong>Transforms.delete:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">unit: \'word\'</code> without <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">reverse</code> flag.',
+              '<strong>Same API:</strong> Uses same method as backward deletion, just without <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">reverse: true</code>.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Word Forward Deletion"
+            description="ProseMirror uses word boundary detection forward:"
+            code={`view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteWordForward') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Extend selection forward to word boundary
+    const { $to } = state.selection;
+    const wordEnd = $to.endOfWord($to);
+    
+    if (wordEnd !== null) {
+      const tr = state.tr.delete($to.pos, wordEnd.pos);
+      dispatch(tr);
+    }
+  }
+});`}
+            features={[
+              '<strong>Word boundary detection:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">endOfWord()</code> to find word end.',
+              '<strong>Transaction-based:</strong> Creates transaction to delete word range forward.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Word Forward Deletion"
+            description="Draft.js finds word end and deletes:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleDeleteWordForward(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  // Find word end
+  const block = contentState.getBlockForKey(selection.getStartKey());
+  const text = block.getText();
+  const offset = selection.getStartOffset();
+  
+  // Find word boundary (simplified)
+  let wordEnd = offset;
+  while (wordEnd < text.length && /\S/.test(text[wordEnd])) {
+    wordEnd++;
+  }
+  
+  // Create new selection from cursor to word end
+  const newSelection = selection.merge({
+    anchorOffset: offset,
+    focusOffset: wordEnd,
+  });
+  
+  // Delete selection
+  const newContentState = Modifier.removeRange(
+    contentState,
+    newSelection,
+    'forward'
+  );
+  
+  return EditorState.push(
+    editorState,
+    newContentState,
+    'remove-range'
+  );
+}`}
+            features={[
+              '<strong>Word boundary detection:</strong> Manually finds word end by scanning forward for whitespace.',
+              '<strong>Selection extension:</strong> Extends selection to word boundary before deleting.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContentForward" class="text-accent-primary no-underline">
+                deleteContentForward →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteWordBackward" class="text-accent-primary no-underline">
+                deleteWordBackward →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

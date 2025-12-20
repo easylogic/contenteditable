@@ -1,0 +1,190 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertHorizontalRule"
+  description="How insertHorizontalRule inputType inserts horizontal rule (hr) elements and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertHorizontalRule</code> inputType is triggered when the user inserts a horizontal rule (typically via toolbar or programmatically). The browser inserts an <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;hr&gt;</code> element at the current cursor position.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Cursor in middle of paragraph">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 5)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After insertHorizontalRule</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello&lt;/p&gt;</div>
+                  <div class="text-text-primary">&lt;hr&gt;</div>
+                  <div class="text-text-primary">&lt;p&gt;world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Paragraph split, &lt;hr&gt; inserted between</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Inserts <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;hr&gt;</code> element</li>
+                  <li class="mb-1">May split current paragraph if cursor is in middle</li>
+                  <li class="mb-1">Creates new paragraph after <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">&lt;hr&gt;</code> if needed</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">May handle paragraph splitting differently</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Horizontal rule insertion may differ</li>
+                  <li class="mb-1">May use different element structure</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle horizontal rule insertion differently. Here's how major editors implement insertHorizontalRule:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Horizontal Rule Insertion"
+            description="Slate inserts horizontal rule as a block element:"
+            code={`import { Editor, Transforms, Element } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertHorizontalRule') {
+    e.preventDefault();
+    
+    // Insert horizontal rule block
+    Transforms.insertNodes(editor, {
+      type: 'horizontal-rule',
+      children: [],
+    });
+    
+    // Insert new paragraph after hr
+    Transforms.insertNodes(editor, {
+      type: 'paragraph',
+      children: [{ text: '' }],
+    });
+  }
+});`}
+            features={[
+              '<strong>Block element:</strong> Horizontal rule is represented as a block element in Slate.',
+              '<strong>Transforms.insertNodes:</strong> Inserts horizontal rule block at selection.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Horizontal Rule Insertion"
+            description="ProseMirror inserts horizontal rule node:"
+            code={`import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertHorizontalRule') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Insert horizontal rule node
+    const hrNode = schema.nodes.horizontal_rule.create();
+    const tr = state.tr.replaceSelectionWith(hrNode);
+    
+    // Insert paragraph after if needed
+    const paragraph = schema.nodes.paragraph.create();
+    tr.insert(tr.selection.after, paragraph);
+    
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>Node creation:</strong> Creates horizontal rule node from schema.',
+              '<strong>replaceSelectionWith:</strong> Replaces selection with horizontal rule.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Horizontal Rule Insertion"
+            description="Draft.js uses block type for horizontal rule:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleInsertHorizontalRule(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  // Create horizontal rule block
+  const newContentState = Modifier.splitBlock(contentState, selection);
+  const newSelection = newContentState.getSelectionAfter();
+  
+  // Set block type to horizontal-rule
+  const blockMap = newContentState.getBlockMap();
+  const block = blockMap.get(newSelection.getStartKey());
+  const newBlock = block.merge({ type: 'horizontal-rule' });
+  
+  const finalContentState = newContentState.merge({
+    blockMap: blockMap.set(newSelection.getStartKey(), newBlock),
+  });
+  
+  return EditorState.push(
+    editorState,
+    finalContentState,
+    'insert-fragment'
+  );
+}`}
+            features={[
+              '<strong>Block type:</strong> Uses block type (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">\'horizontal-rule\'</code>) for horizontal rule.',
+              '<strong>splitBlock:</strong> Splits current block and creates horizontal rule block.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertParagraph" class="text-accent-primary no-underline">
+                insertParagraph →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

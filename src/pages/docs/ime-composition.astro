@@ -1,7 +1,9 @@
 ---
-import SiteNav from '../../components/SiteNav.astro';
-import DocsSidebar from '../../components/DocsSidebar.astro';
-import BaseHead from '../../components/BaseHead.astro';
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
 import '../../styles/global.css';
 
 const compositionCode = `element.addEventListener('compositionstart', () => {
@@ -17,296 +19,685 @@ element.addEventListener('compositionend', (e) => {
 });`;
 ---
 
-<html lang="en">
-  <head>
-    <BaseHead title="IME & Composition – contenteditable.lab" description="How Input Method Editors work with contenteditable." />
-  </head>
-  <body
-    style="
-      color: var(--text-primary);
-    "
-  >
-    <SiteNav />
-    <main
-      style="
-        display: flex;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-      "
-    >
-      <DocsSidebar currentPath={Astro.url.pathname} />
-
-      <section
-        style="
-          flex: 1;
-          max-width: 1120px;
-          margin: 0 auto;
-          padding: 1.75rem 1.25rem 2.5rem;
-          width: 100%;
-        "
-      >
-      <header style="margin-bottom: 2rem;">
-        <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
-          <a href="/docs" style="color: var(--text-muted); text-decoration: none;">Documentation</a>
-          <span style="color: var(--text-faint); margin: 0 0.5rem;">/</span>
-          <span style="color: var(--text-primary);">IME & Composition</span>
-        </nav>
-        <h1
-          style="
-            font-size: 2rem;
-            line-height: 1.1;
-            margin: 0 0 0.5rem 0;
-          "
-        >
-          IME & Composition
-        </h1>
-        <p style="margin: 0; font-size: 0.95rem; color: var(--text-secondary);">
-          How Input Method Editors (IME) work with contenteditable and the challenges they present.
-        </p>
-      </header>
-
-      <article
-        style="
-          border-radius: 0.75rem;
-          border: 1px solid var(--border-light);
-          background: var(--bg-surface);
-          padding: 1.5rem 1.75rem;
-          font-size: 0.9rem;
-          line-height: 1.7;
-        "
-      >
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            What is an IME?
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
+<DocLayout
+  title="IME & Composition"
+  description="How Input Method Editors (IME) work with contenteditable and the challenges they present."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="What is an IME?">
+          <p class="m-0 mb-4">
             An Input Method Editor (IME) is a software component that allows users to enter characters that are not directly available on their keyboard. Common examples include:
           </p>
-          <ul style="margin: 0; padding-left: 1.5rem;">
-            <li style="margin-bottom: 0.5rem;">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
               <strong>Japanese IME:</strong> Converts romanized input (romaji) into hiragana, katakana, or kanji
             </li>
-            <li style="margin-bottom: 0.5rem;">
+            <li class="mb-2">
               <strong>Korean IME:</strong> Combines individual jamo characters into complete syllables
             </li>
-            <li style="margin-bottom: 0.5rem;">
+            <li class="mb-2">
               <strong>Chinese IME:</strong> Converts pinyin or other phonetic input into Chinese characters
             </li>
-            <li style="margin-bottom: 0.5rem;">
+            <li class="mb-2">
               <strong>Vietnamese IME:</strong> Adds diacritical marks to base characters
             </li>
           </ul>
-        </section>
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Composition events
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
+        <DocSection title="Korean IME Variations">
+          <p class="m-0 mb-4">
+            Korean IMEs can use different keyboard layouts and composition methods, which can affect how composition events fire and how text is composed:
+          </p>
+
+          <DocInfoBox title="Keyboard Layout Types">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">2벌식 (두벌식) - Most Common</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Standard Korean keyboard layout</li>
+                  <li class="mb-1">Most widely used in South Korea</li>
+                  <li class="mb-1">Jamo characters arranged in two rows</li>
+                  <li class="mb-1">Example: ㅎ (H), ㅏ (A), ㄴ (N) → 한</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">3벌식 (세벌식)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Alternative keyboard layout</li>
+                  <li class="mb-1">Jamo characters arranged in three rows</li>
+                  <li class="mb-1">Different key positions for same jamo</li>
+                  <li class="mb-1">May affect composition event timing</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">390 자판</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Another alternative layout</li>
+                  <li class="mb-1">Less commonly used</li>
+                  <li class="mb-1">May have different composition behavior</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Composition Methods" class="mt-4">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">조합형 (Composition-based)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Real-time composition: ㅎ + ㅏ + ㄴ → 한</li>
+                  <li class="mb-1">Each jamo input triggers <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code></li>
+                  <li class="mb-1">Composition text changes with each keystroke</li>
+                  <li class="mb-1">Most common method in modern Korean IMEs</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">완성형 (Completion-based)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">User selects from pre-composed characters</li>
+                  <li class="mb-1">May have different event patterns</li>
+                  <li class="mb-1">Less common in modern IMEs</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="warning" title="⚠️ Impact on Composition Events" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              Different keyboard layouts and composition methods can affect:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">The number of <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> events fired</li>
+              <li class="mb-1">The timing of when composition text is updated</li>
+              <li class="mb-1">How selection ranges change during composition</li>
+              <li class="mb-1">Whether <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> events fire for formatting shortcuts</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Example:</strong> macOS Korean IME with 2벌식 may behave differently than Windows Korean IME with 3벌식, even for the same text input.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Composition events">
+          <p class="m-0 mb-4">
             When using an IME, the input process involves multiple stages tracked by composition events:
           </p>
-          <div
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              margin-bottom: 1rem;
-            "
-          >
-            <ol style="margin: 0; padding-left: 1.5rem;">
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionstart</code> – Fires when the user starts composing (e.g., begins typing in Japanese)
+          <DocInfoBox class="mb-4">
+            <ol class="m-0 pl-6">
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code> – Fires when the user starts composing (e.g., begins typing in Japanese)
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionupdate</code> – Fires repeatedly as the composition changes (e.g., as candidate characters appear)
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> – Fires repeatedly as the composition changes (e.g., as candidate characters appear)
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">compositionend</code> – Fires when the composition is finalized (e.g., user selects a kanji)
+              <li class="mb-2">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code> – Fires when the composition is finalized (e.g., user selects a kanji)
               </li>
             </ol>
-          </div>
-          <pre
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              overflow-x: auto;
-              font-size: 0.85rem;
-              line-height: 1.6;
-            "
-          ><code>{compositionCode}</code></pre>
-        </section>
+          </DocInfoBox>
+          <DocCodeBlock code={compositionCode} />
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Common issues
-          </h2>
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+        <DocSection title="Composition Event Timing Variations">
+          <p class="m-0 mb-4">
+            The exact timing and occurrence of <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code>, <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code>, and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code> events can vary significantly depending on multiple factors:
+          </p>
+
+          <DocInfoBox title="Factors Affecting Composition Event Timing">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">1. Keyboard/IME Type</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Korean IME:</strong> 2벌식 vs 3벌식 vs 390 자판 may fire events at different points</li>
+                  <li class="mb-1"><strong>Japanese IME:</strong> Different IME engines (Microsoft IME, Google IME, etc.) may have different timing</li>
+                  <li class="mb-1"><strong>Chinese IME:</strong> Pinyin vs other input methods may trigger events differently</li>
+                  <li class="mb-1"><strong>Mobile keyboards:</strong> Gboard, Samsung Keyboard, iOS QuickType all have different composition behaviors</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">2. Browser</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Chrome/Edge:</strong> May fire <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">compositionupdate</code> before <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> in some cases</li>
+                  <li class="mb-1"><strong>Firefox:</strong> Different event ordering and timing</li>
+                  <li class="mb-1"><strong>Safari:</strong> May have unique composition event patterns</li>
+                  <li class="mb-1">Event order can change between browser versions</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">3. Operating System</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>macOS:</strong> Uses system-level IME, may have different timing than Windows</li>
+                  <li class="mb-1"><strong>Windows:</strong> IME behavior varies by Windows version and IME provider</li>
+                  <li class="mb-1"><strong>Linux:</strong> IME implementation varies by distribution and desktop environment</li>
+                  <li class="mb-1"><strong>Android:</strong> OS-level keyboard integration affects event timing</li>
+                  <li class="mb-1"><strong>iOS:</strong> System keyboard behavior differs from desktop</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">4. Device Type</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Desktop:</strong> Physical keyboard input may trigger events differently</li>
+                  <li class="mb-1"><strong>Mobile:</strong> Virtual keyboard with text prediction may skip or delay events</li>
+                  <li class="mb-1"><strong>Tablet:</strong> Hybrid behavior between desktop and mobile</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Example: Korean IME Timing Differences" class="mt-4">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">macOS + Chrome + Korean IME (2벌식)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary mb-2">Typing "한":</div>
+                  <div class="text-text-primary">1. compositionstart (when "ㅎ" pressed)</div>
+                  <div class="text-text-primary">2. compositionupdate (data: "ㅎ")</div>
+                  <div class="text-text-primary">3. compositionupdate (data: "하") - when "ㅏ" pressed</div>
+                  <div class="text-text-primary">4. compositionupdate (data: "한") - when "ㄴ" pressed</div>
+                  <div class="text-text-primary">5. compositionend (when Space/Enter pressed)</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Windows + Firefox + Korean IME (3벌식)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary mb-2">Typing "한":</div>
+                  <div class="text-text-primary">1. compositionstart (when "ㅎ" pressed)</div>
+                  <div class="text-text-primary">2. compositionupdate (data: "ㅎ")</div>
+                  <div class="text-text-primary">3. compositionupdate (data: "하") - when "ㅏ" pressed</div>
+                  <div class="text-text-primary">4. compositionupdate (data: "한") - when "ㄴ" pressed</div>
+                  <div class="text-text-primary">5. compositionend (when Space/Enter pressed)</div>
+                  <div class="text-text-secondary mt-2 text-xs">⚠️ May have different timing between updates</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Android + Samsung Keyboard + Text Prediction</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary mb-2">Typing "한":</div>
+                  <div class="text-text-primary">1. compositionstart (may be delayed or skipped)</div>
+                  <div class="text-text-primary">2. compositionupdate (data: "한") - may fire once with full text</div>
+                  <div class="text-text-primary">3. compositionend (immediate or delayed)</div>
+                  <div class="text-text-secondary mt-2 text-xs">⚠️ Events may be batched or skipped due to prediction</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="error" title="⚠️ Critical: Unpredictable Event Timing" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Composition event timing is NOT guaranteed to be consistent:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code> may fire before, after, or simultaneously with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code></li>
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> may fire multiple times per keystroke or skip keystrokes</li>
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code> may fire immediately after commit or be delayed</li>
+              <li class="mb-1">Some IMEs may not fire <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code> at all in certain scenarios</li>
+              <li class="mb-1">Mobile keyboards with text prediction may skip composition events entirely</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Best Practice:</strong> Never rely on exact event timing. Always check the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">isComposing</code> flag and DOM state to determine composition status.
+            </p>
+          </DocAlert>
+
+          <DocInfoBox title="Detecting Composition State Reliably" class="mt-4">
+            <p class="m-0 mb-2 text-sm text-text-secondary">
+              Instead of relying on event timing, use these approaches:
+            </p>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Check <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">isComposing</code> flag:</strong> Available on <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> events</li>
+              <li class="mb-2"><strong>Track composition state:</strong> Set a flag on <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code>, clear on <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code></li>
+              <li class="mb-2"><strong>Compare DOM state:</strong> Check if composition text exists in DOM between events</li>
+              <li class="mb-2"><strong>Handle missing events:</strong> Don't assume <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code> will always fire</li>
+              <li class="mb-2"><strong>Test across platforms:</strong> Test with different keyboards, browsers, and devices</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Selection During Composition">
+          <p class="m-0 mb-4">
+            During IME composition, the selection behavior is unique: the selection range changes with each <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code>, but visually, only a single cursor is shown.
+          </p>
+
+          <DocInfoBox title="How Selection Works During Composition">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">1. Composition Text in DOM</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  During composition, the composition text is <strong>actually inserted into the DOM</strong> as text nodes. It's not just a visual overlay - it exists as real DOM content.
+                </p>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm mt-2">
+                  <div class="text-text-secondary">Example DOM during composition:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-orange-200 dark:bg-orange-900/40">한</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">The composition text "한" is a real text node in the DOM</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">2. Selection Range Changes</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  As the user types during composition, the selection range <strong>expands to include the composition text</strong>:
+                </p>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm mt-2">
+                  <div class="text-text-secondary">Selection range during composition:</div>
+                  <div class="text-text-primary mt-1">Range: start at position 6, end at position 7</div>
+                  <div class="text-text-primary">Selected text: "한"</div>
+                  <div class="text-text-secondary mt-2 text-xs">The range includes the composition text</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">3. Visual Cursor vs Selection Range</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  Despite the selection range including the composition text, <strong>visually only one cursor is shown</strong> at the end of the composition text. The composition text itself is typically displayed with an underline or highlight to indicate it's temporary.
+                </p>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="info" title="ℹ️ Browser Internal Management" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Who manages the composition selection?</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><strong>Browser:</strong> The browser manages the composition selection internally. It creates and updates a Range that includes the composition text.</li>
+              <li class="mb-1"><strong>IME/Keyboard:</strong> The IME (Input Method Editor) communicates with the browser to indicate where composition text should be placed, but the browser is responsible for managing the actual DOM and selection.</li>
+              <li class="mb-1"><strong>Selection API:</strong> <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code> returns the current selection, which includes the composition text during composition.</li>
+            </ul>
+            <p class="m-0 text-sm">
+              The browser maintains a <strong>composition range</strong> that is separate from the user's visible selection, but is accessible through the Selection API.
+            </p>
+          </DocAlert>
+
+          <DocInfoBox title="Example: Selection Changes During Composition (2벌식 Korean IME)" class="mt-4">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">User types "ㅎ" (first jamo)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">Selection:</div>
+                  <div class="text-text-primary mt-1">Range: start=6, end=7</div>
+                  <div class="text-text-primary">Selected: "ㅎ"</div>
+                  <div class="text-text-secondary mt-2 text-xs">Visual: cursor after "ㅎ"</div>
+                  <div class="text-text-secondary mt-1 text-xs">compositionupdate fires with data: "ㅎ"</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">User types "ㅏ" (second jamo) → "하"</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">Selection:</div>
+                  <div class="text-text-primary mt-1">Range: start=6, end=7</div>
+                  <div class="text-text-primary">Selected: "하"</div>
+                  <div class="text-text-secondary mt-2 text-xs">Visual: cursor after "하" (same position, different text)</div>
+                  <div class="text-text-secondary mt-1 text-xs">compositionupdate fires with data: "하" (previous "ㅎ" replaced)</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">User types "ㄴ" (third jamo) → "한"</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">Selection:</div>
+                  <div class="text-text-primary mt-1">Range: start=6, end=7</div>
+                  <div class="text-text-primary">Selected: "한"</div>
+                  <div class="text-text-secondary mt-2 text-xs">Visual: cursor after "한" (same position, different text)</div>
+                  <div class="text-text-secondary mt-1 text-xs">compositionupdate fires with data: "한" (previous "하" replaced)</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">User commits (Space/Enter) → Composition ends</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">Selection:</div>
+                  <div class="text-text-primary mt-1">Range: start=7, end=7 (collapsed)</div>
+                  <div class="text-text-primary">Selected: ""</div>
+                  <div class="text-text-secondary mt-2 text-xs">Visual: cursor after "한" (now committed text)</div>
+                  <div class="text-text-secondary mt-1 text-xs">compositionend fires, text "한" is committed to DOM</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="info" title="ℹ️ Note: Keyboard Layout Differences" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Different Korean keyboard layouts (2벌식, 3벌식, 390) may behave differently:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">The number of <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> events may vary</li>
+              <li class="mb-1">The composition text at each step may differ</li>
+              <li class="mb-1">Selection range behavior may be slightly different</li>
+              <li class="mb-1">Event timing may vary between layouts</li>
+            </ul>
+            <p class="m-0 text-sm">
+              Always test with different keyboard layouts if your application needs to support various Korean input methods.
+            </p>
+          </DocAlert>
+
+          <DocAlert type="warning" title="⚠️ Important for Editors" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When editors use preventDefault() and manipulate DOM:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">The browser's composition selection may become invalid</li>
+              <li class="mb-1">If you re-render DOM from your internal model, the composition text may be lost</li>
+              <li class="mb-1">The browser's composition range may not match your model's state</li>
+              <li class="mb-1">You may need to manually restore the selection after DOM updates</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Best Practice:</strong> During composition, avoid programmatic DOM updates that would interfere with the browser's composition management. Let the browser handle composition text insertion, then sync with your model after <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code>.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Common issues">
+          <div class="mb-6">
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
               Enter key during composition
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               Pressing Enter during IME composition may cancel the composition instead of committing it. This breaks the expected workflow for users.
             </p>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-              See cases: <a href="/scenarios/scenario-ime-enter-breaks" style="color: var(--accent-primary);">scenario-ime-enter-breaks</a>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-ime-enter-breaks" class="text-accent-primary">scenario-ime-enter-breaks</a>
             </p>
           </div>
 
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+          <div class="mb-6">
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
               Backspace granularity
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               Backspace may delete entire composed syllables instead of individual characters, making fine-grained editing difficult.
             </p>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-              See cases: <a href="/scenarios/scenario-ime-backspace-granularity" style="color: var(--accent-primary);">scenario-ime-backspace-granularity</a>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-ime-backspace-granularity" class="text-accent-primary">scenario-ime-backspace-granularity</a>
             </p>
           </div>
 
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+          <div class="mb-6">
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
               Space key during composition
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               The Space key may be ignored or commit composition inconsistently during IME input, depending on the browser and OS.
             </p>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-              See cases: <a href="/scenarios/scenario-space-during-composition" style="color: var(--accent-primary);">scenario-space-during-composition</a>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-space-during-composition" class="text-accent-primary">scenario-space-during-composition</a>
             </p>
           </div>
 
           <div>
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
               Undo during composition
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               Undo operations during active composition may clear more text than expected, including text that was already committed.
             </p>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-              See cases: <a href="/scenarios/scenario-undo-with-composition" style="color: var(--accent-primary);">scenario-undo-with-composition</a>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-undo-with-composition" class="text-accent-primary">scenario-undo-with-composition</a>
             </p>
           </div>
-        </section>
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Browser differences
-          </h2>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
+        <DocSection title="Mobile Keyboards & Text Prediction">
+          <p class="m-0 mb-4">
+            Mobile keyboards differ significantly from desktop keyboards, especially when text prediction/suggestion features are enabled. Different keyboard apps (Gboard, Samsung Keyboard, iOS QuickType, etc.) may behave differently.
+          </p>
+
+          <DocInfoBox title="Mobile Keyboard Types">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Android Keyboards</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Gboard (Google Keyboard):</strong> Google's keyboard with text prediction</li>
+                  <li class="mb-1"><strong>Samsung Keyboard:</strong> Samsung's default keyboard with phrase suggestion</li>
+                  <li class="mb-1"><strong>SwiftKey:</strong> Third-party keyboard with advanced prediction</li>
+                  <li class="mb-1">Each may use different inputType values and event patterns</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">iOS Keyboards</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>iOS QuickType:</strong> Apple's predictive text feature</li>
+                  <li class="mb-1"><strong>Third-party keyboards:</strong> Various keyboards available in App Store</li>
+                  <li class="mb-1">Generally more predictable than Android keyboards</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="error" title="⚠️ Text Prediction/Suggestion Features" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When text prediction is enabled:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> may <strong>not fire</strong> before suggestion insertion</li>
+              <li class="mb-1">Multiple <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events may fire for a single suggestion selection</li>
+              <li class="mb-1">Suggested text may replace more content than expected (entire words/phrases)</li>
+              <li class="mb-1">Event timing differs significantly from manual typing</li>
+              <li class="mb-1">Selection ranges in <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> may differ</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Impact:</strong> Text prediction can interfere with custom editing logic, undo/redo stacks, and change tracking systems.
+            </p>
+          </DocAlert>
+
+          <div class="mt-6">
+            <h3 class="text-xl font-semibold mb-4 text-text-primary border-b border-border-light pb-2">
+              Selection Differences: beforeinput vs input
+            </h3>
+            
+            <DocInfoBox title="Why Selection Differs">
+              <div class="space-y-4 text-sm">
+                <div>
+                  <h4 class="font-semibold mb-2 text-text-primary">beforeinput Event</h4>
+                  <ul class="m-0 pl-6 text-text-secondary">
+                    <li class="mb-1">Fires <strong>before</strong> DOM changes occur</li>
+                    <li class="mb-1">Selection range reflects the <strong>current state</strong> (before text insertion/replacement)</li>
+                    <li class="mb-1">May show the range that will be replaced by the suggestion</li>
+                    <li class="mb-1">In text prediction scenarios, may not fire at all</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 class="font-semibold mb-2 text-text-primary">input Event</h4>
+                  <ul class="m-0 pl-6 text-text-secondary">
+                    <li class="mb-1">Fires <strong>after</strong> DOM changes occur</li>
+                    <li class="mb-1">Selection range reflects the <strong>new state</strong> (after text insertion/replacement)</li>
+                    <li class="mb-1">Shows cursor position after the inserted/replaced text</li>
+                    <li class="mb-1">May fire multiple times for a single suggestion (bulk insertion)</li>
+                  </ul>
+                </div>
+              </div>
+            </DocInfoBox>
+
+            <DocInfoBox title="Example: Text Prediction with Selection Differences" class="mt-4">
+              <div class="space-y-4 text-sm">
+                <div>
+                  <h4 class="font-semibold mb-2 text-text-primary">Scenario: User types "안녕", keyboard suggests "안녕하세요"</h4>
+                  
+                  <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm mt-2">
+                    <div class="text-text-secondary mb-2">Before suggestion selection:</div>
+                    <div class="text-text-primary">DOM: &lt;p&gt;안녕<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                    <div class="text-text-primary">Selection: start=2, end=2 (collapsed)</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 class="font-semibold mb-2 text-text-primary">User selects suggestion "안녕하세요"</h4>
+                  
+                  <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm mt-2">
+                    <div class="text-text-secondary mb-2">beforeinput event (if it fires):</div>
+                    <div class="text-text-primary">Selection: start=0, end=2 (may include "안녕" to be replaced)</div>
+                    <div class="text-text-primary">inputType: "insertReplacementText" or "insertFromPredictiveText"</div>
+                    <div class="text-text-primary">data: "안녕하세요"</div>
+                    <div class="text-text-secondary mt-2 text-xs">⚠️ Note: beforeinput may not fire at all!</div>
+                  </div>
+                  
+                  <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm mt-2">
+                    <div class="text-text-secondary mb-2">input event (after DOM change):</div>
+                    <div class="text-text-primary">DOM: &lt;p&gt;안녕하세요<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                    <div class="text-text-primary">Selection: start=5, end=5 (collapsed, after "안녕하세요")</div>
+                    <div class="text-text-primary">inputType: "insertReplacementText" or "insertFromPredictiveText"</div>
+                    <div class="text-text-primary">data: "안녕하세요"</div>
+                    <div class="text-text-secondary mt-2 text-xs">Selection now reflects the new state</div>
+                  </div>
+                </div>
+              </div>
+            </DocInfoBox>
+
+            <DocAlert type="warning" title="⚠️ Critical: Selection Mismatch" class="mt-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>The selection in beforeinput and input events can be completely different:</strong>
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> selection shows what will be replaced</li>
+                <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> selection shows the final cursor position</li>
+                <li class="mb-1">If <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> doesn't fire, you only see the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> selection</li>
+                <li class="mb-1">Multiple <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events may have different selections as text is inserted in chunks</li>
+              </ul>
+              <p class="m-0 text-sm">
+                <strong>Best Practice:</strong> Always compare DOM state before and after events to understand what actually changed, rather than relying solely on selection ranges.
+              </p>
+            </DocAlert>
+          </div>
+
+          <DocInfoBox title="Handling Mobile Text Prediction" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Monitor both events:</strong> Listen to both <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> to catch all text insertions</li>
+              <li class="mb-2"><strong>Compare DOM states:</strong> Store DOM state before events and compare after to detect bulk insertions</li>
+              <li class="mb-2"><strong>Don't rely on selection alone:</strong> Selection ranges may not accurately reflect what was inserted/replaced</li>
+              <li class="mb-2"><strong>Handle multiple input events:</strong> A single suggestion may trigger multiple <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> events</li>
+              <li class="mb-2"><strong>Consider disabling prediction:</strong> Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">autocomplete="off"</code> or <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">spellcheck="false"</code> if it interferes with your use case</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser differences">
+          <DocAlert type="warning" class="mb-4">
+            <p class="m-0 text-sm">
               <strong>Event timing:</strong> The timing and order of composition events varies significantly between browsers, especially when special keys (Enter, Backspace) are pressed during composition.
             </p>
-          </div>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
+          </DocAlert>
+          <DocAlert type="warning" class="mb-4">
+            <p class="m-0 text-sm">
               <strong>IME candidate window:</strong> The position and behavior of the IME candidate window (showing possible character conversions) differs across browsers and may not align correctly with the caret.
             </p>
-          </div>
-          <div style="background: var(--status-draft-light); border-left: 4px solid var(--status-draft); padding: 0.75rem 1rem; border-radius: 0.5rem;">
-            <p style="margin: 0; font-size: 0.85rem;">
+          </DocAlert>
+          <DocAlert type="warning" class="mb-4">
+            <p class="m-0 text-sm">
               <strong>Composition events missing:</strong> Some IMEs may not fire composition events consistently, or events may fire in unexpected orders, making it difficult to track the composition state.
             </p>
-          </div>
-        </section>
+          </DocAlert>
+          <DocAlert type="warning">
+            <p class="m-0 text-sm">
+              <strong>Selection range behavior:</strong> How the selection range is managed during composition may differ between browsers. Some browsers may show the composition text as selected, while others only show a cursor.
+            </p>
+          </DocAlert>
+        </DocSection>
 
-        <section>
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Related resources
-          </h2>
-          <ul style="margin: 0; padding-left: 1.5rem;">
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/docs/events"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+        <DocSection title="Composition Selection & Range Management">
+          <DocInfoBox title="Technical Details: How Composition Selection Works">
+            <div class="space-y-4 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Browser's Internal Composition Range</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  The browser maintains a <strong>composition range</strong> that is separate from the user's visible selection:
+                </p>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">During composition, the browser creates a Range that includes the composition text</li>
+                  <li class="mb-1">This range is updated on each <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> event</li>
+                  <li class="mb-1">The Range's start and end positions change as composition text changes</li>
+                  <li class="mb-1">The Range is accessible via <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection().getRangeAt(0)</code></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Visual vs Actual Selection</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  Even though the selection range includes the composition text (making it a non-collapsed selection), the browser renders it as a single cursor:
+                </p>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">The composition text is visually highlighted/underlined to indicate it's temporary</li>
+                  <li class="mb-1">The cursor appears at the end of the composition text</li>
+                  <li class="mb-1">The selection range spans the entire composition text, but this is not visually shown as a selection</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Why Selection Changes But Cursor Doesn't</h4>
+                <p class="m-0 mb-2 text-text-secondary">
+                  The selection range changes because:
+                </p>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Each <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> replaces the previous composition text with new text</li>
+                  <li class="mb-1">The Range's boundaries are updated to match the new composition text</li>
+                  <li class="mb-1">The Range's <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">toString()</code> returns the current composition text</li>
+                  <li class="mb-1">But visually, the browser only shows a cursor (not a selection highlight) because it's composition text</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Code Example: Observing Selection During Composition" class="mt-4">
+            <DocCodeBlock code={`// Monitor selection changes during composition
+element.addEventListener('compositionupdate', (e) => {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    console.log('Composition text:', e.data);
+    console.log('Selection range:', {
+      start: range.startOffset,
+      end: range.endOffset,
+      text: range.toString(),
+      collapsed: range.collapsed
+    });
+    // Note: range.toString() returns the composition text
+    // range.collapsed may be false even though cursor looks like one position
+  }
+});
+
+// Compare with compositionend
+element.addEventListener('compositionend', (e) => {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    console.log('After composition:', {
+      start: range.startOffset,
+      end: range.endOffset,
+      text: range.toString(),
+      collapsed: range.collapsed
+    });
+    // Now range is typically collapsed at the end of committed text
+  }
+});`} />
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/events" class="text-accent-primary no-underline">
                 Events in contenteditable →
               </a>
             </li>
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/cases?tag=ime"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+            <li class="mb-2">
+              <a href="/cases?tag=ime" class="text-accent-primary no-underline">
                 Browse IME-related cases →
               </a>
             </li>
-            <li style="margin-bottom: 0.5rem;">
-              <a
-                href="/cases?tag=composition"
-                style="color: var(--accent-primary); text-decoration: none;"
-              >
+            <li class="mb-2">
+              <a href="/cases?tag=composition" class="text-accent-primary no-underline">
                 Browse composition-related cases →
               </a>
             </li>
           </ul>
-        </section>
-      </article>
-      </section>
-    </main>
-  </body>
-</html>
+        </DocSection>
+</DocLayout>
 

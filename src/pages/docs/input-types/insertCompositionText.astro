@@ -1,0 +1,268 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertCompositionText"
+  description="How insertCompositionText inputType handles IME composition text insertion and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> inputType is triggered during IME (Input Method Editor) composition when text is being composed. This is particularly relevant for languages that require composition, such as Chinese, Japanese, and Korean.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Korean IME composition">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">During composition (typing "한")</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-orange-200 dark:bg-orange-900/40">한</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Composition text is shown with underline or highlight</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After committing (pressing Enter/Space)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-blue-200 dark:bg-blue-900/40">한</span><span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Composition text committed to final text</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition Flow">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">1. Composition Start</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1 py-0.5 rounded text-xs">compositionstart</code> event fires</li>
+                  <li class="mb-1">User begins typing characters that require composition</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">2. Composition Update</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1 py-0.5 rounded text-xs">compositionupdate</code> event fires</li>
+                  <li class="mb-1"><code class="bg-bg-surface px-1 py-0.5 rounded text-xs">insertCompositionText</code> inputType may fire in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">input</code> events</li>
+                  <li class="mb-1">Composition text is shown (often with underline or highlight)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">3. Composition End</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><code class="bg-bg-surface px-1 py-0.5 rounded text-xs">compositionend</code> event fires</li>
+                  <li class="mb-1">Final text is committed to the DOM</li>
+                  <li class="mb-1">May trigger <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">insertText</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">insertCompositionText</code> events</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Behavior">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Chrome/Edge</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Fires <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">insertCompositionText</code> during composition updates</li>
+                  <li class="mb-1">Composition text is shown with underline styling</li>
+                  <li class="mb-1">May fire multiple <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">insertCompositionText</code> events as user types</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Similar behavior to Chrome</li>
+                  <li class="mb-1">Composition handling may differ slightly</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">IME composition behavior may differ, especially on macOS</li>
+                  <li class="mb-1">May use different event patterns</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Critical Edge Cases">
+          <DocAlert type="error" title="⚠️ macOS Korean IME + Formatting Shortcuts">
+            <p class="m-0 mb-2 text-sm">
+              <strong>macOS + Korean IME:</strong> During IME composition with a collapsed cursor, pressing formatting shortcuts (e.g., <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + B</kbd>) may cause unexpected behavior:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Formatting <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event may not fire</li>
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> may fire instead</li>
+              <li class="mb-1">Composition may be cancelled or committed partially</li>
+            </ul>
+            <p class="m-0 text-sm">
+              See <a href="/docs/input-types/formatBold#ime-composition--formatbold" class="text-accent-primary underline">formatBold - IME Composition</a> for detailed workarounds.
+            </p>
+          </DocAlert>
+
+          <DocAlert type="error" title="⚠️ Composition Cancellation" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              Pressing certain keys during composition (e.g., Backspace, Delete, Escape) may cancel the composition:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Composition text may be lost</li>
+              <li class="mb-1">More text than expected may be deleted</li>
+              <li class="mb-1">Event order may be unpredictable</li>
+            </ul>
+            <p class="m-0 text-sm">
+              See <a href="/docs/input-types/deleteContentBackward#ime-composition--backspace" class="text-accent-primary underline">deleteContentBackward - IME Composition</a> for details.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle IME composition differently. Here's how major editors implement insertCompositionText:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="IME Composition Handling"
+            description="Slate tracks composition state and handles composition text:"
+            code={`import { Editor, Transforms } from 'slate';
+
+let isComposing = false;
+
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertCompositionText' && e.data) {
+    e.preventDefault();
+    
+    // Insert composition text
+    Transforms.insertText(editor, e.data);
+  }
+});
+
+element.addEventListener('compositionend', () => {
+  isComposing = false;
+  // Finalize composition text if needed
+});`}
+            features={[
+              '<strong>Composition state:</strong> Tracks composition state separately from regular text insertion.',
+              '<strong>Text insertion:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Transforms.insertText()</code> to insert composition text.',
+              '<strong>State management:</strong> Maintains composition state to handle edge cases.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="IME Composition Handling"
+            description="ProseMirror uses composition state in the view:"
+            code={`view.dom.addEventListener('compositionstart', () => {
+  view.composing = true;
+});
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertCompositionText' && e.data) {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    // Insert composition text
+    if (insertText(state, e.data, state.selection.$from.marks(), dispatch)) {
+      // Handled
+    }
+  }
+});
+
+view.dom.addEventListener('compositionend', () => {
+  view.composing = false;
+});`}
+            features={[
+              '<strong>View.composing:</strong> ProseMirror tracks composition state in <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">view.composing</code>.',
+              '<strong>insertText command:</strong> Uses same <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertText</code> command as regular text insertion.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="IME Composition Handling"
+            description="Draft.js handles composition through input events:"
+            code={`let isComposing = false;
+
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertCompositionText' && e.data) {
+    e.preventDefault();
+    
+    const contentState = editorState.getCurrentContent();
+    const selection = editorState.getSelection();
+    
+    const newContentState = Modifier.insertText(
+      contentState,
+      selection,
+      e.data,
+      editorState.getCurrentInlineStyle()
+    );
+    
+    const newState = EditorState.push(
+      editorState,
+      newContentState,
+      'insert-characters'
+    );
+    
+    setEditorState(newState);
+  }
+});
+
+element.addEventListener('compositionend', () => {
+  isComposing = false;
+});`}
+            features={[
+              '<strong>Composition tracking:</strong> Tracks composition state to handle edge cases.',
+              '<strong>Modifier.insertText:</strong> Uses <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Modifier.insertText()</code> to insert composition text.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+                IME & Composition →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertText" class="text-accent-primary no-underline">
+                insertText →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

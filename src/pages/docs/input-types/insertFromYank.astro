@@ -1,0 +1,210 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="insertFromYank"
+  description="How insertFromYank inputType handles yank operations (Vim-style copy) and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromYank</code> inputType is triggered when content is inserted via a "yank" operation. Yank is a Vim-style operation where text is copied to a register without being removed from its original location. This inputType is rarely used in standard web browsers and is more commonly found in specialized editors or browser extensions that implement Vim-like keybindings.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Text yanked and inserted">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor position)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After yank operation (inserting "text ")</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40">text </span>world&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Yanked content inserted at cursor position</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Browser Support">
+          <DocAlert type="warning" title="⚠️ Very Limited Browser Support">
+            <p class="m-0 mb-2 text-sm">
+              <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromYank</code> is <strong>not</strong> a standard inputType in most browsers. It is rarely, if ever, used by native browser implementations.
+            </p>
+            <p class="m-0 text-sm">
+              This inputType may be used by:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Browser extensions that implement Vim-like keybindings</li>
+              <li class="mb-1">Custom editor implementations that simulate Vim behavior</li>
+              <li class="mb-1">Specialized web applications with Vim emulation</li>
+            </ul>
+            <p class="m-0 text-sm">
+              In most cases, yank operations will trigger <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code> or <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertText</code> instead.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Difference from insertFromPaste">
+          <DocInfoBox>
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">insertFromYank</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Vim-style operation - text copied to register</li>
+                  <li class="mb-1">Original text remains in place (not cut)</li>
+                  <li class="mb-1">Very rarely used in standard browsers</li>
+                  <li class="mb-1">More common in Vim-like editors or extensions</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">insertFromPaste</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1">Standard clipboard paste operation</li>
+                  <li class="mb-1">Content copied from system clipboard</li>
+                  <li class="mb-1">Widely supported across all browsers</li>
+                  <li class="mb-1">Standard paste behavior (Ctrl/Cmd + V)</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Since <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromYank</code> is rarely used, most editors handle it similarly to paste operations. Here's how major editors could implement insertFromYank:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Yank Handling"
+            description="Slate handles yank similarly to paste:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromYank' && e.dataTransfer) {
+    e.preventDefault();
+    
+    // Get yanked content (similar to paste)
+    const htmlString = e.dataTransfer.getData('text/html');
+    const plainText = e.dataTransfer.getData('text/plain');
+    
+    // Parse and insert content (same as paste handling)
+    const fragment = new DOMParser().parseFromString(htmlString || plainText, 'text/html');
+    const nodes = Array.from(fragment.body.childNodes).map(node => {
+      return jsx('element', { type: 'paragraph' }, [{ text: node.textContent || '' }]);
+    });
+    
+    Transforms.insertNodes(editor, nodes);
+  }
+});`}
+            features={[
+              '<strong>Similar to paste:</strong> Uses same handling as <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code>.',
+              '<strong>DataTransfer access:</strong> Accesses yanked content via <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer</code>.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Yank Handling"
+            description="ProseMirror handles yank:"
+            code={`import { DOMParser } from 'prosemirror-model';
+import { schema } from './schema';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromYank' && e.dataTransfer) {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    const dom = new DOMParser(window).parseFromString(htmlString, 'text/html');
+    
+    // Parse HTML into ProseMirror nodes
+    const fragment = DOMParser.fromSchema(schema).parse(dom.body);
+    
+    // Insert fragment at selection
+    const tr = state.tr.replaceSelection(fragment);
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>Same as paste:</strong> Uses same parsing and insertion logic as paste operations.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Yank Handling"
+            description="Draft.js handles yank:"
+            code={`import { EditorState } from 'draft-js';
+import { stateFromHTML } from 'draft-js-import-html';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromYank' && e.dataTransfer) {
+    e.preventDefault();
+    
+    const htmlString = e.dataTransfer.getData('text/html');
+    
+    // Convert HTML to ContentState
+    const contentState = stateFromHTML(htmlString);
+    
+    // Insert content at selection
+    const selection = editorState.getSelection();
+    const newContentState = Modifier.replaceWithFragment(
+      editorState.getCurrentContent(),
+      selection,
+      contentState.getBlockMap()
+    );
+    
+    const newState = EditorState.push(
+      editorState,
+      newContentState,
+      'insert-fragment'
+    );
+    
+    setEditorState(newState);
+  }
+});`}
+            features={[
+              '<strong>Same as paste:</strong> Uses same HTML import and insertion logic as paste operations.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertFromPaste" class="text-accent-primary no-underline">
+                insertFromPaste →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/insertFromDrop" class="text-accent-primary no-underline">
+                insertFromDrop →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

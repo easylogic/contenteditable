@@ -1,0 +1,14 @@
+---
+interface Props {
+  code: string;
+  language?: string;
+  class?: string;
+}
+
+const { code, language, class: className = '' } = Astro.props;
+---
+
+<pre class={`bg-bg-muted border border-border-light rounded-lg p-4 overflow-x-auto text-sm leading-relaxed text-text-primary ${className}`}>
+  <code>{code}</code>
+</pre>
+

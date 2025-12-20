@@ -1,0 +1,195 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="deleteContent"
+  description="How deleteContent inputType deletes content and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContent</code> inputType is triggered when the user deletes selected content (typically via Delete key or programmatically). If the selection is collapsed, it may delete the character after the cursor (forward delete).
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario 1: Text selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Text selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello <span class="bg-yellow-200 dark:bg-yellow-900/40">world</span> text&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Delete</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello text&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Selected text removed</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocInfoBox title="Scenario 2: Collapsed cursor (forward delete)" class="mt-6">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Cursor at position 5)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>world&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After Delete</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;Hello<span class="bg-blue-200 dark:bg-blue-900/40 px-1 rounded">|</span>orld&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Character after cursor deleted</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="IME Composition + deleteContent">
+          <DocAlert type="error" title="⚠️ Critical Issue">
+            <p class="m-0 mb-2 text-sm">
+              During IME composition, deleting content may cancel the composition or delete more than expected. The behavior varies significantly between browsers and IME implementations.
+            </p>
+            <p class="m-0 text-sm">
+              See: <a href="/docs/input-types/deleteContentBackward#ime-composition--backspace" class="text-accent-primary underline">deleteContentBackward</a> and <a href="/docs/input-types/deleteContentForward#ime-composition--deletecontentforward" class="text-accent-primary underline">deleteContentForward</a> for detailed information.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContent</code> inputType is a generic deletion that editors typically handle by checking selection state and delegating to forward or backward deletion:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Generic Content Deletion"
+            description="Slate handles deleteContent by checking selection state:"
+            code={`import { Editor, Transforms } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteContent') {
+    e.preventDefault();
+    
+    const { selection } = editor;
+    if (selection && !selection.isCollapsed) {
+      // Delete selected content
+      Transforms.delete(editor);
+    } else {
+      // For collapsed selection, default to forward delete
+      Transforms.delete(editor, { unit: 'character' });
+    }
+  }
+});`}
+            features={[
+              '<strong>Selection-aware:</strong> Handles both collapsed and non-collapsed selections.',
+              '<strong>Default direction:</strong> Typically defaults to forward deletion for collapsed selections.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Generic Content Deletion"
+            description="ProseMirror uses deleteSelection or forwardDelete:"
+            code={`import { deleteSelection, forwardDelete } from 'prosemirror-commands';
+
+view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'deleteContent') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    
+    if (state.selection.empty) {
+      // Default to forward delete
+      if (forwardDelete(state, dispatch)) {
+        // Handled
+      }
+    } else {
+      if (deleteSelection(state, dispatch)) {
+        // Handled
+      }
+    }
+  }
+});`}
+            features={[
+              '<strong>Command delegation:</strong> Delegates to appropriate deletion command based on selection state.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Generic Content Deletion"
+            description="Draft.js uses Modifier.removeRange() with appropriate direction:"
+            code={`import { EditorState, Modifier } from 'draft-js';
+
+function handleDeleteContent(editorState) {
+  const contentState = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  
+  if (!selection.isCollapsed) {
+    // Delete selected range
+    const newContentState = Modifier.removeRange(
+      contentState,
+      selection,
+      'forward'
+    );
+    return EditorState.push(editorState, newContentState, 'remove-range');
+  } else {
+    // Default to forward delete for collapsed selection
+    const newSelection = selection.merge({
+      focusOffset: Math.min(
+        selection.focusOffset + 1,
+        selection.focusBlock.getLength()
+      ),
+    });
+    const newContentState = Modifier.removeRange(
+      contentState,
+      newSelection,
+      'forward'
+    );
+    return EditorState.push(editorState, newContentState, 'remove-range');
+  }
+}`}
+            features={[
+              '<strong>Direction handling:</strong> Uses forward direction by default for collapsed selections.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContentForward" class="text-accent-primary no-underline">
+                deleteContentForward →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/deleteContentBackward" class="text-accent-primary no-underline">
+                deleteContentBackward →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+

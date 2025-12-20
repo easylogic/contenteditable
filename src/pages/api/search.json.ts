@@ -9,8 +9,13 @@ export const GET: APIRoute = async () => {
     { id: 'doc-events', title: 'Events', description: 'Understanding input, beforeinput, composition events', url: '/docs/events' },
     { id: 'doc-ime', title: 'IME & Composition', description: 'How Input Method Editors work with contenteditable', url: '/docs/ime-composition' },
     { id: 'doc-selection', title: 'Selection API', description: 'Working with text selection and ranges', url: '/docs/selection-api' },
+    { id: 'doc-range', title: 'Range API', description: 'Comprehensive guide to the Range API for manipulating document content', url: '/docs/range-api' },
+    { id: 'doc-clipboard', title: 'Clipboard API', description: 'Using the Clipboard API and paste events for copy, cut, and paste operations', url: '/docs/clipboard-api' },
+    { id: 'doc-mobile-toolbar', title: 'Mobile Selection Toolbar', description: 'Understanding mobile browser selection toolbars and their differences across platforms', url: '/docs/mobile-selection-toolbar' },
     { id: 'doc-execcommand', title: 'execCommand alternatives', description: 'Modern alternatives to the deprecated execCommand API', url: '/docs/execCommand-alternatives' },
+    { id: 'doc-patterns', title: 'Practical Patterns', description: 'Common patterns and code examples for implementing rich text editing features', url: '/docs/practical-patterns' },
     { id: 'doc-compat', title: 'Browser compatibility', description: 'Overview of contenteditable support across browsers', url: '/docs/browser-compatibility' },
+    { id: 'doc-input-types', title: 'Input Types', description: 'Comprehensive guide to inputType values in beforeinput and input events', url: '/docs/input-types' },
   ];
 
   // Build scenario list

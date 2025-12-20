@@ -1,0 +1,120 @@
+---
+import DocLayout from '../../../components/docs/DocLayout.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../../components/EditorExample.astro';
+import '../../../styles/global.css';
+---
+
+<DocLayout
+  title="formatJustifyLeft"
+  description="How formatJustifyLeft inputType applies left alignment and varies across browsers."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatJustifyLeft</code> inputType is triggered when the user applies left alignment to selected paragraphs. The browser sets <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">text-align: left</code> on the affected elements.
+          </p>
+        </DocSection>
+
+        <DocSection title="Basic Behavior">
+          <DocInfoBox title="Scenario: Paragraph selected">
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">Before (Paragraph selected)</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">This is a paragraph.</span>&lt;/p&gt;</div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-text-primary">After formatJustifyLeft</h4>
+                <div class="bg-bg-surface border border-border-light rounded-md p-3 font-mono text-sm">
+                  <div class="text-text-secondary">HTML:</div>
+                  <div class="text-text-primary mt-1">&lt;p style="text-align: left;"&gt;<span class="bg-yellow-200 dark:bg-yellow-900/40">This is a paragraph.</span>&lt;/p&gt;</div>
+                  <div class="text-text-secondary mt-2 text-xs">Text aligned to left</div>
+                </div>
+              </div>
+            </div>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Editor-Specific Handling">
+          <p class="m-0 mb-4">
+            Different editor frameworks handle text alignment similarly. Here's how major editors implement formatJustifyLeft:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Left Alignment"
+            description="Slate applies alignment as a block property:"
+            code={`import { Editor, Transforms, Element } from 'slate';
+
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatJustifyLeft') {
+    e.preventDefault();
+    Transforms.setNodes(editor, {
+      align: 'left',
+    }, {
+      match: n => Element.isElement(n) && Editor.isBlock(editor, n),
+    });
+  }
+});`}
+            features={[
+              '<strong>Block property:</strong> Alignment is stored as a property on block elements.',
+              '<strong>Transforms.setNodes:</strong> Sets <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">align: \'left\'</code> on selected blocks.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Left Alignment"
+            description="ProseMirror uses block attribute:"
+            code={`view.dom.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatJustifyLeft') {
+    e.preventDefault();
+    const { state, dispatch } = view;
+    const { $from } = state.selection;
+    const blockType = schema.nodes.paragraph;
+    const tr = state.tr.setBlockType($from.before(), $from.after(), blockType, {
+      ...blockType.attrs,
+      align: 'left',
+    });
+    dispatch(tr);
+  }
+});`}
+            features={[
+              '<strong>Block attribute:</strong> Alignment is stored as an attribute on block nodes.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Left Alignment"
+            description="Draft.js uses block-level styles:"
+            code={`function handleJustifyLeft(editorState) {
+  return RichUtils.toggleBlockType(editorState, 'left');
+}`}
+            features={[
+              '<strong>Block type:</strong> Uses block type for alignment.',
+            ]}
+          />
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/input-types" class="text-accent-primary no-underline">
+                Input Types Overview →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/input-types/formatJustifyFull" class="text-accent-primary no-underline">
+                formatJustifyFull →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>

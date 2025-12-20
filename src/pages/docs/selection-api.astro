@@ -1,7 +1,10 @@
 ---
-import SiteNav from '../../components/SiteNav.astro';
-import DocsSidebar from '../../components/DocsSidebar.astro';
-import BaseHead from '../../components/BaseHead.astro';
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../components/EditorExample.astro';
 import '../../styles/global.css';
 
 const getSelectionCode = `const selection = window.getSelection();
@@ -38,129 +41,27 @@ selection.removeAllRanges();
 selection.addRange(range);`;
 ---
 
-<html lang="en">
-  <head>
-    <BaseHead title="Selection API – contenteditable.lab" description="Working with text selection, ranges, and the Selection API." />
-  </head>
-  <body>
-    <SiteNav />
-    <main
-      style="
-        display: flex;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-      "
-    >
-      <DocsSidebar currentPath={Astro.url.pathname} />
-
-      <section
-        style="
-          flex: 1;
-          max-width: 1120px;
-          margin: 0 auto;
-          padding: 1.75rem 1.25rem 2.5rem;
-          width: 100%;
-        "
-      >
-      <header style="margin-bottom: 2rem;">
-        <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
-          <a href="/docs" style="color: var(--text-muted); text-decoration: none;">Documentation</a>
-          <span style="color: var(--text-faint); margin: 0 0.5rem;">/</span>
-          <span style="color: var(--text-primary);">Selection API</span>
-        </nav>
-        <h1
-          style="
-            font-size: 2rem;
-            line-height: 1.1;
-            margin: 0 0 0.5rem 0;
-          "
-        >
-          Selection API
-        </h1>
-        <p style="margin: 0; font-size: 0.95rem; color: var(--text-secondary);">
-          Working with text selection, ranges, and the Selection API in contenteditable elements.
-        </p>
-      </header>
-
-      <article
-        style="
-          border-radius: 0.75rem;
-          border: 1px solid var(--border-light);
-          background: var(--bg-surface);
-          padding: 1.5rem 1.75rem;
-          font-size: 0.9rem;
-          line-height: 1.7;
-        "
-      >
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Getting the selection
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
-            The <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">window.getSelection()</code> method returns a Selection object representing the current text selection.
+<DocLayout
+  title="Selection API"
+  description="Working with text selection, ranges, and the Selection API in contenteditable elements."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Getting the selection">
+          <p class="m-0 mb-4">
+            The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code> method returns a Selection object representing the current text selection.
           </p>
-          <pre
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              overflow-x: auto;
-              font-size: 0.85rem;
-              line-height: 1.6;
-              color: var(--text-primary);
-            "
-          ><code>{getSelectionCode}</code></pre>
-        </section>
+          <DocCodeBlock code={getSelectionCode} />
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Range API
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
+        <DocSection title="Range API">
+          <p class="m-0 mb-4">
             A Range represents a contiguous portion of the document. You can create, modify, and manipulate ranges programmatically.
           </p>
-          <pre
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              overflow-x: auto;
-              font-size: 0.85rem;
-              line-height: 1.6;
-              color: var(--text-primary);
-            "
-          ><code>{rangeCode}</code></pre>
-        </section>
+          <DocCodeBlock code={rangeCode} />
+        </DocSection>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Node Selection
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
+        <DocSection title="Node Selection">
+          <p class="m-0 mb-4">
             Unlike text selection, which selects characters within text nodes, <strong>node selection</strong> selects entire element nodes (like images, divs, or other HTML elements). This is useful when you want to select non-text content or entire blocks of content.
           </p>
 
@@ -219,110 +120,69 @@ selection.addRange(range);`;
             </div>
           </div>
 
-          <div style="margin: 1.5rem 0; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 0.5rem;">
-            <p style="margin: 0; font-size: 0.9rem; color: #856404;">
-              <strong>Important:</strong> You cannot create a selection using just a node object. You must use the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Range</code> API to define the selection boundaries, then apply it to the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Selection</code> object. A node alone is not enough - you need to create a Range that encompasses the node.
+          <DocAlert type="error" title="⚠️ Important">
+            <p class="m-0 text-sm">
+              You cannot create a selection using just a node object. A node by itself is not selectable - you must use the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">Range</code> API to define selection boundaries, then apply it to the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">Selection</code> object. The Range acts as a bridge between the node and the selection.
             </p>
-          </div>
-          
-          <div style="margin: 1.5rem 0; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 0.5rem;">
-            <p style="margin: 0; font-size: 0.9rem; color: #856404;">
-              <strong>⚠️ Important:</strong> You cannot create a selection using just a node object. A node by itself is not selectable - you must use the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Range</code> API to define selection boundaries, then apply it to the <code style="background: rgba(255, 255, 255, 0.5); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">Selection</code> object. The Range acts as a bridge between the node and the selection.
-            </p>
-          </div>
+          </DocAlert>
 
-          <h3
-            style="
-              font-size: 1.1rem;
-              margin: 1.5rem 0 0.75rem 0;
-              color: var(--text-primary);
-            "
-          >
+          <h3 class="text-lg my-6 mb-3 text-text-primary">
             Selecting Entire Nodes
           </h3>
-          <p style="margin: 0 0 1rem 0;">
-            Use <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.selectNode(node)</code> to select an entire element node, including the element itself. This requires creating a Range first:
+          <p class="m-0 mb-4">
+            Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">range.selectNode(node)</code> to select an entire element node, including the element itself. This requires creating a Range first:
           </p>
-          <pre
-            style="
-              background: var(--bg-muted);
-              border: 1px solid var(--border-light);
-              border-radius: 0.5rem;
-              padding: 1rem;
-              overflow-x: auto;
-              font-size: 0.85rem;
-              line-height: 1.6;
-              color: var(--text-primary);
-            "
-          ><code>{nodeSelectionCode}</code></pre>
+          <DocCodeBlock code={nodeSelectionCode} />
 
-          <h3
-            style="
-              font-size: 1.1rem;
-              margin: 1.5rem 0 0.75rem 0;
-              color: var(--text-primary);
-            "
-          >
+          <h3 class="text-lg my-6 mb-3 text-text-primary">
             Key Differences from Text Selection
           </h3>
-          <ul style="margin: 0 0 1rem 0; padding-left: 1.5rem;">
-            <li style="margin-bottom: 0.5rem;">
-              <strong>Container type:</strong> In node selection, <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">startContainer</code> and <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">endContainer</code> are element nodes, not text nodes.
+          <ul class="m-0 mb-4 pl-6">
+            <li class="mb-2">
+              <strong>Container type:</strong> In node selection, <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">startContainer</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">endContainer</code> are element nodes, not text nodes.
             </li>
-            <li style="margin-bottom: 0.5rem;">
-              <strong>Offset meaning:</strong> When the container is an element node, <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">startOffset</code> and <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">endOffset</code> represent child node indices (0, 1, 2...), not character positions.
+            <li class="mb-2">
+              <strong>Offset meaning:</strong> When the container is an element node, <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">startOffset</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">endOffset</code> represent child node indices (0, 1, 2...), not character positions.
             </li>
-            <li style="margin-bottom: 0.5rem;">
+            <li class="mb-2">
               <strong>Visual appearance:</strong> Node selections may appear differently across browsers. Some browsers show a border or outline around selected elements, while others may not visually distinguish node selections from text selections.
             </li>
-            <li style="margin-bottom: 0.5rem;">
+            <li class="mb-2">
               <strong>Common use cases:</strong> Selecting images, selecting entire paragraphs or blocks, programmatically selecting content for clipboard operations.
             </li>
           </ul>
 
-          <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-surface); border-radius: 0.5rem; border: 1px solid var(--border-light);">
-            <h4 style="font-size: 0.95rem; margin: 0 0 0.75rem 0; color: var(--text-primary);">
+          <div class="mt-6 p-4 bg-bg-surface rounded-lg border border-border-light">
+            <h4 class="text-[0.95rem] m-0 mb-3 text-text-primary">
               Why Range is Required
             </h4>
-            <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: var(--text-secondary);">
+            <p class="m-0 mb-3 text-[0.9rem] text-text-secondary">
               A node object alone cannot be directly selected. The Selection API requires a Range object that defines the boundaries of what to select. Here's the process:
             </p>
-            <ol style="margin: 0 0 0.75rem 0; padding-left: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
-              <li style="margin-bottom: 0.5rem;">
-                <strong>Get the node:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">const node = document.getElementById('myImage');</code>
+            <ol class="m-0 mb-3 pl-6 text-[0.9rem] text-text-secondary">
+              <li class="mb-2">
+                <strong>Get the node:</strong> <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">const node = document.getElementById('myImage');</code>
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <strong>Create a Range:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">const range = document.createRange();</code>
+              <li class="mb-2">
+                <strong>Create a Range:</strong> <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">const range = document.createRange();</code>
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <strong>Select the node with Range:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.selectNode(node);</code>
+              <li class="mb-2">
+                <strong>Select the node with Range:</strong> <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">range.selectNode(node);</code>
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <strong>Apply Range to Selection:</strong> <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">selection.addRange(range);</code>
+              <li class="mb-2">
+                <strong>Apply Range to Selection:</strong> <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">selection.addRange(range);</code>
               </li>
             </ol>
-            <p style="margin: 0.75rem 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
+            <p class="mt-3 m-0 text-[0.85rem] text-text-muted">
               Without the Range step, you cannot select a node. The Range object is the mechanism that tells the browser "select this node" or "select from this position to that position."
             </p>
           </div>
 
-          <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-muted); border-radius: 0.5rem; border: 1px solid var(--border-light);">
-            <h4 style="font-size: 0.95rem; margin: 0 0 0.75rem 0; color: var(--text-primary);">
+          <div class="mt-6 p-4 bg-bg-muted rounded-lg border border-border-light">
+            <h4 class="text-[0.95rem] m-0 mb-3 text-text-primary">
               Example: Detecting Node Selection
             </h4>
-            <pre
-              style="
-                background: var(--bg-surface);
-                border: 1px solid var(--border-light);
-                border-radius: 0.375rem;
-                padding: 0.75rem;
-                overflow-x: auto;
-                font-size: 0.85rem;
-                line-height: 1.6;
-                color: var(--text-primary);
-                margin: 0;
-              "
-            ><code>{`const selection = window.getSelection();
+            <pre class="bg-bg-surface border border-border-light rounded-md p-3 overflow-x-auto text-sm leading-relaxed text-text-primary m-0"><code>{`const selection = window.getSelection();
 if (selection && selection.rangeCount > 0) {
   const range = selection.getRangeAt(0);
   
@@ -339,64 +199,37 @@ if (selection && selection.rangeCount > 0) {
 }`}</code></pre>
           </div>
 
-          <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-muted); border-radius: 0.5rem; border: 1px solid var(--border-light);">
-            <h4 style="font-size: 0.95rem; margin: 0 0 0.75rem 0; color: var(--text-primary);">
+          <div class="mt-6 p-4 bg-bg-muted rounded-lg border border-border-light">
+            <h4 class="text-[0.95rem] m-0 mb-3 text-text-primary">
               Important Notes
             </h4>
-            <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.9rem;">
-              <li style="margin-bottom: 0.5rem;">
+            <ul class="m-0 pl-6 text-[0.9rem]">
+              <li class="mb-2">
                 Node selection is less common in user interactions compared to text selection. Most users select text, not entire elements.
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                When <code style="background: var(--bg-surface); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">startContainer</code> is an element node, <code style="background: var(--bg-surface); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">startOffset</code> refers to the index of the child node, not a character position.
+              <li class="mb-2">
+                When <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">startContainer</code> is an element node, <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">startOffset</code> refers to the index of the child node, not a character position.
               </li>
-              <li style="margin-bottom: 0.5rem;">
-                <code style="background: var(--bg-surface); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">range.toString()</code> on a node selection returns the text content of all descendant text nodes, which may not represent the actual selected element.
+              <li class="mb-2">
+                <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">range.toString()</code> on a node selection returns the text content of all descendant text nodes, which may not represent the actual selected element.
               </li>
-              <li style="margin-bottom: 0.5rem;">
+              <li class="mb-2">
                 Some browsers handle node selection differently in contenteditable regions, especially for inline elements like images or links.
               </li>
             </ul>
           </div>
         </section>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Native Selection Visualization
-          </h2>
-          <p style="margin: 0 0 1rem 0;">
+        <DocSection title="Native Selection Visualization">
+          <p class="m-0 mb-4">
             Browsers render text selections using their native styling. The visual appearance of selections varies by browser and operating system. Try selecting text in the contenteditable area below to see how your browser displays selections:
           </p>
           
-          <div
-            style="
-              background: var(--bg-surface);
-              border: 2px solid var(--border-medium);
-              border-radius: 0.5rem;
-              padding: 1.5rem;
-              margin: 1rem 0;
-            "
-          >
+          <div class="bg-bg-surface border-2 border-border-medium rounded-lg p-6 my-4">
             <div
               contenteditable="true"
               id="selection-demo"
-              style="
-                min-height: 120px;
-                padding: 1rem;
-                background: var(--bg-page);
-                border: 1px solid var(--border-light);
-                border-radius: 0.375rem;
-                outline: none;
-                font-size: 1rem;
-                line-height: 1.6;
-              "
+              class="min-h-[120px] p-4 bg-bg-page border border-border-light rounded-md outline-none text-base leading-relaxed"
             >
               <p>This is a <strong>contenteditable</strong> paragraph with <em>various</em> inline elements.</p>
               <p>Select some text above to see how your browser renders the native selection. The selection appearance depends on your browser and operating system.</p>
@@ -405,19 +238,10 @@ if (selection && selection.rangeCount > 0) {
             
             <div
               id="selection-info"
-              style="
-                margin-top: 1rem;
-                padding: 0.75rem;
-                background: var(--bg-muted);
-                border: 1px solid var(--border-light);
-                border-radius: 0.375rem;
-                font-size: 0.85rem;
-                font-family: var(--font-mono);
-                color: var(--text-secondary);
-              "
+              class="mt-4 p-3 bg-bg-muted border border-border-light rounded-md text-sm font-mono text-text-secondary"
             >
-              <div style="margin-bottom: 0.5rem;"><strong>Selection Info:</strong></div>
-              <div id="selection-details" style="color: var(--text-primary);">No selection</div>
+              <div class="mb-2"><strong>Selection Info:</strong></div>
+              <div id="selection-details" class="text-text-primary">No selection</div>
             </div>
           </div>
 
@@ -451,68 +275,308 @@ if (selection && selection.rangeCount > 0) {
           </div>
         </section>
 
-        <section style="margin-bottom: 2rem;">
-          <h2
-            style="
-              font-size: 1.3rem;
-              margin: 0 0 0.75rem 0;
-              padding-bottom: 0.5rem;
-              border-bottom: 2px solid var(--border-light);
-            "
-          >
-            Common issues
-          </h2>
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
-              Selection lost on focus change
+        <DocSection title="Selection Synchronization with Internal Models">
+          <p class="m-0 mb-4">
+            One of the most challenging aspects of building contenteditable editors is maintaining synchronization between the browser's DOM-based Selection API and your editor's internal data model (like Slate, ProseMirror, or custom models).
+          </p>
+
+          <div class="my-6 p-6 bg-bg-muted rounded-lg border border-border-light">
+            <h3 class="text-lg m-0 mb-4 text-text-primary">
+              The Core Problem
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
-              When a contenteditable loses focus, <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">window.getSelection()</code> may return <code style="background: var(--bg-muted); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em;">null</code> or an empty selection, making it difficult to preserve selection state.
-            </p>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-              See cases: <a href="/scenarios/scenario-selection-api-behavior" style="color: var(--accent-primary);">scenario-selection-api-behavior</a>
+            <div class="grid grid-cols-2 gap-6 mb-4">
+              <div class="bg-bg-surface p-4 rounded-md border border-border-light">
+                <h4 class="text-[0.95rem] m-0 mb-3 text-text-primary font-semibold">
+                  Browser Selection (DOM-based)
+                </h4>
+                <ul class="m-0 pl-6 text-[0.9rem] text-text-secondary">
+                  <li class="mb-2">Uses DOM nodes and offsets</li>
+                  <li class="mb-2">Changes with every user interaction</li>
+                  <li class="mb-2">No concept of "blocks" or "nodes"</li>
+                  <li class="mb-2">Tied to actual DOM structure</li>
+                </ul>
+              </div>
+              <div class="bg-bg-surface p-4 rounded-md border border-border-light">
+                <h4 class="text-[0.95rem] m-0 mb-3 text-text-primary font-semibold">
+                  Editor Model (Abstract)
+                </h4>
+                <ul class="m-0 pl-6 text-[0.9rem] text-text-secondary">
+                  <li class="mb-2">Uses abstract paths/positions</li>
+                  <li class="mb-2">Represents document structure</li>
+                  <li class="mb-2">Has "block" and "inline" concepts</li>
+                  <li class="mb-2">Independent of DOM</li>
+                </ul>
+              </div>
+            </div>
+            <p class="m-0 text-[0.9rem] text-text-secondary">
+              These two representations must be kept in sync at all times, which requires constant bidirectional conversion.
             </p>
           </div>
 
-          <div style="margin-bottom: 1.5rem;">
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+          <h3 class="text-lg my-6 mb-3 text-text-primary">
+            Continuous Synchronization Required
+          </h3>
+          <p class="m-0 mb-4">
+            Because the browser's Selection API is DOM-based and your editor model is abstract, you need to continuously synchronize between them:
+          </p>
+          <ul class="m-0 mb-4 pl-6">
+            <li class="mb-3">
+              <strong>DOM → Model:</strong> When the user selects text, you must convert the DOM Range to your model's path/offset representation.
+            </li>
+            <li class="mb-3">
+              <strong>Model → DOM:</strong> When your model changes (e.g., undo/redo, programmatic edits), you must update the DOM and restore the selection.
+            </li>
+            <li class="mb-3">
+              <strong>After every DOM mutation:</strong> The selection may become invalid, requiring normalization and restoration.
+            </li>
+          </ul>
+
+          <div class="my-6 p-4 bg-blue-100 dark:bg-blue-900/20 border border-blue-500 dark:border-blue-700 rounded-lg">
+            <h4 class="text-[0.95rem] m-0 mb-3 text-blue-800 dark:text-blue-200 font-semibold">
+              Example: Selection Normalization Flow
+            </h4>
+            <pre class="bg-bg-surface border border-border-light rounded-md p-3 overflow-x-auto text-sm leading-relaxed text-text-primary m-0 mb-3"><code>{`// 1. User selects text → DOM Range
+const domRange = selection.getRangeAt(0);
+
+// 2. Convert DOM Range to model path
+const modelPath = domRangeToModelPath(domRange);
+// Result: [{ block: 0, offset: 5 }, { block: 0, offset: 10 }]
+
+// 3. Normalize: ensure path is valid in current model
+const normalizedPath = normalizePath(modelPath, editorModel);
+
+// 4. Store in model
+editorModel.selection = normalizedPath;
+
+// 5. When model changes, convert back to DOM
+const newDomRange = modelPathToDomRange(normalizedPath, editorModel);
+selection.removeAllRanges();
+selection.addRange(newDomRange);`}</code></pre>
+          </div>
+
+          <h3 class="text-lg my-6 mb-3 text-text-primary">
+            Handling Node Selection in Different Editors
+          </h3>
+          <p class="m-0 mb-4">
+            Even though the browser's Range API represents node selections using element nodes and child indices, different editor frameworks handle this differently in their internal models. Here's how major editors approach node selection:
+          </p>
+
+          <EditorExample
+            editor="slate"
+            title="Node Selection Handling"
+            description="Slate uses path-based selection. Node selection is represented by selecting the entire node at a specific path:"
+            code={`// Detect node selection from DOM Range
+const range = selection.getRangeAt(0);
+if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+  // Find the Slate node path
+  const slatePath = ReactEditor.findPath(editor, range.startContainer);
+  
+  // Set selection to the entire node
+  Transforms.select(editor, {
+    anchor: { path: slatePath, offset: 0 },
+    focus: { path: slatePath, offset: 1 }, // Select entire node
+  });
+  
+  // Or use Editor.nodes() to work with selected nodes
+  for (const [node, path] of Editor.nodes(editor, {
+    at: slatePath,
+    mode: 'lowest',
+  })) {
+    // Handle selected node
+  }
+}`}
+            features={[
+              '<strong>Path-based:</strong> Node selection uses the same path format as text selection, but with offset 0-1 to indicate the entire node.',
+              '<strong>Unified API:</strong> Same <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Transforms.select()</code> API for both text and node selections.',
+              '<strong>Detection:</strong> Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Editor.nodes()</code> or check if <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">Range.isCollapsed</code> and path offsets.',
+            ]}
+          />
+
+          <EditorExample
+            editor="prosemirror"
+            title="Node Selection Handling"
+            description="ProseMirror has a dedicated NodeSelection class that explicitly represents node selections:"
+            code={`// Detect node selection from DOM Range
+const range = selection.getRangeAt(0);
+if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+  // Find the ProseMirror node and position
+  const pos = editorView.posAtDOM(range.startContainer, 0);
+  const $pos = editorView.state.doc.resolve(pos);
+  const node = $pos.nodeAfter || $pos.nodeBefore;
+  
+  if (node && node.isAtom) { // Images, embeds, etc.
+    // Create NodeSelection
+    const nodeSelection = NodeSelection.create(
+      editorView.state.doc,
+      $pos.pos
+    );
+    
+    // Apply selection
+    const tr = editorView.state.tr.setSelection(nodeSelection);
+    editorView.dispatch(tr);
+  }
+}`}
+            features={[
+              '<strong>Separate class:</strong> <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">NodeSelection</code> is distinct from <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">TextSelection</code>.',
+              '<strong>Atom nodes:</strong> Only "atom" nodes (images, embeds, etc.) can be node-selected, not regular block nodes.',
+              '<strong>Position-based:</strong> Uses document positions, not paths like Slate.',
+            ]}
+          />
+
+          <EditorExample
+            editor="draftjs"
+            title="Node Selection Handling"
+            description="Draft.js has limited support for node selection. It primarily focuses on text selection within blocks:"
+            code={`// Draft.js doesn't have native node selection
+// You need to handle it manually by:
+// 1. Detecting node selection from DOM Range
+// 2. Converting to block key and offset
+// 3. Using EditorState.forceSelection() with a collapsed selection
+
+const range = selection.getRangeAt(0);
+if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+  // Find the block key
+  const blockKey = getBlockKeyForNode(range.startContainer);
+  
+  // Create a collapsed selection at the block
+  const selectionState = SelectionState.createEmpty(blockKey);
+  const newEditorState = EditorState.forceSelection(
+    editorState,
+    selectionState
+  );
+}`}
+            features={[
+              '<strong>Limited support:</strong> Draft.js doesn\'t have built-in node selection support.',
+              '<strong>Workaround:</strong> Convert node selection to a collapsed text selection at the block level.',
+              '<strong>Block-based:</strong> Works with block keys, not individual nodes.',
+            ]}
+          />
+
+          <div class="my-6 p-4 bg-blue-100 dark:bg-blue-900/20 border border-blue-500 dark:border-blue-700 rounded-lg">
+            <h4 class="text-[0.95rem] m-0 mb-3 text-blue-800 dark:text-blue-200 font-semibold">
+              Key Takeaway
+            </h4>
+            <p class="m-0 text-[0.9rem] text-blue-800 dark:text-blue-200">
+              Even though the browser's Range API represents node selections uniformly (using element nodes and child indices), each editor framework converts this to its own internal representation. The conversion strategy depends on:
+            </p>
+            <ul class="m-0 mt-3 pl-6 text-[0.9rem] text-blue-800 dark:text-blue-200">
+              <li class="mb-2">The editor's data model structure (path-based, position-based, block-based)</li>
+              <li class="mb-2">Whether the editor distinguishes between text and node selections</li>
+              <li class="mb-2">Which nodes are selectable (all nodes vs. only atom/void nodes)</li>
+              <li class="mb-2">How the editor handles selection restoration after DOM mutations</li>
+            </ul>
+          </div>
+
+          <h3 class="text-lg my-6 mb-3 text-text-primary">
+            No Block Selection Concept in Browser API
+          </h3>
+          <p class="m-0 mb-4">
+            The browser's Selection API has no concept of "block selection" or "node selection" in the way that editor models do. The browser only knows about:
+          </p>
+          <ul class="m-0 mb-4 pl-6">
+            <li class="mb-2">
+              <strong>Text nodes and character offsets:</strong> For text selections
+            </li>
+            <li class="mb-2">
+              <strong>Element nodes and child indices:</strong> For node selections
+            </li>
+          </ul>
+          <p class="m-0 mb-4">
+            This means you must always normalize selections relative to the parent element, converting between:
+          </p>
+          <div class="my-4 p-4 bg-bg-surface rounded-lg border border-border-light">
+            <div class="text-[0.9rem] leading-[1.8] text-text-secondary">
+              <div class="mb-3">
+                <strong class="text-text-primary">DOM representation:</strong><br/>
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">startContainer: P#paragraph-1 > #text @ 5</code><br/>
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">endContainer: P#paragraph-1 > #text @ 10</code>
+              </div>
+              <div>
+                <strong class="text-text-primary">Model representation (normalized):</strong><br/>
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">path: [0, 5] to [0, 10]</code><br/>
+                <span class="text-[0.85rem] text-text-muted">(block index 0, character offset 5-10)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="my-6 p-4 bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-500 dark:border-yellow-700 rounded-lg">
+            <h4 class="text-[0.95rem] m-0 mb-3 text-yellow-800 dark:text-yellow-200 font-semibold">
+              ⚠️ Normalization Challenges
+            </h4>
+            <ul class="m-0 pl-6 text-[0.9rem] text-yellow-800 dark:text-yellow-200">
+              <li class="mb-2">
+                <strong>Parent-based normalization:</strong> Since there's no block concept, you must always calculate positions relative to the parent element, which can change when the DOM structure is modified.
+              </li>
+              <li class="mb-2">
+                <strong>Cross-boundary selections:</strong> When a selection spans multiple blocks, you need to handle the conversion for each block segment separately.
+              </li>
+              <li class="mb-2">
+                <strong>Invalid ranges after mutations:</strong> After any DOM mutation (insert, delete, split, merge), the stored Range may point to removed nodes, requiring immediate normalization.
+              </li>
+              <li class="mb-2">
+                <strong>Performance:</strong> Constant synchronization can be expensive, especially with large documents or frequent updates.
+              </li>
+            </ul>
+          </div>
+
+          <div class="my-6 p-4 bg-bg-muted rounded-lg border border-border-light">
+            <h4 class="text-[0.95rem] m-0 mb-3 text-text-primary">
+              Best Practices
+            </h4>
+            <ul class="m-0 pl-6 text-[0.9rem] text-text-secondary">
+              <li class="mb-2">
+                <strong>Store normalized paths in your model:</strong> Always convert DOM selections to model paths immediately and store them.
+              </li>
+              <li class="mb-2">
+                <strong>Normalize after every mutation:</strong> After any DOM change, check if the selection is still valid and normalize if needed.
+              </li>
+              <li class="mb-2">
+                <strong>Use path-based selection:</strong> Instead of storing DOM references, store abstract paths (e.g., <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">[blockIndex, offset]</code>) that can be resolved to DOM positions when needed.
+              </li>
+              <li class="mb-2">
+                <strong>Debounce normalization:</strong> For performance, batch multiple selection changes and normalize once per frame.
+              </li>
+              <li class="mb-2">
+                <strong>Handle edge cases:</strong> Empty selections, collapsed selections, selections at block boundaries, and cross-block selections all need special handling.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <DocSection title="Common issues">
+          <div class="mb-6">
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
+              Selection lost on focus change
+            </h3>
+            <p class="m-0 mb-2">
+              When a contenteditable loses focus, <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code> may return <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">null</code> or an empty selection, making it difficult to preserve selection state.
+            </p>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-selection-api-behavior" class="text-accent-primary">scenario-selection-api-behavior</a>
+            </p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
               Incorrect range boundaries
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               When selecting text that spans multiple elements, the Range boundaries may not accurately reflect the visual selection, especially across element boundaries.
             </p>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-              See cases: <a href="/scenarios/scenario-selection-range-accuracy" style="color: var(--accent-primary);">scenario-selection-range-accuracy</a>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-selection-range-accuracy" class="text-accent-primary">scenario-selection-range-accuracy</a>
             </p>
           </div>
 
           <div>
-            <h3
-              style="
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                color: var(--text-primary);
-              "
-            >
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
               Selection collapse on blur
             </h3>
-            <p style="margin: 0 0 0.5rem 0;">
+            <p class="m-0 mb-2">
               Clicking outside a contenteditable may collapse the selection unexpectedly, even when the click target is within the same document.
             </p>
-            <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">
-              See cases: <a href="/scenarios/scenario-selection-collapse-on-blur" style="color: var(--accent-primary);">scenario-selection-collapse-on-blur</a>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-selection-collapse-on-blur" class="text-accent-primary">scenario-selection-collapse-on-blur</a>
             </p>
           </div>
         </section>

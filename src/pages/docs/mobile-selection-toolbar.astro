@@ -1,0 +1,507 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const disableDefaultToolbarCode = `// Disable default selection toolbar (may not work in all browsers)
+element.style.userSelect = 'none'; // Prevents selection entirely
+
+// Or allow selection but try to prevent toolbar
+element.addEventListener('contextmenu', (e) => {
+  e.preventDefault(); // May prevent some toolbars
+});
+
+// CSS approach
+// .contenteditable {
+//   -webkit-user-select: text;
+//   -webkit-touch-callout: none; /* iOS Safari - disable callout menu */
+//   user-select: text;
+// }`;
+
+const customToolbarCode = `// Show custom toolbar on selection
+let customToolbar = null;
+
+document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0 && !selection.isCollapsed) {
+    const range = selection.getRangeAt(0);
+    const rects = range.getClientRects();
+    
+    if (rects.length > 0) {
+      const rect = rects[0];
+      showCustomToolbar(rect);
+    }
+  } else {
+    hideCustomToolbar();
+  }
+});
+
+function showCustomToolbar(rect) {
+  if (!customToolbar) {
+    customToolbar = document.createElement('div');
+    customToolbar.className = 'custom-toolbar';
+    customToolbar.innerHTML = \`
+      <button onclick="formatBold()">Bold</button>
+      <button onclick="formatItalic()">Italic</button>
+      <button onclick="copyText()">Copy</button>
+    \`;
+    document.body.appendChild(customToolbar);
+  }
+  
+  // Position toolbar above selection
+  customToolbar.style.display = 'block';
+  customToolbar.style.position = 'fixed';
+  customToolbar.style.top = (rect.top - 50) + 'px';
+  customToolbar.style.left = rect.left + 'px';
+}
+
+function hideCustomToolbar() {
+  if (customToolbar) {
+    customToolbar.style.display = 'none';
+  }
+}`;
+
+const detectMobileCode = `// Detect mobile device
+function isMobile() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Detect touch capability
+function isTouchDevice() {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
+
+// Use for conditional toolbar behavior
+if (isMobile() || isTouchDevice()) {
+  // Show custom toolbar or handle mobile-specific behavior
+}`;
+---
+
+<DocLayout
+  title="Mobile Selection Toolbar"
+  description="Understanding mobile browser selection toolbars, their differences across platforms, and how to implement custom toolbars."
+  currentPath={Astro.url.pathname}
+>
+        <DocSection title="Overview">
+          <p class="m-0 mb-4">
+            When users select text on mobile devices, browsers display a context menu or toolbar with actions like Copy, Paste, and Share. These toolbars vary significantly across browsers, operating systems, and devices. Understanding these differences is crucial for building rich text editors that work well on mobile.
+          </p>
+          <DocAlert type="info" class="mb-4">
+            <p class="m-0 text-sm">
+              <strong>Note:</strong> Mobile selection toolbars are system-level UI elements that cannot be fully customized. However, you can detect selection changes and show your own custom toolbar alongside or instead of the default one.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="iOS Safari Toolbar">
+          <p class="m-0 mb-4">
+            iOS Safari displays a toolbar above the selected text with standard actions.
+          </p>
+
+          <DocInfoBox title="Default Menu Items">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Basic Actions</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Copy:</strong> Copies selected text to clipboard</li>
+                  <li class="mb-1"><strong>Select All:</strong> Selects all text in the contenteditable element</li>
+                  <li class="mb-1"><strong>Paste:</strong> Pastes from clipboard (if clipboard has content)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Formatting Options (contenteditable only)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Bold:</strong> Applies bold formatting to selected text</li>
+                  <li class="mb-1"><strong>Italic:</strong> Applies italic formatting to selected text</li>
+                  <li class="mb-1"><strong>Underline:</strong> Applies underline formatting to selected text</li>
+                  <li class="mb-1"><strong>Strikethrough:</strong> Applies strikethrough formatting (may not appear in all versions)</li>
+                </ul>
+                <p class="m-0 mt-2 text-xs text-text-muted">
+                  ⚠️ Formatting options only appear in <code class="bg-bg-surface px-1 py-0.5 rounded">contenteditable</code> elements, not in regular text inputs.
+                </p>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">iOS-Specific Features</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Look Up:</strong> Dictionary lookup (iOS feature)</li>
+                  <li class="mb-1"><strong>Share:</strong> iOS share sheet</li>
+                  <li class="mb-1"><strong>Define:</strong> Dictionary definition</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="warning" title="⚠️ iOS-Specific Behavior" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>iOS Safari characteristics:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Toolbar appears above selection (may overlap content)</li>
+              <li class="mb-1">Menu items may vary based on selection context</li>
+              <li class="mb-1">Cannot be fully disabled or customized</li>
+              <li class="mb-1">May interfere with custom toolbars</li>
+              <li class="mb-1">Selection handles are small and may be difficult to use</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Android Chrome Toolbar">
+          <p class="m-0 mb-4">
+            Android Chrome displays a toolbar with actions that may vary by Android version and device manufacturer.
+          </p>
+
+          <DocInfoBox title="Default Menu Items">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Basic Actions</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Copy:</strong> Copies selected text to clipboard</li>
+                  <li class="mb-1"><strong>Select All:</strong> Selects all text in the contenteditable element</li>
+                  <li class="mb-1"><strong>Paste:</strong> Pastes from clipboard</li>
+                  <li class="mb-1"><strong>Cut:</strong> Cuts selected text (may appear in some contexts)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Formatting Options (contenteditable only)</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Bold:</strong> Applies bold formatting to selected text</li>
+                  <li class="mb-1"><strong>Italic:</strong> Applies italic formatting to selected text</li>
+                  <li class="mb-1"><strong>Underline:</strong> Applies underline formatting to selected text</li>
+                  <li class="mb-1"><strong>Strikethrough:</strong> Applies strikethrough formatting (varies by Android version)</li>
+                </ul>
+                <p class="m-0 mt-2 text-xs text-text-muted">
+                  ⚠️ Formatting options only appear in <code class="bg-bg-surface px-1 py-0.5 rounded">contenteditable</code> elements, not in regular text inputs.
+                </p>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Android-Specific Features</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Web Search:</strong> Searches selected text (Android feature)</li>
+                  <li class="mb-1"><strong>Share:</strong> Android share menu</li>
+                  <li class="mb-1"><strong>Translate:</strong> Google Translate (if available)</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="warning" title="⚠️ Android-Specific Behavior" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Android Chrome characteristics:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Toolbar position may vary (above or below selection)</li>
+              <li class="mb-1">Menu items differ by Android version and manufacturer</li>
+              <li class="mb-1">Samsung devices may have additional options</li>
+              <li class="mb-1">Selection handles may overlap with content</li>
+              <li class="mb-1">Virtual keyboard may interfere with toolbar visibility</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Browser-Specific Differences">
+          <DocInfoBox title="Toolbar Comparison">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-border-light">
+                    <th class="text-left p-2 font-semibold text-text-primary">Browser</th>
+                    <th class="text-left p-2 font-semibold text-text-primary">Position</th>
+                    <th class="text-left p-2 font-semibold text-text-primary">Menu Items</th>
+                    <th class="text-left p-2 font-semibold text-text-primary">Customizable</th>
+                  </tr>
+                </thead>
+                <tbody class="text-text-secondary">
+                  <tr class="border-b border-border-light">
+                    <td class="p-2">iOS Safari</td>
+                    <td class="p-2">Above selection</td>
+                    <td class="p-2">Copy, Select All, Paste, <strong>Bold, Italic, Underline</strong>, Look Up, Share, Define</td>
+                    <td class="p-2">No (system-level)</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2">Android Chrome</td>
+                    <td class="p-2">Above or below</td>
+                    <td class="p-2">Copy, Select All, Paste, Cut, <strong>Bold, Italic, Underline</strong>, Web Search, Share, Translate</td>
+                    <td class="p-2">No (system-level)</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2">Android Firefox</td>
+                    <td class="p-2">Above selection</td>
+                    <td class="p-2">Copy, Select All, Paste, <strong>Bold, Italic, Underline</strong>, Share</td>
+                    <td class="p-2">No (system-level)</td>
+                  </tr>
+                  <tr class="border-b border-border-light">
+                    <td class="p-2">Samsung Internet</td>
+                    <td class="p-2">Above selection</td>
+                    <td class="p-2">Copy, Select All, Paste, <strong>Bold, Italic, Underline</strong>, Share, Samsung-specific options</td>
+                    <td class="p-2">No (system-level)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="error" title="⚠️ Critical: Toolbar Cannot Be Fully Disabled" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>System-level toolbars cannot be completely disabled:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">CSS <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">-webkit-touch-callout: none</code> may prevent some toolbars on iOS, but not all</li>
+              <li class="mb-1">Setting <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">user-select: none</code> prevents selection entirely</li>
+              <li class="mb-1">Preventing <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contextmenu</code> event may not work on all browsers</li>
+              <li class="mb-1">Best approach: Show custom toolbar alongside default, or design UI to work with default toolbar</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Formatting Menu Items">
+          <p class="m-0 mb-4">
+            In <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> elements, mobile browsers may show formatting options (Bold, Italic, Underline) in the selection toolbar. These options vary by browser and OS version.
+          </p>
+
+          <DocAlert type="error" title="⚠️ Critical: Formatting Only in contenteditable" class="mb-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Formatting options only appear in contenteditable elements:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Regular <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">&lt;input&gt;</code> or <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">&lt;textarea&gt;</code> elements do not show formatting options</li>
+              <li class="mb-1">Only <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> elements trigger formatting menu items</li>
+              <li class="mb-1">Formatting options may not appear if selection is collapsed (cursor only)</li>
+            </ul>
+          </DocAlert>
+
+          <DocInfoBox title="Formatting Options by Browser">
+            <div class="space-y-3 text-sm">
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">iOS Safari</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Bold:</strong> Appears when text is selected in contenteditable</li>
+                  <li class="mb-1"><strong>Italic:</strong> Appears when text is selected</li>
+                  <li class="mb-1"><strong>Underline:</strong> Appears when text is selected</li>
+                  <li class="mb-1">Formatting options may vary by iOS version</li>
+                  <li class="mb-1">iPad may show additional formatting options</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Android Chrome</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Bold:</strong> Appears in contenteditable elements</li>
+                  <li class="mb-1"><strong>Italic:</strong> Appears in contenteditable elements</li>
+                  <li class="mb-1"><strong>Underline:</strong> Appears in contenteditable elements</li>
+                  <li class="mb-1"><strong>Strikethrough:</strong> May appear in newer Android versions</li>
+                  <li class="mb-1">Formatting options may vary by Android version and device manufacturer</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 class="font-semibold mb-2 text-text-primary">Android Firefox</h4>
+                <ul class="m-0 pl-6 text-text-secondary">
+                  <li class="mb-1"><strong>Bold:</strong> Appears in contenteditable elements</li>
+                  <li class="mb-1"><strong>Italic:</strong> Appears in contenteditable elements</li>
+                  <li class="mb-1"><strong>Underline:</strong> Appears in contenteditable elements</li>
+                  <li class="mb-1">May have fewer formatting options than Chrome</li>
+                </ul>
+              </div>
+            </div>
+          </DocInfoBox>
+
+          <DocAlert type="warning" title="⚠️ Formatting Behavior Differences" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Formatting behavior varies:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Formatting may apply to entire selected text or toggle existing formatting</li>
+              <li class="mb-1">Some browsers may show formatting state (bold/not bold) in toolbar</li>
+              <li class="mb-1">Formatting shortcuts (if any) may differ from desktop</li>
+              <li class="mb-1">Formatting during IME composition may not work (especially on macOS with Korean IME)</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Select All Behavior">
+          <p class="m-0 mb-4">
+            The "Select All" option in mobile toolbars selects all content within the contenteditable element, not just the visible text.
+          </p>
+
+          <DocInfoBox>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-1"><strong>Scope:</strong> Selects all text in the contenteditable element, including nested elements</li>
+              <li class="mb-1"><strong>Behavior:</strong> Creates a Range that spans from first to last text node</li>
+              <li class="mb-1"><strong>Cross-element:</strong> May select across multiple block elements (p, div, etc.)</li>
+              <li class="mb-1"><strong>Browser differences:</strong> Some browsers may include or exclude certain elements differently</li>
+            </ul>
+          </DocInfoBox>
+
+          <DocAlert type="warning" class="mt-4">
+            <p class="m-0 text-sm">
+              <strong>Note:</strong> "Select All" behavior may differ from desktop keyboard shortcut (Cmd/Ctrl + A). On mobile, it's triggered through the toolbar menu, which may have different behavior than the keyboard shortcut.
+            </p>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="OS & Device-Specific Differences">
+          <DocSection title="iOS">
+            <DocInfoBox>
+              <ul class="m-0 pl-6 text-sm text-text-secondary">
+                <li class="mb-1"><strong>iOS Version:</strong> Menu items and formatting options may differ between iOS versions</li>
+                <li class="mb-1"><strong>iPad vs iPhone:</strong> Toolbar behavior and formatting options may differ on larger screens</li>
+                <li class="mb-1"><strong>Accessibility:</strong> VoiceOver may affect toolbar interaction and menu item availability</li>
+                <li class="mb-1"><strong>Split View:</strong> Toolbar positioning may change in split-screen mode</li>
+                <li class="mb-1"><strong>Formatting:</strong> iPad may show more formatting options than iPhone</li>
+              </ul>
+            </DocInfoBox>
+          </DocSection>
+
+          <DocSection title="Android">
+            <DocInfoBox>
+              <ul class="m-0 pl-6 text-text-secondary">
+                <li class="mb-1"><strong>Android Version:</strong> Menu items and formatting options vary by Android version (e.g., Android 10 vs Android 13)</li>
+                <li class="mb-1"><strong>Manufacturer:</strong> Samsung, Xiaomi, etc. may add custom menu items or modify formatting options</li>
+                <li class="mb-1"><strong>Device Size:</strong> Tablet vs phone may have different toolbar layouts and formatting options</li>
+                <li class="mb-1"><strong>Custom ROMs:</strong> Custom Android ROMs may modify toolbar behavior and menu items</li>
+                <li class="mb-1"><strong>Keyboard Apps:</strong> Some keyboard apps (Gboard, Samsung Keyboard) may add their own formatting options</li>
+              </ul>
+            </DocInfoBox>
+          </DocSection>
+        </DocSection>
+
+        <DocSection title="Implementing Custom Toolbars">
+          <p class="m-0 mb-4">
+            While you cannot fully replace the system toolbar, you can detect selection changes and show your own custom toolbar. Here are common approaches:
+          </p>
+
+          <DocCodeBlock code={customToolbarCode} />
+          
+          <DocAlert type="warning" title="⚠️ Positioning Challenges" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Toolbar positioning is complex on mobile:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">System toolbar may overlap your custom toolbar</li>
+              <li class="mb-1">Virtual keyboard may push toolbars off-screen</li>
+              <li class="mb-1">Viewport changes (zoom, rotation) affect positioning</li>
+              <li class="mb-1">Multi-line selections require different positioning logic</li>
+              <li class="mb-1">Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">getClientRects()</code> for accurate selection position</li>
+            </ul>
+          </DocAlert>
+
+          <DocInfoBox title="Best Practices" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Position above selection:</strong> Place custom toolbar above selection to avoid overlap with system toolbar</li>
+              <li class="mb-2"><strong>Hide on scroll:</strong> Hide custom toolbar when user scrolls to avoid UI clutter</li>
+              <li class="mb-2"><strong>Touch-friendly buttons:</strong> Make toolbar buttons large enough for touch (minimum 44x44px)</li>
+              <li class="mb-2"><strong>Handle viewport changes:</strong> Reposition toolbar on orientation change or keyboard show/hide</li>
+              <li class="mb-2"><strong>Test on real devices:</strong> Emulators may not accurately represent toolbar behavior</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Disabling Default Toolbar (Limited)">
+          <p class="m-0 mb-4">
+            Attempting to disable the default toolbar has limited success. Here are approaches that may work in some browsers:
+          </p>
+          <DocCodeBlock code={disableDefaultToolbarCode} />
+          
+          <DocAlert type="error" title="⚠️ Limitations" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>These methods have limitations:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">-webkit-touch-callout: none</code> only works on iOS Safari, and may not prevent all toolbars</li>
+              <li class="mb-1">Preventing <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contextmenu</code> may not work on all mobile browsers</li>
+              <li class="mb-1">Setting <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">user-select: none</code> prevents all selection, which breaks text editing</li>
+              <li class="mb-1">Best practice: Design your UI to work with the default toolbar, or show custom toolbar alongside it</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Mobile Detection">
+          <p class="m-0 mb-4">
+            Detect mobile devices to conditionally show custom toolbars or handle mobile-specific behavior:
+          </p>
+          <DocCodeBlock code={detectMobileCode} />
+        </DocSection>
+
+        <DocSection title="Selection Handle Issues">
+          <DocAlert type="error" title="⚠️ Mobile Selection Handles" class="mb-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Selection handles are problematic on mobile:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><strong>Size:</strong> Handles are small and difficult to grab with fingers</li>
+              <li class="mb-1"><strong>Overlap:</strong> Handles may overlap with content or toolbar</li>
+              <li class="mb-1"><strong>Precision:</strong> Touch input is less precise than mouse, making fine adjustments difficult</li>
+              <li class="mb-1"><strong>Scrolling:</strong> Dragging handles may trigger page scroll instead of selection adjustment</li>
+              <li class="mb-1"><strong>Keyboard:</strong> Virtual keyboard may cover handles or toolbar</li>
+            </ul>
+          </DocAlert>
+
+          <DocInfoBox class="mt-4">
+            <p class="m-0 text-sm text-text-secondary">
+              Consider providing alternative selection methods for mobile, such as tap-to-select-word or long-press-to-select-sentence, to improve usability.
+            </p>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Virtual Keyboard Interference">
+          <DocAlert type="warning" title="⚠️ Keyboard and Toolbar Conflicts" class="mb-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Virtual keyboard may interfere with toolbars:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">Keyboard may push toolbar off-screen</li>
+              <li class="mb-1">Toolbar may appear behind keyboard</li>
+              <li class="mb-1">Selection handles may be hidden by keyboard</li>
+              <li class="mb-1">Viewport height changes when keyboard appears/disappears</li>
+              <li class="mb-1">Reposition toolbar when keyboard visibility changes</li>
+            </ul>
+          </DocAlert>
+        </DocSection>
+
+        <DocSection title="Testing Recommendations">
+          <DocInfoBox>
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2"><strong>Test on real devices:</strong> Emulators may not accurately show toolbar behavior</li>
+              <li class="mb-2"><strong>Test multiple browsers:</strong> Safari, Chrome, Firefox, Samsung Internet</li>
+              <li class="mb-2"><strong>Test different OS versions:</strong> iOS 15+, iOS 16+, Android 10+, Android 13+</li>
+              <li class="mb-2"><strong>Test different devices:</strong> iPhone, iPad, various Android phones and tablets</li>
+              <li class="mb-2"><strong>Test with virtual keyboard:</strong> Ensure toolbars work when keyboard is visible</li>
+              <li class="mb-2"><strong>Test orientation changes:</strong> Portrait vs landscape may affect toolbar positioning</li>
+              <li class="mb-2"><strong>Test with different keyboard apps:</strong> Gboard, Samsung Keyboard, iOS keyboard</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
+        <DocSection title="Related resources">
+          <ul class="m-0 pl-6">
+            <li class="mb-2">
+              <a href="/docs/selection-api" class="text-accent-primary no-underline">
+                Selection API →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/range-api" class="text-accent-primary no-underline">
+                Range API →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/clipboard-api" class="text-accent-primary no-underline">
+                Clipboard API →
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="/docs/practical-patterns" class="text-accent-primary no-underline">
+                Practical Patterns →
+              </a>
+            </li>
+          </ul>
+        </DocSection>
+</DocLayout>
+
