@@ -1,0 +1,406 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const basicDragDropCode = `// Basic drag and drop setup
+const editor = document.querySelector('[contenteditable]');
+
+// Make content draggable
+editor.addEventListener('dragstart', (e) => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const selectedText = range.toString();
+    
+    // Set drag data
+    e.dataTransfer.setData('text/plain', selectedText);
+    e.dataTransfer.setData('text/html', range.cloneContents());
+    e.dataTransfer.effectAllowed = 'move'; // or 'copy', 'copyMove'
+  }
+});
+
+// Handle drop
+editor.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const data = e.dataTransfer.getData('text/plain');
+  // Insert data at drop position
+});
+
+// Prevent default drag behavior
+editor.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+});`;
+
+const dragWithinCode = `// Dragging text within contenteditable
+const editor = document.querySelector('[contenteditable]');
+
+let draggedRange = null;
+
+editor.addEventListener('dragstart', (e) => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    draggedRange = selection.getRangeAt(0).cloneRange();
+    const html = draggedRange.cloneContents();
+    
+    e.dataTransfer.setData('text/html', html.innerHTML);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+});
+
+editor.addEventListener('drop', (e) => {
+  e.preventDefault();
+  
+  if (!draggedRange) return;
+  
+  // Get drop position
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const dropRange = selection.getRangeAt(0);
+  
+  // Delete original content
+  draggedRange.deleteContents();
+  
+  // Insert at drop position
+  const fragment = draggedRange.extractContents();
+  dropRange.insertNode(fragment);
+  
+  draggedRange = null;
+});`;
+
+const fileDropCode = `// File drag and drop
+const editor = document.querySelector('[contenteditable]');
+
+editor.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  // Check if files are being dragged
+  if (e.dataTransfer.types.includes('Files')) {
+    e.dataTransfer.dropEffect = 'copy';
+  }
+});
+
+editor.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  
+  const files = Array.from(e.dataTransfer.files);
+  
+  for (const file of files) {
+    if (file.type.startsWith('image/')) {
+      // Handle image
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = document.createElement('img');
+        img.src = event.target.result;
+        
+        // Insert image at drop position
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          range.insertNode(img);
+        }
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type === 'text/plain') {
+      // Handle text file
+      const text = await file.text();
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        range.insertNode(document.createTextNode(text));
+      }
+    }
+  }
+});`;
+
+const beforeinputDropCode = `// Using beforeinput for drop handling
+const editor = document.querySelector('[contenteditable]');
+
+editor.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromDrop' && e.dataTransfer) {
+    e.preventDefault();
+    
+    // Get dropped data
+    const html = e.dataTransfer.getData('text/html');
+    const text = e.dataTransfer.getData('text/plain');
+    const files = e.dataTransfer.files;
+    
+    // Handle based on data type
+    if (files.length > 0) {
+      // Handle files
+      handleFileDrop(files);
+    } else if (html) {
+      // Handle HTML
+      insertHTML(html);
+    } else if (text) {
+      // Handle plain text
+      insertText(text);
+    }
+  }
+});`;
+
+const dataTransferCode = `// Accessing DataTransfer properties
+editor.addEventListener('drop', (e) => {
+  const dt = e.dataTransfer;
+  
+  // Available data types
+  console.log(dt.types); // ['text/plain', 'text/html', 'Files']
+  
+  // Get data by type
+  const plainText = dt.getData('text/plain');
+  const html = dt.getData('text/html');
+  
+  // Files
+  const files = Array.from(dt.files);
+  
+  // Effect allowed (from dragstart)
+  console.log(dt.effectAllowed); // 'move', 'copy', 'copyMove', etc.
+  
+  // Drop effect
+  console.log(dt.dropEffect); // 'move', 'copy', 'link', 'none'
+});`;
+
+const positionCode = `// Calculating drop position
+editor.addEventListener('drop', (e) => {
+  e.preventDefault();
+  
+  // Get mouse position
+  const x = e.clientX;
+  const y = e.clientY;
+  
+  // Find element at position
+  const elementBelow = document.elementFromPoint(x, y);
+  
+  // Get range at position
+  const range = document.caretRangeFromPoint(x, y);
+  
+  if (range) {
+    // Insert at this position
+    const data = e.dataTransfer.getData('text/plain');
+    range.insertNode(document.createTextNode(data));
+  }
+});`;
+---
+
+<DocLayout
+  title="Drag & Drop"
+  description="Comprehensive guide to drag-and-drop operations in contenteditable elements, including event handling, file drops, browser differences, and mobile considerations."
+  currentPath="/docs/drag-and-drop"
+>
+  <DocSection id="overview" title="Overview">
+    <p class="text-sm text-text-secondary mb-4">
+      Drag-and-drop operations in contenteditable elements involve several events and APIs. The HTML5 Drag and Drop API works with contenteditable, but behavior can be inconsistent across browsers, especially when dragging text within the same contenteditable region or handling file drops.
+    </p>
+    
+    <DocInfoBox title="Key Concepts" class="mb-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Drag Events:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragstart</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">drag</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragend</code></li>
+        <li class="mb-2"><strong>Drop Events:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragover</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragenter</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragleave</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">drop</code></li>
+        <li class="mb-2"><strong>DataTransfer API:</strong> Access to dragged data, files, and drop effects</li>
+        <li class="mb-2"><strong>beforeinput:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">insertFromDrop</code> inputType for intercepting drops</li>
+        <li class="mb-2"><strong>deleteByDrag:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">deleteByDrag</code> inputType when content is dragged out</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="basic-drag-drop" title="Basic Drag & Drop">
+    <p class="text-sm text-text-secondary mb-4">
+      Setting up basic drag-and-drop requires handling several events. The key is preventing default behavior and managing the DataTransfer object.
+    </p>
+    
+    <DocCodeBlock code={basicDragDropCode} />
+    
+    <DocAlert type="warning" title="⚠️ Prevent Default Behavior" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Always call <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">e.preventDefault()</code> in <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">dragover</code> and <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">drop</code> events. Without this, the browser's default drop behavior will occur, which may not be what you want.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="dragging-within-contenteditable" title="Dragging Within contenteditable">
+    <p class="text-sm text-text-secondary mb-4">
+      Dragging selected text within the same contenteditable region can be problematic. The browser may copy instead of move, or the drop position may not match the visual indicator.
+    </p>
+    
+    <DocCodeBlock code={dragWithinCode} />
+    
+    <DocAlert type="error" title="⚠️ Inconsistent Behavior" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Chrome on macOS, dragging text within contenteditable sometimes results in copying instead of moving. The drop position may not match the visual indicator, and the original selection may remain visible after the drop. You must manually handle deletion of the original content.
+      </p>
+    </DocAlert>
+
+    <DocInfoBox title="Best Practices for Internal Dragging" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">Save the dragged range in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragstart</code> for later deletion</li>
+        <li class="mb-2">Manually delete the original content in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">drop</code> event</li>
+        <li class="mb-2">Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">effectAllowed: 'move'</code> to indicate moving behavior</li>
+        <li class="mb-2">Clear selection after drop to avoid visual artifacts</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="dropping-into-contenteditable" title="Dropping Into contenteditable">
+    <p class="text-sm text-text-secondary mb-4">
+      When dropping content into a contenteditable element, you can use either the <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">drop</code> event or the <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromDrop</code> inputType.
+    </p>
+    
+    <h3 class="text-lg font-semibold mb-3 mt-6">Using drop Event</h3>
+    <DocCodeBlock code={positionCode} />
+    
+    <h3 class="text-lg font-semibold mb-3 mt-6">Using beforeinput Event</h3>
+    <DocCodeBlock code={beforeinputDropCode} />
+    
+    <DocInfoBox title="Which to Use?" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>beforeinput:</strong> Better for intercepting and customizing drop behavior, similar to paste handling</li>
+        <li class="mb-2"><strong>drop:</strong> More control over drop position calculation and file handling</li>
+        <li class="mb-2"><strong>Both:</strong> Can use both - handle in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">beforeinput</code> and fallback to <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">drop</code> if needed</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="file-drag-drop" title="File Drag & Drop">
+    <p class="text-sm text-text-secondary mb-4">
+      Dropping files into contenteditable requires special handling. Files can be images, text files, or other types. Access files via <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">dataTransfer.files</code>.
+    </p>
+    
+    <DocCodeBlock code={fileDropCode} />
+    
+    <DocAlert type="warning" title="⚠️ File Drop Limitations" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Safari on macOS, file drag and drop may not work correctly in contenteditable. Drop events may not fire for files, and file content may not be accessible. The default paste behavior may interfere. Test thoroughly on Safari.
+      </p>
+    </DocAlert>
+
+    <DocInfoBox title="File Handling Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">Check <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">e.dataTransfer.types</code> to detect files before processing</li>
+        <li class="mb-2">Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">FileReader</code> API for reading file content</li>
+        <li class="mb-2">Handle images by creating <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">&lt;img&gt;</code> elements with data URLs</li>
+        <li class="mb-2">For text files, use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">file.text()</code> or <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">FileReader</code></li>
+        <li class="mb-2">Validate file types and sizes before processing</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="datatransfer-api" title="DataTransfer API">
+    <p class="text-sm text-text-secondary mb-4">
+      The DataTransfer API provides access to dragged data, files, and drop effects. Understanding its properties and methods is crucial for implementing drag-and-drop.
+    </p>
+    
+    <DocCodeBlock code={dataTransferCode} />
+    
+    <h3 class="text-lg font-semibold mb-3 mt-6">DataTransfer Properties</h3>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>types:</strong> Array of data types available (e.g., ['text/plain', 'text/html', 'Files'])</li>
+      <li class="mb-2"><strong>files:</strong> FileList of dropped files (read-only)</li>
+      <li class="mb-2"><strong>effectAllowed:</strong> Allowed drag effect set in dragstart ('move', 'copy', 'copyMove', 'link', etc.)</li>
+      <li class="mb-2"><strong>dropEffect:</strong> Current drop effect ('move', 'copy', 'link', 'none')</li>
+      <li class="mb-2"><strong>items:</strong> DataTransferItemList for accessing drag data</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">DataTransfer Methods</h3>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>setData(type, data):</strong> Set drag data (only in dragstart)</li>
+      <li class="mb-2"><strong>getData(type):</strong> Get drag data (only in drop)</li>
+      <li class="mb-2"><strong>clearData(type?):</strong> Clear drag data (only in dragstart)</li>
+      <li class="mb-2"><strong>setDragImage(image, x, y):</strong> Set custom drag image</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="platform-specific-issues" title="Platform-Specific Issues & Edge Cases">
+    <h3 class="text-lg font-semibold mb-3 mt-6">Browser-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Chrome/Edge</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Internal Dragging:</strong> Dragging text within contenteditable may copy instead of move</li>
+      <li class="mb-2"><strong>Drop Position:</strong> Drop position may not match visual indicator</li>
+      <li class="mb-2"><strong>Selection Artifacts:</strong> Original selection may remain visible after drop</li>
+      <li class="mb-2"><strong>File Handling:</strong> Generally works well for file drops</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Firefox</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Better Internal Dragging:</strong> Generally better support for dragging within contenteditable</li>
+      <li class="mb-2"><strong>HTML Stripping:</strong> May strip or modify HTML structure more aggressively when dropping</li>
+      <li class="mb-2"><strong>File Handling:</strong> File drop behavior may differ from Chrome</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Safari</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>File Drop Issues:</strong> File drag and drop may not work correctly in contenteditable</li>
+      <li class="mb-2"><strong>Drop Events:</strong> Drop events may not fire for files</li>
+      <li class="mb-2"><strong>Mobile Behavior:</strong> Drag-and-drop behavior differs significantly on mobile</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">OS & Device-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Desktop</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Mouse Interaction:</strong> Standard mouse-based drag-and-drop works, but behavior varies</li>
+      <li class="mb-2"><strong>Modifier Keys:</strong> Ctrl/Cmd key may change behavior (copy vs move)</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Mobile</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Touch Interaction:</strong> Touch-based drag-and-drop may not work the same way as mouse-based</li>
+      <li class="mb-2"><strong>Limited Support:</strong> Some mobile browsers may not support <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">insertFromDrop</code> inputType</li>
+      <li class="mb-2"><strong>File Drops:</strong> File dropping from external apps may require special handling</li>
+      <li class="mb-2"><strong>Long Press:</strong> Long press may trigger different behavior than drag</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">General Edge Cases</h3>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Nested contenteditable:</strong> Dragging between nested contenteditable regions may cause issues</li>
+      <li class="mb-2"><strong>contenteditable="false":</strong> Dragging from or to non-editable areas within contenteditable may not work</li>
+      <li class="mb-2"><strong>IME Composition:</strong> Dragging during IME composition may cancel composition or cause issues</li>
+      <li class="mb-2"><strong>Undo/Redo:</strong> Drag-and-drop operations may not be properly integrated with undo/redo stack</li>
+      <li class="mb-2"><strong>Selection State:</strong> Selection state may be inconsistent after drag operations</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="best-practices" title="Best Practices">
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Always Prevent Default:</strong> Call <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">e.preventDefault()</code> in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragover</code> and <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">drop</code> events</li>
+      <li class="mb-2"><strong>Save Dragged Range:</strong> When dragging within contenteditable, save the range in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dragstart</code> for later deletion</li>
+      <li class="mb-2"><strong>Use beforeinput When Possible:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">beforeinput</code> with <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">insertFromDrop</code> provides better integration with other input handling</li>
+      <li class="mb-2"><strong>Handle Files Separately:</strong> Check for files in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dataTransfer.types</code> and handle them appropriately</li>
+      <li class="mb-2"><strong>Calculate Drop Position:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">document.caretRangeFromPoint()</code> or <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">elementFromPoint()</code> to find drop position</li>
+      <li class="mb-2"><strong>Clear Selection After Drop:</strong> Clear selection after drop to avoid visual artifacts</li>
+      <li class="mb-2"><strong>Test Across Browsers:</strong> Drag-and-drop behavior varies significantly - test on Chrome, Firefox, Safari, and mobile browsers</li>
+      <li class="mb-2"><strong>Provide Visual Feedback:</strong> Show visual feedback during drag (e.g., highlight drop zones, change cursor)</li>
+      <li class="mb-2"><strong>Handle Errors:</strong> File reading and data access may fail - handle errors gracefully</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="related-resources" title="Related Resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/input-types/insertFromDrop" class="text-accent-primary no-underline">
+          insertFromDrop inputType →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/input-types/deleteByDrag" class="text-accent-primary no-underline">
+          deleteByDrag inputType →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/input-types/insertFromPaste" class="text-accent-primary no-underline">
+          insertFromPaste (similar handling) →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/clipboard-api" class="text-accent-primary no-underline">
+          Clipboard API (related operations) →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

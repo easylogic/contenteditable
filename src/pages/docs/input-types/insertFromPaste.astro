@@ -106,6 +106,32 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
+        <DocSection title="Mobile-Specific Behavior">
+          <DocAlert type="error" title="⚠️ Samsung Keyboard: Clipboard History & Saved Text" class="mb-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>Android + Samsung Keyboard:</strong> Samsung Keyboard's clipboard history and saved text features may cause unexpected behavior:
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1"><strong>Clipboard History:</strong> Selecting from clipboard history may fire <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code>, but <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> may not fire</li>
+              <li class="mb-1"><strong>Saved Text:</strong> Inserting saved text may fire <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code> or <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> depending on context</li>
+              <li class="mb-1"><strong>Multiple Events:</strong> A single clipboard history selection may trigger multiple <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events</li>
+              <li class="mb-1"><strong>Event Timing:</strong> Events may fire with delays or in unexpected order</li>
+              <li class="mb-1"><strong>Content Format:</strong> Clipboard history items may include HTML formatting that needs sanitization</li>
+            </ul>
+            <p class="m-0 text-sm">
+              <strong>Best Practice:</strong> Always monitor both <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events, compare DOM state to detect unexpected insertions, and sanitize all clipboard content.
+            </p>
+          </DocAlert>
+
+          <DocInfoBox title="Gboard Clipboard Suggestions" class="mt-4">
+            <ul class="m-0 pl-6 text-sm text-text-secondary">
+              <li class="mb-2">Gboard may show clipboard suggestions that interfere with paste operations</li>
+              <li class="mb-2">Clipboard suggestions may trigger <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code> or <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code></li>
+              <li class="mb-2">Multiple paste events may fire for a single clipboard selection</li>
+            </ul>
+          </DocInfoBox>
+        </DocSection>
+
         <DocSection title="Security Considerations">
           <DocAlert type="warning" title="⚠️ XSS Risk">
             <p class="m-0 mb-2 text-sm">

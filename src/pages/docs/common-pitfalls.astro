@@ -1,0 +1,562 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+---
+
+<DocLayout
+  title="Common Pitfalls & Debugging"
+  description="Common mistakes, pitfalls, and debugging strategies when working with contenteditable."
+  currentPath={Astro.url.pathname}
+>
+
+  <DocSection id="overview" title="Overview">
+    <p class="m-0 mb-4">
+      Working with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> can be challenging due to browser inconsistencies, complex event handling, and edge cases. This guide covers common pitfalls developers encounter and strategies for debugging issues.
+    </p>
+    <DocAlert type="warning" title="⚠️ Why contenteditable is Difficult">
+      <p class="m-0 mb-2 text-sm">
+        <strong>contenteditable has many edge cases because:</strong>
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Browser implementations differ significantly (Chrome, Firefox, Safari, Edge)</li>
+        <li class="mb-1">OS and keyboard variations affect behavior (IME composition, mobile keyboards)</li>
+        <li class="mb-1">Event timing and order vary across platforms</li>
+        <li class="mb-1">Selection and Range APIs have subtle differences</li>
+        <li class="mb-1">DOM mutations can interfere with browser's native behavior</li>
+        <li class="mb-1">Undo/redo stack management is complex</li>
+      </ul>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="selection-pitfalls" title="Selection & Range Pitfalls">
+    <DocAlert type="error" title="⚠️ Pitfall: Assuming Selection is Always Valid" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> After DOM mutations, the selection may become invalid or point to removed nodes.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Selection may be invalid after DOM changes
+const selection = window.getSelection();
+const range = selection.getRangeAt(0);
+// ... modify DOM ...
+range.toString(); // May throw error if nodes were removed
+
+// ✅ GOOD: Always check selection validity
+const selection = window.getSelection();
+if (selection.rangeCount === 0) return;
+const range = selection.getRangeAt(0);
+// ... modify DOM ...
+if (range.startContainer.isConnected && range.endContainer.isConnected) {
+  range.toString(); // Safe
+}`} />
+    </DocAlert>
+
+    <DocAlert type="error" title="⚠️ Pitfall: Not Normalizing Selection" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> Selection ranges may span across block boundaries or include unexpected nodes.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Selection may include unwanted nodes
+const range = selection.getRangeAt(0);
+const contents = range.extractContents(); // May include block elements
+
+// ✅ GOOD: Normalize selection to text nodes only
+function normalizeSelection(range) {
+  // Expand to include full text nodes
+  range.selectNodeContents(range.commonAncestorContainer);
+  // Then collapse to start/end of actual selection
+  // (Implementation depends on your needs)
+}`} />
+    </DocAlert>
+
+    <DocAlert type="warning" title="⚠️ Pitfall: Selection Lost After Programmatic DOM Changes" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When you modify the DOM programmatically, the browser may lose the selection.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Selection lost after DOM update
+const selection = window.getSelection();
+const range = selection.getRangeAt(0);
+element.innerHTML = newContent; // Selection lost!
+
+// ✅ GOOD: Save and restore selection
+function saveSelection() {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return null;
+  const range = selection.getRangeAt(0);
+  return {
+    startContainer: range.startContainer,
+    startOffset: range.startOffset,
+    endContainer: range.endContainer,
+    endOffset: range.endOffset,
+  };
+}
+
+function restoreSelection(saved) {
+  const selection = window.getSelection();
+  const range = document.createRange();
+  range.setStart(saved.startContainer, saved.startOffset);
+  range.setEnd(saved.endContainer, saved.endOffset);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}`} />
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="event-pitfalls" title="Event Handling Pitfalls">
+    <DocAlert type="error" title="⚠️ Pitfall: Relying Only on beforeinput" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> may not fire in all cases (Safari limitations, mobile keyboards, IME composition).
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Only listening to beforeinput
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+  handleInput(e);
+}); // May miss some inputs!
+
+// ✅ GOOD: Listen to both beforeinput and input
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+  handleInput(e);
+});
+
+element.addEventListener('input', (e) => {
+  // Fallback for cases where beforeinput didn't fire
+  if (!wasHandled(e)) {
+    handleInput(e);
+  }
+});`} />
+    </DocAlert>
+
+    <DocAlert type="error" title="⚠️ Pitfall: Not Handling IME Composition State" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> During IME composition, events behave differently and preventing default may cancel composition.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Preventing all inputs during composition
+let isComposing = false;
+
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('beforeinput', (e) => {
+  if (isComposing) {
+    e.preventDefault(); // May cancel composition!
+  }
+});
+
+// ✅ GOOD: Only prevent non-composition inputs
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('compositionend', () => {
+  isComposing = false;
+});
+
+element.addEventListener('beforeinput', (e) => {
+  if (isComposing && e.inputType !== 'insertCompositionText') {
+    // Don't prevent composition-related inputs
+    return;
+  }
+  e.preventDefault();
+  handleInput(e);
+});`} />
+    </DocAlert>
+
+    <DocAlert type="warning" title="⚠️ Pitfall: Event Order Assumptions" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> Event order (beforeinput, input, composition events) varies across browsers and platforms.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Assuming event order
+element.addEventListener('beforeinput', () => {
+  console.log('1. beforeinput');
+});
+
+element.addEventListener('input', () => {
+  console.log('2. input'); // May fire before beforeinput in some cases!
+});
+
+// ✅ GOOD: Don't rely on event order
+// Use flags or state management instead
+let inputHandled = false;
+
+element.addEventListener('beforeinput', (e) => {
+  inputHandled = true;
+  handleInput(e);
+});
+
+element.addEventListener('input', (e) => {
+  if (!inputHandled) {
+    handleInput(e); // Fallback
+  }
+  inputHandled = false;
+});`} />
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="dom-pitfalls" title="DOM Manipulation Pitfalls">
+    <DocAlert type="error" title="⚠️ Pitfall: Clearing Undo Stack" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> Programmatic DOM changes can clear the browser's native undo/redo stack.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Direct DOM manipulation clears undo stack
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+  element.innerHTML = newContent; // Undo stack cleared!
+});
+
+// ✅ GOOD: Use Range API or preserve undo stack
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+  const selection = window.getSelection();
+  const range = selection.getRangeAt(0);
+  
+  // Use Range API to modify content
+  range.deleteContents();
+  const textNode = document.createTextNode(e.data);
+  range.insertNode(textNode);
+  
+  // Or use document.execCommand carefully (deprecated but preserves undo)
+  // document.execCommand('insertText', false, e.data);
+});`} />
+    </DocAlert>
+
+    <DocAlert type="warning" title="⚠️ Pitfall: Not Sanitizing Pasted HTML" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> Pasting HTML can introduce XSS vulnerabilities or unwanted formatting.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Directly inserting pasted HTML
+element.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const html = e.clipboardData.getData('text/html');
+  element.innerHTML += html; // XSS risk!
+});
+
+// ✅ GOOD: Sanitize HTML before insertion
+import DOMPurify from 'dompurify';
+
+element.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const html = e.clipboardData.getData('text/html');
+  const sanitized = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u'],
+    ALLOWED_ATTR: []
+  });
+  
+  const selection = window.getSelection();
+  const range = selection.getRangeAt(0);
+  range.deleteContents();
+  
+  const temp = document.createElement('div');
+  temp.innerHTML = sanitized;
+  const fragment = document.createDocumentFragment();
+  while (temp.firstChild) {
+    fragment.appendChild(temp.firstChild);
+  }
+  range.insertNode(fragment);
+});`} />
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="ime-pitfalls" title="IME & Composition Pitfalls">
+    <DocAlert type="error" title="⚠️ Pitfall: Ignoring Composition Events" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> During IME composition, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em">input</code> events behave differently, and preventing default may cancel composition.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Not tracking composition state
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+  // May cancel active composition!
+});
+
+// ✅ GOOD: Track composition state
+let isComposing = false;
+
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('compositionend', () => {
+  isComposing = false;
+});
+
+element.addEventListener('beforeinput', (e) => {
+  // Don't prevent composition-related inputs
+  if (isComposing && e.inputType === 'insertCompositionText') {
+    return; // Let browser handle it
+  }
+  e.preventDefault();
+  handleInput(e);
+});`} />
+    </DocAlert>
+
+    <DocAlert type="warning" title="⚠️ Pitfall: macOS Korean IME Formatting Issues" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> On macOS with Korean IME, formatting commands (Cmd+B, Cmd+I) may not fire <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> when cursor is collapsed during composition.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Only listening to beforeinput for formatting
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    applyBold();
+  }
+}); // May miss formatting on macOS Korean IME!
+
+// ✅ GOOD: Also listen to keyboard events as fallback
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    applyBold();
+  }
+});
+
+element.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+    e.preventDefault();
+    applyBold(); // Fallback for macOS Korean IME
+  }
+});`} />
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="browser-pitfalls" title="Browser-Specific Pitfalls">
+    <DocAlert type="error" title="⚠️ Pitfall: Safari beforeinput Limitations" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> Safari has limited <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> support. Some <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values may not fire.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Assuming beforeinput works for all inputTypes
+element.addEventListener('beforeinput', (e) => {
+  switch (e.inputType) {
+    case 'formatBold':
+    case 'formatItalic':
+    case 'insertParagraph':
+      e.preventDefault();
+      handleInput(e);
+      break;
+  }
+}); // May not work in Safari!
+
+// ✅ GOOD: Check browser support and provide fallbacks
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+element.addEventListener('beforeinput', (e) => {
+  if (isSafari && !isInputTypeSupported(e.inputType)) {
+    return; // Let browser handle it
+  }
+  e.preventDefault();
+  handleInput(e);
+});
+
+// Provide keyboard event fallbacks for Safari
+if (isSafari) {
+  element.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+      e.preventDefault();
+      applyBold();
+    }
+  });
+}`} />
+    </DocAlert>
+
+    <DocAlert type="warning" title="⚠️ Pitfall: Chrome/Firefox DOM Structure Differences" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code> creates different DOM structures across browsers (Chrome: <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">&lt;p&gt;</code>, Firefox: <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">&lt;p&gt;&lt;br&gt;</code>, Safari: <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">&lt;div&gt;</code>).
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Assuming consistent DOM structure
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault();
+    // Assumes <p> is created - may be <div> in Safari!
+  }
+});
+
+// ✅ GOOD: Normalize DOM structure after insertion
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault();
+    insertParagraph();
+    normalizeDOM(); // Ensure consistent structure
+  }
+});
+
+function normalizeDOM() {
+  // Convert all <div> paragraphs to <p> if needed
+  // Remove empty <br> tags
+  // Ensure consistent structure across browsers
+}`} />
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="debugging" title="Debugging Strategies">
+    <DocInfoBox title="1. Enable Event Logging">
+      <p class="m-0 mb-2 text-sm">
+        Log all events to understand the event flow:
+      </p>
+      <DocCodeBlock code={`const eventTypes = [
+  'beforeinput', 'input', 'keydown', 'keyup',
+  'compositionstart', 'compositionupdate', 'compositionend',
+  'selectionchange', 'focus', 'blur'
+];
+
+eventTypes.forEach(type => {
+  element.addEventListener(type, (e) => {
+    console.log(\`[\${type}]\`, {
+      inputType: e.inputType,
+      data: e.data,
+      key: e.key,
+      selection: window.getSelection()?.toString(),
+      // ... other relevant properties
+    });
+  });
+});`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="2. Monitor Selection Changes" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Track selection changes to detect when selection is lost or invalid:
+      </p>
+      <DocCodeBlock code={`document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    console.log('Selection:', {
+      collapsed: range.collapsed,
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset,
+      isValid: range.startContainer.isConnected && range.endContainer.isConnected
+    });
+  } else {
+    console.warn('Selection lost!');
+  }
+});`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="3. Compare DOM Before/After" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Store DOM state before operations to detect unexpected changes:
+      </p>
+      <DocCodeBlock code={`function getDOMSnapshot(element) {
+  return {
+    html: element.innerHTML,
+    textContent: element.textContent,
+    selection: saveSelection()
+  };
+}
+
+element.addEventListener('beforeinput', (e) => {
+  const before = getDOMSnapshot(element);
+  console.log('Before:', before);
+  
+  // ... handle input ...
+  
+  setTimeout(() => {
+    const after = getDOMSnapshot(element);
+    console.log('After:', after);
+    console.log('Changes:', diffDOM(before, after));
+  }, 0);
+});`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="4. Test Across Browsers & Platforms" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Always test in multiple browsers and platforms. Use browser detection to log environment:
+      </p>
+      <DocCodeBlock code={`function logEnvironment() {
+  console.log({
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    browser: detectBrowser(),
+    os: detectOS(),
+    isMobile: /Mobile|Android|iPhone/i.test(navigator.userAgent)
+  });
+}
+
+// Log on page load
+logEnvironment();`} />
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="checklist" title="Common Issues Checklist">
+    <DocInfoBox>
+      <p class="m-0 mb-4 text-sm">
+        Use this checklist when debugging contenteditable issues:
+      </p>
+      <ul class="m-0 pl-6 text-sm space-y-2">
+        <li class="mb-2">
+          <strong>Selection Issues:</strong>
+          <ul class="m-0 mt-1 pl-6">
+            <li>✓ Is selection valid after DOM changes? (check <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">isConnected</code>)</li>
+            <li>✓ Is selection saved/restored when needed?</li>
+            <li>✓ Is selection normalized to avoid spanning block boundaries?</li>
+          </ul>
+        </li>
+        <li class="mb-2">
+          <strong>Event Issues:</strong>
+          <ul class="m-0 mt-1 pl-6">
+            <li>✓ Are you listening to both <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> and <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">input</code>?</li>
+            <li>✓ Is composition state tracked correctly?</li>
+            <li>✓ Are you handling Safari's limited <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> support?</li>
+            <li>✓ Are keyboard event fallbacks provided for unsupported <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">inputType</code> values?</li>
+          </ul>
+        </li>
+        <li class="mb-2">
+          <strong>DOM Issues:</strong>
+          <ul class="m-0 mt-1 pl-6">
+            <li>✓ Is pasted HTML sanitized? (XSS prevention)</li>
+            <li>✓ Is undo stack preserved when using <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">preventDefault()</code>?</li>
+            <li>✓ Is DOM structure normalized across browsers?</li>
+            <li>✓ Are programmatic DOM changes not clearing the undo stack?</li>
+          </ul>
+        </li>
+        <li class="mb-2">
+          <strong>IME Issues:</strong>
+          <ul class="m-0 mt-1 pl-6">
+            <li>✓ Is composition state tracked?</li>
+            <li>✓ Are composition-related inputs not being prevented?</li>
+            <li>✓ Are macOS Korean IME formatting issues handled?</li>
+            <li>✓ Are mobile keyboard text prediction features considered?</li>
+          </ul>
+        </li>
+        <li class="mb-2">
+          <strong>Browser Compatibility:</strong>
+          <ul class="m-0 mt-1 pl-6">
+            <li>✓ Tested in Chrome, Firefox, Safari, Edge?</li>
+            <li>✓ Tested on macOS, Windows, Linux, iOS, Android?</li>
+            <li>✓ Tested with different keyboard layouts (US, Korean, Japanese, Chinese)?</li>
+            <li>✓ Are browser-specific workarounds implemented?</li>
+          </ul>
+        </li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection title="Related resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/events" class="text-accent-primary no-underline">
+          Events →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+          IME & Composition →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/selection-api" class="text-accent-primary no-underline">
+          Selection API →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/practical-patterns" class="text-accent-primary no-underline">
+          Practical Patterns →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

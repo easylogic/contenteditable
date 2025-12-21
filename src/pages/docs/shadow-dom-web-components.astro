@@ -1,0 +1,426 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const shadowDOMBasicCode = `// Basic Shadow DOM with contenteditable
+class EditableComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    shadow.innerHTML = \`
+      <style>
+        .editor {
+          padding: 1rem;
+          border: 1px solid #ccc;
+          min-height: 100px;
+        }
+      </style>
+      <div class="editor" contenteditable="true">
+        <!-- Content -->
+      </div>
+    \`;
+  }
+}
+
+customElements.define('editable-component', EditableComponent);`;
+
+const eventBubblingCode = `// Event bubbling through shadow DOM boundaries
+class EditableComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    shadow.appendChild(editor);
+    
+    // Listen inside shadow DOM
+    editor.addEventListener('input', (e) => {
+      console.log('Input event in shadow DOM');
+      // Event won't bubble to light DOM by default
+    });
+    
+    // Listen on host element (light DOM)
+    this.addEventListener('input', (e) => {
+      console.log('Input event on host');
+      // May not fire for events inside shadow DOM
+    });
+  }
+}
+
+// Workaround: Dispatch custom events
+class EditableComponentFixed extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    shadow.appendChild(editor);
+    
+    // Forward events to host
+    editor.addEventListener('input', (e) => {
+      // Create new event that bubbles
+      const customEvent = new CustomEvent('editor-input', {
+        bubbles: true,
+        composed: true, // Important: allows crossing shadow boundary
+        detail: { originalEvent: e }
+      });
+      this.dispatchEvent(customEvent);
+    });
+  }
+}`;
+
+const selectionCode = `// Selection issues in Shadow DOM
+class EditableComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    shadow.appendChild(editor);
+    
+    // getSelection() may not work correctly
+    editor.addEventListener('selectionchange', () => {
+      const selection = window.getSelection();
+      // Selection may reference nodes in shadow DOM
+      // which are not accessible from light DOM
+      
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        // range.startContainer may be in shadow DOM
+        console.log(range.startContainer);
+      }
+    });
+  }
+}
+
+// Workaround: Use shadow root's selection
+class EditableComponentFixed extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    shadow.appendChild(editor);
+    
+    editor.addEventListener('selectionchange', () => {
+      // Access selection from shadow root context
+      const shadowSelection = shadow.getSelection();
+      if (shadowSelection.rangeCount > 0) {
+        const range = shadowSelection.getRangeAt(0);
+        // This works within shadow DOM context
+        console.log(range.toString());
+      }
+    });
+  }
+}`;
+
+const focusCode = `// Focus management in Shadow DOM
+class EditableComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    shadow.appendChild(editor);
+    
+    // Focus may not work correctly
+    this.addEventListener('click', () => {
+      editor.focus(); // May not work in Chrome
+    });
+  }
+}
+
+// Workaround: Use activeElement
+class EditableComponentFixed extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    shadow.appendChild(editor);
+    
+    this.addEventListener('click', () => {
+      // Check if already focused
+      const activeElement = shadow.activeElement;
+      if (activeElement !== editor) {
+        editor.focus();
+      }
+    });
+    
+    // Also handle focus events
+    editor.addEventListener('focus', () => {
+      // Focus is working
+    });
+  }
+}`;
+
+const composedEventsCode = `// Using composed: true for cross-boundary events
+class EditableComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    shadow.appendChild(editor);
+    
+    // Forward all important events
+    const eventsToForward = [
+      'beforeinput', 'input', 'compositionstart',
+      'compositionupdate', 'compositionend',
+      'selectionchange', 'focus', 'blur'
+    ];
+    
+    eventsToForward.forEach(eventType => {
+      editor.addEventListener(eventType, (e) => {
+        const customEvent = new CustomEvent(\`editor-\${eventType}\`, {
+          bubbles: true,
+          composed: true, // Critical: allows crossing shadow boundary
+          cancelable: e.cancelable,
+          detail: {
+            originalEvent: e,
+            inputType: e.inputType,
+            data: e.data,
+            // ... other relevant properties
+          }
+        });
+        this.dispatchEvent(customEvent);
+      });
+    });
+  }
+}`;
+
+const slotCode = `// Using slots for contenteditable (not recommended)
+class EditableComponent extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    shadow.innerHTML = \`
+      <style>
+        .editor-wrapper {
+          padding: 1rem;
+          border: 1px solid #ccc;
+        }
+      </style>
+      <div class="editor-wrapper">
+        <slot></slot>
+      </div>
+    \`;
+  }
+}
+
+// Usage (problematic)
+<editable-component>
+  <div contenteditable="true">Content</div>
+</editable-component>
+
+// Problem: contenteditable in slotted content may not work correctly
+// Better: Put contenteditable inside shadow DOM`;
+---
+
+<DocLayout
+  title="Shadow DOM & Web Components"
+  description="Understanding contenteditable behavior inside Shadow DOM and Web Components, including event bubbling, selection, focus management, and browser differences."
+  currentPath="/docs/shadow-dom-web-components"
+>
+  <DocSection id="overview" title="Overview">
+    <p class="text-sm text-text-secondary mb-4">
+      When using contenteditable elements inside Shadow DOM or Web Components, several issues can arise due to DOM encapsulation and event isolation. Events may not bubble correctly, selection APIs may behave unexpectedly, and focus management can be inconsistent.
+    </p>
+    
+    <DocInfoBox title="Key Concepts" class="mb-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Shadow DOM:</strong> Encapsulated DOM tree that isolates styles and structure</li>
+        <li class="mb-2"><strong>Event Bubbling:</strong> Events inside shadow DOM don't bubble to light DOM by default</li>
+        <li class="mb-2"><strong>Selection API:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">window.getSelection()</code> may reference shadow DOM nodes that aren't accessible</li>
+        <li class="mb-2"><strong>Focus Management:</strong> Focus behavior may differ when contenteditable is inside shadow DOM</li>
+        <li class="mb-2"><strong>Composed Events:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">composed: true</code> to allow events to cross shadow boundaries</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="basic-usage" title="Basic Usage">
+    <p class="text-sm text-text-secondary mb-4">
+      Creating a contenteditable element inside Shadow DOM is straightforward, but you'll encounter issues with events, selection, and focus.
+    </p>
+    
+    <DocCodeBlock code={shadowDOMBasicCode} />
+    
+    <DocAlert type="warning" title="⚠️ Browser Support Issues" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Chrome on macOS, contenteditable may not work correctly inside Shadow DOM. Selection may be broken, focus may not work, and events may not fire correctly. Behavior is inconsistent across browsers.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="event-bubbling" title="Event Bubbling Issues">
+    <p class="text-sm text-text-secondary mb-4">
+      Events fired inside Shadow DOM don't bubble to the light DOM by default. This means event listeners on the host element won't receive events from contenteditable elements inside the shadow DOM.
+    </p>
+    
+    <DocCodeBlock code={eventBubblingCode} />
+    
+    <DocAlert type="error" title="⚠️ Events Don't Bubble by Default" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Standard DOM events (like <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">focus</code>) fired inside shadow DOM do not bubble to the light DOM. You must manually forward events using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">CustomEvent</code> with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">composed: true</code>.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">Forwarding Events</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      To make events accessible from the light DOM, forward them as custom events with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">composed: true</code>.
+    </p>
+    
+    <DocCodeBlock code={composedEventsCode} />
+  </DocSection>
+
+  <DocSection id="selection-issues" title="Selection API Issues">
+    <p class="text-sm text-text-secondary mb-4">
+      The Selection API may behave unexpectedly when contenteditable is inside Shadow DOM. <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code> may reference nodes in shadow DOM that aren't directly accessible from the light DOM.
+    </p>
+    
+    <DocCodeBlock code={selectionCode} />
+    
+    <DocAlert type="warning" title="⚠️ Selection May Reference Shadow DOM Nodes" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        When using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code>, the returned Range may reference nodes inside shadow DOM. These nodes are not directly accessible from the light DOM. Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">shadowRoot.getSelection()</code> when working within the shadow DOM context.
+      </p>
+    </DocAlert>
+
+    <DocInfoBox title="Selection Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">shadowRoot.getSelection()</code> when working inside shadow DOM</li>
+        <li class="mb-2">Save selection state as serializable data (node paths, offsets) rather than node references</li>
+        <li class="mb-2">Forward selection change events to light DOM using custom events</li>
+        <li class="mb-2">Test selection behavior across different browsers</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="focus-management" title="Focus Management Issues">
+    <p class="text-sm text-text-secondary mb-4">
+      Focus behavior can be inconsistent when contenteditable is inside Shadow DOM. The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">focus()</code> method may not work as expected in Chrome.
+    </p>
+    
+    <DocCodeBlock code={focusCode} />
+    
+    <DocAlert type="warning" title="⚠️ Focus May Not Work Correctly" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Chrome, calling <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">focus()</code> on a contenteditable element inside Shadow DOM may not work correctly. Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">shadowRoot.activeElement</code> to check focus state, and handle focus events carefully.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="slots-and-contenteditable" title="Slots & contenteditable">
+    <p class="text-sm text-text-secondary mb-4">
+      Using <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;slot&gt;</code> with contenteditable is not recommended. Contenteditable elements in slotted content may not work correctly.
+    </p>
+    
+    <DocCodeBlock code={slotCode} />
+    
+    <DocAlert type="error" title="⚠️ Avoid Slots for contenteditable" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Placing contenteditable elements in slotted content (light DOM) while the component uses Shadow DOM can cause issues. The contenteditable may not work correctly, and events/selection may be inconsistent. Instead, create the contenteditable element inside the shadow DOM.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="workarounds" title="Workarounds & Best Practices">
+    <h3 class="text-lg font-semibold mb-3 mt-6">1. Forward Events with Custom Events</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      Always forward important events (beforeinput, input, composition, selectionchange) to the light DOM using custom events with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">composed: true</code>.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">2. Use Shadow Root Selection API</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      When working with selection inside shadow DOM, use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">shadowRoot.getSelection()</code> instead of <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code>.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">3. Serialize Selection State</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      When saving/restoring selection, serialize it as node paths and offsets rather than storing node references, which may not be accessible across shadow boundaries.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">4. Handle Focus Carefully</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      Check <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">shadowRoot.activeElement</code> to verify focus state, and forward focus/blur events to light DOM.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">5. Avoid Slots for contenteditable</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      Don't use slots for contenteditable content. Create contenteditable elements directly inside the shadow DOM.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">6. Test Across Browsers</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      Shadow DOM behavior varies significantly across browsers. Test thoroughly on Chrome, Firefox, Safari, and Edge.
+    </p>
+  </DocSection>
+
+  <DocSection id="platform-specific-issues" title="Platform-Specific Issues & Edge Cases">
+    <h3 class="text-lg font-semibold mb-3 mt-6">Browser-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Chrome/Edge</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Focus Issues:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focus()</code> may not work correctly on contenteditable inside shadow DOM</li>
+      <li class="mb-2"><strong>Selection Issues:</strong> Selection may be broken or inconsistent</li>
+      <li class="mb-2"><strong>Event Bubbling:</strong> Events don't bubble to light DOM by default - must use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">composed: true</code></li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Firefox</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Better Support:</strong> Generally better support for contenteditable in shadow DOM</li>
+      <li class="mb-2"><strong>Event Handling:</strong> Events may still need forwarding for consistency</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Safari</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Limited Support:</strong> Shadow DOM support may be limited in older Safari versions</li>
+      <li class="mb-2"><strong>Selection:</strong> Selection behavior may differ from Chrome</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">OS & Device-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Desktop</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Mouse Interaction:</strong> Click events and focus may behave differently</li>
+      <li class="mb-2"><strong>Keyboard Navigation:</strong> Arrow keys and selection may be affected</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Mobile</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Touch Interaction:</strong> Touch events may not bubble correctly</li>
+      <li class="mb-2"><strong>Virtual Keyboard:</strong> Keyboard behavior may be inconsistent</li>
+      <li class="mb-2"><strong>Selection Toolbar:</strong> Mobile selection toolbars may not work correctly</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">General Edge Cases</h3>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Nested Shadow DOM:</strong> Multiple levels of shadow DOM can compound issues</li>
+      <li class="mb-2"><strong>Dynamic Content:</strong> Adding/removing contenteditable elements dynamically may cause issues</li>
+      <li class="mb-2"><strong>IME Composition:</strong> IME composition may not work correctly inside shadow DOM</li>
+      <li class="mb-2"><strong>Clipboard Operations:</strong> Copy/paste may be affected by shadow DOM boundaries</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="alternative-approaches" title="Alternative Approaches">
+    <h3 class="text-lg font-semibold mb-3 mt-6">1. Use Light DOM Instead</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      If possible, avoid using Shadow DOM for contenteditable elements. Use light DOM with scoped styles using CSS modules or scoped stylesheets.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">2. Use Declarative Shadow DOM</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      Declarative Shadow DOM (supported in newer browsers) may have better compatibility, but issues may still persist.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">3. Hybrid Approach</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      Keep contenteditable in light DOM but wrap it in a Web Component that handles styling and behavior through the component's API rather than shadow DOM.
+    </p>
+  </DocSection>
+</DocLayout>
+

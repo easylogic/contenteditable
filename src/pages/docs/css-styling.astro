@@ -1,0 +1,491 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const caretColorCode = `// Custom caret color
+[contenteditable] {
+  caret-color: #0066ff; /* Blue caret */
+}
+
+/* Different colors for different states */
+[contenteditable]:focus {
+  caret-color: #0066ff;
+}
+
+[contenteditable]:not(:focus) {
+  caret-color: #999; /* Gray when not focused */
+}
+
+/* Auto (browser default) */
+[contenteditable] {
+  caret-color: auto;
+}`;
+
+const userSelectCode = `// Control text selection
+[contenteditable] {
+  user-select: text; /* Allow text selection */
+}
+
+/* Prevent selection (not recommended for contenteditable) */
+[contenteditable] {
+  user-select: none; /* Prevents selection entirely */
+}
+
+/* Select all on click */
+[contenteditable] {
+  user-select: all; /* Selects all text on click */
+}
+
+/* Mobile-specific */
+[contenteditable] {
+  -webkit-user-select: text;
+  -webkit-touch-callout: default; /* iOS Safari callout menu */
+  user-select: text;
+}`;
+
+const selectionCode = `// Style selected text
+[contenteditable]::selection {
+  background: #0066ff;
+  color: white;
+}
+
+/* For Firefox */
+[contenteditable]::-moz-selection {
+  background: #0066ff;
+  color: white;
+}
+
+/* Different styles for different elements */
+[contenteditable] strong::selection {
+  background: #ff6b35;
+  color: white;
+}`;
+
+const outlineCode = `// Remove default outline
+[contenteditable] {
+  outline: none; /* Remove all outlines */
+}
+
+/* Custom outline on focus */
+[contenteditable]:focus {
+  outline: 2px solid #0066ff;
+  outline-offset: 2px;
+}
+
+/* Use focus-visible for keyboard focus only */
+[contenteditable]:focus-visible {
+  outline: 2px solid #0066ff;
+  outline-offset: 2px;
+}
+
+/* Remove outline but keep accessibility */
+[contenteditable]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #0066ff;
+}`;
+
+const transformCode = `// CSS transform (may affect selection handles)
+[contenteditable] {
+  transform: scale(0.9);
+  /* Selection handles may appear in wrong position */
+}
+
+/* Workaround: Use transform on wrapper */
+.editor-wrapper {
+  transform: scale(0.9);
+}
+
+.editor-wrapper [contenteditable] {
+  /* No transform on contenteditable itself */
+}`;
+
+const filterCode = `// CSS filter (may affect performance)
+[contenteditable] {
+  filter: blur(2px) brightness(1.2);
+  /* May cause typing lag */
+}
+
+/* Better: Use filter on wrapper or background */
+.editor-wrapper {
+  filter: blur(2px);
+}
+
+.editor-wrapper [contenteditable] {
+  filter: none; /* No filter on contenteditable */
+}`;
+
+const backdropFilterCode = `// backdrop-filter (may cause rendering issues)
+[contenteditable] {
+  backdrop-filter: blur(10px);
+  /* May cause text to appear blurry */
+}
+
+/* Better: Use on wrapper */
+.editor-wrapper {
+  backdrop-filter: blur(10px);
+}
+
+.editor-wrapper [contenteditable] {
+  backdrop-filter: none;
+}`;
+
+const mixBlendModeCode = `// mix-blend-mode (may affect text rendering)
+[contenteditable] {
+  mix-blend-mode: multiply;
+  /* May cause text colors to be incorrect */
+  /* Selection may not be visible */
+  /* Caret may not render correctly */
+}
+
+/* Workaround: Use on wrapper */
+.editor-wrapper {
+  mix-blend-mode: multiply;
+}
+
+.editor-wrapper [contenteditable] {
+  mix-blend-mode: normal;
+}`;
+
+const containCode = `// CSS contain (may restrict selection)
+[contenteditable] {
+  contain: layout style paint;
+  /* Selection may not extend beyond boundaries */
+  /* Caret movement may be restricted */
+}
+
+/* Better: Use contain on parent, not contenteditable */
+.editor-container {
+  contain: layout style paint;
+}
+
+.editor-container [contenteditable] {
+  contain: none;
+}`;
+
+const isolationCode = `// CSS isolation (may affect stacking context)
+[contenteditable] {
+  isolation: isolate;
+  /* May affect IME candidate window positioning */
+  /* Selection handles may be positioned incorrectly */
+}
+
+/* Use on wrapper if needed */
+.editor-wrapper {
+  isolation: isolate;
+}`;
+
+const willChangeCode = `// will-change (may improve or degrade performance)
+[contenteditable] {
+  will-change: contents;
+  /* May improve performance by hinting browser */
+  /* Or may degrade performance by creating layers */
+}
+
+/* Use specific values */
+[contenteditable] {
+  will-change: transform; /* If animating */
+}
+
+/* Remove when not needed */
+[contenteditable]:not(:focus) {
+  will-change: auto;
+}`;
+---
+
+<DocLayout
+  title="CSS & Styling"
+  description="Understanding CSS properties that affect contenteditable elements, including caret styling, selection styling, focus styles, and browser differences."
+  currentPath="/docs/css-styling"
+>
+  <DocSection id="overview" title="Overview">
+    <p class="text-sm text-text-secondary mb-4">
+      CSS properties can significantly affect contenteditable behavior and appearance. Some properties work well, while others may cause rendering issues, performance problems, or affect selection and caret positioning. Understanding these effects is crucial for creating reliable contenteditable interfaces.
+    </p>
+    
+    <DocInfoBox title="Key Concepts" class="mb-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>caret-color:</strong> Controls the color of the text caret (cursor)</li>
+        <li class="mb-2"><strong>user-select:</strong> Controls whether and how text can be selected</li>
+        <li class="mb-2"><strong>::selection:</strong> Styles the selected text background and color</li>
+        <li class="mb-2"><strong>outline/focus-visible:</strong> Controls focus indicator styling</li>
+        <li class="mb-2"><strong>Transform/Filter:</strong> May affect selection handles and caret positioning</li>
+        <li class="mb-2"><strong>Performance:</strong> Some CSS properties can degrade editing performance</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="caret-styling" title="Caret Styling">
+    <p class="text-sm text-text-secondary mb-4">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">caret-color</code> property controls the color of the text caret (cursor) in contenteditable elements.
+    </p>
+    
+    <DocCodeBlock code={caretColorCode} />
+    
+    <DocInfoBox title="caret-color Notes" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Browser Support:</strong> Well supported in modern browsers</li>
+        <li class="mb-2"><strong>Inheritance:</strong> Inherits by default, can be set on contenteditable or parent</li>
+        <li class="mb-2"><strong>Auto Value:</strong> Uses browser default (usually matches text color)</li>
+        <li class="mb-2"><strong>Transparency:</strong> Supports transparent and rgba values</li>
+        <li class="mb-2"><strong>Dark Mode:</strong> Consider different colors for light/dark themes</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="text-selection" title="Text Selection Control">
+    <p class="text-sm text-text-secondary mb-4">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">user-select</code> property controls whether and how text can be selected in contenteditable elements.
+    </p>
+    
+    <DocCodeBlock code={userSelectCode} />
+    
+    <DocAlert type="warning" title="⚠️ user-select: none Not Recommended" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Setting <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">user-select: none</code> on contenteditable prevents text selection entirely, which breaks essential editing functionality. Users need to select text to delete, copy, or format it. Only use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">user-select: none</code> on specific non-editable elements within contenteditable, not on the contenteditable itself.
+      </p>
+    </DocAlert>
+
+    <DocInfoBox title="Mobile Considerations" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>-webkit-user-select:</strong> Required for iOS Safari</li>
+        <li class="mb-2"><strong>-webkit-touch-callout:</strong> Controls iOS callout menu (copy, paste, etc.)</li>
+        <li class="mb-2"><strong>user-select: all:</strong> May cause issues on mobile - selects all text on tap</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="selection-styling" title="Selection Styling">
+    <p class="text-sm text-text-secondary mb-4">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">::selection</code> pseudo-element styles the appearance of selected text.
+    </p>
+    
+    <DocCodeBlock code={selectionCode} />
+    
+    <DocInfoBox title="::selection Notes" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Firefox:</strong> Requires <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">::-moz-selection</code> prefix</li>
+        <li class="mb-2"><strong>Limited Properties:</strong> Only <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">color</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">background-color</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">text-shadow</code>, and <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">cursor</code> are supported</li>
+        <li class="mb-2"><strong>Accessibility:</strong> Ensure sufficient contrast between selection background and text color</li>
+        <li class="mb-2"><strong>Nested Elements:</strong> Can style selection differently for nested elements</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="focus-styling" title="Focus Styling">
+    <p class="text-sm text-text-secondary mb-4">
+      Focus indicators are important for accessibility. Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">outline</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">focus-visible</code> to style focus states.
+    </p>
+    
+    <DocCodeBlock code={outlineCode} />
+    
+    <DocAlert type="warning" title="⚠️ Don't Remove Focus Indicators" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Removing focus indicators entirely (using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">outline: none</code> without replacement) harms accessibility. Keyboard users need visible focus indicators. Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">focus-visible</code> to show focus only for keyboard navigation, or provide an alternative visual indicator like <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">box-shadow</code>.
+      </p>
+    </DocAlert>
+
+    <DocInfoBox title="Focus Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>focus-visible:</strong> Shows focus only for keyboard navigation (better UX)</li>
+        <li class="mb-2"><strong>outline:</strong> Always shows focus (better accessibility)</li>
+        <li class="mb-2"><strong>box-shadow:</strong> Can be used as alternative to outline</li>
+        <li class="mb-2"><strong>Contrast:</strong> Ensure focus indicator is clearly visible</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="problematic-properties" title="Problematic CSS Properties">
+    <p class="text-sm text-text-secondary mb-4">
+      Some CSS properties can cause issues with contenteditable, affecting selection, caret positioning, rendering, or performance.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">transform</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      CSS <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">transform</code> may cause selection handles and caret to appear in incorrect positions.
+    </p>
+    
+    <DocCodeBlock code={transformCode} />
+    
+    <DocAlert type="error" title="⚠️ Selection Handle Misalignment" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Edge on Windows, CSS transforms may cause selection handle misalignment. The caret position may appear offset, and selection handles may not align with selected text. Touch selection on mobile may also be affected. Apply transforms to a wrapper element instead of the contenteditable itself.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">filter</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      CSS <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">filter</code> may degrade editing performance, causing typing lag.
+    </p>
+    
+    <DocCodeBlock code={filterCode} />
+    
+    <DocAlert type="warning" title="⚠️ Performance Impact" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Chrome on macOS, CSS filters may cause performance issues. Typing may lag or stutter, and selection updates may be slow. The UI may become unresponsive during rapid editing. Apply filters to wrapper elements or backgrounds instead of the contenteditable itself.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">backdrop-filter</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      CSS <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">backdrop-filter</code> may cause rendering issues, especially on mobile.
+    </p>
+    
+    <DocCodeBlock code={backdropFilterCode} />
+    
+    <DocAlert type="warning" title="⚠️ Rendering Issues" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Safari on iOS, backdrop-filter may cause rendering issues. Text may appear blurry or distorted, selection may not render correctly, and performance may be poor, especially on mobile devices. Avoid using backdrop-filter directly on contenteditable elements.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">mix-blend-mode</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      CSS <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">mix-blend-mode</code> may affect text rendering, selection visibility, and caret rendering.
+    </p>
+    
+    <DocCodeBlock code={mixBlendModeCode} />
+    
+    <DocAlert type="error" title="⚠️ Text Rendering Issues" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Firefox on Windows, mix-blend-mode may affect text rendering. Text colors may be incorrect, selection may not be visible, and caret may not render correctly. Apply mix-blend-mode to wrapper elements instead of the contenteditable itself.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">contain</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      CSS <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contain</code> may restrict selection and caret movement.
+    </p>
+    
+    <DocCodeBlock code={containCode} />
+    
+    <DocAlert type="warning" title="⚠️ Selection Restrictions" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Chrome on Windows, CSS contain may restrict selection. Selection may not extend beyond contained boundaries, caret movement may be limited, and selection ranges may be invalidated. Use contain on parent elements, not on the contenteditable itself.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">isolation</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      CSS <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">isolation</code> may affect stacking context and UI element positioning.
+    </p>
+    
+    <DocCodeBlock code={isolationCode} />
+    
+    <DocAlert type="warning" title="⚠️ Stacking Context Issues" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Safari on macOS, isolation may affect IME candidate window positioning. Selection handles may be positioned incorrectly, z-index stacking may be affected, and overlays may not appear correctly. Use isolation on wrapper elements if needed.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">will-change</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      CSS <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">will-change</code> may improve or degrade performance depending on usage.
+    </p>
+    
+    <DocCodeBlock code={willChangeCode} />
+    
+    <DocInfoBox title="will-change Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Use Sparingly:</strong> Only when you know an element will change</li>
+        <li class="mb-2"><strong>Remove When Done:</strong> Set to <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">auto</code> when animation/change is complete</li>
+        <li class="mb-2"><strong>Specific Values:</strong> Use specific values like <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">transform</code> or <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">contents</code></li>
+        <li class="mb-2"><strong>Memory Impact:</strong> May increase memory usage - monitor performance</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="platform-specific-issues" title="Platform-Specific Issues & Edge Cases">
+    <h3 class="text-lg font-semibold mb-3 mt-6">Browser-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Chrome/Edge</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>filter:</strong> May cause performance issues with typing lag</li>
+      <li class="mb-2"><strong>contain:</strong> May restrict selection beyond boundaries</li>
+      <li class="mb-2"><strong>will-change:</strong> Mixed performance effects</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Firefox</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>mix-blend-mode:</strong> May affect text rendering, selection visibility, and caret</li>
+      <li class="mb-2"><strong>::selection:</strong> Requires <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">::-moz-selection</code> prefix</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Safari</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>backdrop-filter:</strong> May cause rendering issues, especially on iOS</li>
+      <li class="mb-2"><strong>isolation:</strong> May affect IME candidate window positioning</li>
+      <li class="mb-2"><strong>user-select:</strong> Requires <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">-webkit-user-select</code> prefix</li>
+      <li class="mb-2"><strong>-webkit-touch-callout:</strong> Controls iOS callout menu</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">OS & Device-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Desktop</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Transform:</strong> Selection handle misalignment more noticeable</li>
+      <li class="mb-2"><strong>Filter:</strong> Performance impact more noticeable with rapid typing</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Mobile</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>backdrop-filter:</strong> More severe rendering issues on mobile</li>
+      <li class="mb-2"><strong>user-select:</strong> Requires webkit prefixes, touch-callout control</li>
+      <li class="mb-2"><strong>Transform:</strong> Touch selection may be affected</li>
+      <li class="mb-2"><strong>Performance:</strong> CSS effects have greater performance impact on mobile</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">General Edge Cases</h3>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Combined Properties:</strong> Multiple problematic properties together can compound issues</li>
+      <li class="mb-2"><strong>Nested Elements:</strong> CSS properties on parent elements may affect contenteditable</li>
+      <li class="mb-2"><strong>Dynamic Changes:</strong> Changing CSS properties dynamically may cause layout shifts</li>
+      <li class="mb-2"><strong>Dark Mode:</strong> Some properties may behave differently in dark mode</li>
+      <li class="mb-2"><strong>High DPI:</strong> Rendering issues may be more noticeable on high DPI displays</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="best-practices" title="Best Practices">
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Use caret-color:</strong> Customize caret color for better visibility and branding</li>
+      <li class="mb-2"><strong>Style Selection:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">::selection</code> to make selected text clearly visible</li>
+      <li class="mb-2"><strong>Maintain Focus Indicators:</strong> Always provide visible focus indicators for accessibility</li>
+      <li class="mb-2"><strong>Avoid Problematic Properties:</strong> Don't apply transform, filter, backdrop-filter, mix-blend-mode directly to contenteditable</li>
+      <li class="mb-2"><strong>Use Wrappers:</strong> Apply problematic CSS properties to wrapper elements instead</li>
+      <li class="mb-2"><strong>Test Performance:</strong> Monitor performance when using CSS effects, especially filters</li>
+      <li class="mb-2"><strong>Mobile Considerations:</strong> Test on mobile devices - CSS effects have greater impact</li>
+      <li class="mb-2"><strong>Browser Prefixes:</strong> Use appropriate prefixes for cross-browser compatibility</li>
+      <li class="mb-2"><strong>Accessibility:</strong> Ensure sufficient contrast for selection and focus indicators</li>
+      <li class="mb-2"><strong>Dark Mode:</strong> Test CSS properties in both light and dark modes</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="related-resources" title="Related Resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/accessibility" class="text-accent-primary no-underline">
+          Accessibility (focus indicators) →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/performance" class="text-accent-primary no-underline">
+          Performance (CSS impact) →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/selection-api" class="text-accent-primary no-underline">
+          Selection API →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/mobile-selection-toolbar" class="text-accent-primary no-underline">
+          Mobile Selection Toolbar (user-select) →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

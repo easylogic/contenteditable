@@ -1,0 +1,430 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const focusEventsCode = `// Focus and blur event handling
+const editor = document.querySelector('[contenteditable]');
+
+// Focus events
+editor.addEventListener('focus', (e) => {
+  console.log('Editor received focus');
+  // Update UI, show toolbar, etc.
+});
+
+editor.addEventListener('focusin', (e) => {
+  // Fires before focus, bubbles
+  console.log('Focus entering editor');
+});
+
+// Blur events
+editor.addEventListener('blur', (e) => {
+  console.log('Editor lost focus');
+  // Hide toolbar, save content, etc.
+});
+
+editor.addEventListener('focusout', (e) => {
+  // Fires before blur, bubbles
+  console.log('Focus leaving editor');
+});`;
+
+const autofocusCode = `// Implementing autofocus for contenteditable
+const editor = document.querySelector('[contenteditable]');
+
+// Option 1: On page load
+window.addEventListener('load', () => {
+  editor.focus();
+});
+
+// Option 2: Using requestAnimationFrame (better timing)
+requestAnimationFrame(() => {
+  editor.focus();
+});
+
+// Option 3: Using DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  editor.focus();
+});
+
+// Option 4: After a short delay (if needed)
+setTimeout(() => {
+  editor.focus();
+}, 100);`;
+
+const focusLostCode = `// Handling focus loss when clicking nested elements
+const editor = document.querySelector('[contenteditable]');
+
+// Prevent focus loss on nested interactive elements
+editor.addEventListener('mousedown', (e) => {
+  const target = e.target;
+  
+  // If clicking on button, link, etc. within editor
+  if (target.tagName === 'BUTTON' || target.tagName === 'A') {
+    // Prevent default to keep focus on editor
+    e.preventDefault();
+    
+    // Handle the click manually
+    handleButtonClick(target);
+    
+    // Restore focus to editor
+    requestAnimationFrame(() => {
+      editor.focus();
+    });
+  }
+});
+
+// Alternative: Use focusin/focusout to track focus
+let isEditorFocused = false;
+
+editor.addEventListener('focusin', () => {
+  isEditorFocused = true;
+});
+
+editor.addEventListener('focusout', (e) => {
+  // Check if focus is moving to a child element
+  const relatedTarget = e.relatedTarget;
+  
+  if (relatedTarget && editor.contains(relatedTarget)) {
+    // Focus is moving to a child - keep editor focused
+    requestAnimationFrame(() => {
+      editor.focus();
+    });
+  } else {
+    // Focus is leaving editor completely
+    isEditorFocused = false;
+  }
+});`;
+
+const activeElementCode = `// Checking focus state
+const editor = document.querySelector('[contenteditable]');
+
+// Check if editor is focused
+function isEditorFocused() {
+  return document.activeElement === editor;
+}
+
+// Monitor focus changes
+document.addEventListener('focusin', (e) => {
+  if (e.target === editor) {
+    console.log('Editor gained focus');
+  }
+});
+
+document.addEventListener('focusout', (e) => {
+  if (e.target === editor) {
+    console.log('Editor lost focus');
+  }
+});
+
+// Check focus state periodically (if needed)
+setInterval(() => {
+  if (isEditorFocused()) {
+    // Editor is focused
+  }
+}, 100);`;
+
+const tabindexCode = `// Managing tabindex for focus order
+const editors = document.querySelectorAll('[contenteditable]');
+
+// Set tabindex for natural tab order
+editors.forEach((editor, index) => {
+  editor.setAttribute('tabindex', '0');
+});
+
+// Or manage focus programmatically
+editors.forEach((editor, index) => {
+  editor.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      const next = editors[index + 1];
+      if (next) {
+        next.focus();
+      }
+    } else if (e.key === 'Tab' && e.shiftKey) {
+      e.preventDefault();
+      const prev = editors[index - 1];
+      if (prev) {
+        prev.focus();
+      }
+    }
+  });
+});`;
+
+const programmaticFocusCode = `// Programmatic focus management
+const editor = document.querySelector('[contenteditable]');
+
+// Focus the editor
+function focusEditor() {
+  editor.focus();
+  
+  // Optionally move cursor to end
+  const selection = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(editor);
+  range.collapse(false); // Collapse to end
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+// Blur the editor
+function blurEditor() {
+  editor.blur();
+}
+
+// Focus with cursor at specific position
+function focusAtPosition(offset) {
+  editor.focus();
+  const selection = window.getSelection();
+  const range = document.createRange();
+  
+  if (editor.firstChild) {
+    range.setStart(editor.firstChild, offset);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+}`;
+
+const visibilityCode = `// Handling focus when page visibility changes
+const editor = document.querySelector('[contenteditable]');
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // Page is hidden - may want to blur editor
+    if (document.activeElement === editor) {
+      editor.blur();
+    }
+  } else {
+    // Page is visible again
+    // Optionally restore focus
+    // editor.focus();
+  }
+});`;
+---
+
+<DocLayout
+  title="Focus & Blur Events"
+  description="Understanding focus and blur events in contenteditable elements, including autofocus limitations, focus management, nested element interactions, and browser differences."
+  currentPath="/docs/focus-blur-events"
+>
+  <DocSection id="overview" title="Overview">
+    <p class="text-sm text-text-secondary mb-4">
+      Focus and blur events are crucial for managing the editing state of contenteditable elements. However, contenteditable has several limitations compared to standard form inputs, including the lack of <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">autofocus</code> support and issues with focus loss when interacting with nested elements.
+    </p>
+    
+    <DocInfoBox title="Key Concepts" class="mb-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Focus Events:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focus</code> (doesn't bubble), <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusin</code> (bubbles)</li>
+        <li class="mb-2"><strong>Blur Events:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">blur</code> (doesn't bubble), <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusout</code> (bubbles)</li>
+        <li class="mb-2"><strong>activeElement:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">document.activeElement</code> to check which element has focus</li>
+        <li class="mb-2"><strong>autofocus:</strong> Not supported on contenteditable - must use JavaScript</li>
+        <li class="mb-2"><strong>tabindex:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">tabindex="0"</code> for natural tab order</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="focus-blur-events" title="Focus & Blur Events">
+    <p class="text-sm text-text-secondary mb-4">
+      Contenteditable elements support standard focus and blur events. <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">focus</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">blur</code> don't bubble, while <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">focusin</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">focusout</code> do bubble.
+    </p>
+    
+    <DocCodeBlock code={focusEventsCode} />
+    
+    <DocInfoBox title="Event Differences" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>focus vs focusin:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focus</code> doesn't bubble, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusin</code> bubbles - use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusin</code> for event delegation</li>
+        <li class="mb-2"><strong>blur vs focusout:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">blur</code> doesn't bubble, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusout</code> bubbles - use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusout</code> for event delegation</li>
+        <li class="mb-2"><strong>Timing:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusin</code> fires before <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focus</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusout</code> fires before <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">blur</code></li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="autofocus-limitation" title="autofocus Limitation">
+    <p class="text-sm text-text-secondary mb-4">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">autofocus</code> attribute does not work on contenteditable elements. You must use JavaScript to focus the element on page load.
+    </p>
+    
+    <DocCodeBlock code={autofocusCode} />
+    
+    <DocAlert type="warning" title="⚠️ autofocus Not Supported" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        The <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">autofocus</code> attribute, which automatically focuses form inputs on page load, does not work on contenteditable elements. There is no built-in way to automatically focus a contenteditable region when a page loads. You must use JavaScript with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">focus()</code> method.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="focus-loss-issues" title="Focus Loss Issues">
+    <p class="text-sm text-text-secondary mb-4">
+      When a contenteditable region contains interactive elements (buttons, links, etc.), clicking on these elements may cause the contenteditable to lose focus. This interrupts the editing flow.
+    </p>
+    
+    <DocCodeBlock code={focusLostCode} />
+    
+    <DocAlert type="error" title="⚠️ Focus Lost on Nested Elements" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Firefox on Windows, clicking interactive elements (buttons, links) within contenteditable removes focus from the contenteditable. The caret disappears, and typing no longer inserts text. You must manually restore focus or prevent the default behavior.
+      </p>
+    </DocAlert>
+
+    <DocInfoBox title="Preventing Focus Loss" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">mousedown</code> event to prevent default on nested interactive elements</li>
+        <li class="mb-2">Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusout</code> to detect when focus is leaving and restore it if moving to a child</li>
+        <li class="mb-2">Handle clicks on nested elements manually and restore focus after</li>
+        <li class="mb-2">Consider using <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">contenteditable="false"</code> for interactive elements, but be aware of its limitations</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="checking-focus-state" title="Checking Focus State">
+    <p class="text-sm text-text-secondary mb-4">
+      Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">document.activeElement</code> to check which element currently has focus.
+    </p>
+    
+    <DocCodeBlock code={activeElementCode} />
+    
+    <DocInfoBox title="activeElement Notes" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Read-only:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">document.activeElement</code> is read-only - use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focus()</code> to change focus</li>
+        <li class="mb-2"><strong>null:</strong> May be <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">null</code> when no element has focus (e.g., clicking outside)</li>
+        <li class="mb-2"><strong>body:</strong> May be <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">document.body</code> in some cases</li>
+        <li class="mb-2"><strong>Shadow DOM:</strong> In Shadow DOM, use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">shadowRoot.activeElement</code></li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="tabindex-management" title="tabindex Management">
+    <p class="text-sm text-text-secondary mb-4">
+      Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">tabindex</code> to control tab order. For natural tab order, use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">tabindex="0"</code>. Custom <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">tabindex</code> values may not work correctly in some browsers.
+    </p>
+    
+    <DocCodeBlock code={tabindexCode} />
+    
+    <DocAlert type="warning" title="⚠️ tabindex Issues" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        When multiple contenteditable regions have <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">tabindex</code> attributes, the tab order may not follow the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">tabindex</code> values correctly in some browsers. The focus order may be inconsistent or incorrect. Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">tabindex="0"</code> for natural DOM order, or manage focus programmatically.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="programmatic-focus" title="Programmatic Focus Management">
+    <p class="text-sm text-text-secondary mb-4">
+      You can programmatically focus and blur contenteditable elements, and control cursor position.
+    </p>
+    
+    <DocCodeBlock code={programmaticFocusCode} />
+    
+    <DocInfoBox title="Focus Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Timing:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">requestAnimationFrame</code> for better timing when focusing after DOM changes</li>
+        <li class="mb-2"><strong>Cursor Position:</strong> After focusing, set cursor position using Selection API</li>
+        <li class="mb-2"><strong>User Interaction:</strong> Only focus programmatically in response to user actions (accessibility requirement)</li>
+        <li class="mb-2"><strong>Blur Carefully:</strong> Be careful when blurring - it may interrupt user editing</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="page-visibility" title="Page Visibility & Focus">
+    <p class="text-sm text-text-secondary mb-4">
+      When the page becomes hidden (e.g., user switches tabs), you may want to blur the editor. When the page becomes visible again, you can optionally restore focus.
+    </p>
+    
+    <DocCodeBlock code={visibilityCode} />
+    
+    <DocInfoBox title="Visibility Considerations" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Blur on Hide:</strong> Consider blurring editor when page is hidden to prevent unexpected behavior</li>
+        <li class="mb-2"><strong>Restore on Show:</strong> Generally don't auto-restore focus when page becomes visible (accessibility)</li>
+        <li class="mb-2"><strong>Save State:</strong> Save editor state before blurring if needed</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="platform-specific-issues" title="Platform-Specific Issues & Edge Cases">
+    <h3 class="text-lg font-semibold mb-3 mt-6">Browser-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Chrome/Edge</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>autofocus:</strong> Attribute is ignored - must use JavaScript</li>
+      <li class="mb-2"><strong>Focus Timing:</strong> May need <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">requestAnimationFrame</code> for reliable focus</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Firefox</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Focus Loss:</strong> Clicking nested interactive elements removes focus from contenteditable</li>
+      <li class="mb-2"><strong>tabindex:</strong> Custom tabindex values may not work correctly</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Safari</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Focus Behavior:</strong> Generally consistent, but may differ on mobile</li>
+      <li class="mb-2"><strong>Mobile Focus:</strong> Virtual keyboard may affect focus behavior</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">OS & Device-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Desktop</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Mouse Interaction:</strong> Clicking focuses the editor</li>
+      <li class="mb-2"><strong>Keyboard Navigation:</strong> Tab key moves focus between elements</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Mobile</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Touch Interaction:</strong> Tapping focuses the editor and shows virtual keyboard</li>
+      <li class="mb-2"><strong>Virtual Keyboard:</strong> Keyboard appearance/disappearance may trigger focus/blur events</li>
+      <li class="mb-2"><strong>Focus Timing:</strong> Focus events may fire at different times due to keyboard animation</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">General Edge Cases</h3>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Nested contenteditable:</strong> Focus behavior may be complex with nested editable regions</li>
+      <li class="mb-2"><strong>contenteditable="false":</strong> Focus may not work correctly with non-editable areas</li>
+      <li class="mb-2"><strong>Shadow DOM:</strong> Focus behavior differs when contenteditable is inside Shadow DOM</li>
+      <li class="mb-2"><strong>iframe:</strong> Focus behavior may differ when contenteditable is inside iframe</li>
+      <li class="mb-2"><strong>Programmatic Updates:</strong> DOM updates may cause focus loss - save and restore focus if needed</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="best-practices" title="Best Practices">
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Use focusin/focusout:</strong> For event delegation, use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusin</code> and <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">focusout</code> which bubble</li>
+      <li class="mb-2"><strong>Implement autofocus Manually:</strong> Use JavaScript with appropriate timing (<code class="bg-bg-muted px-1 py-0.5 rounded text-xs">requestAnimationFrame</code>)</li>
+      <li class="mb-2"><strong>Prevent Focus Loss:</strong> Handle nested interactive elements to prevent unwanted focus loss</li>
+      <li class="mb-2"><strong>Use tabindex="0":</strong> For natural tab order, avoid custom tabindex values</li>
+      <li class="mb-2"><strong>Check activeElement:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">document.activeElement</code> to check focus state</li>
+      <li class="mb-2"><strong>Save/Restore Focus:</strong> Save and restore focus when making DOM updates</li>
+      <li class="mb-2"><strong>Handle Visibility:</strong> Consider blurring editor when page is hidden</li>
+      <li class="mb-2"><strong>Test Across Browsers:</strong> Focus behavior varies - test on Chrome, Firefox, Safari, and mobile browsers</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="related-resources" title="Related Resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/html-attributes" class="text-accent-primary no-underline">
+          HTML Attributes (autofocus limitation) →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/accessibility" class="text-accent-primary no-underline">
+          Accessibility (focus management) →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/keyboard-navigation" class="text-accent-primary no-underline">
+          Keyboard Navigation →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/shadow-dom-web-components" class="text-accent-primary no-underline">
+          Shadow DOM & Web Components (focus in Shadow DOM) →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

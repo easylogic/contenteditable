@@ -1,0 +1,493 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const placeholderCode = `// CSS-based placeholder implementation
+[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  color: #999;
+  pointer-events: none;
+}
+
+// JavaScript to handle focus behavior
+const editor = document.querySelector('[contenteditable]');
+editor.addEventListener('focus', () => {
+  if (editor.textContent.trim() === '') {
+    // Placeholder should remain visible
+    // But Safari may hide it - need workaround
+  }
+});
+
+editor.addEventListener('blur', () => {
+  if (editor.textContent.trim() === '') {
+    // Show placeholder again
+  }
+});`;
+
+const spellcheckCode = `// Disable spellcheck during IME composition
+const editor = document.querySelector('[contenteditable]');
+let isComposing = false;
+
+editor.addEventListener('compositionstart', () => {
+  isComposing = true;
+  editor.setAttribute('spellcheck', 'false');
+});
+
+editor.addEventListener('compositionend', () => {
+  isComposing = false;
+  editor.setAttribute('spellcheck', 'true');
+});`;
+
+const maxlengthCode = `// Implement maxlength manually
+const editor = document.querySelector('[contenteditable]');
+const maxLength = 100;
+
+editor.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertText' || e.inputType === 'insertCompositionText') {
+    const currentLength = editor.textContent.length;
+    const newText = e.data || '';
+    const selection = window.getSelection();
+    
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const selectedLength = range.toString().length;
+      const newLength = currentLength - selectedLength + newText.length;
+      
+      if (newLength > maxLength) {
+        e.preventDefault();
+        // Optionally show warning to user
+      }
+    }
+  }
+});`;
+
+const readonlyCode = `// Implement readonly manually
+const editor = document.querySelector('[contenteditable]');
+let isReadonly = false;
+
+editor.addEventListener('beforeinput', (e) => {
+  if (isReadonly) {
+    e.preventDefault();
+  }
+});
+
+// Also prevent paste, drag-drop, etc.
+editor.addEventListener('paste', (e) => {
+  if (isReadonly) {
+    e.preventDefault();
+  }
+});
+
+editor.addEventListener('drop', (e) => {
+  if (isReadonly) {
+    e.preventDefault();
+  }
+});`;
+
+const dirCode = `// Handle dir changes during editing
+const editor = document.querySelector('[contenteditable]');
+
+function setDirection(dir) {
+  // Save selection
+  const selection = window.getSelection();
+  const range = selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+  
+  // Change direction
+  editor.setAttribute('dir', dir);
+  
+  // Restore selection after a brief delay
+  if (range) {
+    requestAnimationFrame(() => {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
+  }
+}`;
+
+const autofocusCode = `// Implement autofocus for contenteditable
+const editor = document.querySelector('[contenteditable]');
+
+// Option 1: On page load
+window.addEventListener('load', () => {
+  editor.focus();
+});
+
+// Option 2: Using requestAnimationFrame (better timing)
+requestAnimationFrame(() => {
+  editor.focus();
+});
+
+// Option 3: Using DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  editor.focus();
+});`;
+---
+
+<DocLayout
+  title="HTML Attributes & contenteditable"
+  description="Understanding which HTML attributes work with contenteditable elements, browser differences, and workarounds for unsupported attributes."
+  currentPath="/docs/html-attributes"
+>
+  <DocSection id="overview" title="Overview">
+    <p class="text-sm text-text-secondary mb-4">
+      Unlike standard form inputs (<code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;input&gt;</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;textarea&gt;</code>), contenteditable elements have limited support for HTML attributes. Many attributes that work on form inputs are either ignored, partially supported, or behave inconsistently across browsers.
+    </p>
+    
+    <DocInfoBox title="Key Points" class="mb-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>No Native Validation:</strong> Attributes like <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">required</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">pattern</code>, and <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">maxlength</code> are not supported</li>
+        <li class="mb-2"><strong>Limited Mobile Support:</strong> Mobile-specific attributes like <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">inputmode</code> and <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">enterkeyhint</code> often don't work</li>
+        <li class="mb-2"><strong>Browser Inconsistencies:</strong> Even supported attributes may behave differently across browsers</li>
+        <li class="mb-2"><strong>Manual Implementation Required:</strong> Many features must be implemented manually using JavaScript</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="supported-attributes" title="Supported Attributes">
+    <p class="text-sm text-text-secondary mb-4">
+      These attributes generally work on contenteditable elements, though behavior may vary across browsers.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">spellcheck</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">spellcheck</code> attribute controls browser spellchecking. It works on contenteditable, but may interfere with IME composition and editing flow.
+    </p>
+    
+    <DocCodeBlock code={`<div contenteditable spellcheck="true">
+  <!-- Spellcheck enabled -->
+</div>
+
+<div contenteditable spellcheck="false">
+  <!-- Spellcheck disabled -->
+</div>`} />
+    
+    <DocAlert type="warning" title="⚠️ Spellcheck Interference" class="mt-4 mb-4">
+      <ul class="m-0 pl-6 text-sm">
+        <li class="mb-2">Spellcheck may interfere with IME composition - suggestions may appear during composition</li>
+        <li class="mb-2">Accepting spellcheck suggestions may cause caret to jump unexpectedly</li>
+        <li class="mb-2">Spellcheck UI may overlap with content during editing</li>
+        <li class="mb-2">Consider disabling spellcheck during composition (see code example below)</li>
+      </ul>
+    </DocAlert>
+
+    <DocCodeBlock code={spellcheckCode} />
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">lang</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">lang</code> attribute specifies the language of the content. It may affect spellcheck language in some browsers, but behavior is inconsistent.
+    </p>
+    
+    <DocCodeBlock code={`<div contenteditable lang="en" spellcheck="true">
+  <!-- English content -->
+</div>
+
+<div contenteditable lang="fr" spellcheck="true">
+  <!-- French content -->
+</div>`} />
+    
+    <DocAlert type="warning" title="⚠️ lang May Not Affect Spellcheck" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Safari, the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">lang</code> attribute does not affect spellcheck language. Spellcheck always uses the browser's default language, regardless of the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">lang</code> value.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">dir</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">dir</code> attribute controls text direction (ltr or rtl). It works on contenteditable, but changing it dynamically during editing may cause issues.
+    </p>
+    
+    <DocCodeBlock code={`<div contenteditable dir="ltr">
+  <!-- Left-to-right text -->
+</div>
+
+<div contenteditable dir="rtl">
+  <!-- Right-to-left text -->
+</div>`} />
+    
+    <DocAlert type="warning" title="⚠️ Dynamic dir Changes" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Firefox, changing the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">dir</code> attribute during active editing may not take effect immediately. The caret position may be incorrect, and text flow may not update properly. Save and restore selection when changing direction programmatically.
+      </p>
+    </DocAlert>
+
+    <DocCodeBlock code={dirCode} />
+  </DocSection>
+
+  <DocSection id="unsupported-attributes" title="Unsupported Attributes">
+    <p class="text-sm text-text-secondary mb-4">
+      These attributes are ignored by browsers on contenteditable elements. You must implement the functionality manually using JavaScript.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">autofocus</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">autofocus</code> attribute does not work on contenteditable. Use JavaScript to focus the element on page load.
+    </p>
+    
+    <DocCodeBlock code={autofocusCode} />
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">maxlength</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">maxlength</code> attribute is not supported. Implement length limiting manually using <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> events.
+    </p>
+    
+    <DocCodeBlock code={maxlengthCode} />
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">required</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">required</code> attribute does not trigger form validation. Implement validation manually.
+    </p>
+    
+    <DocCodeBlock code={`// Manual required validation
+const editor = document.querySelector('[contenteditable]');
+const form = editor.closest('form');
+
+form.addEventListener('submit', (e) => {
+  if (editor.textContent.trim() === '') {
+    e.preventDefault();
+    // Show validation error
+    editor.setAttribute('aria-invalid', 'true');
+  }
+});`} />
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">pattern</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">pattern</code> attribute does not validate content. Implement pattern validation manually.
+    </p>
+    
+    <DocCodeBlock code={`// Manual pattern validation
+const editor = document.querySelector('[contenteditable]');
+const pattern = /^[0-9]+$/; // Numbers only
+
+editor.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertText' || e.inputType === 'insertCompositionText') {
+    const newText = e.data || '';
+    const currentText = editor.textContent;
+    const selection = window.getSelection();
+    
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const selectedText = range.toString();
+      const newContent = currentText.slice(0, range.startOffset) + 
+                        newText + 
+                        currentText.slice(range.endOffset);
+      
+      if (!pattern.test(newContent)) {
+        e.preventDefault();
+      }
+    }
+  }
+});`} />
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">readonly</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">readonly</code> attribute is ignored in Firefox. In other browsers, behavior is inconsistent. Implement readonly manually.
+    </p>
+    
+    <DocCodeBlock code={readonlyCode} />
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">disabled</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">disabled</code> attribute is ignored in Safari. Implement disabled state manually.
+    </p>
+    
+    <DocCodeBlock code={`// Manual disabled implementation
+const editor = document.querySelector('[contenteditable]');
+let isDisabled = false;
+
+function setDisabled(disabled) {
+  isDisabled = disabled;
+  editor.setAttribute('contenteditable', disabled ? 'false' : 'true');
+  editor.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+  editor.style.opacity = disabled ? '0.6' : '1';
+  editor.style.pointerEvents = disabled ? 'none' : 'auto';
+}
+
+editor.addEventListener('beforeinput', (e) => {
+  if (isDisabled) {
+    e.preventDefault();
+  }
+});`} />
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">autocomplete</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">autocomplete</code> attribute does not trigger browser autocomplete suggestions. Browser autocomplete features are not available for contenteditable.
+    </p>
+    
+    <DocAlert type="info" title="ℹ️ No Browser Autocomplete" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Browser autocomplete suggestions (for forms, addresses, etc.) do not appear when typing in contenteditable regions, even when appropriate <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">autocomplete</code> attributes are set. You must implement custom autocomplete if needed.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="partially-supported-attributes" title="Partially Supported Attributes">
+    <p class="text-sm text-text-secondary mb-4">
+      These attributes work in some browsers or scenarios, but have limitations or inconsistencies.
+    </p>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">placeholder</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">placeholder</code> attribute does not work on contenteditable. You must implement it using CSS and JavaScript.
+    </p>
+    
+    <DocCodeBlock code={placeholderCode} />
+    
+    <DocAlert type="warning" title="⚠️ Placeholder Disappears on Focus" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Safari, when using CSS <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">::before</code> or <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">::after</code> for placeholder, the placeholder disappears immediately when the element receives focus, even if the content is empty. This differs from standard input elements where placeholder persists until text is entered.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">inputmode</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">inputmode</code> attribute should control the type of virtual keyboard on mobile devices, but it is ignored on contenteditable in iOS Safari.
+    </p>
+    
+    <DocCodeBlock code={`<div contenteditable inputmode="numeric">
+  <!-- Should show numeric keyboard, but doesn't work on iOS -->
+</div>
+
+<div contenteditable inputmode="email">
+  <!-- Should show email keyboard, but doesn't work on iOS -->
+</div>`} />
+    
+    <DocAlert type="warning" title="⚠️ inputmode Not Supported on iOS" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In iOS Safari, the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputmode</code> attribute is ignored on contenteditable. The default keyboard always appears. Numeric, email, or URL keyboards cannot be triggered.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">autocapitalize</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">autocapitalize</code> attribute works inconsistently on contenteditable in iOS Safari. Behavior may differ from standard input elements.
+    </p>
+    
+    <DocCodeBlock code={`<div contenteditable autocapitalize="sentences">
+  <!-- Should capitalize first letter of sentences -->
+</div>
+
+<div contenteditable autocapitalize="words">
+  <!-- Should capitalize first letter of words -->
+</div>
+
+<div contenteditable autocapitalize="none">
+  <!-- Should not capitalize -->
+</div>`} />
+    
+    <DocAlert type="warning" title="⚠️ autocapitalize Inconsistency" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Safari on iOS, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">autocapitalize</code> may not work as expected on contenteditable. Capitalization behavior may differ from standard inputs, and the attribute may be ignored in some cases.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">autocorrect</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">autocorrect</code> attribute behaves differently on contenteditable compared to standard input elements in iOS Safari.
+    </p>
+    
+    <DocCodeBlock code={`<div contenteditable autocorrect="on">
+  <!-- Should enable autocorrect -->
+</div>
+
+<div contenteditable autocorrect="off">
+  <!-- Should disable autocorrect -->
+</div>`} />
+    
+    <DocAlert type="warning" title="⚠️ autocorrect May Not Respect Attribute" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Safari on iOS, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">autocorrect</code> may not respect the attribute value on contenteditable. Autocorrect suggestions may appear even when <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">autocorrect="off"</code> is set, and behavior may differ from standard input elements.
+      </p>
+    </DocAlert>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">enterkeyhint</h3>
+    <p class="text-sm text-text-secondary mb-3">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">enterkeyhint</code> attribute should control the label on the Enter key on mobile keyboards, but it is ignored on contenteditable in Android Chrome.
+    </p>
+    
+    <DocCodeBlock code={`<div contenteditable enterkeyhint="send">
+  <!-- Should show "Send" on Enter key, but doesn't work on Android -->
+</div>
+
+<div contenteditable enterkeyhint="search">
+  <!-- Should show "Search" on Enter key, but doesn't work on Android -->
+</div>`} />
+    
+    <DocAlert type="warning" title="⚠️ enterkeyhint Not Supported on Android" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        In Chrome on Android, the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">enterkeyhint</code> attribute is ignored on contenteditable. The Enter key always shows the default label, and no customization is possible.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="platform-specific-issues" title="Platform-Specific Issues & Edge Cases">
+    <h3 class="text-lg font-semibold mb-3 mt-6">Browser-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Safari</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>placeholder:</strong> CSS-based placeholder disappears on focus even if content is empty</li>
+      <li class="mb-2"><strong>lang:</strong> Does not affect spellcheck language - always uses browser default</li>
+      <li class="mb-2"><strong>disabled:</strong> Attribute is ignored - element remains editable</li>
+      <li class="mb-2"><strong>inputmode:</strong> Ignored on iOS - default keyboard always appears</li>
+      <li class="mb-2"><strong>autocapitalize/autocorrect:</strong> Works inconsistently compared to standard inputs</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Chrome/Edge</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>autocomplete:</strong> Attribute is ignored - no browser autocomplete suggestions</li>
+      <li class="mb-2"><strong>maxlength:</strong> Not supported - must implement manually</li>
+      <li class="mb-2"><strong>enterkeyhint:</strong> Ignored on Android - default Enter key label always shown</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Firefox</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>readonly:</strong> Attribute is ignored - users can still edit</li>
+      <li class="mb-2"><strong>dir:</strong> Dynamic changes during editing may not take effect immediately - caret position may be incorrect</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">OS & Keyboard-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">iOS</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>inputmode:</strong> Completely ignored on contenteditable - cannot control keyboard type</li>
+      <li class="mb-2"><strong>autocapitalize:</strong> Works inconsistently - may not respect attribute value</li>
+      <li class="mb-2"><strong>autocorrect:</strong> May appear even when disabled - behavior differs from standard inputs</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Android</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>enterkeyhint:</strong> Ignored on contenteditable - default Enter key label always shown</li>
+      <li class="mb-2"><strong>inputmode:</strong> May work in some browsers but behavior is inconsistent</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">Device-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Mobile</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Virtual Keyboard Attributes:</strong> Most mobile-specific attributes (inputmode, enterkeyhint, autocapitalize, autocorrect) work inconsistently or not at all</li>
+      <li class="mb-2"><strong>Touch Interaction:</strong> Some attributes may behave differently due to touch vs. mouse interaction</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Tablet</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Hybrid Behavior:</strong> Tablets may show desktop or mobile behavior depending on browser and OS</li>
+      <li class="mb-2"><strong>Keyboard Type:</strong> Physical keyboard vs. virtual keyboard affects attribute behavior</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="best-practices" title="Best Practices">
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Always Implement Validation Manually:</strong> Don't rely on HTML attributes for validation - use JavaScript with <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">beforeinput</code> events</li>
+      <li class="mb-2"><strong>Test Across Browsers:</strong> Attribute support varies significantly - test on Safari, Chrome, Firefox, and mobile browsers</li>
+      <li class="mb-2"><strong>Provide Fallbacks:</strong> For unsupported attributes, provide JavaScript-based alternatives</li>
+      <li class="mb-2"><strong>Use ARIA Attributes:</strong> For accessibility, use ARIA attributes (<code class="bg-bg-muted px-1 py-0.5 rounded text-xs">aria-required</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">aria-invalid</code>, etc.) alongside manual validation</li>
+      <li class="mb-2"><strong>Handle Mobile Separately:</strong> Mobile-specific attributes often don't work - implement custom solutions for mobile keyboards</li>
+      <li class="mb-2"><strong>Disable Spellcheck During IME:</strong> Spellcheck can interfere with IME composition - disable it during composition</li>
+      <li class="mb-2"><strong>Save/Restore Selection:</strong> When changing attributes dynamically (like <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dir</code>), save and restore selection to maintain caret position</li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

@@ -1,0 +1,503 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import EditorExample from '../../components/EditorExample.astro';
+import '../../styles/global.css';
+---
+
+<DocLayout
+  title="Keyboard Navigation"
+  description="Comprehensive guide to keyboard navigation in contenteditable elements, including arrow keys, modifier keys, special keys, and browser differences."
+  currentPath={Astro.url.pathname}
+>
+
+  <DocSection id="overview" title="Overview">
+    <p class="m-0 mb-4">
+      Keyboard navigation in <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> elements is complex and varies significantly across browsers, operating systems, and input methods. This guide covers all aspects of keyboard navigation, from basic arrow key movement to complex scenarios involving IME composition and non-editable regions.
+    </p>
+    <DocAlert type="warning" title="⚠️ Browser & Platform Differences">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Keyboard navigation behavior varies by:</strong>
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Browser (Chrome, Firefox, Safari, Edge)</li>
+        <li class="mb-1">Operating system (macOS, Windows, Linux, iOS, Android)</li>
+        <li class="mb-1">Input method (IME composition, mobile keyboards)</li>
+        <li class="mb-1">Keyboard layout (QWERTY, Dvorak, etc.)</li>
+        <li class="mb-1">Content structure (nested elements, contenteditable="false")</li>
+      </ul>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="arrow-keys" title="Arrow Keys">
+    <DocSection title="Basic Arrow Key Movement">
+      <DocInfoBox title="Arrow Key Behavior">
+        <p class="m-0 mb-2 text-sm">
+          Arrow keys move the cursor one character or line at a time:
+        </p>
+        <ul class="m-0 pl-6 text-sm text-text-secondary">
+          <li class="mb-2"><strong>ArrowLeft (←):</strong> Move cursor one character to the left</li>
+          <li class="mb-2"><strong>ArrowRight (→):</strong> Move cursor one character to the right</li>
+          <li class="mb-2"><strong>ArrowUp (↑):</strong> Move cursor up one line, maintaining horizontal position</li>
+          <li class="mb-2"><strong>ArrowDown (↓):</strong> Move cursor down one line, maintaining horizontal position</li>
+        </ul>
+      </DocInfoBox>
+
+      <DocAlert type="warning" title="⚠️ Character vs. Visual Position" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Problem:</strong> Arrow keys move by character position, not visual position. This can cause issues with:
+        </p>
+        <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+          <li class="mb-1"><strong>Emoji:</strong> Arrow keys may skip over entire emoji clusters instead of moving by visual position</li>
+          <li class="mb-1"><strong>Combining characters:</strong> Complex Unicode sequences may be skipped</li>
+          <li class="mb-1"><strong>RTL text:</strong> Right-to-left text may behave unexpectedly</li>
+        </ul>
+        <DocCodeBlock code={`<!-- Example: Emoji skipping -->
+<div contenteditable="true">
+  Hello 👋 World 🌍
+</div>
+
+<!-- Cursor at: H|ello 👋 World -->
+<!-- Press ArrowRight → May jump to: Hello 👋| World -->
+<!-- Skips the entire emoji cluster instead of moving character by character -->
+
+<!-- ✅ GOOD: Handle emoji clusters manually if needed -->
+element.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return;
+    
+    const range = selection.getRangeAt(0);
+    const text = range.startContainer.textContent;
+    const offset = range.startOffset;
+    
+    // Check if we're at a grapheme cluster boundary
+    // Use Intl.Segmenter or similar to handle properly
+    if (e.key === 'ArrowRight' && offset < text.length) {
+      const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+      const segments = Array.from(segmenter.segment(text));
+      // Find next grapheme boundary
+      // Move cursor accordingly
+    }
+  }
+});`} />
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Modifier Keys with Arrow Keys">
+      <DocInfoBox title="Common Modifier Combinations">
+        <table class="w-full text-sm border-collapse mt-2">
+          <thead>
+            <tr class="border-b border-border-light">
+              <th class="text-left p-2">Key Combination</th>
+              <th class="text-left p-2">macOS</th>
+              <th class="text-left p-2">Windows/Linux</th>
+              <th class="text-left p-2">Behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-border-light">
+              <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + ←</kbd></td>
+              <td class="p-2">Word left</td>
+              <td class="p-2">Word left</td>
+              <td class="p-2">Move to start of word</td>
+            </tr>
+            <tr class="border-b border-border-light">
+              <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + →</kbd></td>
+              <td class="p-2">Word right</td>
+              <td class="p-2">Word right</td>
+              <td class="p-2">Move to end of word</td>
+            </tr>
+            <tr class="border-b border-border-light">
+              <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + ↑</kbd></td>
+              <td class="p-2">Line start</td>
+              <td class="p-2">Paragraph start</td>
+              <td class="p-2">Move to start of line/paragraph</td>
+            </tr>
+            <tr class="border-b border-border-light">
+              <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + ↓</kbd></td>
+              <td class="p-2">Line end</td>
+              <td class="p-2">Paragraph end</td>
+              <td class="p-2">Move to end of line/paragraph</td>
+            </tr>
+            <tr class="border-b border-border-light">
+              <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Shift + ←/→</kbd></td>
+              <td class="p-2">Extend selection</td>
+              <td class="p-2">Extend selection</td>
+              <td class="p-2">Extend selection character by character</td>
+            </tr>
+            <tr class="border-b border-border-light">
+              <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Shift + Ctrl/Cmd + ←/→</kbd></td>
+              <td class="p-2">Extend by word</td>
+              <td class="p-2">Extend by word</td>
+              <td class="p-2">Extend selection word by word</td>
+            </tr>
+            <tr class="border-b border-border-light">
+              <td class="p-2"><kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Alt + ←/→</kbd></td>
+              <td class="p-2">Word left/right</td>
+              <td class="p-2">Word left/right</td>
+              <td class="p-2">Move by word (alternative)</td>
+            </tr>
+          </tbody>
+        </table>
+      </DocInfoBox>
+
+      <DocAlert type="warning" title="⚠️ Browser Differences in Word Movement" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Problem:</strong> Word boundary detection varies across browsers:
+        </p>
+        <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+          <li class="mb-1"><strong>Chrome:</strong> May move by word even without modifier keys in some cases</li>
+          <li class="mb-1"><strong>Firefox:</strong> More consistent word boundary detection</li>
+          <li class="mb-1"><strong>Safari:</strong> Uses different word boundary rules (may include punctuation differently)</li>
+          <li class="mb-1"><strong>Unicode:</strong> Word boundaries for non-ASCII characters may be inconsistent</li>
+        </ul>
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Arrow Keys with contenteditable=&quot;false&quot;">
+      <DocAlert type="error" title="⚠️ Navigation Issues with Non-Editable Content" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Problem:</strong> When navigating with arrow keys near or within <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements:
+        </p>
+        <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+          <li class="mb-1">Arrow keys may skip over non-editable content entirely</li>
+          <li class="mb-1">Cursor may appear inside non-editable elements where it shouldn't be</li>
+          <li class="mb-1">Navigation may be blocked or jump to unexpected locations</li>
+          <li class="mb-1">Behavior varies significantly between browsers</li>
+        </ul>
+        <p class="m-0 mt-2 text-sm">
+          See <a href="/docs/contenteditable-false#keyboard-navigation" class="text-accent-primary underline">contenteditable="false" documentation</a> for detailed information and workarounds.
+        </p>
+      </DocAlert>
+    </DocSection>
+  </DocSection>
+
+  <DocSection id="special-keys" title="Special Navigation Keys">
+    <DocSection title="Home and End Keys">
+      <DocInfoBox title="Home/End Key Behavior">
+        <ul class="m-0 pl-6 text-sm text-text-secondary">
+          <li class="mb-2"><strong>Home:</strong> Move cursor to start of current line</li>
+          <li class="mb-2"><strong>End:</strong> Move cursor to end of current line</li>
+          <li class="mb-2"><strong>Ctrl/Cmd + Home:</strong> Move cursor to start of document</li>
+          <li class="mb-2"><strong>Ctrl/Cmd + End:</strong> Move cursor to end of document</li>
+          <li class="mb-2"><strong>Shift + Home/End:</strong> Extend selection to start/end of line</li>
+          <li class="mb-2"><strong>Shift + Ctrl/Cmd + Home/End:</strong> Extend selection to start/end of document</li>
+        </ul>
+      </DocInfoBox>
+
+      <DocAlert type="warning" title="⚠️ Line vs. Paragraph" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Browser differences:</strong> The definition of "line" varies:
+        </p>
+        <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+          <li class="mb-1"><strong>Chrome/Firefox:</strong> Home/End move to start/end of the current visual line (may wrap)</li>
+          <li class="mb-1"><strong>Safari:</strong> May move to start/end of paragraph instead of visual line</li>
+          <li class="mb-1"><strong>Word wrapping:</strong> Behavior may differ when text wraps to multiple lines</li>
+        </ul>
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Page Up and Page Down">
+      <DocInfoBox title="Page Up/Down Behavior">
+        <ul class="m-0 pl-6 text-sm text-text-secondary">
+          <li class="mb-2"><strong>PageUp:</strong> Move cursor up by one viewport height</li>
+          <li class="mb-2"><strong>PageDown:</strong> Move cursor down by one viewport height</li>
+          <li class="mb-2"><strong>Shift + PageUp/PageDown:</strong> Extend selection by one viewport</li>
+          <li class="mb-2"><strong>Ctrl/Cmd + PageUp/PageDown:</strong> May scroll without moving cursor (browser-dependent)</li>
+        </ul>
+      </DocInfoBox>
+
+      <DocAlert type="warning" title="⚠️ Viewport Calculation" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Problem:</strong> Page Up/Down behavior depends on viewport size and scroll position, which can be unpredictable in contenteditable elements with dynamic content.
+        </p>
+      </DocAlert>
+    </DocSection>
+  </DocSection>
+
+  <DocSection id="tab-navigation" title="Tab Navigation">
+    <DocAlert type="warning" title="⚠️ Tab Key Behavior" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> The Tab key has special meaning in contenteditable:
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1"><strong>Default behavior:</strong> Tab key inserts a tab character (or spaces) instead of moving focus</li>
+        <li class="mb-1"><strong>Focus management:</strong> Tab key does not move focus to next focusable element by default</li>
+        <li class="mb-1"><strong>tabindex:</strong> Using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">tabindex</code> may not work consistently across browsers</li>
+      </ul>
+      <DocCodeBlock code={`<!-- ❌ BAD: Tab inserts character instead of moving focus -->
+<div contenteditable="true">
+  <!-- Press Tab → Inserts tab character, doesn't move focus -->
+</div>
+
+<!-- ✅ GOOD: Intercept Tab key for focus management -->
+element.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    
+    if (e.shiftKey) {
+      // Shift+Tab: Move to previous focusable element
+      moveFocusToPrevious();
+    } else {
+      // Tab: Move to next focusable element
+      moveFocusToNext();
+    }
+  }
+});
+
+// Or allow Tab to insert character in some cases
+element.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab' && !e.shiftKey) {
+    // Check if we want to insert tab or move focus
+    if (shouldInsertTab()) {
+      // Insert tab character
+      e.preventDefault();
+      document.execCommand('insertText', false, '\t');
+    } else {
+      // Move focus
+      e.preventDefault();
+      moveFocusToNext();
+    }
+  }
+});`} />
+    </DocAlert>
+
+    <DocInfoBox title="Tab Navigation Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Intercept Tab:</strong> Always intercept Tab key if you want focus management</li>
+        <li class="mb-2"><strong>User preference:</strong> Consider allowing users to choose between inserting tab or moving focus</li>
+        <li class="mb-2"><strong>Context-aware:</strong> Insert tab when editing, move focus when navigating between editors</li>
+        <li class="mb-2"><strong>Accessibility:</strong> Ensure Tab navigation works for screen reader users</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="ime-composition" title="IME Composition & Keyboard Navigation">
+    <DocAlert type="error" title="⚠️ Arrow Keys During Composition" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> During IME composition, arrow key behavior changes:
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Arrow keys may cancel the active composition</li>
+        <li class="mb-1">Arrow keys may commit composition text prematurely</li>
+        <li class="mb-1">Navigation may be blocked until composition completes</li>
+        <li class="mb-1">Behavior varies by IME and platform (Korean, Japanese, Chinese IMEs behave differently)</li>
+      </ul>
+      <DocCodeBlock code={`// Example: Handle arrow keys during composition
+let isComposing = false;
+
+element.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+
+element.addEventListener('compositionend', () => {
+  isComposing = false;
+});
+
+element.addEventListener('keydown', (e) => {
+  if (isComposing && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+    // Option 1: Prevent arrow keys during composition
+    e.preventDefault();
+    // Option 2: Allow but handle composition cancellation
+    // The composition may be cancelled by the browser
+  }
+});`} />
+    </DocAlert>
+
+    <DocInfoBox title="IME-Specific Behavior" class="mt-4">
+      <div class="space-y-3 text-sm">
+        <div>
+          <h4 class="font-semibold mb-2 text-text-primary">Korean IME</h4>
+          <ul class="m-0 pl-6 text-text-secondary">
+            <li class="mb-1">Arrow keys may cancel composition</li>
+            <li class="mb-1">Left/Right arrows may move within composition text (browser-dependent)</li>
+            <li class="mb-1">Up/Down arrows typically cancel composition</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-2 text-text-primary">Japanese IME</h4>
+          <ul class="m-0 pl-6 text-text-secondary">
+            <li class="mb-1">Arrow keys may navigate candidate list</li>
+            <li class="mb-1">Left/Right may move within composition</li>
+            <li class="mb-1">Up/Down may select candidates</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-2 text-text-primary">Chinese IME</h4>
+          <ul class="m-0 pl-6 text-text-secondary">
+            <li class="mb-1">Similar to Japanese IME</li>
+            <li class="mb-1">Arrow keys may interact with candidate selection</li>
+          </ul>
+        </div>
+      </div>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="mobile-navigation" title="Mobile Keyboard Navigation">
+    <DocInfoBox title="Mobile-Specific Behavior">
+      <p class="m-0 mb-2 text-sm">
+        On mobile devices, keyboard navigation works differently:
+      </p>
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Virtual keyboards:</strong> Arrow keys may not be available on all virtual keyboards</li>
+        <li class="mb-2"><strong>Touch selection:</strong> Users primarily use touch for selection, not keyboard</li>
+        <li class="mb-2"><strong>External keyboards:</strong> When external keyboard is connected, behavior may differ from desktop</li>
+        <li class="mb-2"><strong>iOS:</strong> Arrow keys on external keyboard may behave differently than on macOS</li>
+        <li class="mb-2"><strong>Android:</strong> Keyboard behavior varies by manufacturer and keyboard app</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocAlert type="warning" title="⚠️ Mobile Arrow Key Support" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> Arrow keys may not be available or may behave unexpectedly on mobile:
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Many virtual keyboards don't include arrow keys</li>
+        <li class="mb-1">External keyboards may have limited arrow key support</li>
+        <li class="mb-1">Touch selection handles may interfere with keyboard navigation</li>
+        <li class="mb-1">Virtual keyboard may close when arrow keys are pressed</li>
+      </ul>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="browser-differences" title="Browser-Specific Differences">
+    <DocSection title="Chrome/Edge">
+      <DocInfoBox>
+        <ul class="m-0 pl-6 text-sm text-text-secondary">
+          <li class="mb-2">Arrow keys may move by word instead of character in some cases (Windows)</li>
+          <li class="mb-2">Word boundary detection may include punctuation differently</li>
+          <li class="mb-2">Home/End may move to visual line start/end</li>
+          <li class="mb-2">Tab key inserts tab character by default</li>
+        </ul>
+      </DocInfoBox>
+    </DocSection>
+
+    <DocSection title="Firefox">
+      <DocInfoBox>
+        <ul class="m-0 pl-6 text-sm text-text-secondary">
+          <li class="mb-2">Generally more consistent arrow key behavior</li>
+          <li class="mb-2">Better word boundary detection</li>
+          <li class="mb-2">Home/End behavior is more predictable</li>
+          <li class="mb-2">Tab key behavior similar to Chrome</li>
+        </ul>
+      </DocInfoBox>
+    </DocSection>
+
+    <DocSection title="Safari">
+      <DocInfoBox>
+        <ul class="m-0 pl-6 text-sm text-text-secondary">
+          <li class="mb-2">Arrow keys may behave differently, especially with modifier keys</li>
+          <li class="mb-2">Home/End may move to paragraph start/end instead of line</li>
+          <li class="mb-2">Cmd+Arrow behavior differs from Ctrl+Arrow on Windows</li>
+          <li class="mb-2">Tab key may have different default behavior</li>
+        </ul>
+      </DocInfoBox>
+    </DocSection>
+  </DocSection>
+
+  <DocSection id="best-practices" title="Best Practices">
+    <DocInfoBox title="Implementing Custom Keyboard Navigation">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Intercept keydown:</strong> Use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">keydown</code> event, not <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">keypress</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">keyup</code></li>
+        <li class="mb-2"><strong>Check modifiers:</strong> Always check <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">ctrlKey</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">metaKey</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">shiftKey</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">altKey</code></li>
+        <li class="mb-2"><strong>Handle composition:</strong> Check for active IME composition before handling navigation</li>
+        <li class="mb-2"><strong>Test across browsers:</strong> Keyboard behavior varies significantly - test in all major browsers</li>
+        <li class="mb-2"><strong>Respect platform conventions:</strong> Use Cmd on macOS, Ctrl on Windows/Linux</li>
+        <li class="mb-2"><strong>Provide fallbacks:</strong> Don't break default behavior unless necessary</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`// Example: Comprehensive keyboard navigation handler
+element.addEventListener('keydown', (e) => {
+  // Check for active composition
+  if (isComposing) {
+    // Handle composition-specific navigation
+    handleCompositionNavigation(e);
+    return;
+  }
+  
+  // Handle arrow keys
+  if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return;
+    
+    const range = selection.getRangeAt(0);
+    
+    // Check for contenteditable="false" issues
+    if (isInContentEditableFalse(range.startContainer)) {
+      e.preventDefault();
+      handleNavigationInNonEditable(e.key, range);
+      return;
+    }
+    
+    // Handle modifier keys
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      handleWordNavigation(e.key, e.shiftKey, range);
+      return;
+    }
+    
+    if (e.shiftKey) {
+      // Extend selection
+      // Allow default behavior or handle manually
+      return;
+    }
+    
+    // Default arrow key behavior
+    // Allow browser to handle or customize
+  }
+  
+  // Handle Home/End
+  if (e.key === 'Home' || e.key === 'End') {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      handleDocumentNavigation(e.key, e.shiftKey);
+      return;
+    }
+    // Default Home/End behavior
+  }
+  
+  // Handle Tab
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      moveFocusToPrevious();
+    } else {
+      moveFocusToNext();
+    }
+  }
+});`} />
+  </DocSection>
+
+  <DocSection title="Related resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/contenteditable-false" class="text-accent-primary no-underline">
+          contenteditable="false" →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+          IME & Composition →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/accessibility" class="text-accent-primary no-underline">
+          Accessibility →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/practical-patterns" class="text-accent-primary no-underline">
+          Practical Patterns →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

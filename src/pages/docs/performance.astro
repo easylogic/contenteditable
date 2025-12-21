@@ -1,0 +1,383 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+---
+
+<DocLayout
+  title="Performance"
+  description="Performance considerations and optimization strategies for contenteditable elements."
+  currentPath={Astro.url.pathname}
+>
+
+  <DocSection id="overview" title="Overview">
+    <p class="m-0 mb-4">
+      <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> performance can degrade significantly with large content, frequent DOM mutations, or certain CSS properties. This guide covers common performance issues and optimization strategies.
+    </p>
+    <DocAlert type="warning" title="⚠️ Performance Bottlenecks">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Common performance issues:</strong>
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Large DOM trees (thousands of nodes) cause typing lag</li>
+        <li class="mb-1">MutationObserver callbacks fire too frequently</li>
+        <li class="mb-1">CSS filters and transforms trigger expensive repaints</li>
+        <li class="mb-1">Virtual scrolling libraries interfere with selection</li>
+        <li class="mb-1">Frequent programmatic DOM updates cause reflow</li>
+      </ul>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="large-content" title="Large Content Performance">
+    <DocAlert type="error" title="⚠️ Typing Lag with Large Content" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When a contenteditable contains thousands of DOM nodes, typing becomes noticeably slow. There's a visible lag between pressing keys and seeing characters appear.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Large DOM tree causes lag
+<div contenteditable>
+  <!-- 10,000+ DOM nodes -->
+  <p>Node 1</p>
+  <p>Node 2</p>
+  <!-- ... thousands more ... -->
+</div>
+// Typing becomes slow!
+
+// ✅ GOOD: Limit visible content, use pagination or virtualization
+<div contenteditable>
+  <!-- Only render visible portion -->
+  <div class="visible-content">
+    <!-- ~100-200 nodes max -->
+  </div>
+</div>`} />
+    </DocAlert>
+
+    <DocInfoBox title="Optimization Strategies" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Pagination:</strong> Split content into pages and only render the current page</li>
+        <li class="mb-2"><strong>Virtual Scrolling:</strong> Only render visible nodes (see Virtual Scrolling section)</li>
+        <li class="mb-2"><strong>Lazy Loading:</strong> Load content on demand as user scrolls</li>
+        <li class="mb-2"><strong>Debounce Updates:</strong> Batch DOM updates instead of applying them immediately</li>
+        <li class="mb-2"><strong>Document Fragments:</strong> Use DocumentFragment for bulk DOM operations</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`// Example: Debounce DOM updates
+let updateTimeout;
+function updateContent(newContent) {
+  clearTimeout(updateTimeout);
+  updateTimeout = setTimeout(() => {
+    // Batch all updates together
+    const fragment = document.createDocumentFragment();
+    // ... build fragment ...
+    element.appendChild(fragment);
+  }, 16); // ~60fps
+}`} />
+  </DocSection>
+
+  <DocSection id="mutation-observer" title="MutationObserver Performance">
+    <DocAlert type="error" title="⚠️ MutationObserver Callback Overhead" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When a MutationObserver is attached to a contenteditable element, frequent DOM mutations during typing can trigger many observer callbacks, causing lag or jank.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Observer fires on every mutation
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach(mutation => {
+    // Expensive operation on every mutation
+    processMutation(mutation);
+  });
+});
+
+observer.observe(element, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});
+// Fires too frequently during typing!
+
+// ✅ GOOD: Batch mutations and debounce processing
+let mutationQueue = [];
+let processTimeout;
+
+const observer = new MutationObserver((mutations) => {
+  mutationQueue.push(...mutations);
+  
+  clearTimeout(processTimeout);
+  processTimeout = setTimeout(() => {
+    // Process all mutations at once
+    processMutations(mutationQueue);
+    mutationQueue = [];
+  }, 50); // Batch every 50ms
+});
+
+observer.observe(element, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});`} />
+    </DocAlert>
+
+    <DocInfoBox title="Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Batch Processing:</strong> Collect mutations and process them in batches</li>
+        <li class="mb-2"><strong>Debounce:</strong> Use setTimeout to delay processing until typing pauses</li>
+        <li class="mb-2"><strong>Filter Mutations:</strong> Only process relevant mutations (ignore text node changes during typing)</li>
+        <li class="mb-2"><strong>Disconnect When Not Needed:</strong> Temporarily disconnect observer during rapid typing</li>
+        <li class="mb-2"><strong>Use requestIdleCallback:</strong> Process mutations during idle time when available</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`// Example: Filter and batch mutations
+const observer = new MutationObserver((mutations) => {
+  // Filter out text node changes during typing
+  const relevantMutations = mutations.filter(mutation => {
+    if (mutation.type === 'characterData') {
+      // Ignore text changes during active typing
+      return false;
+    }
+    return true;
+  });
+  
+  if (relevantMutations.length > 0) {
+    batchProcess(relevantMutations);
+  }
+});`} />
+  </DocSection>
+
+  <DocSection id="css-performance" title="CSS Performance Impact">
+    <DocAlert type="warning" title="⚠️ CSS Filters and Transforms" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> CSS filters (blur, brightness, etc.) and transforms can cause performance degradation. Typing may lag, and selection updates may be slow.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Expensive CSS filters
+.contenteditable {
+  filter: blur(2px) brightness(1.2);
+  transform: scale(1.05);
+}
+// Causes repaints on every keystroke!
+
+// ✅ GOOD: Use CSS containment and optimize filters
+.contenteditable {
+  /* Use will-change carefully */
+  will-change: contents;
+  /* Use CSS containment to limit repaints */
+  contain: layout style paint;
+  /* Avoid expensive filters during editing */
+  /* Apply filters only when not editing */
+}
+
+.contenteditable:focus {
+  filter: none; /* Remove filters during editing */
+}`} />
+    </DocAlert>
+
+    <DocInfoBox title="CSS Optimization Tips" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Avoid Filters During Editing:</strong> Remove filters when element is focused</li>
+        <li class="mb-2"><strong>Use CSS Containment:</strong> <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">contain: layout style paint</code> limits repaint scope</li>
+        <li class="mb-2"><strong>will-change Carefully:</strong> Use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">will-change</code> sparingly - it creates layers and uses memory</li>
+        <li class="mb-2"><strong>Avoid Backdrop Filters:</strong> <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">backdrop-filter</code> is very expensive</li>
+        <li class="mb-2"><strong>Use Transform Instead of Position:</strong> Transforms are GPU-accelerated</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="virtual-scrolling" title="Virtual Scrolling">
+    <DocAlert type="error" title="⚠️ Virtual Scrolling Interference" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When contenteditable is used with virtual scrolling libraries, the virtual scrolling mechanism may interfere with text selection and caret positioning. Selection may be lost when elements are removed from the DOM during scrolling.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Virtual scrolling removes selected nodes
+function onScroll() {
+  // Remove nodes outside viewport
+  removeNodesOutsideViewport();
+  // Selection lost if selected node was removed!
+}
+
+// ✅ GOOD: Preserve selection during virtual scrolling
+function onScroll() {
+  // Save selection before DOM changes
+  const savedSelection = saveSelection();
+  
+  // Remove nodes outside viewport
+  removeNodesOutsideViewport();
+  
+  // Restore selection if nodes still exist
+  if (canRestoreSelection(savedSelection)) {
+    restoreSelection(savedSelection);
+  }
+}
+
+function saveSelection() {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return null;
+  const range = selection.getRangeAt(0);
+  
+  // Store node references and offsets
+  return {
+    startPath: getNodePath(range.startContainer),
+    startOffset: range.startOffset,
+    endPath: getNodePath(range.endContainer),
+    endOffset: range.endOffset
+  };
+}
+
+function getNodePath(node) {
+  const path = [];
+  while (node && node !== element) {
+    const index = Array.from(node.parentNode.childNodes).indexOf(node);
+    path.unshift(index);
+    node = node.parentNode;
+  }
+  return path;
+}`} />
+    </DocAlert>
+
+    <DocInfoBox title="Virtual Scrolling Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Preserve Selection:</strong> Always save and restore selection before DOM changes</li>
+        <li class="mb-2"><strong>Use Node Paths:</strong> Store node paths (indices) instead of direct references</li>
+        <li class="mb-2"><strong>Buffer Zone:</strong> Keep extra nodes above/below viewport to prevent selection loss</li>
+        <li class="mb-2"><strong>Debounce Scrolling:</strong> Don't update DOM on every scroll event</li>
+        <li class="mb-2"><strong>Test Selection:</strong> Verify selection is maintained after scrolling</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="optimization" title="Optimization Strategies">
+    <DocInfoBox title="1. Debounce and Throttle">
+      <p class="m-0 mb-2 text-sm">
+        Debounce or throttle expensive operations:
+      </p>
+      <DocCodeBlock code={`function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Debounce DOM updates
+const updateDOM = debounce((content) => {
+  element.innerHTML = content;
+}, 100);
+
+// Throttle selection tracking
+const trackSelection = throttle(() => {
+  const selection = window.getSelection();
+  // ... track selection ...
+}, 50);`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="2. Use Document Fragments" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Batch DOM operations using DocumentFragment:
+      </p>
+      <DocCodeBlock code={`// ✅ GOOD: Use DocumentFragment for bulk operations
+function insertMultipleNodes(nodes) {
+  const fragment = document.createDocumentFragment();
+  nodes.forEach(node => fragment.appendChild(node));
+  element.appendChild(fragment); // Single DOM update
+}
+
+// ❌ BAD: Multiple DOM updates
+function insertMultipleNodes(nodes) {
+  nodes.forEach(node => {
+    element.appendChild(node); // Multiple updates
+  });
+}`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="3. Use requestAnimationFrame" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Schedule DOM updates during the next frame:
+      </p>
+      <DocCodeBlock code={`function updateContent(content) {
+  requestAnimationFrame(() => {
+    element.innerHTML = content;
+    // Update happens during next frame
+  });
+}`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="4. Minimize Reflows" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Batch style reads and writes to minimize reflows:
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: Causes multiple reflows
+element.style.width = '100px';
+const height = element.offsetHeight; // Reflow
+element.style.height = '200px';
+const width = element.offsetWidth; // Reflow
+
+// ✅ GOOD: Batch reads and writes
+// Read all properties first
+const height = element.offsetHeight;
+const width = element.offsetWidth;
+
+// Then write all properties
+requestAnimationFrame(() => {
+  element.style.width = '100px';
+  element.style.height = '200px';
+});`} />
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="platform-issues" title="Platform-Specific Issues">
+    <DocSection title="Browser-Specific Issues">
+      <DocAlert type="warning" title="⚠️ Chrome: Large DOM Performance" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Chrome:</strong> Performance degrades more noticeably with large DOM trees compared to Firefox. Consider virtual scrolling or pagination for Chrome users.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="warning" title="⚠️ Safari: MutationObserver Overhead" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Safari:</strong> MutationObserver callbacks may have more overhead in Safari. Consider debouncing more aggressively.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="warning" title="⚠️ Firefox: CSS Filter Performance" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Firefox:</strong> CSS filters may have worse performance in Firefox. Avoid filters during active editing.
+        </p>
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Device-Specific Issues">
+      <DocAlert type="error" title="⚠️ Mobile: Limited Performance" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Mobile devices:</strong> Performance is more limited on mobile. Consider:
+        </p>
+        <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+          <li class="mb-1">Reducing DOM complexity on mobile</li>
+          <li class="mb-1">Using simpler CSS (avoid filters/transforms)</li>
+          <li class="mb-1">Implementing aggressive debouncing</li>
+          <li class="mb-1">Limiting content size on mobile devices</li>
+        </ul>
+      </DocAlert>
+    </DocSection>
+  </DocSection>
+
+  <DocSection title="Related resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/common-pitfalls" class="text-accent-primary no-underline">
+          Common Pitfalls & Debugging →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/practical-patterns" class="text-accent-primary no-underline">
+          Practical Patterns →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

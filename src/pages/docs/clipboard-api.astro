@@ -381,6 +381,32 @@ async function checkClipboardPermission() {
               </ul>
             </DocAlert>
 
+            <DocAlert type="error" title="⚠️ Samsung Keyboard: Clipboard History & Saved Text" class="mb-4">
+              <p class="m-0 mb-2 text-sm">
+                <strong>Android + Samsung Keyboard:</strong> Samsung Keyboard provides clipboard history and saved text insertion features that may behave differently:
+              </p>
+              <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                <li class="mb-1"><strong>Clipboard History:</strong> Selecting from clipboard history may fire <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code> or <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> depending on context</li>
+                <li class="mb-1"><strong>Saved Text:</strong> Inserting saved text may not fire <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event, making it impossible to intercept</li>
+                <li class="mb-1"><strong>Multiple Events:</strong> A single clipboard history selection may trigger multiple <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events</li>
+                <li class="mb-1"><strong>Event Timing:</strong> Events may fire in unexpected order or with delays</li>
+                <li class="mb-1"><strong>Content Replacement:</strong> Saved text may replace more content than expected</li>
+              </ul>
+              <p class="m-0 text-sm">
+                <strong>Impact:</strong> Clipboard history and saved text features can interfere with custom editing logic, undo/redo stacks, and change tracking. Always monitor both <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events, and compare DOM state to detect unexpected insertions.
+              </p>
+            </DocAlert>
+
+            <DocInfoBox title="Handling Samsung Keyboard Clipboard Features" class="mt-4">
+              <ul class="m-0 pl-6 text-sm text-text-secondary">
+                <li class="mb-2"><strong>Monitor both events:</strong> Listen to both <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> to catch all clipboard insertions</li>
+                <li class="mb-2"><strong>Compare DOM state:</strong> Store DOM state before events and compare after to detect bulk insertions from clipboard history</li>
+                <li class="mb-2"><strong>Handle missing beforeinput:</strong> If <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> doesn't fire, handle in <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> event</li>
+                <li class="mb-2"><strong>Multiple input events:</strong> Be prepared for multiple <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> events for a single clipboard selection</li>
+                <li class="mb-2"><strong>Sanitize content:</strong> Always sanitize content from clipboard history or saved text, as it may contain unexpected HTML or formatting</li>
+              </ul>
+            </DocInfoBox>
+
             <DocAlert type="warning" title="⚠️ Tablet: Hybrid Clipboard Behavior" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Tablets:</strong> Clipboard behavior may vary based on input method:

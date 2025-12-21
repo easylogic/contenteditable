@@ -1,0 +1,535 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+---
+
+<DocLayout
+  title="contenteditable=&quot;false&quot;"
+  description="Understanding contenteditable=false behavior when used within contenteditable=true regions, browser differences, and common issues."
+  currentPath={Astro.url.pathname}
+>
+
+  <DocSection id="overview" title="Overview">
+    <p class="m-0 mb-4">
+      When you have a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="true"</code> element, you can set <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> on child elements to create read-only sections within an editable area. However, this behavior is <strong>inconsistent across browsers</strong> and can cause unexpected issues. This document focuses on the problems that occur when <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> is used within a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="true"</code> region.
+    </p>
+    <DocAlert type="error" title="⚠️ Inconsistent Behavior">
+      <p class="m-0 mb-2 text-sm">
+        <strong>contenteditable=&quot;false&quot; has inconsistent behavior:</strong>
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Some browsers allow editing within <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable=&quot;false&quot;</code> elements</li>
+        <li class="mb-1">Inheritance behavior varies across browsers</li>
+        <li class="mb-1">Selection behavior differs when spanning across editable/non-editable boundaries</li>
+        <li class="mb-1">Event handling may be inconsistent</li>
+      </ul>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="inheritance" title="Inheritance Behavior">
+    <DocInfoBox title="How contenteditable Inheritance Works">
+      <p class="m-0 mb-2 text-sm">
+        The <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> attribute is inherited by child elements:
+      </p>
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>contenteditable="true":</strong> Element and all children are editable (unless overridden)</li>
+        <li class="mb-2"><strong>contenteditable="false":</strong> Element and all children are not editable</li>
+        <li class="mb-2"><strong>contenteditable="inherit":</strong> Inherits from parent (default behavior)</li>
+        <li class="mb-2"><strong>No attribute:</strong> Inherits from parent (same as "inherit")</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`<!-- Example: Inheritance -->
+<div contenteditable="true">
+  <p>Editable paragraph</p>
+  <p contenteditable="false">Non-editable paragraph</p>
+  <p contenteditable="inherit">Inherits editable (editable)</p>
+  <p>No attribute (inherits editable)</p>
+  <div contenteditable="true">
+    <p>Nested editable (editable)</p>
+  </div>
+</div>`} />
+
+    <DocAlert type="error" title="⚠️ Inheritance Inconsistencies" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When a parent element has <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="true"</code> and a child element has <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code>, the inheritance behavior is inconsistent across browsers. Some browsers allow editing in the child, while others correctly prevent it.
+      </p>
+      <DocCodeBlock code={`<!-- ❌ BAD: Behavior may be inconsistent -->
+<div contenteditable="true">
+  <p>Editable</p>
+  <p contenteditable="false">Should not be editable, but may be editable in Chrome</p>
+</div>
+
+<!-- ✅ GOOD: Test in all browsers and provide workarounds -->
+<div contenteditable="true" id="editor">
+  <p>Editable</p>
+  <p contenteditable="false" class="readonly">Non-editable</p>
+</div>
+
+<script>
+  // Workaround: Prevent editing programmatically
+  const editor = document.getElementById('editor');
+  const readonlyElements = editor.querySelectorAll('.readonly');
+  
+  readonlyElements.forEach(el => {
+    el.addEventListener('beforeinput', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    
+    el.addEventListener('input', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  });
+</script>`} />
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="browser-differences" title="Browser Differences">
+    <DocSection title="Chrome/Edge">
+      <DocAlert type="error" title="⚠️ contenteditable=&quot;false&quot; Not Always Respected" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Chrome/Edge:</strong> Child elements with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> may still be editable. The attribute is not consistently respected.
+        </p>
+        <DocCodeBlock code={`<!-- Chrome may allow editing here -->
+<div contenteditable="true">
+  <p contenteditable="false">May still be editable in Chrome!</p>
+</div>`} />
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Firefox">
+      <DocAlert type="warning" title="⚠️ Inheritance Inconsistencies" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Firefox:</strong> Inheritance behavior is inconsistent. Children with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> may still be editable, and children with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="inherit"</code> may not inherit correctly.
+        </p>
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Safari">
+      <DocInfoBox>
+        <p class="m-0 mb-2 text-sm">
+          <strong>Safari:</strong> Generally better support for <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code>, but still test thoroughly.
+        </p>
+      </DocInfoBox>
+    </DocSection>
+
+    <DocInfoBox title="Browser Support Summary" class="mt-4">
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr class="border-b border-border-light">
+            <th class="text-left p-2">Browser</th>
+            <th class="text-left p-2">contenteditable="false" Support</th>
+            <th class="text-left p-2">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-border-light">
+            <td class="p-2">Chrome/Edge</td>
+            <td class="p-2">⚠️ Partial</td>
+            <td class="p-2">May allow editing in false elements</td>
+          </tr>
+          <tr class="border-b border-border-light">
+            <td class="p-2">Firefox</td>
+            <td class="p-2">⚠️ Partial</td>
+            <td class="p-2">Inheritance inconsistencies</td>
+          </tr>
+          <tr class="border-b border-border-light">
+            <td class="p-2">Safari</td>
+            <td class="p-2">✅ Better</td>
+            <td class="p-2">Generally more reliable</td>
+          </tr>
+        </tbody>
+      </table>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="selection-behavior" title="Selection Behavior">
+    <DocAlert type="error" title="⚠️ Node Selection Not Possible" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> Within <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements, you cannot select entire nodes (like images, videos, or other block elements) using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">Range.selectNode()</code> or by clicking. The browser treats these elements as non-selectable.
+      </p>
+      <DocCodeBlock code={`<!-- ❌ BAD: Cannot select image node in contenteditable="false" -->
+<div contenteditable="true">
+  <p>Editable text</p>
+  <div contenteditable="false">
+    <img src="image.jpg" alt="Image">
+    <!-- Cannot select this image node! -->
+  </div>
+</div>
+
+<script>
+  // This will fail or behave unexpectedly
+  const img = document.querySelector('img');
+  const range = document.createRange();
+  range.selectNode(img); // May not work if img is in contenteditable="false"
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range); // Selection may be lost or invalid
+</script>
+
+<!-- ✅ GOOD: Move image to editable area or handle programmatically -->
+<div contenteditable="true">
+  <p>Editable text</p>
+  <img src="image.jpg" alt="Image" contenteditable="false">
+  <!-- Image can be selected here -->
+</div>`} />
+      <p class="m-0 mt-2 text-sm">
+        <strong>Impact:</strong> This makes it impossible to programmatically select or manipulate nodes within non-editable sections, even if you only want to select them (not edit them).
+      </p>
+    </DocAlert>
+
+    <DocAlert type="error" title="⚠️ Text Input After Selection" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When a selection includes or is within a <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> element, typing text may not work as expected. The browser may:
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Ignore the input entirely</li>
+        <li class="mb-1">Move the cursor to an unexpected location</li>
+        <li class="mb-1">Insert text in the wrong place</li>
+        <li class="mb-1">Clear the selection without inserting text</li>
+      </ul>
+      <DocCodeBlock code={`<!-- ❌ BAD: Selection includes non-editable element -->
+<div contenteditable="true">
+  <p>Editable text</p>
+  <div contenteditable="false">
+    <p>Non-editable text</p>
+  </div>
+  <p>More editable text</p>
+</div>
+
+<!-- User selects from "Editable text" through "Non-editable text" to "More editable text" -->
+<!-- Then types "new text" -->
+<!-- Result: Text may not be inserted, or inserted in wrong location! -->
+
+<!-- ✅ GOOD: Normalize selection before input -->
+element.addEventListener('beforeinput', (e) => {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  // Check if selection includes non-editable content
+  const nonEditableInRange = range.commonAncestorContainer.querySelectorAll(
+    '[contenteditable="false"]'
+  );
+  
+  if (nonEditableInRange.length > 0) {
+    // Normalize selection to exclude non-editable content
+    e.preventDefault();
+    normalizeSelectionToEditable(range);
+    // Then handle input manually
+    handleInputManually(e.data);
+  }
+});`} />
+    </DocAlert>
+
+    <DocInfoBox title="Selection Across Editable/Non-Editable Boundaries" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        When selection spans across editable and non-editable elements, behavior can be inconsistent:
+      </p>
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">Selection may include non-editable content</li>
+        <li class="mb-2">Deleting selection may remove non-editable elements</li>
+        <li class="mb-2">Pasting may insert content into non-editable areas</li>
+        <li class="mb-2">Formatting may be applied to non-editable content</li>
+        <li class="mb-2"><strong>Text input after selection may fail or behave unexpectedly</strong></li>
+        <li class="mb-2"><strong>Node selection (images, videos) is not possible within contenteditable="false"</strong></li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`// Example: Normalize selection to exclude non-editable content
+function normalizeSelection() {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  
+  // Check if selection includes non-editable elements
+  const nonEditableElements = range.commonAncestorContainer.querySelectorAll(
+    '[contenteditable="false"]'
+  );
+  
+  if (nonEditableElements.length > 0) {
+    // Adjust selection to exclude non-editable content
+    const startContainer = range.startContainer;
+    const endContainer = range.endContainer;
+    
+    // Find nearest editable node (text node or element)
+    const editableStart = findEditableNode(startContainer);
+    const editableEnd = findEditableNode(endContainer);
+    
+    if (editableStart && editableEnd) {
+      // Set selection to editable boundaries
+      if (editableStart.nodeType === Node.TEXT_NODE) {
+        range.setStart(editableStart, 0);
+      } else {
+        range.setStartBefore(editableStart);
+      }
+      
+      if (editableEnd.nodeType === Node.TEXT_NODE) {
+        range.setEnd(editableEnd, editableEnd.textContent.length);
+      } else {
+        range.setEndAfter(editableEnd);
+      }
+      
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+}
+
+function findEditableNode(node) {
+  // If node is in non-editable area, find nearest editable ancestor
+  let current = node;
+  while (current && current !== document.body) {
+    if (current.contentEditable === 'true') {
+      // Found editable ancestor, return first text node or the element itself
+      if (current.nodeType === Node.TEXT_NODE) {
+        return current;
+      }
+      // Return first text node in editable area
+      const walker = document.createTreeWalker(
+        current,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+      return walker.nextNode() || current;
+    }
+    if (current.contentEditable === 'false') {
+      // We're in a non-editable area, need to go up
+      current = current.parentNode;
+      continue;
+    }
+    current = current.parentNode;
+  }
+  return null;
+}
+
+// Prevent text input when selection includes non-editable content
+element.addEventListener('beforeinput', (e) => {
+  const selection = window.getSelection();
+  if (selection.rangeCount === 0) return;
+  
+  const range = selection.getRangeAt(0);
+  const nonEditableInRange = range.commonAncestorContainer.querySelectorAll(
+    '[contenteditable="false"]'
+  );
+  
+  if (nonEditableInRange.length > 0 && e.inputType === 'insertText') {
+    // Normalize selection first
+    normalizeSelection();
+    // Then allow the input to proceed
+    // Or prevent and handle manually
+  }
+});`} />
+  </DocSection>
+
+  <DocSection id="keyboard-navigation" title="Keyboard Navigation">
+    <DocAlert type="error" title="⚠️ Arrow Key Navigation Issues" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When navigating with arrow keys in or around <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements, the cursor behavior is inconsistent and unpredictable:
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1"><strong>Within non-editable area:</strong> Arrow keys may not move the cursor at all, or may jump to unexpected locations</li>
+        <li class="mb-1"><strong>Crossing boundaries:</strong> Moving from editable to non-editable (or vice versa) may skip the non-editable content entirely</li>
+        <li class="mb-1"><strong>Cursor position:</strong> The cursor may appear inside non-editable elements where it shouldn't be</li>
+        <li class="mb-1"><strong>Browser differences:</strong> Behavior varies significantly between Chrome, Firefox, and Safari</li>
+      </ul>
+      <p class="m-0 mt-2 text-sm">
+        For detailed information about keyboard navigation, including arrow keys, modifier keys, Home/End, Tab navigation, IME composition handling, and browser differences, see the <a href="/docs/keyboard-navigation" class="text-accent-primary underline">Keyboard Navigation documentation</a>.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="use-cases" title="Use Cases">
+    <DocInfoBox title="Common Use Cases for contenteditable=false">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Embedded Media:</strong> Prevent editing of images, videos, or other embedded content</li>
+        <li class="mb-2"><strong>Read-only Sections:</strong> Create read-only sections within an editable document</li>
+        <li class="mb-2"><strong>Template Elements:</strong> Protect template or boilerplate content from editing</li>
+        <li class="mb-2"><strong>Metadata:</strong> Keep metadata or annotations non-editable</li>
+        <li class="mb-2"><strong>Complex Widgets:</strong> Prevent editing within complex interactive widgets</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`<!-- Example: Embedded media -->
+<div contenteditable="true">
+  <p>Editable text before image</p>
+  <img src="image.jpg" contenteditable="false" alt="Non-editable image">
+  <p>Editable text after image</p>
+</div>
+
+<!-- Example: Read-only sections -->
+<div contenteditable="true">
+  <p>Editable paragraph</p>
+  <div contenteditable="false" class="readonly-section">
+    <h2>Read-only Header</h2>
+    <p>This section cannot be edited</p>
+  </div>
+  <p>Editable paragraph</p>
+</div>
+
+<!-- Example: Template elements -->
+<div contenteditable="true">
+  <p contenteditable="false" class="template">
+    [Template: Insert your content here]
+  </p>
+  <p>Your editable content</p>
+</div>`} />
+  </DocSection>
+
+  <DocSection id="workarounds" title="Workarounds">
+    <DocInfoBox title="1. Prevent Events Programmatically">
+      <p class="m-0 mb-2 text-sm">
+        Intercept and prevent editing events on non-editable elements:
+      </p>
+      <DocCodeBlock code={`function makeNonEditable(element) {
+  // Prevent all input events
+  element.addEventListener('beforeinput', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, true); // Use capture phase
+  
+  element.addEventListener('input', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, true);
+  
+  // Prevent keyboard input
+  element.addEventListener('keydown', (e) => {
+    // Allow navigation keys
+    const allowedKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 
+                         'Home', 'End', 'PageUp', 'PageDown'];
+    if (!allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }, true);
+  
+  // Prevent paste
+  element.addEventListener('paste', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, true);
+}
+
+// Apply to all non-editable elements
+document.querySelectorAll('[contenteditable="false"]').forEach(makeNonEditable);`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="2. Monitor and Revert Changes" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Monitor DOM changes and revert any edits to non-editable elements:
+      </p>
+      <DocCodeBlock code={`function protectNonEditable(element) {
+  const nonEditableElements = element.querySelectorAll('[contenteditable="false"]');
+  
+  nonEditableElements.forEach(el => {
+    const originalHTML = el.innerHTML;
+    
+    // Monitor changes
+    const observer = new MutationObserver((mutations) => {
+      if (el.innerHTML !== originalHTML) {
+        // Revert changes
+        el.innerHTML = originalHTML;
+      }
+    });
+    
+    observer.observe(el, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  });
+}
+
+protectNonEditable(document.getElementById('editor'));`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="3. Use CSS to Indicate Non-Editable" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Use CSS to visually indicate non-editable elements and prevent cursor changes:
+      </p>
+      <DocCodeBlock code={`/* CSS for non-editable elements */
+[contenteditable="false"] {
+  user-select: none;
+  cursor: default;
+  background-color: rgba(0, 0, 0, 0.05);
+  pointer-events: none; /* Prevents interaction */
+}
+
+/* Or allow selection but not editing */
+[contenteditable="false"].selectable {
+  user-select: text;
+  cursor: text;
+  pointer-events: auto;
+}`} />
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="platform-issues" title="Platform-Specific Issues">
+    <DocSection title="Browser-Specific Issues">
+      <DocAlert type="error" title="⚠️ Chrome: Editing Allowed" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Chrome:</strong> May allow editing within <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements. Use programmatic event prevention as workaround.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="warning" title="⚠️ Firefox: Inheritance Issues" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Firefox:</strong> Inheritance behavior is inconsistent. Test thoroughly and provide workarounds.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="info" title="ℹ️ Safari: Better Support" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Safari:</strong> Generally better support, but still test edge cases.
+        </p>
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Mobile-Specific Issues">
+      <DocAlert type="warning" title="⚠️ Mobile: Touch Selection" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Mobile devices:</strong> Touch selection may behave differently with non-editable elements. Test on actual devices.
+        </p>
+      </DocAlert>
+    </DocSection>
+  </DocSection>
+
+  <DocSection title="Related resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/what-is-contenteditable" class="text-accent-primary no-underline">
+          What is contenteditable? →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/keyboard-navigation" class="text-accent-primary no-underline">
+          Keyboard Navigation →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/common-pitfalls" class="text-accent-primary no-underline">
+          Common Pitfalls & Debugging →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/selection-api" class="text-accent-primary no-underline">
+          Selection API →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

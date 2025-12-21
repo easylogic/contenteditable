@@ -1,0 +1,376 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+---
+
+<DocLayout
+  title="Accessibility"
+  description="Accessibility considerations and best practices for contenteditable elements, including screen reader support, ARIA attributes, and keyboard navigation."
+  currentPath={Astro.url.pathname}
+>
+
+  <DocSection id="overview" title="Overview">
+    <p class="m-0 mb-4">
+      Making <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> accessible is challenging because screen readers may not properly announce changes, ARIA attributes may not be respected, and keyboard navigation can be inconsistent. This guide covers accessibility issues and solutions.
+    </p>
+    <DocAlert type="error" title="⚠️ Common Accessibility Issues">
+      <p class="m-0 mb-2 text-sm">
+        <strong>contenteditable has accessibility challenges:</strong>
+      </p>
+      <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+        <li class="mb-1">Screen readers don't announce content changes automatically</li>
+        <li class="mb-1">ARIA attributes may not be properly announced (especially in Safari)</li>
+        <li class="mb-1">Keyboard navigation can be inconsistent</li>
+        <li class="mb-1">Focus management is complex</li>
+        <li class="mb-1">Formatting changes aren't announced</li>
+      </ul>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="screen-readers" title="Screen Reader Support">
+    <DocAlert type="error" title="⚠️ Changes Not Announced" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When content changes in a contenteditable region (text is typed, deleted, or formatted), screen readers do not announce these changes to users. This makes it difficult for users relying on assistive technologies to understand what is happening in the editor.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: No announcements for content changes
+<div contenteditable>
+  <!-- Changes not announced to screen readers -->
+</div>
+
+// ✅ GOOD: Use aria-live regions for announcements
+<div contenteditable
+     role="textbox"
+     aria-label="Rich text editor"
+     aria-live="polite"
+     aria-atomic="false">
+  <!-- Content -->
+</div>
+
+// Or use a separate live region
+<div id="announcements" 
+     aria-live="polite" 
+     aria-atomic="false"
+     class="sr-only">
+</div>
+
+function announceChange(message) {
+  const announcements = document.getElementById('announcements');
+  announcements.textContent = message;
+  // Clear after announcement
+  setTimeout(() => {
+    announcements.textContent = '';
+  }, 1000);
+}`} />
+    </DocAlert>
+
+    <DocInfoBox title="Screen Reader Announcement Strategies" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>aria-live regions:</strong> Use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">aria-live="polite"</code> or <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">aria-live="assertive"</code> for important changes</li>
+        <li class="mb-2"><strong>Separate live region:</strong> Use a dedicated element for announcements to avoid interrupting reading</li>
+        <li class="mb-2"><strong>Announce formatting:</strong> Announce when formatting is applied or removed (e.g., "Bold applied")</li>
+        <li class="mb-2"><strong>Announce selection:</strong> Announce selection changes (e.g., "2 words selected")</li>
+        <li class="mb-2"><strong>Debounce announcements:</strong> Don't announce every keystroke, batch announcements</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`// Example: Announce formatting changes
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    applyBold();
+    announceChange('Bold formatting applied');
+  } else if (e.inputType === 'formatRemove') {
+    e.preventDefault();
+    removeFormatting();
+    announceChange('Formatting removed');
+  }
+});
+
+// Example: Announce selection changes
+document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) {
+      const text = range.toString();
+      const wordCount = text.split(/\\s+/).filter(w => w.length > 0).length;
+      announceChange(\`\${wordCount} word\${wordCount !== 1 ? 's' : ''} selected\`);
+    }
+  }
+});`} />
+  </DocSection>
+
+  <DocSection id="aria-attributes" title="ARIA Attributes">
+    <DocAlert type="error" title="⚠️ ARIA Attributes Not Announced" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When ARIA attributes (like <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">role</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">aria-label</code>, <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">aria-describedby</code>) are applied to contenteditable regions, screen readers may not properly announce them, especially in Safari. The accessibility information is lost.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: ARIA attributes may not be announced in Safari
+<div contenteditable role="textbox" aria-label="Editor">
+  <!-- ARIA info may be lost -->
+</div>
+
+// ✅ GOOD: Use multiple ARIA attributes and test across screen readers
+<div contenteditable
+     role="textbox"
+     aria-label="Rich text editor"
+     aria-describedby="editor-help"
+     aria-multiline="true"
+     aria-haspopup="false"
+     tabindex="0">
+  <!-- Content -->
+</div>
+<div id="editor-help" class="sr-only">
+  Use keyboard shortcuts to format text. Press Ctrl+B for bold, Ctrl+I for italic.
+</div>`} />
+    </DocAlert>
+
+    <DocInfoBox title="Recommended ARIA Attributes" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>role="textbox":</strong> Indicates the element is a text input</li>
+        <li class="mb-2"><strong>aria-label or aria-labelledby:</strong> Provides accessible name</li>
+        <li class="mb-2"><strong>aria-describedby:</strong> Links to help text or instructions</li>
+        <li class="mb-2"><strong>aria-multiline="true":</strong> Indicates multi-line text input</li>
+        <li class="mb-2"><strong>aria-live:</strong> Announces dynamic content changes</li>
+        <li class="mb-2"><strong>aria-atomic:</strong> Controls whether entire region or only changes are announced</li>
+        <li class="mb-2"><strong>aria-invalid:</strong> Indicates validation errors</li>
+      </ul>
+    </DocInfoBox>
+
+    <DocCodeBlock code={`// Complete ARIA setup example
+<div contenteditable
+     role="textbox"
+     aria-label="Document editor"
+     aria-describedby="editor-instructions editor-status"
+     aria-multiline="true"
+     aria-live="polite"
+     aria-atomic="false"
+     aria-invalid="false"
+     tabindex="0">
+  <!-- Editor content -->
+</div>
+
+<div id="editor-instructions" class="sr-only">
+  Rich text editor. Use keyboard shortcuts to format text.
+</div>
+
+<div id="editor-status" 
+     aria-live="polite" 
+     aria-atomic="false"
+     class="sr-only">
+  <!-- Status announcements -->
+</div>`} />
+  </DocSection>
+
+  <DocSection id="keyboard-navigation" title="Keyboard Navigation">
+    <DocAlert type="warning" title="⚠️ tabindex Issues" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> When multiple contenteditable regions have <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">tabindex</code> attributes, the tab order may not follow the <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">tabindex</code> values correctly in some browsers. The focus order may be inconsistent or incorrect.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: tabindex may not work correctly
+<div contenteditable tabindex="3">Third</div>
+<div contenteditable tabindex="1">First</div>
+<div contenteditable tabindex="2">Second</div>
+// Focus order may be incorrect!
+
+// ✅ GOOD: Use sequential tabindex or manage focus programmatically
+<div contenteditable tabindex="0">First</div>
+<div contenteditable tabindex="0">Second</div>
+<div contenteditable tabindex="0">Third</div>
+// Natural DOM order
+
+// Or manage focus programmatically
+const editors = document.querySelectorAll('[contenteditable]');
+editors.forEach((editor, index) => {
+  editor.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      const next = editors[index + 1];
+      if (next) next.focus();
+    } else if (e.key === 'Tab' && e.shiftKey) {
+      e.preventDefault();
+      const prev = editors[index - 1];
+      if (prev) prev.focus();
+    }
+  });
+});`} />
+    </DocAlert>
+
+    <DocInfoBox title="Keyboard Navigation Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Use tabindex="0":</strong> For natural tab order, use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">tabindex="0"</code> instead of custom values</li>
+        <li class="mb-2"><strong>Manage Focus:</strong> Programmatically manage focus for custom keyboard navigation</li>
+        <li class="mb-2"><strong>Escape Key:</strong> Provide a way to exit the editor (e.g., blur on Escape)</li>
+        <li class="mb-2"><strong>Arrow Keys:</strong> Ensure arrow keys work correctly for navigation within content</li>
+        <li class="mb-2"><strong>Home/End:</strong> Test that Home and End keys work as expected</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="focus-management" title="Focus Management">
+    <DocAlert type="warning" title="⚠️ autofocus Doesn't Work" class="mb-4">
+      <p class="m-0 mb-2 text-sm">
+        <strong>Problem:</strong> The <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">autofocus</code> attribute, which automatically focuses form inputs on page load, does not work on contenteditable elements. There is no built-in way to automatically focus a contenteditable region when a page loads.
+      </p>
+      <DocCodeBlock code={`// ❌ BAD: autofocus doesn't work on contenteditable
+<div contenteditable autofocus>
+  <!-- Won't receive focus automatically -->
+</div>
+
+// ✅ GOOD: Use JavaScript to focus
+<div contenteditable id="editor">
+  <!-- Content -->
+</div>
+
+<script>
+  // Focus on page load
+  window.addEventListener('load', () => {
+    const editor = document.getElementById('editor');
+    editor.focus();
+  });
+  
+  // Or use requestAnimationFrame for better timing
+  requestAnimationFrame(() => {
+    editor.focus();
+  });
+</script>`} />
+    </DocAlert>
+
+    <DocInfoBox title="Focus Management Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Programmatic Focus:</strong> Use <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">element.focus()</code> instead of relying on autofocus</li>
+        <li class="mb-2"><strong>Focus Indicators:</strong> Ensure focus is visible with clear focus styles</li>
+        <li class="mb-2"><strong>Focus Trapping:</strong> Consider focus trapping for modal editors</li>
+        <li class="mb-2"><strong>Focus Restoration:</strong> Restore focus after programmatic DOM changes</li>
+        <li class="mb-2"><strong>Skip Links:</strong> Provide skip links to jump to editor</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="announcements" title="Live Announcements">
+    <DocInfoBox title="Implementing Live Announcements">
+      <p class="m-0 mb-2 text-sm">
+        Use <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">aria-live</code> regions to announce changes:
+      </p>
+      <DocCodeBlock code={`// Create a dedicated live region
+<div id="live-region" 
+     aria-live="polite" 
+     aria-atomic="false"
+     class="sr-only">
+</div>
+
+// Announce changes
+function announce(message, priority = 'polite') {
+  const liveRegion = document.getElementById('live-region');
+  liveRegion.setAttribute('aria-live', priority);
+  liveRegion.textContent = message;
+  
+  // Clear after announcement
+  setTimeout(() => {
+    liveRegion.textContent = '';
+  }, 1000);
+}
+
+// Announce formatting
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    announce('Bold formatting applied');
+  } else if (e.inputType === 'formatItalic') {
+    announce('Italic formatting applied');
+  }
+});
+
+// Announce selection
+document.addEventListener('selectionchange', debounce(() => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) {
+      const text = range.toString();
+      const words = text.split(/\\s+/).filter(w => w.length > 0);
+      announce(\`\${words.length} word\${words.length !== 1 ? 's' : ''} selected\`);
+    }
+  }
+}, 300));`} />
+    </DocInfoBox>
+
+    <DocInfoBox title="Screen Reader Only CSS" class="mt-4">
+      <p class="m-0 mb-2 text-sm">
+        Use CSS to hide live regions visually but keep them accessible to screen readers:
+      </p>
+      <DocCodeBlock code={`.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}`} />
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="platform-issues" title="Platform-Specific Issues">
+    <DocSection title="Browser-Specific Issues">
+      <DocAlert type="error" title="⚠️ Safari: ARIA Attributes Not Announced" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Safari:</strong> ARIA attributes on contenteditable elements may not be properly announced by screen readers (VoiceOver). Use live regions as a workaround.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="warning" title="⚠️ Chrome/Edge: Better ARIA Support" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Chrome/Edge:</strong> Generally better ARIA support, but still use live regions for dynamic content changes.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="warning" title="⚠️ Firefox: Keyboard Navigation" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>Firefox:</strong> Keyboard navigation may behave differently. Test thoroughly with NVDA.
+        </p>
+      </DocAlert>
+    </DocSection>
+
+    <DocSection title="Screen Reader-Specific Issues">
+      <DocAlert type="error" title="⚠️ VoiceOver: Limited Announcements" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>VoiceOver (macOS/iOS):</strong> May not announce content changes automatically. Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">aria-live</code> regions for all important changes.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="warning" title="⚠️ NVDA: Better Support" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>NVDA (Windows):</strong> Generally better support, but still test with live regions.
+        </p>
+      </DocAlert>
+
+      <DocAlert type="warning" title="⚠️ JAWS: Complex Content" class="mb-4">
+        <p class="m-0 mb-2 text-sm">
+          <strong>JAWS:</strong> May struggle with complex nested content. Keep structure simple when possible.
+        </p>
+      </DocAlert>
+    </DocSection>
+  </DocSection>
+
+  <DocSection title="Related resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/common-pitfalls" class="text-accent-primary no-underline">
+          Common Pitfalls & Debugging →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/practical-patterns" class="text-accent-primary no-underline">
+          Practical Patterns →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+

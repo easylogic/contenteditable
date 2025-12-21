@@ -1,0 +1,406 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import '../../styles/global.css';
+
+const basicIframeCode = `// Basic iframe with contenteditable
+<iframe id="editorFrame" src="about:blank"></iframe>
+
+<script>
+const iframe = document.getElementById('editorFrame');
+const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+// Create contenteditable inside iframe
+iframeDoc.open();
+iframeDoc.write(\`
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <style>
+        body { margin: 0; padding: 1rem; }
+        [contenteditable] { min-height: 200px; border: 1px solid #ccc; }
+      </style>
+    </head>
+    <body>
+      <div contenteditable="true">Content</div>
+    </body>
+  </html>
+\`);
+iframeDoc.close();
+
+// Access contenteditable
+const editor = iframeDoc.querySelector('[contenteditable]');
+</script>`;
+
+const eventHandlingCode = `// Event handling across iframe boundaries
+const iframe = document.getElementById('editorFrame');
+const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+const editor = iframeDoc.querySelector('[contenteditable]');
+
+// Listen to events inside iframe
+editor.addEventListener('input', (e) => {
+  console.log('Input event in iframe');
+  
+  // Forward to parent window
+  window.parent.postMessage({
+    type: 'editor-input',
+    data: editor.innerHTML
+  }, '*'); // Use specific origin in production
+});
+
+// Listen from parent window
+window.addEventListener('message', (e) => {
+  if (e.data.type === 'editor-input') {
+    console.log('Received input from iframe:', e.data.data);
+  }
+});`;
+
+const selectionCode = `// Selection handling across iframe boundaries
+const iframe = document.getElementById('editorFrame');
+const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+const editor = iframeDoc.querySelector('[contenteditable]');
+
+// Get selection inside iframe
+function getIframeSelection() {
+  const iframeWindow = iframe.contentWindow;
+  const selection = iframeWindow.getSelection();
+  
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    return {
+      text: range.toString(),
+      startOffset: range.startOffset,
+      endOffset: range.endOffset,
+      startContainer: range.startContainer,
+      endContainer: range.endContainer
+    };
+  }
+  return null;
+}
+
+// Set selection inside iframe
+function setIframeSelection(startContainer, startOffset, endContainer, endOffset) {
+  const iframeWindow = iframe.contentWindow;
+  const selection = iframeWindow.getSelection();
+  const range = iframeDoc.createRange();
+  
+  range.setStart(startContainer, startOffset);
+  range.setEnd(endContainer, endOffset);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}`;
+
+const focusCode = `// Focus management across iframe boundaries
+const iframe = document.getElementById('editorFrame');
+const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+const editor = iframeDoc.querySelector('[contenteditable]');
+
+// Focus editor inside iframe
+function focusIframeEditor() {
+  // First focus the iframe itself
+  iframe.focus();
+  
+  // Then focus the editor inside
+  editor.focus();
+}
+
+// Check if editor is focused
+function isIframeEditorFocused() {
+  const iframeWindow = iframe.contentWindow;
+  return iframeWindow.document.activeElement === editor;
+}
+
+// Listen to focus events
+editor.addEventListener('focus', () => {
+  console.log('Editor focused in iframe');
+  
+  // Notify parent
+  window.parent.postMessage({
+    type: 'editor-focus'
+  }, '*');
+});`;
+
+const crossOriginCode = `// Cross-origin iframe limitations
+// ❌ BAD: Cannot access cross-origin iframe content
+const iframe = document.getElementById('editorFrame');
+iframe.src = 'https://example.com/editor.html';
+
+// This will throw SecurityError
+try {
+  const iframeDoc = iframe.contentDocument; // null
+  const editor = iframeDoc.querySelector('[contenteditable]'); // Error
+} catch (e) {
+  console.error('Cannot access cross-origin iframe:', e);
+}
+
+// ✅ GOOD: Use postMessage for communication
+iframe.contentWindow.postMessage({
+  type: 'get-content'
+}, 'https://example.com');
+
+// Listen for response
+window.addEventListener('message', (e) => {
+  if (e.origin === 'https://example.com') {
+    console.log('Received from iframe:', e.data);
+  }
+});`;
+
+const sandboxCode = `// Using sandbox attribute (restricts iframe capabilities)
+<iframe 
+  id="editorFrame" 
+  sandbox="allow-same-origin allow-scripts"
+  src="about:blank">
+</iframe>
+
+// sandbox options:
+// - allow-same-origin: Allows same-origin access
+// - allow-scripts: Allows scripts to run
+// - allow-forms: Allows form submission
+// - allow-popups: Allows popups
+// - allow-top-navigation: Allows navigation of top-level browsing context
+
+// Note: Some sandbox restrictions may affect contenteditable behavior`;
+
+const srcdocCode = `// Using srcdoc attribute
+<iframe 
+  id="editorFrame"
+  srcdoc="
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { margin: 0; padding: 1rem; }
+          [contenteditable] { min-height: 200px; border: 1px solid #ccc; }
+        </style>
+      </head>
+      <body>
+        <div contenteditable='true'>Content</div>
+      </body>
+    </html>
+  ">
+</iframe>
+
+// Access after load
+const iframe = document.getElementById('editorFrame');
+iframe.addEventListener('load', () => {
+  const iframeDoc = iframe.contentDocument;
+  const editor = iframeDoc.querySelector('[contenteditable]');
+  // Editor is ready
+});`;
+---
+
+<DocLayout
+  title="iframe Integration"
+  description="Understanding contenteditable behavior inside iframes, including event handling, selection management, focus control, cross-origin limitations, and browser differences."
+  currentPath="/docs/iframe-integration"
+>
+  <DocSection id="overview" title="Overview">
+    <p class="text-sm text-text-secondary mb-4">
+      When using contenteditable elements inside iframes, several considerations arise due to document isolation. Event handling, selection management, and focus control may require special handling, especially when communicating between the iframe and parent window.
+    </p>
+    
+    <DocInfoBox title="Key Concepts" class="mb-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2"><strong>Document Isolation:</strong> iframe has its own document context</li>
+        <li class="mb-2"><strong>Same-Origin Access:</strong> Can access iframe content only if same-origin</li>
+        <li class="mb-2"><strong>Cross-Origin:</strong> Must use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">postMessage</code> for communication</li>
+        <li class="mb-2"><strong>Selection API:</strong> Use iframe's window for selection operations</li>
+        <li class="mb-2"><strong>Focus Management:</strong> Must focus iframe first, then editor inside</li>
+        <li class="mb-2"><strong>Sandbox:</strong> <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">sandbox</code> attribute may restrict capabilities</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="basic-usage" title="Basic Usage">
+    <p class="text-sm text-text-secondary mb-4">
+      Creating a contenteditable element inside an iframe requires accessing the iframe's document. Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contentDocument</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contentWindow.document</code> to access the iframe's document.
+    </p>
+    
+    <DocCodeBlock code={basicIframeCode} />
+    
+    <DocAlert type="warning" title="⚠️ Same-Origin Required" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        You can only access an iframe's document if it's same-origin. Cross-origin iframes cannot be accessed directly due to the Same-Origin Policy. Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">postMessage</code> for cross-origin communication.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="event-handling" title="Event Handling">
+    <p class="text-sm text-text-secondary mb-4">
+      Events fired inside an iframe don't automatically bubble to the parent window. You must either listen inside the iframe and forward events, or use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">postMessage</code> for cross-frame communication.
+    </p>
+    
+    <DocCodeBlock code={eventHandlingCode} />
+    
+    <DocInfoBox title="Event Forwarding Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">Listen to events inside iframe and forward to parent using <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">postMessage</code></li>
+        <li class="mb-2">Include relevant event data (inputType, data, selection, etc.) in message</li>
+        <li class="mb-2">Use specific origin in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">postMessage</code> (not <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">'*'</code>) for security</li>
+        <li class="mb-2">Handle both directions: iframe → parent and parent → iframe</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="selection-management" title="Selection Management">
+    <p class="text-sm text-text-secondary mb-4">
+      Selection operations must use the iframe's window object. <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code> in the parent window won't access selection inside the iframe.
+    </p>
+    
+    <DocCodeBlock code={selectionCode} />
+    
+    <DocAlert type="warning" title="⚠️ Selection Isolation" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Selection inside an iframe is isolated from the parent window. You must use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">iframe.contentWindow.getSelection()</code> to access selection inside the iframe. Node references from iframe selection cannot be used directly in parent window context.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="focus-management" title="Focus Management">
+    <p class="text-sm text-text-secondary mb-4">
+      Focusing a contenteditable inside an iframe requires first focusing the iframe itself, then the editor element inside.
+    </p>
+    
+    <DocCodeBlock code={focusCode} />
+    
+    <DocInfoBox title="Focus Best Practices" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">Focus the iframe first, then the editor inside</li>
+        <li class="mb-2">Check focus state using <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">iframe.contentWindow.document.activeElement</code></li>
+        <li class="mb-2">Forward focus/blur events to parent window if needed</li>
+        <li class="mb-2">Handle focus loss when user clicks outside iframe</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="cross-origin-limitations" title="Cross-Origin Limitations">
+    <p class="text-sm text-text-secondary mb-4">
+      Cross-origin iframes cannot be accessed directly due to the Same-Origin Policy. You must use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">postMessage</code> for communication.
+    </p>
+    
+    <DocCodeBlock code={crossOriginCode} />
+    
+    <DocAlert type="error" title="⚠️ Security Restrictions" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        Cross-origin iframes are protected by the Same-Origin Policy. You cannot access <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contentDocument</code>, read content, or manipulate the DOM directly. All communication must go through <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">postMessage</code> API. Always validate message origins for security.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="sandbox-attribute" title="sandbox Attribute">
+    <p class="text-sm text-text-secondary mb-4">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">sandbox</code> attribute can restrict iframe capabilities. Some restrictions may affect contenteditable behavior.
+    </p>
+    
+    <DocCodeBlock code={sandboxCode} />
+    
+    <DocAlert type="warning" title="⚠️ Sandbox Restrictions" class="mt-4 mb-4">
+      <p class="m-0 mb-2 text-sm">
+        The <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">sandbox</code> attribute restricts iframe capabilities. Without <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">allow-same-origin</code>, you cannot access the iframe's document. Without <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">allow-scripts</code>, JavaScript won't run. Some restrictions may affect contenteditable behavior, especially event handling and focus management.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="srcdoc-attribute" title="srcdoc Attribute">
+    <p class="text-sm text-text-secondary mb-4">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">srcdoc</code> attribute allows embedding HTML directly in the iframe without a separate file.
+    </p>
+    
+    <DocCodeBlock code={srcdocCode} />
+    
+    <DocInfoBox title="srcdoc Benefits" class="mt-4">
+      <ul class="m-0 pl-6 text-sm text-text-secondary">
+        <li class="mb-2">No separate HTML file needed</li>
+        <li class="mb-2">Easier to embed inline content</li>
+        <li class="mb-2">Same-origin by default (can access document)</li>
+        <li class="mb-2">Useful for isolated editor instances</li>
+      </ul>
+    </DocInfoBox>
+  </DocSection>
+
+  <DocSection id="platform-specific-issues" title="Platform-Specific Issues & Edge Cases">
+    <h3 class="text-lg font-semibold mb-3 mt-6">Browser-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Chrome/Edge</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Selection:</strong> Selection behavior may differ inside iframe</li>
+      <li class="mb-2"><strong>Focus:</strong> Focus handling may be inconsistent</li>
+      <li class="mb-2"><strong>Events:</strong> Events may not bubble correctly to parent</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Firefox</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Better Isolation:</strong> Generally better isolation between iframe and parent</li>
+      <li class="mb-2"><strong>Event Handling:</strong> Events may need explicit forwarding</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Safari</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Mobile Behavior:</strong> iframe behavior may differ significantly on mobile</li>
+      <li class="mb-2"><strong>Focus Issues:</strong> Focus management may be problematic</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">OS & Device-Specific Behavior</h3>
+    
+    <h4 class="text-base font-semibold mb-2 mt-4">Desktop</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Mouse Interaction:</strong> Click events may behave differently</li>
+      <li class="mb-2"><strong>Keyboard Navigation:</strong> Tab key navigation may be affected</li>
+    </ul>
+
+    <h4 class="text-base font-semibold mb-2 mt-4">Mobile</h4>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Touch Interaction:</strong> Touch events may not work correctly</li>
+      <li class="mb-2"><strong>Virtual Keyboard:</strong> Keyboard behavior may be inconsistent</li>
+      <li class="mb-2"><strong>Focus Issues:</strong> Focus management may be more problematic</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold mb-3 mt-6">General Edge Cases</h3>
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Nested iframes:</strong> Multiple levels of iframes can compound issues</li>
+      <li class="mb-2"><strong>Dynamic Content:</strong> Adding/removing contenteditable dynamically may cause issues</li>
+      <li class="mb-2"><strong>IME Composition:</strong> IME composition may not work correctly inside iframe</li>
+      <li class="mb-2"><strong>Clipboard Operations:</strong> Copy/paste may be affected by iframe boundaries</li>
+      <li class="mb-2"><strong>Undo/Redo:</strong> Undo/redo stack is isolated per iframe</li>
+      <li class="mb-2"><strong>Selection Toolbar:</strong> Mobile selection toolbars may not work correctly</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="best-practices" title="Best Practices">
+    <ul class="m-0 pl-6 text-sm text-text-secondary mb-4">
+      <li class="mb-2"><strong>Use Same-Origin When Possible:</strong> Same-origin iframes are easier to work with</li>
+      <li class="mb-2"><strong>Forward Events:</strong> Listen to events inside iframe and forward to parent using <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">postMessage</code></li>
+      <li class="mb-2"><strong>Use iframe Window for Selection:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">iframe.contentWindow.getSelection()</code> for selection operations</li>
+      <li class="mb-2"><strong>Focus iframe First:</strong> Focus the iframe before focusing editor inside</li>
+      <li class="mb-2"><strong>Validate Origins:</strong> Always validate message origins in <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">postMessage</code> handlers</li>
+      <li class="mb-2"><strong>Handle Cross-Origin:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">postMessage</code> for cross-origin communication</li>
+      <li class="mb-2"><strong>Consider Sandbox:</strong> Use <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">sandbox</code> attribute for security, but be aware of restrictions</li>
+      <li class="mb-2"><strong>Test Across Browsers:</strong> iframe behavior varies - test on Chrome, Firefox, Safari, and mobile browsers</li>
+      <li class="mb-2"><strong>Handle Errors:</strong> Access to iframe content may fail - handle errors gracefully</li>
+    </ul>
+  </DocSection>
+
+  <DocSection id="related-resources" title="Related Resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/focus-blur-events" class="text-accent-primary no-underline">
+          Focus & Blur Events →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/selection-api" class="text-accent-primary no-underline">
+          Selection API →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/shadow-dom-web-components" class="text-accent-primary no-underline">
+          Shadow DOM & Web Components (similar isolation issues) →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+</DocLayout>
+
