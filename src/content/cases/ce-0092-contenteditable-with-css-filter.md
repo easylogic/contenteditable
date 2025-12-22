@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: CSS filter may affect contenteditable performance
+description: "When a contenteditable element has CSS filters applied (blur, brightness, etc.), editing performance may be degraded. Typing may lag, and selection may be slow to update."
 tags:
   - css-filter
   - performance

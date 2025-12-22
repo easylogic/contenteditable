@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Arrow keys skip over emoji in contenteditable
+description: "In Edge on Windows, when navigating with arrow keys through text containing emoji, the caret position behaves unexpectedly. The arrow keys may skip over emoji characters or position the caret incor"
 tags:
   - emoji
   - caret

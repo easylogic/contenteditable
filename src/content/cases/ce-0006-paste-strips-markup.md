@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Pasting rich text into contenteditable strips markup unexpectedly
+description: "When pasting content from a rich text source (such as a word processor or a web page) into a contenteditable element, the resulting DOM loses headings, lists, or inline formatting that were present in the source."
 tags:
   - paste
   - clipboard

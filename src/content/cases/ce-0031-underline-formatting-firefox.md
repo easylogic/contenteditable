@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Underline formatting is lost when typing after applying underline
+description: "When applying underline formatting to selected text and then continuing to type, the underline formatting is not maintained for the newly typed characters in Firefox on Linux."
 tags:
   - formatting
   - underline

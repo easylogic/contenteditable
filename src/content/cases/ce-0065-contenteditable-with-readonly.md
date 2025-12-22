@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: readonly attribute does not prevent editing in contenteditable
+description: "The readonly attribute, which should prevent editing on form inputs, does not work on contenteditable regions in Firefox. Users can still edit the content even when readonly is set."
 tags:
   - readonly
   - editing

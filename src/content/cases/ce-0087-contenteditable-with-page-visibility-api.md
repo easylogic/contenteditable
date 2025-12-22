@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: Page Visibility API may affect contenteditable during tab switches
+description: "When a page with a contenteditable element becomes hidden (tab switch, minimize), the Page Visibility API may affect editing state. Focus may be lost, and composition may be interrupted."
 tags:
   - page-visibility-api
   - focus

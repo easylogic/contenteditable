@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: autofocus attribute does not work on contenteditable
+description: "The autofocus attribute, which automatically focuses form inputs on page load, does not work on contenteditable elements. There is no built-in way to automatically focus a contenteditable region on page load."
 tags:
   - autofocus
   - focus

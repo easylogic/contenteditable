@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: CORS restrictions may affect contenteditable in cross-origin iframes
+description: "When a contenteditable element is inside a cross-origin iframe, CORS restrictions may prevent certain operations. Accessing the contenteditable from the parent frame may be blocked, and some editin"
 tags:
   - cors
   - iframe

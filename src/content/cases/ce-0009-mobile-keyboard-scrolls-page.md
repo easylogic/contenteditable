@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: System virtual keyboard
 caseTitle: Virtual keyboard on mobile scrolls contenteditable out of view
+description: "On mobile devices, when the virtual keyboard appears while focusing a contenteditable element, the page scrolls in a way that moves the caret or the editable region partially out of view."
 tags:
   - mobile
   - keyboard

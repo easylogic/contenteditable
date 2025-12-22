@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Placeholder text disappears when contenteditable receives focus
+description: "When using CSS ::before or ::after pseudo-elements to create placeholder text for a contenteditable region, the placeholder disappears immediately when the element receives focus, even if the content is empty."
 tags:
   - placeholder
   - focus

@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Arrow keys skip over emoji in contenteditable
+description: "When using the left and right arrow keys in a contenteditable element that contains emoji, the caret sometimes jumps over entire emoji clusters instead of moving by a single visual position."
 tags:
   - caret
   - emoji

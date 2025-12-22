@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: tabindex attribute does not control focus order correctly
+description: "When multiple contenteditable regions have tabindex attributes, the tab order may not follow the tabindex values correctly in Edge. The focus order may be inconsistent or incorrect."
 tags:
   - tabindex
   - focus

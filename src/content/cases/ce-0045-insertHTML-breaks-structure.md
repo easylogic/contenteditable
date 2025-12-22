@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: insertHTML breaks DOM structure and formatting
+description: "When using document.execCommand('insertHTML', ...) to insert HTML content into a contenteditable region, the DOM structure may be broken or reformatted unexpectedly. Nested elements may be flattened or reformatted."
 tags:
   - insertHTML
   - dom

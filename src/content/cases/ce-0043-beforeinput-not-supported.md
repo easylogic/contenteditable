@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: beforeinput event is not supported in Safari
+description: "The beforeinput event, which is crucial for intercepting and modifying input before it's committed to the DOM, is not supported in Safari. This makes it difficult to implement custom input handling."
 tags:
   - beforeinput
   - events

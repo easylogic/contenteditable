@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Undo stack is cleared when programmatically modifying content
+description: "When programmatically modifying the content of a contenteditable region (e.g., using innerHTML or textContent), the undo stack is cleared in Safari. This prevents users from undoing their previous edits."
 tags:
   - undo
   - programmatic

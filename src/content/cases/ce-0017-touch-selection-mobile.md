@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: System virtual keyboard
 caseTitle: Touch selection handles are difficult to use on mobile devices
+description: "On mobile devices, selecting text in a contenteditable region using touch is difficult. The selection handles are small and hard to grab, and the selection range may change unexpectedly when trying"
 tags:
   - mobile
   - touch

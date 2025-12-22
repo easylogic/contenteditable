@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Clipboard API read/write works inconsistently with contenteditable
+description: "When using the Clipboard API (navigator.clipboard.readText/writeText) with contenteditable elements, the behavior may be inconsistent. Reading clipboard content may not work during paste events, an"
 tags:
   - clipboard-api
   - paste

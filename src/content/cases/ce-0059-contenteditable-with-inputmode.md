@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: System virtual keyboard
 caseTitle: inputmode attribute does not affect virtual keyboard on mobile
+description: "The inputmode attribute, which should control the type of virtual keyboard shown on mobile devices, does not work on contenteditable regions in iOS Safari. The keyboard type cannot be controlled."
 tags:
   - inputmode
   - mobile

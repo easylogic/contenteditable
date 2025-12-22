@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: System virtual keyboard
 caseTitle: Double-tap on contenteditable triggers page zoom
+description: "On iOS Safari, double-tapping on a contenteditable region triggers page zoom instead of word selection. This interferes with the expected text editing behavior."
 tags:
   - mobile
   - zoom

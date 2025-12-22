@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Undo and redo behavior is inconsistent across browsers
+description: "The undo and redo functionality (Ctrl+Z / Ctrl+Y or Cmd+Z / Cmd+Shift+Z) behaves differently across browsers. Some browsers undo individual keystrokes, while others undo larger operations. The undo"
 tags:
   - undo
   - redo

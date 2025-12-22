@@ -1,0 +1,242 @@
+---
+import { getCollection } from 'astro:content';
+import SiteNav from '../components/SiteNav.astro';
+import BaseHead from '../components/BaseHead.astro';
+import '../styles/global.css';
+
+const cases = await getCollection('cases');
+const scenarios = await getCollection('scenarios');
+
+// Enrich scenarios with case data
+const scenariosWithStats = scenarios.map((scenario) => {
+  const scenarioCases = cases.filter((c) => c.data.scenarioId === scenario.data.id);
+  
+  const osSet = new Set(scenarioCases.map((c) => c.data.os));
+  const browserSet = new Set(scenarioCases.map((c) => c.data.browser));
+  const deviceSet = new Set(scenarioCases.map((c) => c.data.device));
+  const keyboardSet = new Set(scenarioCases.map((c) => c.data.keyboard));
+  
+  const confirmed = scenarioCases.filter((c) => c.data.status === 'confirmed').length;
+  const draft = scenarioCases.filter((c) => c.data.status === 'draft').length;
+  
+  // Coverage: how many unique OS × Browser combinations
+  const uniqueCombinations = new Set(
+    scenarioCases.map((c) => `${c.data.os}|${c.data.browser}`)
+  ).size;
+  
+  return {
+    ...scenario,
+    caseCount: scenarioCases.length,
+    confirmed,
+    draft,
+    osCount: osSet.size,
+    browserCount: browserSet.size,
+    deviceCount: deviceSet.size,
+    keyboardCount: keyboardSet.size,
+    uniqueCombinations,
+    osList: Array.from(osSet).sort(),
+    browserList: Array.from(browserSet).sort(),
+    deviceList: Array.from(deviceSet).sort(),
+    keyboardList: Array.from(keyboardSet).sort(),
+  };
+});
+
+// Sort by case count (most cases first)
+scenariosWithStats.sort((a, b) => b.caseCount - a.caseCount);
+
+// Group by category
+const scenariosByCategory = scenariosWithStats.reduce(
+  (acc, scenario) => {
+    const category = scenario.data.category || 'other';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(scenario);
+    return acc;
+  },
+  {} as Record<string, typeof scenariosWithStats>,
+);
+
+const categoryLabels: Record<string, string> = {
+  ime: 'IME & Composition',
+  formatting: 'Formatting',
+  paste: 'Paste & Copy',
+  selection: 'Selection',
+  caret: 'Caret & Navigation',
+  mobile: 'Mobile & Touch',
+  accessibility: 'Accessibility',
+  performance: 'Performance',
+  focus: 'Focus & Blur',
+  other: 'Other',
+};
+
+// Overall statistics
+const totalScenarios = scenariosWithStats.length;
+const totalCases = cases.length;
+const totalConfirmed = cases.filter((c) => c.data.status === 'confirmed').length;
+const totalDraft = cases.filter((c) => c.data.status === 'draft').length;
+const avgCasesPerScenario = Math.round((totalCases / totalScenarios) * 10) / 10;
+const scenariosWithMultipleCases = scenariosWithStats.filter((s) => s.caseCount > 1).length;
+---
+
+<html lang="en">
+  <head>
+    <BaseHead title="Scenario Statistics – contenteditable.lab" description="Statistics and analytics for contenteditable scenarios and cases." />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="max-w-[1200px] mx-auto py-7 px-5 pb-10">
+      <header class="mb-6">
+        <h1 class="text-[2rem] leading-[1.1] m-0 mb-2">Scenario Statistics</h1>
+        <p class="m-0 text-[0.95rem] text-text-secondary">
+          Comprehensive statistics and analytics for scenarios and cases across different environments.
+        </p>
+      </header>
+
+      <!-- Overall Stats -->
+      <section class="rounded-xl border border-border-light bg-bg-surface p-4 mb-6">
+        <h2 class="text-lg font-semibold m-0 mb-4">Overall Statistics</h2>
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-accent-primary">{totalScenarios}</div>
+            <div class="text-sm text-text-muted mt-1">Total Scenarios</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-category-ime">{totalCases}</div>
+            <div class="text-sm text-text-muted mt-1">Total Cases</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-status-confirmed">{totalConfirmed}</div>
+            <div class="text-sm text-text-muted mt-1">Confirmed</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-status-draft">{totalDraft}</div>
+            <div class="text-sm text-text-muted mt-1">Draft</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-category-formatting">{avgCasesPerScenario}</div>
+            <div class="text-sm text-text-muted mt-1">Avg Cases/Scenario</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-category-events">{scenariosWithMultipleCases}</div>
+            <div class="text-sm text-text-muted mt-1">Scenarios with Multiple Cases</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scenarios by Category -->
+      <section class="rounded-xl border border-border-light bg-bg-surface p-4 mb-6">
+        <h2 class="text-lg font-semibold m-0 mb-4">Scenarios by Category</h2>
+        {Object.entries(scenariosByCategory)
+          .sort(([a], [b]) => {
+            const order = ['ime', 'formatting', 'paste', 'selection', 'caret', 'mobile', 'accessibility', 'performance', 'focus', 'other'];
+            return (order.indexOf(a) || 999) - (order.indexOf(b) || 999);
+          })
+          .map(([category, categoryScenarios]) => {
+            const categoryTotalCases = categoryScenarios.reduce((sum, s) => sum + s.caseCount, 0);
+            const categoryConfirmed = categoryScenarios.reduce((sum, s) => sum + s.confirmed, 0);
+            return (
+              <div class="mb-6 last:mb-0">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-base font-semibold m-0">
+                    {categoryLabels[category] || category}
+                  </h3>
+                  <div class="text-sm text-text-muted">
+                    {categoryScenarios.length} scenario{categoryScenarios.length === 1 ? '' : 's'} · {categoryTotalCases} cases · {categoryConfirmed} confirmed
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  {categoryScenarios.map((scenario) => (
+                    <div class="flex items-center justify-between p-3 bg-bg-muted rounded-lg">
+                      <div class="flex-1">
+                        <a
+                          href={`/scenarios/${encodeURIComponent(scenario.data.id)}`}
+                          class="text-sm font-medium text-text-primary no-underline hover:text-accent-primary"
+                        >
+                          {scenario.data.title}
+                        </a>
+                        <div class="text-xs text-text-muted mt-1">
+                          {scenario.data.id}
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-4 text-xs text-text-secondary">
+                        <span class="flex items-center gap-1">
+                          <span class="font-semibold">{scenario.caseCount}</span>
+                          <span>cases</span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <span class="font-semibold">{scenario.uniqueCombinations}</span>
+                          <span>combinations</span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <span class="font-semibold">{scenario.osCount}</span>
+                          <span>OS</span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <span class="font-semibold">{scenario.browserCount}</span>
+                          <span>browsers</span>
+                        </span>
+                        {scenario.confirmed > 0 && (
+                          <span class="px-2 py-0.5 rounded-full bg-status-confirmed-light text-status-confirmed text-xs font-medium">
+                            {scenario.confirmed} confirmed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+      </section>
+
+      <!-- Coverage Analysis -->
+      <section class="rounded-xl border border-border-light bg-bg-surface p-4 mb-6">
+        <h2 class="text-lg font-semibold m-0 mb-4">Coverage Analysis</h2>
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-semibold mb-2">Scenarios with Best Coverage</h3>
+            <div class="space-y-2">
+              {scenariosWithStats
+                .sort((a, b) => b.uniqueCombinations - a.uniqueCombinations)
+                .slice(0, 10)
+                .map((scenario) => (
+                  <div class="flex items-center justify-between p-2 bg-bg-muted rounded">
+                    <a
+                      href={`/scenarios/${encodeURIComponent(scenario.data.id)}`}
+                      class="text-sm text-text-primary no-underline hover:text-accent-primary"
+                    >
+                      {scenario.data.title}
+                    </a>
+                    <div class="text-xs text-text-muted">
+                      {scenario.uniqueCombinations} OS×Browser combinations
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold mb-2">Scenarios Needing More Cases</h3>
+            <div class="space-y-2">
+              {scenariosWithStats
+                .filter((s) => s.caseCount === 1)
+                .slice(0, 10)
+                .map((scenario) => (
+                  <div class="flex items-center justify-between p-2 bg-bg-muted rounded">
+                    <a
+                      href={`/scenarios/${encodeURIComponent(scenario.data.id)}`}
+                      class="text-sm text-text-primary no-underline hover:text-accent-primary"
+                    >
+                      {scenario.data.title}
+                    </a>
+                    <div class="text-xs text-text-muted">
+                      Only {scenario.caseCount} case
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+

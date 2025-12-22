@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: CSS isolation property may affect contenteditable stacking context
+description: "When a contenteditable element has the CSS isolation: isolate property, it creates a new stacking context. This may affect how selection handles and IME candidate windows are positioned relative to the element."
 tags:
   - css-isolation
   - stacking-context

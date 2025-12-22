@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Pressing Enter inserts two line breaks in contenteditable
+description: "In Chrome on macOS, pressing Enter in a contenteditable region inserts two line breaks (br elements) instead of one, causing unexpected spacing between paragraphs."
 tags:
   - line-break
   - enter

@@ -155,7 +155,10 @@ const allTags = Array.from(
           return (
             <div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5">
               {filtered.map((entry) => (
-                <article class="rounded-xl border border-border-light bg-bg-surface px-4 py-3.5 flex flex-col gap-1.5">
+                <article
+                  class="rounded-xl border border-border-light bg-bg-surface px-4 py-3.5 flex flex-col gap-1.5 hover:border-accent-primary hover:bg-bg-muted transition-colors cursor-pointer"
+                  onclick={`window.location.href='/cases/${entry.slug}'`}
+                >
                   <header>
                     <div class="flex justify-between items-center gap-2 mb-0.5">
                       <h2 class="text-[0.95rem] m-0">
@@ -190,6 +193,7 @@ const allTags = Array.from(
                         <a
                           href={`/scenarios/${encodeURIComponent(entry.data.scenarioId)}`}
                           class="text-inherit underline"
+                          onclick={`event.stopPropagation(); window.location.href='/scenarios/${encodeURIComponent(entry.data.scenarioId)}'`}
                         >
                           {entry.data.scenarioId}
                         </a>
@@ -209,6 +213,13 @@ const allTags = Array.from(
                             searchParams.get('q') ?? '',
                           )}`}
                           class="inline-flex items-center rounded-full border border-border-light px-1.5 py-0.5 mr-1 no-underline text-inherit"
+                          onclick={`event.stopPropagation(); window.location.href='?locale=${encodeURIComponent(
+                            locale,
+                          )}&status=${encodeURIComponent(
+                            statusFilter,
+                          )}&tag=${encodeURIComponent(tag)}&q=${encodeURIComponent(
+                            searchParams.get('q') ?? '',
+                          )}'`}
                         >
                           {tag}
                         </a>
@@ -220,6 +231,7 @@ const allTags = Array.from(
                     <a
                       href={`/cases/${entry.slug}`}
                       class="inline-flex items-center gap-0.5 text-xs text-text-primary no-underline font-medium"
+                      onclick={`event.stopPropagation(); window.location.href='/cases/${entry.slug}'`}
                     >
                       <span>View details</span>
                       <span aria-hidden="true">→</span>
@@ -227,6 +239,7 @@ const allTags = Array.from(
                     <a
                       href={`/?scenario=${encodeURIComponent(entry.data.id)}`}
                       class="inline-flex items-center gap-0.5 text-xs text-text-secondary no-underline"
+                      onclick={`event.stopPropagation(); window.location.href='/?scenario=${encodeURIComponent(entry.data.id)}'`}
                     >
                       <span>Open in playground</span>
                       <span aria-hidden="true">↗</span>

@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: MutationObserver may interfere with contenteditable editing
+description: "When a MutationObserver is attached to a contenteditable element or its parent, the observer callbacks may interfere with editing performance. Frequent DOM mutations during typing can trigger many"
 tags:
   - mutation-observer
   - performance

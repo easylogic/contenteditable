@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: CSS transform may cause selection handles to appear in wrong position
+description: "When a contenteditable element has CSS transforms applied (translate, scale, rotate), the selection handles and caret may appear in incorrect positions. The visual position may not match the actual DOM position."
 tags:
   - css-transform
   - selection

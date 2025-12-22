@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Bold formatting is lost when typing after applying bold
+description: "When applying bold formatting to selected text and then continuing to type, the bold formatting is not maintained for the newly typed characters in Chrome on Windows."
 tags:
   - formatting
   - bold

@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: CSS backdrop-filter may cause rendering issues in contenteditable
+description: "When a contenteditable element has CSS backdrop-filter applied, rendering may be affected. Text may appear blurry, selection may not render correctly, and performance may be degraded, especially on mobile devices."
 tags:
   - css-backdrop-filter
   - rendering

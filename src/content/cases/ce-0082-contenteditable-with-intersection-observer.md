@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: IntersectionObserver may affect contenteditable visibility detection
+description: "When an IntersectionObserver is used to detect when a contenteditable element becomes visible or hidden, the observer may not fire correctly during editing. Changes to content size or position duri"
 tags:
   - intersection-observer
   - visibility

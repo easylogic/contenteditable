@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: CSS will-change may improve or degrade contenteditable performance
+description: "When a contenteditable element has CSS will-change property set, performance may be affected. In some cases, it may improve performance by hinting the browser about upcoming changes. In other cases, it may cause unnecessary layer creation and degrade performance."
 tags:
   - css-will-change
   - performance

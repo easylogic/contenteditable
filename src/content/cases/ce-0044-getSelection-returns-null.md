@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: window.getSelection() returns null when contenteditable loses focus
+description: "When a contenteditable region loses focus, window.getSelection() may return null in Safari, even if there was a valid selection before the focus loss. This makes it difficult to preserve or work with selection state."
 tags:
   - selection
   - api

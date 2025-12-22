@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Virtual scrolling libraries interfere with contenteditable selection
+description: "When a contenteditable element is used with virtual scrolling libraries (e.g., for large documents), the virtual scrolling mechanism may interfere with text selection and caret positioning. The sel"
 tags:
   - virtual-scrolling
   - performance

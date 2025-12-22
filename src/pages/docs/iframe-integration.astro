@@ -15,20 +15,18 @@ const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
 // Create contenteditable inside iframe
 iframeDoc.open();
-iframeDoc.write(\`
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <style>
-        body { margin: 0; padding: 1rem; }
-        [contenteditable] { min-height: 200px; border: 1px solid #ccc; }
-      </style>
-    </head>
-    <body>
-      <div contenteditable="true">Content</div>
-    </body>
-  </html>
-\`);
+iframeDoc.write('<!DOCTYPE html>\\n' +
+  '<html>\\n' +
+  '  <head>\\n' +
+  '    <style>\\n' +
+  '      body { margin: 0; padding: 1rem; }\\n' +
+  '      [contenteditable] { min-height: 200px; border: 1px solid #ccc; }\\n' +
+  '    </style>\\n' +
+  '  </head>\\n' +
+  '  <body>\\n' +
+  '    <div contenteditable="true">Content</div>\\n' +
+  '  </body>\\n' +
+  '</html>');
 iframeDoc.close();
 
 // Access contenteditable

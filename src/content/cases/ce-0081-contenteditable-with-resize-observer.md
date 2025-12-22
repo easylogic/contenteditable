@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: ResizeObserver may cause layout shifts during contenteditable editing
+description: "When a ResizeObserver is attached to a contenteditable element, the observer may trigger during editing as content changes size. This can cause layout recalculations and visual jumps, especially when the observer modifies the DOM in response to size changes."
 tags:
   - resize-observer
   - layout

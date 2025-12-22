@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Focus is lost when clicking on certain elements within contenteditable
+description: "When a contenteditable region contains interactive elements (buttons, links, etc.), clicking on these elements causes the contenteditable to lose focus. This interrupts the editing flow and may cau"
 tags:
   - focus
   - click

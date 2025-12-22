@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Screen readers do not announce changes in contenteditable regions
+description: "When content changes in a contenteditable region (text is typed, deleted, or formatted), screen readers do not announce these changes to users. This makes it difficult for users relying on assistive technologies to understand what is happening in the editor."
 tags:
   - accessibility
   - screen-reader

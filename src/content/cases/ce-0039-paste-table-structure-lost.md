@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Pasting tables loses structure and formatting
+description: "When pasting table content (from Excel, Google Sheets, or HTML tables) into a contenteditable region in Firefox, the table structure is lost. The content may be pasted as plain text or lose its formatting."
 tags:
   - paste
   - table

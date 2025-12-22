@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: maxlength attribute is not supported on contenteditable
+description: "The maxlength attribute, which works on input and textarea elements, is not supported on contenteditable regions. There is no built-in way to limit the amount of content that can be entered."
 tags:
   - maxlength
   - validation

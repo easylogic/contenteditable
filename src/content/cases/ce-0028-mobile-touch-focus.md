@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: System virtual keyboard
 caseTitle: Touch events interfere with contenteditable focus on mobile
+description: "On iOS Safari, touch events (tap, long-press) on a contenteditable region may not properly focus the element. The virtual keyboard may not appear, or focus may be lost unexpectedly."
 tags:
   - mobile
   - touch

@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: Korean (IME)
 caseTitle: Space key during composition is ignored or committed inconsistently
+description: "While composing text with a Korean IME in a contenteditable element, pressing the Space key is either ignored or commits the composition in an inconsistent way compared to native text controls."
 tags:
   - composition
   - ime

@@ -5,13 +5,22 @@ import BaseHead from '../components/BaseHead.astro';
 import '../styles/global.css';
 
 const allCases = await getCollection('cases');
+const allScenarios = await getCollection('scenarios');
 
+// Create a map of scenarioId -> scenario entry
+const scenarioEntriesMap = new Map(
+  allScenarios.map((s) => [s.data.id, s])
+);
+
+// Group cases by scenarioId and enrich with scenario metadata
 const scenariosMap = allCases.reduce(
   (acc, entry) => {
     const key = entry.data.scenarioId;
     if (!acc[key]) {
+      const scenarioEntry = scenarioEntriesMap.get(key);
       acc[key] = {
         scenarioId: key,
+        scenarioEntry: scenarioEntry || null,
         cases: [] as typeof allCases,
       };
     }
@@ -22,6 +31,7 @@ const scenariosMap = allCases.reduce(
     string,
     {
       scenarioId: string;
+      scenarioEntry: (typeof allScenarios)[0] | null;
       cases: typeof allCases;
     }
   >,
@@ -31,28 +41,33 @@ const scenarios = Object.values(scenariosMap).sort((a, b) =>
   a.scenarioId.localeCompare(b.scenarioId),
 );
 
-// Group scenarios by category based on tags
+// Group scenarios by category (from scenario metadata or fallback to tags)
 const scenariosByCategory = scenarios.reduce(
   (acc, scenario) => {
-    const tags = scenario.cases.flatMap((c) => c.data.tags);
-    const categoryTags = [
-      'ime',
-      'composition',
-      'formatting',
-      'paste',
-      'selection',
-      'caret',
-      'mobile',
-      'accessibility',
-      'performance',
-      'focus',
-    ];
+    // Use category from scenario metadata, or infer from tags
+    let category = scenario.scenarioEntry?.data.category || 'other';
+    
+    if (category === 'other') {
+      // Fallback: infer from case tags
+      const tags = scenario.cases.flatMap((c) => c.data.tags);
+      const categoryTags = [
+        'ime',
+        'composition',
+        'formatting',
+        'paste',
+        'selection',
+        'caret',
+        'mobile',
+        'accessibility',
+        'performance',
+        'focus',
+      ];
 
-    let category = 'other';
-    for (const catTag of categoryTags) {
-      if (tags.includes(catTag)) {
-        category = catTag;
-        break;
+      for (const catTag of categoryTags) {
+        if (tags.includes(catTag)) {
+          category = catTag;
+          break;
+        }
       }
     }
 
@@ -142,10 +157,15 @@ const categoryLabels: Record<string, string> = {
                     {categoryScenarios.map((scenario) => {
                       const osSet = new Set(scenario.cases.map((c) => c.data.os));
                       const browserSet = new Set(scenario.cases.map((c) => c.data.browser));
+                      const title = scenario.scenarioEntry?.data.title || scenario.cases[0]?.data.caseTitle || scenario.scenarioId;
+                      const description = scenario.scenarioEntry?.data.description || scenario.cases[0]?.data.caseTitle;
                       return (
-                        <article class="rounded-xl border border-border-light p-3.5 px-3.5 text-sm">
-                          <h2 class="text-sm m-0 mb-1.5">
-                            {scenario.scenarioId}
+                        <a
+                          href={`/scenarios/${encodeURIComponent(scenario.scenarioId)}`}
+                          class="block rounded-xl border border-border-light p-3.5 px-3.5 text-sm no-underline text-inherit hover:border-accent-primary hover:bg-bg-muted transition-colors cursor-pointer"
+                        >
+                          <h2 class="text-sm m-0 mb-1.5 text-text-primary">
+                            {title}
                           </h2>
                           <div class="flex gap-1.5 flex-wrap m-0 mb-1.5">
                             <span class="text-xs px-1.5 py-0.5 rounded-full border border-border-light bg-bg-muted text-text-secondary">
@@ -155,7 +175,6 @@ const categoryLabels: Record<string, string> = {
                               .slice(0, 3)
                               .map((os) => (
                                 <span
-                                  key={os}
                                   class="text-xs px-1.5 py-0.5 rounded-full border border-border-light bg-bg-surface text-text-muted"
                                 >
                                   {os}
@@ -165,7 +184,6 @@ const categoryLabels: Record<string, string> = {
                               .slice(0, 2)
                               .map((browser) => (
                                 <span
-                                  key={browser}
                                   class="text-xs px-1.5 py-0.5 rounded-full border border-border-light bg-bg-surface text-text-muted"
                                 >
                                   {browser}
@@ -173,15 +191,12 @@ const categoryLabels: Record<string, string> = {
                               ))}
                           </div>
                           <p class="m-0 mb-1.5 text-text-secondary text-xs">
-                            {scenario.cases[0]?.data.caseTitle}
+                            {description}
                           </p>
-                          <a
-                            href={`/scenarios/${encodeURIComponent(scenario.scenarioId)}`}
-                            class="text-xs text-text-primary no-underline font-medium"
-                          >
+                          <div class="text-xs text-text-primary font-medium mt-2">
                             Open scenario →
-                          </a>
-                        </article>
+                          </div>
+                        </a>
                       );
                     })}
                   </div>

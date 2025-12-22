@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: CSS contain property may affect contenteditable selection
+description: "When a contenteditable element or its parent has the CSS contain property, selection behavior may be affected. Selection may not extend beyond the contained element, and caret movement may be restricted."
 tags:
   - css-contain
   - selection

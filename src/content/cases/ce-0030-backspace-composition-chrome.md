@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: Japanese IME
 caseTitle: Backspace removes a whole composed syllable instead of a single character
+description: "When using a Japanese IME in Chrome on macOS, pressing Backspace during composition removes the entire composed syllable (hiragana/katakana) instead of removing individual characters one at a time."
 tags:
   - ime
   - backspace

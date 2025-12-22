@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Drag and Drop API behavior differs in contenteditable
+description: "When using the HTML5 Drag and Drop API with contenteditable elements, the behavior differs from standard elements. Dragging text within a contenteditable may not work as expected, and drop zones ma"
 tags:
   - drag-drop
   - api

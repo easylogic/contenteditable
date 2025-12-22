@@ -14,9 +14,13 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.16.6",
+    "graphology": "^0.26.0",
+    "graphology-layout-forceatlas2": "^0.10.1",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "sigma": "^3.0.2",
+    "vis-network": "^10.0.2"
   },
   "devDependencies": {
     "@astrojs/tailwind": "^6.0.2",

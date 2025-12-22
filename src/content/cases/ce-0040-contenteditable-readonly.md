@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: contenteditable="false" on child elements is not respected consistently
+description: "When a contenteditable region contains child elements with contenteditable=\"false\", the behavior is inconsistent. Some browsers allow editing within these elements, while others correctly prevent editing."
 tags:
   - readonly
   - nested

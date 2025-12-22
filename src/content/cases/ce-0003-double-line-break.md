@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: Pressing Enter inserts two line breaks in contenteditable
+description: "In a plain contenteditable element, pressing Enter inserts two visible line breaks instead of one. The resulting DOM contains nested div or br elements that render as an extra blank line."
 tags:
   - enter
   - newline

@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Input events fire multiple times for single keystroke
+description: "In Edge on Windows, the input event may fire multiple times for a single keystroke, causing event handlers to execute more than expected. This can lead to performance issues and incorrect behavior."
 tags:
   - input
   - events

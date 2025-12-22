@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 
 export const GET: APIRoute = async () => {
   const cases = await getCollection('cases');
+  const scenarios = await getCollection('scenarios');
   
   const docsPages = [
     { id: 'doc-what-is', title: 'What is contenteditable?', description: 'Introduction to the contenteditable attribute', url: '/docs/what-is-contenteditable' },
@@ -29,24 +30,12 @@ export const GET: APIRoute = async () => {
     { id: 'doc-input-types', title: 'Input Types', description: 'Comprehensive guide to inputType values in beforeinput and input events', url: '/docs/input-types' },
   ];
 
-  // Build scenario list
-  const scenarioMap = new Map<string, { id: string; title: string; description: string }>();
-  for (const c of cases) {
-    if (!scenarioMap.has(c.data.scenarioId)) {
-      scenarioMap.set(c.data.scenarioId, {
-        id: c.data.scenarioId,
-        title: c.data.caseTitle,
-        description: c.data.description,
-      });
-    }
-  }
-
   const searchItems = [
     // Cases
     ...cases.map((c) => ({
       id: c.data.id,
       title: c.data.caseTitle,
-      description: c.data.description,
+      description: c.data.description || c.data.caseTitle,
       type: 'case' as const,
       url: `/cases/${c.slug}`,
       tags: c.data.tags || [],
@@ -54,12 +43,14 @@ export const GET: APIRoute = async () => {
       browser: c.data.browser,
     })),
     // Scenarios
-    ...Array.from(scenarioMap.values()).map((s) => ({
-      id: s.id,
-      title: s.title,
-      description: s.description,
+    ...scenarios.map((s) => ({
+      id: s.data.id,
+      title: s.data.title,
+      description: s.data.description || s.data.title,
       type: 'scenario' as const,
-      url: `/scenarios/${s.id}`,
+      url: `/scenarios/${s.data.id}`,
+      tags: s.data.tags || [],
+      category: s.data.category,
     })),
     // Docs
     ...docsPages.map((d) => ({

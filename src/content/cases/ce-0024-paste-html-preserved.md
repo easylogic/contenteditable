@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Pasting rich text preserves unwanted HTML structure
+description: "When pasting content from external sources (like Word documents or web pages) into a contenteditable region in Safari, the HTML structure is preserved, including unwanted elements like span tags with inline styles."
 tags:
   - paste
   - formatting

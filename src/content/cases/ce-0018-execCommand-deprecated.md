@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: execCommand is deprecated but still widely used for formatting
+description: "The document.execCommand() API, which is commonly used to apply formatting (bold, italic, etc.) in contenteditable regions, has been deprecated. However, there is no complete replacement, and many editors still rely on it."
 tags:
   - execCommand
   - formatting

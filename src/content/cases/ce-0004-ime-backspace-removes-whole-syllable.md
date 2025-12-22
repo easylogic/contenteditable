@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: Korean (IME)
 caseTitle: Backspace removes a whole composed syllable instead of a single jamo
+description: "When editing Korean text in a contenteditable element, pressing Backspace removes the entire composed syllable instead of a single jamo. This makes fine-grained correction difficult and differs from the expected behavior."
 tags:
   - composition
   - ime

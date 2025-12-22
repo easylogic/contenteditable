@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: ARIA attributes on contenteditable are not properly announced
+description: "When ARIA attributes (like role, aria-label, aria-describedby) are applied to contenteditable regions, screen readers may not properly announce them in Safari. The accessibility information is not conveyed to users."
 tags:
   - accessibility
   - aria

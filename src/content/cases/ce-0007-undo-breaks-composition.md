@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: Korean (IME)
 caseTitle: Undo during IME composition clears more text than expected
+description: "Pressing Undo while an IME composition is active in a contenteditable element removes more text than expected, including characters that were committed before the current composition."
 tags:
   - undo
   - composition

@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Content Security Policy may restrict contenteditable behavior
+description: "When a page has a strict Content Security Policy (CSP), certain contenteditable operations may be restricted. Pasting content, executing scripts, or inserting HTML may be blocked depending on the CSP configuration."
 tags:
   - csp
   - security

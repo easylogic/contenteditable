@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: Korean IME
 caseTitle: Composition is cancelled when pressing Enter inside contenteditable
+description: "When using a Korean IME (Input Method Editor) in Firefox on Windows, pressing Enter during composition cancels the composition instead of committing it. This breaks the expected IME workflow."
 tags:
   - ime
   - composition

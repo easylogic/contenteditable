@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Selection range is incorrect when selecting across multiple elements
+description: "When selecting text that spans across multiple HTML elements (e.g., p, div, span) in a contenteditable region, the selection range may not accurately reflect the visual selection. The getSelection() API may return ranges that do not match what the user sees."
 tags:
   - selection
   - range

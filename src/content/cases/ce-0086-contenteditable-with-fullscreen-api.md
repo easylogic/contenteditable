@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Fullscreen API may affect contenteditable focus and selection
+description: "When a contenteditable element enters or exits fullscreen mode using the Fullscreen API, focus and selection may be lost. The caret position may reset, and editing may be disrupted."
 tags:
   - fullscreen-api
   - focus

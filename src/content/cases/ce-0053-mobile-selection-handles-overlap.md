@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: System virtual keyboard
 caseTitle: Selection handles overlap with content on mobile
+description: "On Android Chrome, when selecting text in a contenteditable region, the selection handles (grab points for adjusting selection) may overlap with the content, making it difficult to see or interact"
 tags:
   - mobile
   - selection

@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Backspace deletes whole words instead of single characters
+description: "In Safari on macOS, pressing Backspace may delete entire words instead of single characters, especially when the caret is positioned at word boundaries or after spaces."
 tags:
   - backspace
   - deletion

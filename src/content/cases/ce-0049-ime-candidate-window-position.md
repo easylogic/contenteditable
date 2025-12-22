@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: Japanese IME
 caseTitle: IME candidate window appears in wrong position
+description: "When using an IME (Input Method Editor) in Chrome on macOS, the candidate window (which shows possible character conversions) may appear in the wrong position relative to the caret. It may be offse"
 tags:
   - ime
   - ui

@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: contenteditable behavior differs inside Web Components
+description: "When a contenteditable element is inside a Web Component (custom element), its behavior may differ from when it's in standard HTML. Event handling, selection, and focus management may be affected by the Shadow DOM isolation."
 tags:
   - web-components
   - custom-elements

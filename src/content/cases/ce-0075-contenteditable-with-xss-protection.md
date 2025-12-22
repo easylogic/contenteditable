@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: XSS protection may interfere with contenteditable HTML insertion
+description: "Browser XSS protection mechanisms may interfere with programmatic HTML insertion in contenteditable elements. Script tags or event handlers inserted via innerHTML or similar methods may be stripped"
 tags:
   - xss
   - security

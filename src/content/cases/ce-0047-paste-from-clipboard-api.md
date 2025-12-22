@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Clipboard API paste does not work in contenteditable
+description: "When using the Clipboard API (navigator.clipboard.readText() or navigator.clipboard.read()) to programmatically paste content into a contenteditable region, the paste operation may fail or not trigger paste events."
 tags:
   - clipboard
   - api

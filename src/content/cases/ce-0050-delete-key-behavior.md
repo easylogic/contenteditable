@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Delete key behavior is inconsistent with Backspace
+description: "In Firefox on Linux, the Delete key behaves differently from Backspace in ways that are inconsistent. Delete may remove different amounts of text or behave unexpectedly compared to Backspace."
 tags:
   - delete
   - backspace

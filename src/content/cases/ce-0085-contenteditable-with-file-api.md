@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: File API drag and drop does not work in contenteditable
+description: "When trying to drag and drop files into a contenteditable element, the File API may not work as expected. File drop events may not fire, or file content may not be accessible."
 tags:
   - file-api
   - drag-drop

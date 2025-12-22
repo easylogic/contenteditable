@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Spellcheck interferes with contenteditable editing
+description: "When spellcheck=\"true\" is enabled on a contenteditable region in Safari, the spellcheck functionality may interfere with normal editing. Red underlines may appear incorrectly, and the spellcheck suggestions may interfere with IME composition."
 tags:
   - spellcheck
   - editing

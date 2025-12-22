@@ -10,6 +10,7 @@ browser: Edge
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Italic formatting is lost when typing after applying italic
+description: "When applying italic formatting to selected text and then continuing to type, the italic formatting is not maintained for the newly typed characters in Edge on Windows."
 tags:
   - formatting
   - italic

@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Pasting images into contenteditable is not supported consistently
+description: "When attempting to paste images (from clipboard) into a contenteditable region, the behavior is inconsistent across browsers. Some browsers ignore the paste, while others may insert a placeholder o"
 tags:
   - paste
   - images

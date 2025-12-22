@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: System virtual keyboard
 caseTitle: Page zooms in when focusing contenteditable on mobile
+description: "On iOS Safari, when a contenteditable region receives focus, the page may automatically zoom in. This can be disorienting and may cause layout issues."
 tags:
   - mobile
   - zoom

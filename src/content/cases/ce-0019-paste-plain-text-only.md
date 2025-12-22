@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Pasting rich text inserts unwanted formatting
+description: "When pasting content from external sources (like Word documents or web pages) into a contenteditable region, unwanted formatting is often included. There is no simple way to paste as plain text wit"
 tags:
   - paste
   - formatting

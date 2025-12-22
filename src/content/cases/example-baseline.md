@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: Latest
 keyboard: US
 caseTitle: Baseline typing and composition in a simple contenteditable region
+description: "This case describes a baseline scenario for inspecting how a plain contenteditable region behaves with typing, composition, and basic navigation keys."
 tags:
   - composition
   - baseline

@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Typing becomes slow with large contenteditable content
+description: "When a contenteditable region contains a large amount of content (thousands of DOM nodes), typing becomes noticeably slow. There is a visible lag between pressing keys and seeing characters appear."
 tags:
   - performance
   - large-content

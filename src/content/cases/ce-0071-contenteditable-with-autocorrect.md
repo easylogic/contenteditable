@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: autocorrect attribute behavior differs on contenteditable
+description: "The autocorrect attribute, which controls automatic text correction on mobile keyboards, behaves differently on contenteditable elements compared to standard input elements. The correction suggestions may not appear or may behave inconsistently."
 tags:
   - autocorrect
   - mobile

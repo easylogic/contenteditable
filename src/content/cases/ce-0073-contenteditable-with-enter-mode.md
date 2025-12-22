@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: enterkeyhint and inputmode affect Enter key behavior inconsistently
+description: "On mobile devices, the combination of enterkeyhint and inputmode attributes may affect Enter key behavior inconsistently on contenteditable elements. The Enter key may insert line breaks when it should submit or vice versa."
 tags:
   - enterkeyhint
   - inputmode

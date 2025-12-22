@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: Caret position jumps unexpectedly after pasting content
+description: "After pasting content into a contenteditable region, the caret position does not end up at the expected location, sometimes jumping to the beginning of the pasted content or to an unexpected position."
 tags:
   - paste
   - caret

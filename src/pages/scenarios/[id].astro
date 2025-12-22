@@ -1,11 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import SiteNav from '../../components/SiteNav.astro';
 import BaseHead from '../../components/BaseHead.astro';
 import '../../styles/global.css';
 
 export const getStaticPaths = (async () => {
+  // Use cases to determine which scenarios exist (backward compatibility)
   const cases = await getCollection('cases');
   const scenarioIds = Array.from(new Set(cases.map((c) => c.data.scenarioId)));
   return scenarioIds.map((scenarioId) => ({
@@ -19,6 +20,10 @@ if (!scenarioId) {
   throw new Error('Scenario id is missing in route params.');
 }
 
+// Get scenario entry if it exists
+const allScenarios = await getCollection('scenarios');
+const scenarioEntry = allScenarios.find((s) => s.data.id === scenarioId) || null;
+
 const allCases = await getCollection('cases');
 const scenarioCases = allCases.filter((c) => c.data.scenarioId === scenarioId);
 
@@ -26,8 +31,16 @@ if (scenarioCases.length === 0) {
   throw new Error(`No cases found for scenario "${scenarioId}".`);
 }
 
-// Use the first case as the primary description for now.
-const primaryCase = scenarioCases[0];
+// Use scenario metadata, fallback to first case
+const scenarioTitle = scenarioEntry?.data.title || scenarioCases[0].data.caseTitle;
+const scenarioDescription = scenarioEntry?.data.description || scenarioCases[0].data.caseTitle;
+
+// Render scenario content if it exists
+let scenarioContent = null;
+if (scenarioEntry) {
+  const { Content } = await scenarioEntry.render();
+  scenarioContent = Content;
+}
 
 // Sort variants for readability.
 scenarioCases.sort((a, b) => a.data.id.localeCompare(b.data.id));
@@ -57,11 +70,36 @@ const compatibilityMatrix = browsers.map((browser) => {
     }),
   };
 });
+
+// Find related scenarios based on category and tags
+const currentTags = scenarioEntry?.data.tags || scenarioCases[0].data.tags || [];
+const currentCategory = scenarioEntry?.data.category || 'other';
+
+const relatedScenarios = allScenarios
+  .filter((s) => s.data.id !== scenarioId)
+  .map((s) => {
+    let score = 0;
+    const scenarioTags = s.data.tags || [];
+    const matchingTags = currentTags.filter((t) => scenarioTags.includes(t));
+    
+    // Same category = high priority
+    if (s.data.category === currentCategory && currentCategory !== 'other') {
+      score += 50;
+    }
+    
+    // Matching tags
+    score += matchingTags.length * 10;
+    
+    return { ...s, score, matchingTags };
+  })
+  .filter((s) => s.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 5);
 ---
 
 <html lang="en">
   <head>
-    <BaseHead title={`${scenarioId} – contenteditable scenario`} />
+    <BaseHead title={`${scenarioTitle} – contenteditable scenario`} />
   </head>
   <body>
     <SiteNav />
@@ -83,12 +121,27 @@ const compatibilityMatrix = browsers.map((browser) => {
             margin: 0 0 0.5rem 0;
           "
         >
-          {scenarioId}
+          {scenarioTitle}
         </h1>
         <p style="margin: 0 0 0.75rem 0; font-size: 0.9rem; color: var(--text-secondary);">
-          This scenario groups concrete cases that describe the same contenteditable phenomenon under
-          different operating systems, devices, browsers, and keyboard setups.
+          {scenarioDescription}
         </p>
+        {scenarioEntry?.data.category && (
+          <div style="margin-bottom: 0.75rem;">
+            <span
+              style="
+                display: inline-block;
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                background: var(--bg-muted);
+                color: var(--text-secondary);
+              "
+            >
+              {scenarioEntry.data.category}
+            </span>
+          </div>
+        )}
         <div
           style="
             border-radius: 0.5rem;
@@ -99,12 +152,27 @@ const compatibilityMatrix = browsers.map((browser) => {
           "
         >
           <div style="font-weight: 600; margin-bottom: 0.3rem; color: var(--text-primary);">
-            Phenomenon
+            Scenario ID
           </div>
-          <div style="color: var(--text-secondary); line-height: 1.5;">
-            {primaryCase.data.caseTitle}
+          <div style="color: var(--text-secondary); line-height: 1.5; font-family: monospace; font-size: 0.8rem;">
+            {scenarioId}
           </div>
         </div>
+        {scenarioContent && (
+          <div
+            style="
+              margin-top: 1rem;
+              padding: 1rem;
+              border-radius: 0.5rem;
+              border: 1px solid var(--border-light);
+              background: var(--bg-surface);
+              font-size: 0.9rem;
+              line-height: 1.6;
+            "
+          >
+            <scenarioContent />
+          </div>
+        )}
       </header>
 
       <section
@@ -387,16 +455,34 @@ const compatibilityMatrix = browsers.map((browser) => {
                 border-radius: 0.75rem;
                 border: 1px solid var(--border-light);
                 padding: 0.8rem 0.9rem;
+                transition: border-color 0.2s, background-color 0.2s;
+                cursor: pointer;
               "
+              onmouseover="this.style.borderColor='var(--accent-primary)'; this.style.backgroundColor='var(--bg-muted)';"
+              onmouseout="this.style.borderColor='var(--border-light)'; this.style.backgroundColor='transparent';"
+              onclick={`window.location.href='/cases/${c.slug}'`}
             >
-              <h3
+              <a
+                href={`/cases/${c.slug}`}
                 style="
-                  font-size: 0.9rem;
-                  margin: 0 0 0.35rem 0;
+                  text-decoration: none;
+                  color: inherit;
+                  display: block;
                 "
               >
-                {c.data.caseTitle}
-              </h3>
+                <h3
+                  style="
+                    font-size: 0.9rem;
+                    margin: 0 0 0.35rem 0;
+                    color: var(--text-primary);
+                    transition: color 0.2s;
+                  "
+                  onmouseover="this.style.color='var(--accent-primary)';"
+                  onmouseout="this.style.color='var(--text-primary)';"
+                >
+                  {c.data.caseTitle}
+                </h3>
+              </a>
               <p style="margin: 0 0 0.35rem 0; color: var(--text-secondary);">
                 OS: {c.data.os}
                 {c.data.osVersion && ` ${c.data.osVersion}`} · Device: {c.data.device}
@@ -408,8 +494,14 @@ const compatibilityMatrix = browsers.map((browser) => {
                 style="
                   font-size: 0.8rem;
                   color: var(--text-primary);
+                  font-weight: 500;
+                  margin-top: 0.5rem;
+                  display: inline-block;
                   text-decoration: none;
+                  transition: color 0.2s;
                 "
+                onmouseover="this.style.color='var(--accent-primary)';"
+                onmouseout="this.style.color='var(--text-primary)';"
               >
                 Open case →
               </a>
@@ -417,6 +509,94 @@ const compatibilityMatrix = browsers.map((browser) => {
           ))}
         </div>
       </section>
+
+      {relatedScenarios.length > 0 && (
+        <section
+          aria-label="Related scenarios"
+          style="
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-light);
+            background: var(--bg-surface);
+            padding: 0.9rem 1rem;
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
+          "
+        >
+          <h2
+            style="
+              font-size: 0.95rem;
+              margin: 0 0 0.5rem 0;
+            "
+          >
+            Related Scenarios
+          </h2>
+          <p style="margin: 0 0 0.6rem 0; color: var(--text-secondary);">
+            Other scenarios that share similar tags or category.
+          </p>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+              gap: 0.9rem;
+            "
+          >
+            {relatedScenarios.map((s) => {
+              const relatedCases = allCases.filter((c) => c.data.scenarioId === s.data.id);
+              const relationType = s.matchingTags.length > 0
+                ? `Tags: ${s.matchingTags.join(', ')}`
+                : s.data.category === currentCategory
+                ? `Category: ${currentCategory}`
+                : 'Related';
+              
+              return (
+                <article
+                  style="
+                    border-radius: 0.75rem;
+                    border: 1px solid var(--border-light);
+                    padding: 0.8rem 0.9rem;
+                  "
+                >
+                  <div
+                    style="
+                      display: inline-block;
+                      padding: 0.2rem 0.5rem;
+                      border-radius: 4px;
+                      background: var(--bg-muted);
+                      color: var(--text-secondary);
+                      font-size: 0.7rem;
+                      margin-bottom: 0.4rem;
+                    "
+                  >
+                    {relationType}
+                  </div>
+                  <h3
+                    style="
+                      font-size: 0.9rem;
+                      margin: 0 0 0.35rem 0;
+                    "
+                  >
+                    <a
+                      href={`/scenarios/${encodeURIComponent(s.data.id)}`}
+                      style="
+                        color: var(--text-primary);
+                        text-decoration: none;
+                      "
+                    >
+                      {s.data.title}
+                    </a>
+                  </h3>
+                  <p style="margin: 0 0 0.35rem 0; color: var(--text-secondary); font-size: 0.8rem;">
+                    {s.data.description || 'No description available.'}
+                  </p>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">
+                    {relatedCases.length} case{relatedCases.length === 1 ? '' : 's'}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </main>
   </body>
 </html>
@@ -440,4 +620,5 @@ const compatibilityMatrix = browsers.map((browser) => {
     background: var(--status-draft);
   }
 </style>
+
 

@@ -10,6 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: US
 caseTitle: autocapitalize attribute works inconsistently on contenteditable
+description: "The autocapitalize attribute, which controls automatic capitalization on mobile keyboards, works inconsistently on contenteditable elements. The behavior may differ from standard input elements."
 tags:
   - autocapitalize
   - mobile

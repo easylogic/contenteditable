@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: Korean (IME)
 caseTitle: Composition is cancelled when pressing Enter inside contenteditable
+description: "When composing Korean text with an IME in a contenteditable element, pressing Enter cancels the composition and sometimes commits only a partial syllable. In some browser and IME combinations, the caret moves to the next line but the last composed character is lost."
 tags:
   - composition
   - ime

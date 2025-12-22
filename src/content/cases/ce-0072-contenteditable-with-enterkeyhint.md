@@ -10,6 +10,7 @@ browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: enterkeyhint attribute does not work on contenteditable
+description: "The enterkeyhint attribute, which controls the label on the Enter key on mobile keyboards, does not work on contenteditable elements. The Enter key label remains the default regardless of the attribute value."
 tags:
   - enterkeyhint
   - mobile

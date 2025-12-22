@@ -10,6 +10,7 @@ browser: Firefox
 browserVersion: "120.0"
 keyboard: US
 caseTitle: contenteditable inheritance behavior is inconsistent
+description: "When a parent element has contenteditable=\"true\" and a child element has contenteditable=\"false\", the inheritance behavior is inconsistent across browsers. Some browsers allow editing in the child element while others do not."
 tags:
   - inheritance
   - nested
