@@ -3,6 +3,7 @@ import { getCollection, getEntry } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import SiteNav from '../../components/SiteNav.astro';
 import BaseHead from '../../components/BaseHead.astro';
+import ScenarioFlow from '../../components/ScenarioFlow';
 import '../../styles/global.css';
 
 export const getStaticPaths = (async () => {
@@ -34,6 +35,7 @@ if (scenarioCases.length === 0) {
 // Use scenario metadata, fallback to first case
 const scenarioTitle = scenarioEntry?.data.title || scenarioCases[0].data.caseTitle;
 const scenarioDescription = scenarioEntry?.data.description || scenarioCases[0].data.caseTitle;
+const scenarioCategory = scenarioEntry?.data.category || undefined;
 
 // Render scenario content if it exists
 let scenarioContent = null;
@@ -44,6 +46,18 @@ if (scenarioEntry) {
 
 // Sort variants for readability.
 scenarioCases.sort((a, b) => a.data.id.localeCompare(b.data.id));
+
+const flowCases = scenarioCases.map((c) => ({
+  id: c.data.id,
+  caseTitle: c.data.caseTitle,
+  os: c.data.os,
+  browser: c.data.browser,
+  device: c.data.device,
+  keyboard: c.data.keyboard,
+  status: c.data.status,
+  slug: c.slug,
+  tags: c.data.tags ?? [],
+}));
 
 // Build compatibility matrix: Browser x OS
 const browsers = Array.from(new Set(scenarioCases.map((c) => c.data.browser))).sort();
@@ -174,6 +188,39 @@ const relatedScenarios = allScenarios
           </div>
         )}
       </header>
+
+      <section
+        aria-label="Scenario flow"
+        style="
+          border-radius: 0.75rem;
+          border: 1px solid var(--border-light);
+          background: var(--bg-surface);
+          padding: 0.9rem 1rem;
+          margin-bottom: 1.25rem;
+        "
+      >
+        <h2
+          style="
+            font-size: 0.95rem;
+            margin: 0 0 0.4rem 0;
+          "
+        >
+          Scenario flow
+        </h2>
+        <p style="margin: 0 0 0.6rem 0; color: var(--text-secondary); font-size: 0.85rem;">
+          Visual view of how this scenario connects to its concrete cases and environments. Nodes can be dragged and clicked.
+        </p>
+        <div style="height: 520px; border-radius: 0.6rem; border: 1px solid var(--border-light); overflow: hidden;">
+          <ScenarioFlow
+            client:load
+            scenarioId={scenarioId}
+            scenarioTitle={scenarioTitle}
+            scenarioDescription={scenarioDescription}
+            scenarioCategory={scenarioCategory}
+            cases={flowCases}
+          />
+        </div>
+      </section>
 
       <section
         aria-label="Variants for this scenario"
