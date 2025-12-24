@@ -119,11 +119,7 @@ const { Content } = await entry.render();
           class="sticky top-0 h-screen overflow-y-auto w-[240px] min-w-[240px] border-r border-border-light bg-bg-muted p-0 text-sm flex-shrink-0"
         >
           <div class="p-4 px-3 border-b border-border-light bg-bg-surface">
-            <div class="flex justify-between">
-                align-items: center;
-                margin-bottom: 0.5rem;
-              "
-            >
+            <div class="flex justify-between items-center mb-2">
               <span class="font-semibold text-sm">Cases</span>
               <a
                 href="/cases"
@@ -194,15 +190,18 @@ const { Content } = await entry.render();
                         <li class="m-0">
                           <a
                             href={`/cases/${c.slug}`}
-                            title={c.data.caseTitle}
+                            title={`${c.data.id}: ${c.data.caseTitle} (${c.data.browser})`}
                             class:list={[
-                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
+                              'block px-3 py-1.5 no-underline text-sm transition-colors',
                               c.slug === slug
                                 ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
                                 : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
                             ]}
                           >
-                            {c.data.caseTitle}
+                            <div class="truncate">{c.data.caseTitle}</div>
+                            <div class="text-xs text-text-secondary mt-0.5 truncate">
+                              {c.data.id} · {c.data.browser}
+                            </div>
                           </a>
                         </li>
                       ))}
