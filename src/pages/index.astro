@@ -48,6 +48,20 @@ const browserList = Array.from(new Set(cases.map((c) => c.data.browser))).sort()
 const confirmedCases = cases.filter((c) => c.data.status === 'confirmed').length;
 const draftCases = cases.filter((c) => c.data.status === 'draft').length;
 
+// Category statistics
+const imeCases = cases.filter((c) => c.data.tags.some((tag) => tag.toLowerCase().includes('ime') || tag.toLowerCase().includes('composition'))).length;
+const formattingCases = cases.filter((c) => c.data.tags.some((tag) => tag.toLowerCase().includes('formatting') || tag.toLowerCase().includes('bold') || tag.toLowerCase().includes('italic'))).length;
+const selectionCases = cases.filter((c) => c.data.tags.some((tag) => tag.toLowerCase().includes('selection') || tag.toLowerCase().includes('caret'))).length;
+const pasteCases = cases.filter((c) => c.data.tags.some((tag) => tag.toLowerCase().includes('paste') || tag.toLowerCase().includes('clipboard'))).length;
+
+// Scenarios by category
+const scenariosByCategory = scenarios.reduce((acc, s) => {
+  const category = s.data.category || 'other';
+  if (!acc[category]) acc[category] = [];
+  acc[category].push(s);
+  return acc;
+}, {} as Record<string, typeof scenarios>);
+
 // Recently added cases (sorted by ID, assuming higher ID = newer)
 const recentlyAddedCases = [...cases]
   .sort((a, b) => b.data.id.localeCompare(a.data.id))
@@ -78,29 +92,44 @@ const recentlyAddedScenarios = scenarios
     <BrowserDetectionBanner client:load />
     <main class="max-w-[1280px] mx-auto px-8 py-8 pb-12">
       <!-- Hero Section -->
-      <section data-ui="hero" class="text-center py-12 px-4 mb-8 rounded-[20px] border border-border-light" style="background: var(--hero-gradient);">
-        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-bg-surface border border-border-light rounded-full text-xs text-text-secondary mb-4">
-          <span class="text-base">📝</span>
-          <span>Real-world contenteditable research</span>
-        </div>
-        <h1 class="text-5xl font-extrabold m-0 mb-3 font-mono tracking-tight">
-          contenteditable<span class="text-accent-primary">.</span>lab
-        </h1>
-        <p class="text-lg text-text-secondary max-w-[600px] mx-auto mb-6 leading-relaxed">
-          Ever wondered why your contenteditable behaves differently in Safari vs Chrome? 
-          Or why IME composition (Chinese, Japanese, Korean, and more) breaks in some browsers? 
-          We're documenting these real-world quirks across all languages and input methods 
-          so you don't have to discover them the hard way. Each scenario groups multiple cases across 
-          different operating systems, browsers, and keyboard setups.
-        </p>
-        <div class="flex gap-3 justify-center flex-wrap">
-          <a href="/cases" class="inline-flex items-center gap-2 px-6 py-3 bg-accent-primary text-white rounded-lg font-semibold transition-all hover:bg-accent-primary-hover hover:text-white hover:-translate-y-0.5 hover:shadow-lg no-underline">
-            Browse all cases
-            <span>→</span>
-          </a>
-          <a href="/playground" class="inline-flex items-center px-6 py-3 bg-bg-surface text-text-primary border border-border-medium rounded-lg font-medium transition-all hover:border-accent-primary hover:bg-bg-muted hover:text-accent-primary no-underline">
-            Open playground
-          </a>
+      <section data-ui="hero" class="text-center py-16 px-4 mb-10 rounded-[24px] border border-border-light relative overflow-hidden" style="background: var(--hero-gradient);">
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-bg-surface/90 backdrop-blur-sm border border-border-light rounded-full text-xs text-text-secondary mb-5 shadow-sm">
+            <span class="text-base">📝</span>
+            <span>Real-world contenteditable research</span>
+          </div>
+          <h1 class="text-6xl font-extrabold m-0 mb-4 font-mono tracking-tight">
+            contenteditable<span class="text-accent-primary">.</span>lab
+          </h1>
+          <p class="text-xl text-text-secondary max-w-[700px] mx-auto mb-8 leading-relaxed">
+            Ever wondered why your contenteditable behaves differently in Safari vs Chrome? 
+            Or why IME composition (Chinese, Japanese, Korean, and more) breaks in some browsers? 
+            We're documenting these real-world quirks across all languages and input methods 
+            so you don't have to discover them the hard way.
+          </p>
+          <div class="flex gap-3 justify-center flex-wrap mb-6">
+            <a href="/cases" class="inline-flex items-center gap-2 px-7 py-3.5 bg-accent-primary text-white rounded-lg font-semibold text-base transition-all hover:bg-accent-primary-hover hover:text-white hover:-translate-y-0.5 hover:shadow-xl no-underline">
+              Browse all cases
+              <span>→</span>
+            </a>
+            <a href="/playground" class="inline-flex items-center px-7 py-3.5 bg-bg-surface text-text-primary border border-border-medium rounded-lg font-medium text-base transition-all hover:border-accent-primary hover:bg-bg-muted hover:text-accent-primary hover:shadow-md no-underline">
+              Open playground
+            </a>
+          </div>
+          <div class="flex items-center justify-center gap-6 text-sm text-text-muted">
+            <div class="flex items-center gap-1.5">
+              <span class="text-base">✓</span>
+              <span>{totalCases} documented cases</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-base">🌍</span>
+              <span>All languages & IMEs</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-base">🔬</span>
+              <span>Real-world tested</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -172,30 +201,55 @@ const recentlyAddedScenarios = scenarios
       )}
 
       <!-- Stats Grid -->
-      <section data-ui="stats" class="grid grid-cols-6 gap-4 mb-8">
-        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
-          <div class="text-3xl font-bold leading-none text-accent-primary">{totalCases}</div>
-          <div class="text-xs text-text-muted mt-1.5">Total Cases</div>
+      <section data-ui="stats" class="mb-10">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+          <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center transition-all hover:border-accent-primary hover:shadow-md">
+            <div class="text-3xl font-bold leading-none text-accent-primary mb-1">{totalCases}</div>
+            <div class="text-xs text-text-muted">Total Cases</div>
+          </div>
+          <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center transition-all hover:border-accent-primary hover:shadow-md">
+            <div class="text-3xl font-bold leading-none mb-1" style="color: var(--category-ime);">{totalScenarios}</div>
+            <div class="text-xs text-text-muted">Scenarios</div>
+          </div>
+          <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center transition-all hover:border-accent-primary hover:shadow-md">
+            <div class="text-3xl font-bold leading-none mb-1" style="color: var(--category-formatting);">{osList.length}</div>
+            <div class="text-xs text-text-muted">OS Variants</div>
+          </div>
+          <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center transition-all hover:border-accent-primary hover:shadow-md">
+            <div class="text-3xl font-bold leading-none mb-1" style="color: var(--category-events);">{browserList.length}</div>
+            <div class="text-xs text-text-muted">Browsers</div>
+          </div>
+          <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center transition-all hover:border-accent-primary hover:shadow-md">
+            <div class="text-3xl font-bold leading-none mb-1" style="color: var(--status-confirmed);">{confirmedCases}</div>
+            <div class="text-xs text-text-muted">Confirmed</div>
+          </div>
+          <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center transition-all hover:border-accent-primary hover:shadow-md">
+            <div class="text-3xl font-bold leading-none mb-1" style="color: var(--status-draft);">{draftCases}</div>
+            <div class="text-xs text-text-muted">Draft</div>
+          </div>
         </div>
-        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
-          <div class="text-3xl font-bold leading-none" style="color: var(--category-ime);">{totalScenarios}</div>
-          <div class="text-xs text-text-muted mt-1.5">Scenarios</div>
-        </div>
-        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
-          <div class="text-3xl font-bold leading-none" style="color: var(--category-formatting);">{osList.length}</div>
-          <div class="text-xs text-text-muted mt-1.5">OS Variants</div>
-        </div>
-        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
-          <div class="text-3xl font-bold leading-none" style="color: var(--category-events);">{browserList.length}</div>
-          <div class="text-xs text-text-muted mt-1.5">Browsers</div>
-        </div>
-        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
-          <div class="text-3xl font-bold leading-none" style="color: var(--status-confirmed);">{confirmedCases}</div>
-          <div class="text-xs text-text-muted mt-1.5">Confirmed</div>
-        </div>
-        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
-          <div class="text-3xl font-bold leading-none" style="color: var(--status-draft);">{draftCases}</div>
-          <div class="text-xs text-text-muted mt-1.5">Draft</div>
+        
+        <!-- Category Breakdown -->
+        <div class="bg-gradient-to-br from-bg-muted/50 to-bg-surface border border-border-light rounded-xl p-5">
+          <h3 class="text-sm font-semibold text-text-primary mb-3">Cases by Category</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="text-center">
+              <div class="text-xl font-bold mb-0.5" style="color: var(--category-ime);">{imeCases}</div>
+              <div class="text-xs text-text-muted">IME & Composition</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xl font-bold mb-0.5" style="color: var(--category-formatting);">{formattingCases}</div>
+              <div class="text-xs text-text-muted">Formatting</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xl font-bold mb-0.5" style="color: var(--category-selection);">{selectionCases}</div>
+              <div class="text-xs text-text-muted">Selection</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xl font-bold mb-0.5" style="color: var(--category-clipboard);">{pasteCases}</div>
+              <div class="text-xs text-text-muted">Paste & Clipboard</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -209,8 +263,10 @@ const recentlyAddedScenarios = scenarios
           </div>
         </div>
 
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3 mb-4">
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-3 mb-4">
           {latestScenarios.slice(0, 6).map((item, idx) => {
+            const scenarioTitle = item.scenarioEntry?.data.title || item.scenarioId;
+            const scenarioCases = cases.filter((c) => c.data.scenarioId === item.scenarioId);
             const colors = [
               { bg: 'linear-gradient(135deg, #ede9fe, #fae8ff)', border: '#c4b5fd' },
               { bg: 'linear-gradient(135deg, #cffafe, #e0f2fe)', border: '#67e8f9' },
@@ -223,15 +279,16 @@ const recentlyAddedScenarios = scenarios
             return (
               <a
                 href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}
-                class="block p-3.5 px-4 rounded-lg border border-transparent transition-all hover:-translate-y-0.5 hover:shadow-lg no-underline"
+                class="block p-4 rounded-lg border transition-all hover:-translate-y-1 hover:shadow-xl no-underline group"
                 style={`background: ${color.bg}; border-color: ${color.border};`}
               >
-                <div class="text-sm font-semibold text-text-primary mb-1">{item.scenarioId}</div>
-                <div class="text-xs text-text-muted">
-                  {item.representative.data.os}
-                  {item.representative.data.osVersion && ` ${item.representative.data.osVersion}`} ·{' '}
-                  {item.representative.data.browser}
-                  {item.representative.data.browserVersion && ` ${item.representative.data.browserVersion}`}
+                <div class="text-sm font-semibold text-text-primary mb-1.5 line-clamp-2 group-hover:text-accent-primary transition-colors">{scenarioTitle}</div>
+                <div class="text-xs text-text-muted mb-2 font-mono opacity-75">{item.scenarioId}</div>
+                <div class="flex items-center justify-between">
+                  <div class="text-xs text-text-muted">
+                    {scenarioCases.length} case{scenarioCases.length === 1 ? '' : 's'}
+                  </div>
+                  <span class="text-xs text-text-muted group-hover:text-accent-primary transition-colors">→</span>
                 </div>
               </a>
             );
@@ -240,6 +297,39 @@ const recentlyAddedScenarios = scenarios
         <a href="/scenarios" class="inline-flex items-center mt-4 text-sm font-medium text-accent-primary hover:underline">
           View all scenarios →
         </a>
+      </section>
+
+      <!-- Quick Links -->
+      <section data-ui="quick-links" class="bg-bg-surface border border-border-light rounded-2xl p-6 mb-6">
+        <div class="flex items-start gap-4 mb-5">
+          <div class="text-3xl w-12 h-12 flex items-center justify-center bg-bg-muted rounded-xl flex-shrink-0">⚡</div>
+          <div>
+            <h2 class="text-lg m-0 mb-1">Quick Links</h2>
+            <p class="text-sm text-text-muted m-0">Jump to popular sections and resources.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <a href="/cases" class="flex flex-col items-center gap-2 p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary hover:bg-accent-primary/5 transition-all group no-underline">
+            <span class="text-2xl">📋</span>
+            <span class="text-sm font-medium text-text-primary group-hover:text-accent-primary">All Cases</span>
+            <span class="text-xs text-text-muted">{totalCases} cases</span>
+          </a>
+          <a href="/scenarios" class="flex flex-col items-center gap-2 p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary hover:bg-accent-primary/5 transition-all group no-underline">
+            <span class="text-2xl">🔬</span>
+            <span class="text-sm font-medium text-text-primary group-hover:text-accent-primary">Scenarios</span>
+            <span class="text-xs text-text-muted">{totalScenarios} scenarios</span>
+          </a>
+          <a href="/playground" class="flex flex-col items-center gap-2 p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary hover:bg-accent-primary/5 transition-all group no-underline">
+            <span class="text-2xl">🧪</span>
+            <span class="text-sm font-medium text-text-primary group-hover:text-accent-primary">Playground</span>
+            <span class="text-xs text-text-muted">Test & explore</span>
+          </a>
+          <a href="/docs" class="flex flex-col items-center gap-2 p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary hover:bg-accent-primary/5 transition-all group no-underline">
+            <span class="text-2xl">📚</span>
+            <span class="text-sm font-medium text-text-primary group-hover:text-accent-primary">Documentation</span>
+            <span class="text-xs text-text-muted">Guides & API</span>
+          </a>
+        </div>
       </section>
 
       <!-- Browse by category -->
@@ -348,6 +438,61 @@ const recentlyAddedScenarios = scenarios
         </div>
       </section>
 
+      <!-- Community & Communication -->
+      <section data-ui="community" class="bg-gradient-to-br from-accent-primary/5 via-accent-secondary/5 to-accent-primary/5 border border-border-light rounded-2xl p-6 mb-6">
+        <div class="flex items-start gap-4 mb-5">
+          <div class="text-3xl w-12 h-12 flex items-center justify-center bg-bg-muted rounded-xl flex-shrink-0">💬</div>
+          <div>
+            <h2 class="text-lg m-0 mb-1">Join the Community</h2>
+            <p class="text-sm text-text-muted m-0">Share your findings, ask questions, or contribute to the project. Your input helps make this catalog more comprehensive.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <a
+            href="https://github.com/easylogic/contenteditable/discussions"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex flex-col gap-2 p-4 bg-bg-surface border border-border-light rounded-lg hover:border-accent-primary hover:shadow-md transition-all group no-underline"
+          >
+            <div class="text-2xl">💭</div>
+            <h3 class="text-sm font-semibold text-text-primary m-0 group-hover:text-accent-primary transition-colors">Discussions</h3>
+            <p class="text-xs text-text-muted m-0">Share ideas, ask questions, and discuss contenteditable behavior</p>
+          </a>
+
+          <a
+            href="https://github.com/easylogic/contenteditable/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex flex-col gap-2 p-4 bg-bg-surface border border-border-light rounded-lg hover:border-accent-primary hover:shadow-md transition-all group no-underline"
+          >
+            <div class="text-2xl">🐛</div>
+            <h3 class="text-sm font-semibold text-text-primary m-0 group-hover:text-accent-primary transition-colors">Report Issues</h3>
+            <p class="text-xs text-text-muted m-0">Found a bug or have a feature request? Open an issue</p>
+          </a>
+
+          <a
+            href="https://github.com/easylogic/contenteditable"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex flex-col gap-2 p-4 bg-bg-surface border border-border-light rounded-lg hover:border-accent-primary hover:shadow-md transition-all group no-underline"
+          >
+            <div class="text-2xl">⭐</div>
+            <h3 class="text-sm font-semibold text-text-primary m-0 group-hover:text-accent-primary transition-colors">Star on GitHub</h3>
+            <p class="text-xs text-text-muted m-0">Show your support by starring the repository</p>
+          </a>
+
+          <a
+            href="/CONTRIBUTING.md"
+            class="flex flex-col gap-2 p-4 bg-bg-surface border border-border-light rounded-lg hover:border-accent-primary hover:shadow-md transition-all group no-underline"
+          >
+            <div class="text-2xl">🤝</div>
+            <h3 class="text-sm font-semibold text-text-primary m-0 group-hover:text-accent-primary transition-colors">Contribute</h3>
+            <p class="text-xs text-text-muted m-0">Learn how to add cases, improve docs, or help translate</p>
+          </a>
+        </div>
+      </section>
+
       <!-- Latest scenarios -->
       <section data-ui="latest" class="bg-bg-surface border border-border-light rounded-2xl p-6">
         <div class="flex items-start gap-4 mb-5">
@@ -358,24 +503,25 @@ const recentlyAddedScenarios = scenarios
           </div>
         </div>
 
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5">
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
           {latestScenarios.map((item) => {
             const scenarioTitle = item.scenarioEntry?.data.title || item.representative.data.caseTitle;
+            const scenarioCases = cases.filter((c) => c.data.scenarioId === item.scenarioId);
             return (
-              <article class="p-3.5 px-4 bg-bg-surface border border-border-light rounded-lg transition-colors hover:border-accent-primary">
-                <h3 class="text-sm m-0 mb-1 font-semibold text-text-primary">{scenarioTitle}</h3>
-                <p class="text-xs text-text-muted m-0 mb-1.5 font-mono">
+              <article class="p-4 bg-bg-surface border border-border-light rounded-lg transition-all hover:border-accent-primary hover:shadow-md group">
+                <h3 class="text-sm m-0 mb-2 font-semibold text-text-primary line-clamp-2 group-hover:text-accent-primary transition-colors">{scenarioTitle}</h3>
+                <p class="text-xs text-text-muted m-0 mb-2 font-mono opacity-75">
                   {item.scenarioId}
                 </p>
-                <p class="text-xs text-text-muted m-0 mb-2">
-                  {item.representative.data.id} · {item.representative.data.os} · {item.representative.data.browser}
-                </p>
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-xs text-text-muted m-0">
+                    {scenarioCases.length} case{scenarioCases.length === 1 ? '' : 's'} · {item.representative.data.os}
+                  </p>
+                </div>
                 <div class="flex gap-3 text-xs">
-                  <a href={`/scenarios/${encodeURIComponent(item.scenarioId)}`} class="font-medium text-accent-primary hover:underline no-underline">
-                    Scenario →
-                  </a>
-                  <a href={`/cases/${item.representative.slug}`} class="font-medium text-text-muted hover:text-text-primary hover:underline no-underline">
-                    Case →
+                  <a href={`/scenarios/${encodeURIComponent(item.scenarioId)}`} class="font-medium text-accent-primary hover:underline no-underline flex items-center gap-1">
+                    View scenario
+                    <span>→</span>
                   </a>
                 </div>
               </article>

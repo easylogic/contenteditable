@@ -1,0 +1,74 @@
+---
+interface Props {
+  repo: string;
+  repoId: string;
+  category?: string;
+  categoryId?: string;
+  mapping?: string;
+  reactionsEnabled?: boolean;
+  emitMetadata?: boolean;
+  inputPosition?: 'top' | 'bottom';
+  theme?: 'light' | 'dark' | 'preferred_color_scheme';
+  lang?: string;
+  loading?: 'lazy' | 'eager';
+}
+
+const {
+  repo = 'easylogic/contenteditable',
+  repoId = 'R_kgDOQpz-Uw', // Will be set after giscus setup
+  category = 'Q&A',
+  categoryId = 'DIC_kwDOQpz-U84C0O4K', // Will be set after giscus setup
+  mapping = 'pathname',
+  reactionsEnabled = true,
+  emitMetadata = false,
+  inputPosition = 'bottom',
+  theme = 'preferred_color_scheme',
+  lang = 'en',
+  loading = 'lazy',
+} = Astro.props;
+---
+
+<div class="mt-8 pt-8 border-t border-border-light">
+  <div class="mb-4">
+    <h2 class="text-lg font-semibold text-text-primary m-0 mb-2">Comments & Discussion</h2>
+    <p class="text-sm text-text-muted m-0">
+      Have questions, suggestions, or want to share your experience? Join the discussion below.
+    </p>
+  </div>
+  
+  <div id="giscus-root" class="mt-4"></div>
+</div>
+
+<script
+  src="https://giscus.app/client.js"
+  data-repo={repo}
+  data-repo-id={repoId}
+  data-category={category}
+  data-category-id={categoryId}
+  data-mapping={mapping}
+  data-strict="0"
+  data-reactions-enabled={reactionsEnabled ? '1' : '0'}
+  data-emit-metadata={emitMetadata ? '1' : '0'}
+  data-input-position={inputPosition}
+  data-theme={theme}
+  data-lang={lang}
+  crossorigin="anonymous"
+  async
+  is:inline
+></script>
+
+<style>
+  #giscus-root {
+    min-height: 200px;
+  }
+  
+  /* Customize giscus theme to match site */
+  :root {
+    --giscus-border-color: var(--border-light);
+  }
+  
+  [data-theme="dark"] {
+    --giscus-border-color: var(--border-light);
+  }
+</style>
+

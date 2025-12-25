@@ -9,6 +9,8 @@ import { CaseExport } from '../../components/CaseExport';
 import { CaseVerification } from '../../components/CaseVerification';
 import { DomChangeAnimation } from '../../components/DomChangeAnimation';
 import CasesSidebar from '../../components/CasesSidebar.astro';
+import EditOnGitHub from '../../components/EditOnGitHub.astro';
+import Comments from '../../components/Comments.astro';
 import '../../styles/global.css';
 
 export const getStaticPaths = (async () => {
@@ -123,7 +125,7 @@ const { Content } = await entry.render();
               </div>
             )}
 
-            <div class="mt-3">
+            <div class="mt-3 flex items-center gap-3 flex-wrap">
               <CaseExport
                 client:load
                 caseData={{
@@ -144,6 +146,7 @@ const { Content } = await entry.render();
                   status: entry.data.status,
                 }}
               />
+              <EditOnGitHub filePath={`src/content/cases/${entry.slug}.md`} />
             </div>
           </header>
 
@@ -358,6 +361,18 @@ const { Content } = await entry.render();
               tags: c.data.tags,
               scenarioId: c.data.scenarioId,
             }))}
+          />
+
+          <Comments
+            repo="easylogic/contenteditable"
+            repoId=""
+            category="Q&A"
+            categoryId=""
+            mapping={`pathname`}
+            reactionsEnabled={true}
+            inputPosition="bottom"
+            theme="preferred_color_scheme"
+            lang="en"
           />
         </section>
       </div>

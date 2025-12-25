@@ -422,3 +422,192 @@ th {
   opacity: 1;
 }
 
+/* Scenario markdown content styling */
+.scenario-markdown {
+  color: var(--text-primary);
+}
+
+.scenario-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.scenario-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.scenario-markdown h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.scenario-markdown h2:first-of-type {
+  margin-top: 0;
+}
+
+.scenario-markdown h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenario-markdown h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenario-markdown p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+
+.scenario-markdown p + p {
+  margin-top: 0.75rem;
+}
+
+.scenario-markdown ul,
+.scenario-markdown ol,
+.scenario-markdown menu {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.scenario-markdown ul {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+.scenario-markdown ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+
+.scenario-markdown menu {
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+.scenario-markdown li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+  display: list-item;
+}
+
+.scenario-markdown li > p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenario-markdown li > ul,
+.scenario-markdown li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.scenario-markdown strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.scenario-markdown em {
+  font-style: italic;
+}
+
+.scenario-markdown code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-muted);
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  color: var(--accent-primary);
+  border: 1px solid var(--border-light);
+  font-weight: 500;
+}
+
+.scenario-markdown pre {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.scenario-markdown pre code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+}
+
+.scenario-markdown blockquote {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  padding-left: 1.25rem;
+  border-left: 4px solid var(--accent-primary);
+  background: rgba(0, 102, 255, 0.05);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.scenario-markdown a {
+  color: var(--accent-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.scenario-markdown a:hover {
+  color: var(--accent-primary-hover);
+}
+
+.scenario-markdown hr {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: none;
+  border-top: 1px solid var(--border-light);
+}
+
+.scenario-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9em;
+}
+
+.scenario-markdown th,
+.scenario-markdown td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-light);
+  text-align: left;
+}
+
+.scenario-markdown th {
+  background: var(--bg-muted);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.scenario-markdown td {
+  color: var(--text-secondary);
+}
+
