@@ -35,6 +35,13 @@
     }
   },
   {
+    "id": "invisible-characters-comprehensive",
+    "labels": {
+      "en": "Invisible characters (ZWNBSP, NBSP, LF, CR, TAB)",
+      "ko": "보이지 않는 문자 (ZWNBSP, NBSP, LF, CR, TAB)"
+    }
+  },
+  {
     "id": "rich-inline-list-previous-default",
     "labels": {
       "en": "Rich inline + nested + list (previous default)",
@@ -74,6 +81,55 @@
     "labels": {
       "en": "Mixed media (images + videos + text)",
       "ko": "혼합 미디어 (이미지 + 비디오 + 텍스트)"
+    }
+  },
+  {
+    "id": "plain-japanese-paragraph",
+    "labels": {
+      "en": "Plain paragraph (Japanese IME)",
+      "ko": "기본 문단 (일본어 IME)"
+    }
+  },
+  {
+    "id": "plain-chinese-paragraph",
+    "labels": {
+      "en": "Plain paragraph (Chinese IME)",
+      "ko": "기본 문단 (중국어 IME)"
+    }
+  },
+  {
+    "id": "plain-thai-paragraph",
+    "labels": {
+      "en": "Plain paragraph (Thai IME)",
+      "ko": "기본 문단 (태국어 IME)"
+    }
+  },
+  {
+    "id": "plain-vietnamese-paragraph",
+    "labels": {
+      "en": "Plain paragraph (Vietnamese IME)",
+      "ko": "기본 문단 (베트남어 IME)"
+    }
+  },
+  {
+    "id": "plain-arabic-paragraph",
+    "labels": {
+      "en": "Plain paragraph (Arabic IME, RTL)",
+      "ko": "기본 문단 (아랍어 IME, RTL)"
+    }
+  },
+  {
+    "id": "plain-hindi-paragraph",
+    "labels": {
+      "en": "Plain paragraph (Hindi IME, Devanagari)",
+      "ko": "기본 문단 (힌디어 IME, 데바나가리)"
+    }
+  },
+  {
+    "id": "noneditable-elements",
+    "labels": {
+      "en": "Non-editable elements (contenteditable=false)",
+      "ko": "편집 불가능한 요소 (contenteditable=false)"
     }
   }
 ]
