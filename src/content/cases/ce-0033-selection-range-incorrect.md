@@ -17,6 +17,16 @@ tags:
   - elements
   - edge
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<p>First paragraph</p><p>Second paragraph</p>'
+    description: "두 개의 단락, 첫 번째 단락 중간부터 두 번째 단락 중간까지 선택됨"
+  - label: "Selection Range (Bug)"
+    html: '<p>First paragraph</p><p>Second paragraph</p>'
+    description: "getSelection()이 잘못된 범위 반환, 시각적 선택과 불일치"
+  - label: "✅ Expected"
+    html: '<p>First paragraph</p><p>Second paragraph</p>'
+    description: "정상: getSelection()이 시각적 선택과 일치하는 정확한 범위 반환"
 ---
 
 ### Phenomenon

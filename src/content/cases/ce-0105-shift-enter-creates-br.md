@@ -17,6 +17,16 @@ tags:
   - br
   - all-browsers
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello'
+    description: "기본 텍스트"
+  - label: "After Shift+Enter"
+    html: 'Hello<br>'
+    description: "Shift+Enter로 &lt;br&gt; 요소 생성 (정상 동작)"
+  - label: "✅ Expected"
+    html: 'Hello<br>'
+    description: "정상: Shift+Enter로 줄바꿈, Enter로는 새 단락 생성 (현재 동작이 올바름)"
 ---
 
 ### Phenomenon

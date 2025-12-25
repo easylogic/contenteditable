@@ -16,6 +16,16 @@ tags:
   - selection
   - safari
 status: draft
+domSteps:
+  - label: "Before Copy"
+    html: 'Hello <span style="background: #bfdbfe;">World</span> Test'
+    description: "텍스트 선택됨 (World가 하이라이트)"
+  - label: "After Copy (Bug)"
+    html: 'Hello World| Test'
+    description: "복사 후 선택이 해제되고 커서로 축소됨"
+  - label: "✅ Expected"
+    html: 'Hello <span style="background: #bfdbfe;">World</span> Test'
+    description: "정상: 복사 후에도 선택 상태 유지"
 ---
 
 ### Phenomenon

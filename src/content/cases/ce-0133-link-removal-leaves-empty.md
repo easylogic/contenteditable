@@ -17,6 +17,16 @@ tags:
   - empty
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<a href="https://example.com">Link text</a>'
+    description: "링크 요소"
+  - label: "After Unlink (Bug)"
+    html: '<a href="https://example.com"></a>Link text'
+    description: "링크 제거 후 빈 앵커 태그가 남음"
+  - label: "✅ Expected"
+    html: 'Link text'
+    description: "정상: 링크 제거 후 텍스트만 남고 빈 태그 없음"
 ---
 
 ### Phenomenon

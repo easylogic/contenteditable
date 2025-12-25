@@ -17,6 +17,19 @@ tags:
   - formatting
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello World'
+    description: "기본 텍스트"
+  - label: "Insert HTML"
+    html: '<p><strong>Bold text</strong></p>'
+    description: "insertHTML로 삽입할 HTML"
+  - label: "❌ After insertHTML (Bug)"
+    html: 'Hello <strong>Bold text</strong> World'
+    description: "DOM 구조 손상, &lt;p&gt; 태그 손실, 중첩 구조 평탄화"
+  - label: "✅ Expected"
+    html: 'Hello <p><strong>Bold text</strong></p> World'
+    description: "정상: HTML 구조 보존, 중첩 요소 유지"
 ---
 
 ### Phenomenon

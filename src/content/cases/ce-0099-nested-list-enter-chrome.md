@@ -17,6 +17,16 @@ tags:
   - enter
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<ul><li>Item 1<ul><li>Nested item</li></ul></li></ul>'
+    description: "중첩 리스트, 'Nested item' 내부에 커서"
+  - label: "After Enter"
+    html: '<ul><li>Item 1<ul><li>Nested item</li><li></li></ul></li></ul>'
+    description: "Enter로 같은 중첩 레벨에 새 항목 생성 (정상 동작)"
+  - label: "✅ Expected"
+    html: '<ul><li>Item 1<ul><li>Nested item</li><li></li></ul></li></ul>'
+    description: "정상: 같은 중첩 레벨에 새 항목 생성 (현재 동작이 올바름)"
 ---
 
 ### Phenomenon

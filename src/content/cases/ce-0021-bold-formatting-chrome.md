@@ -16,6 +16,16 @@ tags:
   - bold
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<b>Hello</b>|'
+    description: "굵은 텍스트, 커서(|)가 끝에 위치"
+  - label: "After Typing (Bug)"
+    html: '<b>Hello</b>World'
+    description: "새로 입력한 텍스트가 굵게 적용되지 않음"
+  - label: "✅ Expected"
+    html: '<b>HelloWorld</b>'
+    description: "정상: 새로 입력한 텍스트도 굵게 상속됨"
 ---
 
 ### Phenomenon

@@ -17,6 +17,16 @@ tags:
   - structure
   - firefox
 status: draft
+domSteps:
+  - label: "Clipboard"
+    html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr><tr><td>Cell 3</td><td>Cell 4</td></tr></table>'
+    description: "복사한 테이블 구조"
+  - label: "❌ After Paste"
+    html: 'Cell 1 Cell 2<br>Cell 3 Cell 4'
+    description: "테이블 구조 손실, 평문 텍스트로 변환"
+  - label: "✅ Expected"
+    html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr><tr><td>Cell 3</td><td>Cell 4</td></tr></table>'
+    description: "테이블 구조 유지"
 ---
 
 ### Phenomenon

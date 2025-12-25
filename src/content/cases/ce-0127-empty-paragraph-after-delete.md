@@ -17,6 +17,16 @@ tags:
   - cleanup
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<p>Text 1</p><p>Text 2</p><p>Text 3</p>'
+    description: "여러 단락의 텍스트"
+  - label: "After Delete All (Bug)"
+    html: '<p><br></p><p><br></p><p><br></p>'
+    description: "모든 텍스트 삭제 후 빈 단락(&lt;br&gt; 포함) 누적"
+  - label: "✅ Expected"
+    html: '<p><br></p>'
+    description: "정상: 커서 배치를 위한 하나의 빈 단락만 유지"
 ---
 
 ### Phenomenon

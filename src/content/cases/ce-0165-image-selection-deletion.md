@@ -17,6 +17,19 @@ tags:
   - selection
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<div><img src="image.jpg" alt="Image"></div>'
+    description: "이미지가 선택된 상태"
+  - label: "After First Delete (Bug)"
+    html: '<div><img src="image.jpg" alt="Image"></div>'
+    description: "첫 번째 Delete 키 입력 시 이미지 삭제 안 됨"
+  - label: "After Multiple Delete"
+    html: '<div></div>'
+    description: "여러 번 Delete 키 입력 후 삭제됨"
+  - label: "✅ Expected"
+    html: ''
+    description: "정상: 첫 번째 Delete 키 입력으로 즉시 삭제"
 ---
 
 ### Phenomenon

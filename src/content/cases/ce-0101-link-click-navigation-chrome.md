@@ -17,6 +17,16 @@ tags:
   - navigation
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<a href="https://example.com">Link text</a>'
+    description: "링크 요소, 클릭 전"
+  - label: "After Single Click (Bug)"
+    html: '<a href="https://example.com">Link text</a>'
+    description: "단일 클릭으로 페이지가 링크 URL로 이동 (텍스트 선택 불가)"
+  - label: "✅ Expected"
+    html: '<a href="https://example.com">Link text</a>'
+    description: "정상: 단일 클릭으로 텍스트 선택 가능, 편집 가능"
 ---
 
 ### Phenomenon

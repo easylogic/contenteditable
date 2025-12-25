@@ -1,0 +1,70 @@
+---
+id: ce-0188
+scenarioId: scenario-ime-composition-focus-blur
+locale: en
+os: macOS
+osVersion: "14.0"
+device: Desktop or Laptop
+deviceVersion: Any
+browser: Safari
+browserVersion: "17.0"
+keyboard: Japanese (IME)
+caseTitle: Japanese IME composition lost when focus changes in Safari
+description: "When composing Japanese text with IME in a contenteditable element, clicking elsewhere or changing focus causes incomplete kanji conversions to be lost. The composition may be cancelled before conversion is complete."
+tags:
+  - composition
+  - ime
+  - focus
+  - blur
+  - japanese
+  - safari
+  - macos
+status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello <span style="text-decoration: underline; background: #fef08a;">かんじ</span>'
+    description: "일본어 로마지 입력 중 (kanji → かんじ), 후보 목록 표시"
+  - label: "After Blur (Bug)"
+    html: 'Hello '
+    description: "포커스 변경으로 조합 취소, 불완전한 한자 변환 손실"
+  - label: "✅ Expected"
+    html: 'Hello 漢字'
+    description: "정상: 조합이 보존되거나 우아하게 처리됨"
+---
+
+### Phenomenon
+
+When composing Japanese text with IME in a `contenteditable` element, clicking elsewhere or changing focus causes incomplete kanji conversions to be lost. The composition may be cancelled before conversion is complete, resulting in lost work.
+
+### Reproduction example
+
+1. Focus the editable area.
+2. Activate Japanese IME.
+3. Type romaji text (e.g., "kanji") and start kanji conversion.
+4. Click elsewhere or change focus before completing the conversion.
+
+### Observed behavior
+
+- The compositionend event fires with incomplete data
+- Incomplete kanji conversions are lost
+- The blur event may fire before or after compositionend
+- Candidate list disappears without committing selection
+
+### Expected behavior
+
+- Composition should be preserved or gracefully handled when focus changes
+- Incomplete conversions should not be lost
+- Event sequence should be predictable and consistent
+
+### Browser Comparison
+
+- **Safari**: Composition may be lost on blur, especially on macOS
+- **Chrome**: May have different behavior
+- **Firefox**: May have different behavior
+
+### Notes and possible direction for workarounds
+
+- Monitor blur and compositionend events to detect composition loss
+- Consider storing pending conversion state for recovery
+- Prevent programmatic blur during active conversion if possible
+

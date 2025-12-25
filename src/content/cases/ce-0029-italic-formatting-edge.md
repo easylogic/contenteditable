@@ -16,6 +16,16 @@ tags:
   - italic
   - edge
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<i>Hello</i>|'
+    description: "이탤릭 텍스트, 커서(|)가 끝에 위치"
+  - label: "After Typing (Bug)"
+    html: '<i>Hello</i>World'
+    description: "새로 입력한 텍스트가 이탤릭 적용되지 않음"
+  - label: "✅ Expected"
+    html: '<i>HelloWorld</i>'
+    description: "정상: 새로 입력한 텍스트도 이탤릭 상속됨"
 ---
 
 ### Phenomenon

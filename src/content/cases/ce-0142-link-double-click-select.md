@@ -18,6 +18,16 @@ tags:
   - navigation
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<a href="https://example.com">Link text</a>'
+    description: "링크 요소"
+  - label: "After Double-Click (Bug)"
+    html: '[Navigated to https://example.com]'
+    description: "더블클릭 시 텍스트 선택되지만 네비게이션도 발생"
+  - label: "✅ Expected"
+    html: '<a href="https://example.com">Link text</a>'
+    description: "정상: 더블클릭으로 텍스트만 선택, 네비게이션 없음"
 ---
 
 ### Phenomenon

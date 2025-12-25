@@ -16,6 +16,19 @@ tags:
   - programmatic
   - safari
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello World'
+    description: "수동으로 입력한 텍스트"
+  - label: "After Programmatic Change"
+    html: 'New content'
+    description: "프로그래밍 방식으로 innerHTML 변경"
+  - label: "After Undo (Bug)"
+    html: 'New content'
+    description: "Undo 스택이 비워져서 이전 수동 편집을 취소할 수 없음"
+  - label: "✅ Expected"
+    html: 'Hello World'
+    description: "정상: Undo로 이전 수동 편집 복원 가능"
 ---
 
 ### Phenomenon

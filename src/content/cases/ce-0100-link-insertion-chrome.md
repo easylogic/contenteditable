@@ -17,6 +17,16 @@ tags:
   - nested
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<a href="url1">Link text</a>'
+    description: "기존 링크"
+  - label: "After New Link (Bug)"
+    html: '<a href="url1"><a href="url2">Link text</a></a>'
+    description: "중첩 링크 생성 (잘못된 HTML)"
+  - label: "✅ Expected"
+    html: '<a href="url2">Link text</a>'
+    description: "정상: 기존 링크 제거 후 새 링크 생성"
 ---
 
 ### Phenomenon

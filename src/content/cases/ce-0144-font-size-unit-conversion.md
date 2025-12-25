@@ -18,6 +18,16 @@ tags:
   - conversion
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<span style="font-size: 1.2em;">Text</span>'
+    description: "상대 단위(em)로 폰트 크기 적용"
+  - label: "After Conversion (Bug)"
+    html: '<span style="font-size: 19.2px;">Text</span>'
+    description: "편집 후 상대 단위가 절대 단위(px)로 변환됨"
+  - label: "✅ Expected"
+    html: '<span style="font-size: 1.2em;">Text</span>'
+    description: "정상: 원래 단위(em) 보존"
 ---
 
 ### Phenomenon

@@ -18,6 +18,19 @@ tags:
   - custom
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello World'
+    description: "기본 텍스트"
+  - label: "After Custom Bold"
+    html: 'Hello <strong>World</strong>'
+    description: "preventDefault()로 커스텀 볼드 적용"
+  - label: "After Undo (Bug)"
+    html: 'Hello <strong>World</strong>'
+    description: "Ctrl+Z로 Undo 불가, 커스텀 작업이 undo 스택에 없음"
+  - label: "✅ Expected"
+    html: 'Hello World'
+    description: "정상: Undo로 커스텀 서식 취소 가능"
 ---
 
 ### Phenomenon

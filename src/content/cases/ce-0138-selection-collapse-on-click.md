@@ -17,6 +17,16 @@ tags:
   - collapse
   - safari
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello <span style="background: yellow;">World</span> Test'
+    description: "선택된 텍스트 (World)"
+  - label: "After Click (Bug)"
+    html: 'Hello World Test'
+    description: "클릭 시 선택이 예상치 못한 위치로 축소되거나 무효화됨"
+  - label: "✅ Expected"
+    html: 'Hello World Test'
+    description: "정상: 클릭 위치로 선택 축소 (예측 가능한 동작)"
 ---
 
 ### Phenomenon

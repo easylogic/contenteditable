@@ -17,6 +17,16 @@ tags:
   - aspect-ratio
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<img src="image.jpg" width="200" height="150" alt="Image">'
+    description: "원본 이미지 (200x150, 비율 4:3)"
+  - label: "After Resize (Bug)"
+    html: '<img src="image.jpg" width="300" height="150" alt="Image">'
+    description: "리사이즈 후 비율 손상 (300x150, 왜곡됨)"
+  - label: "✅ Expected"
+    html: '<img src="image.jpg" width="300" height="225" alt="Image">'
+    description: "정상: 비율 유지 (300x225, 4:3 비율 보존)"
 ---
 
 ### Phenomenon

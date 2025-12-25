@@ -17,6 +17,16 @@ tags:
   - update
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<a href="url1">Link text</a>'
+    description: "기존 링크"
+  - label: "After Programmatic Update (Bug)"
+    html: '<a href="url1">Link text</a>'
+    description: "프로그래밍 방식으로 href 업데이트 시도, DOM에 반영 안 됨"
+  - label: "✅ Expected"
+    html: '<a href="url2">Link text</a>'
+    description: "정상: href 업데이트가 DOM에 즉시 반영됨"
 ---
 
 ### Phenomenon

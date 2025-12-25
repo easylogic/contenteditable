@@ -16,6 +16,16 @@ tags:
   - underline
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<u>Hello</u>|'
+    description: "밑줄 텍스트, 커서(|)가 끝에 위치"
+  - label: "After Typing (Bug)"
+    html: '<u>Hello</u>World'
+    description: "새로 입력한 텍스트가 밑줄 적용되지 않음"
+  - label: "✅ Expected"
+    html: '<u>HelloWorld</u>'
+    description: "정상: 새로 입력한 텍스트도 밑줄 상속됨"
 ---
 
 ### Phenomenon

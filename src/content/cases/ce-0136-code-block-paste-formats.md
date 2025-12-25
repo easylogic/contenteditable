@@ -18,6 +18,19 @@ tags:
   - formatting
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<pre><code>function test() {</code></pre>'
+    description: "코드 블록 구조"
+  - label: "Clipboard"
+    html: '<strong>Bold</strong> Code'
+    description: "복사한 서식 있는 텍스트"
+  - label: "❌ After Paste (Bug)"
+    html: '<p><strong>Bold</strong> Code</p>'
+    description: "코드 블록 구조 손실, &lt;pre&gt;&lt;code&gt;가 &lt;p&gt;로 변환됨"
+  - label: "✅ Expected"
+    html: '<pre><code>Bold Code</code></pre>'
+    description: "정상: 코드 블록 구조 유지, 서식 제거 (평문 텍스트)"
 ---
 
 ### Phenomenon

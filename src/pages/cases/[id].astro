@@ -8,6 +8,7 @@ import RelatedCases from '../../components/RelatedCases.astro';
 import { CaseExport } from '../../components/CaseExport';
 import { CaseVerification } from '../../components/CaseVerification';
 import { DomChangeAnimation } from '../../components/DomChangeAnimation';
+import CasesSidebar from '../../components/CasesSidebar.astro';
 import '../../styles/global.css';
 
 export const getStaticPaths = (async () => {
@@ -32,46 +33,6 @@ if (!entry) {
 const allCases = await getCollection('cases');
 
 const activeView = Astro.url.searchParams.get('view') ?? 'scenario';
-
-const casesByScenario = allCases.reduce(
-  (acc, c) => {
-    const key = c.data.scenarioId;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(c);
-    return acc;
-  },
-  {} as Record<string, typeof allCases>,
-);
-
-const osGroups = allCases.reduce(
-  (acc, c) => {
-    const key = c.data.os;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(c);
-    return acc;
-  },
-  {} as Record<string, typeof allCases>,
-);
-
-const browserGroups = allCases.reduce(
-  (acc, c) => {
-    const key = c.data.browser;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(c);
-    return acc;
-  },
-  {} as Record<string, typeof allCases>,
-);
-
-const deviceGroups = allCases.reduce(
-  (acc, c) => {
-    const key = c.data.device;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(c);
-    return acc;
-  },
-  {} as Record<string, typeof allCases>,
-);
 
 const sameScenarioCases = allCases.filter(
   (c) => c.data.scenarioId === entry.data.scenarioId,
@@ -114,194 +75,11 @@ const { Content } = await entry.render();
   <body>
     <SiteNav />
     <main class="flex max-w-full m-0 p-0">
-        <aside
-          aria-label="Cases"
-          class="sticky top-0 h-screen overflow-y-auto w-[240px] min-w-[240px] border-r border-border-light bg-bg-muted p-0 text-sm flex-shrink-0"
-        >
-          <div class="p-4 px-3 border-b border-border-light bg-bg-surface">
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-semibold text-sm">Cases</span>
-              <a
-                href="/cases"
-                class="text-xs text-accent-primary no-underline"
-              >
-                All →
-              </a>
-            </div>
-
-            <div class="flex flex-wrap gap-1 text-xs">
-              <a
-                href={`?view=scenario`}
-                class:list={[
-                  'px-2 py-0.5 rounded no-underline transition-colors',
-                  activeView === 'scenario'
-                    ? 'bg-accent-primary text-bg-surface border-none'
-                    : 'bg-transparent text-accent-primary border border-border-light',
-                ]}
-              >
-                Scenario
-              </a>
-              <a
-                href={`?view=os`}
-                class:list={[
-                  'px-2 py-0.5 rounded no-underline transition-colors',
-                  activeView === 'os'
-                    ? 'bg-accent-primary text-bg-surface border-none'
-                    : 'bg-transparent text-accent-primary border border-border-light',
-                ]}
-              >
-                OS
-              </a>
-              <a
-                href={`?view=browser`}
-                class:list={[
-                  'px-2 py-0.5 rounded no-underline transition-colors',
-                  activeView === 'browser'
-                    ? 'bg-accent-primary text-bg-surface border-none'
-                    : 'bg-transparent text-accent-primary border border-border-light',
-                ]}
-              >
-                Browser
-              </a>
-              <a
-                href={`?view=device`}
-                class:list={[
-                  'px-2 py-0.5 rounded no-underline transition-colors',
-                  activeView === 'device'
-                    ? 'bg-accent-primary text-bg-surface border-none'
-                    : 'bg-transparent text-accent-primary border border-border-light',
-                ]}
-              >
-                Device
-              </a>
-            </div>
-          </div>
-
-          <nav aria-label="Case list" class="py-2">
-            {activeView === 'scenario' && (
-              <ul class="list-none p-0 m-0">
-                {Object.entries(casesByScenario).map(([scenarioId, scenarioCases]) => (
-                  <li class="mb-2">
-                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
-                      {scenarioId}
-                    </div>
-                    <ul class="list-none p-0 m-0">
-                      {scenarioCases.map((c) => (
-                        <li class="m-0">
-                          <a
-                            href={`/cases/${c.slug}`}
-                            title={`${c.data.id}: ${c.data.caseTitle} (${c.data.browser})`}
-                            class:list={[
-                              'block px-3 py-1.5 no-underline text-sm transition-colors',
-                              c.slug === slug
-                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
-                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
-                            ]}
-                          >
-                            <div class="truncate">{c.data.caseTitle}</div>
-                            <div class="text-xs text-text-secondary mt-0.5 truncate">
-                              {c.data.id} · {c.data.browser}
-                            </div>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {activeView === 'os' && (
-              <ul class="list-none p-0 m-0">
-                {Object.entries(osGroups).map(([os, osCases]) => (
-                  <li class="mb-2">
-                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
-                      {os}
-                    </div>
-                    <ul class="list-none p-0 m-0">
-                      {osCases.map((c) => (
-                        <li class="m-0">
-                          <a
-                            href={`/cases/${c.slug}`}
-                            title={c.data.caseTitle}
-                            class:list={[
-                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
-                              c.slug === slug
-                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
-                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
-                            ]}
-                          >
-                            {c.data.caseTitle}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {activeView === 'browser' && (
-              <ul class="list-none p-0 m-0">
-                {Object.entries(browserGroups).map(([browser, browserCases]) => (
-                  <li class="mb-2">
-                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
-                      {browser}
-                    </div>
-                    <ul class="list-none p-0 m-0">
-                      {browserCases.map((c) => (
-                        <li class="m-0">
-                          <a
-                            href={`/cases/${c.slug}`}
-                            title={c.data.caseTitle}
-                            class:list={[
-                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
-                              c.slug === slug
-                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
-                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
-                            ]}
-                          >
-                            {c.data.caseTitle}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {activeView === 'device' && (
-              <ul class="list-none p-0 m-0">
-                {Object.entries(deviceGroups).map(([device, deviceCases]) => (
-                  <li class="mb-2">
-                    <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
-                      {device}
-                    </div>
-                    <ul class="list-none p-0 m-0">
-                      {deviceCases.map((c) => (
-                        <li class="m-0">
-                          <a
-                            href={`/cases/${c.slug}`}
-                            title={c.data.caseTitle}
-                            class:list={[
-                              'block px-3 py-1.5 no-underline text-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors',
-                              c.slug === slug
-                                ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2]'
-                                : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent',
-                            ]}
-                          >
-                            {c.data.caseTitle}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </nav>
-        </aside>
+      <CasesSidebar
+        allCases={allCases}
+        currentSlug={slug}
+        activeView={activeView}
+      />
 
         <section class="flex-1 max-w-[1120px] mx-auto py-7 px-5 pb-10 w-full">
           <header class="mb-6">

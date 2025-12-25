@@ -16,6 +16,16 @@ tags:
   - emoji
   - navigation
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello| 👋 World 🌍'
+    description: "텍스트와 이모지, 커서(|)가 'Hello' 뒤"
+  - label: "After Right Arrow (Bug)"
+    html: 'Hello 👋| World 🌍'
+    description: "오른쪽 화살표로 이모지 클러스터 전체를 건너뜀"
+  - label: "✅ Expected"
+    html: 'Hello |👋 World 🌍'
+    description: "정상: 오른쪽 화살표로 한 글자씩 이동 (이모지 포함)"
 ---
 
 ### Phenomenon

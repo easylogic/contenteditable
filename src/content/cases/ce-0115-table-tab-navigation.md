@@ -17,6 +17,16 @@ tags:
   - navigation
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>'
+    description: "테이블 구조, 첫 번째 셀에 커서"
+  - label: "After Tab (Bug)"
+    html: '<table><tr><td>Cell 1\t</td><td>Cell 2</td></tr></table>'
+    description: "Tab 키로 탭 문자가 삽입됨, 다음 셀으로 이동 안 됨"
+  - label: "✅ Expected"
+    html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>'
+    description: "정상: Tab 키로 다음 셀로 이동, 탭 문자 삽입 안 됨"
 ---
 
 ### Phenomenon

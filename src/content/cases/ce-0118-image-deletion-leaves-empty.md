@@ -17,6 +17,16 @@ tags:
   - empty
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<div><img src="image.jpg" alt="Image"></div>'
+    description: "이미지가 포함된 구조"
+  - label: "After Delete (Bug)"
+    html: '<div></div>'
+    description: "이미지 삭제 후 빈 래퍼 div 남음"
+  - label: "✅ Expected"
+    html: ''
+    description: "정상: 빈 요소 제거, 깨끗한 DOM"
 ---
 
 ### Phenomenon

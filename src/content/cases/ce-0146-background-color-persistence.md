@@ -17,6 +17,19 @@ tags:
   - persistence
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello World'
+    description: "기본 텍스트"
+  - label: "After Background Color"
+    html: 'Hello <span style="background-color: yellow;">World</span>'
+    description: "배경색 적용 (노란색)"
+  - label: "After Typing (Bug)"
+    html: 'Hello <span style="background-color: yellow;">World</span> New'
+    description: "새로 입력한 텍스트에 배경색 미적용"
+  - label: "✅ Expected"
+    html: 'Hello <span style="background-color: yellow;">World New</span>'
+    description: "정상: 새로 입력한 텍스트도 배경색 상속"
 ---
 
 ### Phenomenon

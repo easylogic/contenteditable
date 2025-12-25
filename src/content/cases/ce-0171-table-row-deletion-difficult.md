@@ -17,6 +17,16 @@ tags:
   - deletion
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<table><tr><td>Row 1 Cell 1</td><td>Row 1 Cell 2</td></tr><tr><td>Row 2 Cell 1</td><td>Row 2 Cell 2</td></tr></table>'
+    description: "테이블 구조, 두 번째 행 선택"
+  - label: "After Manual Delete (Bug)"
+    html: '<table><tr><td>Row 1 Cell 1</td><td>Row 1 Cell 2</td></tr><tr><td></td><td></td></tr></table>'
+    description: "셀 내용만 수동 삭제, 빈 행이 남음"
+  - label: "✅ Expected"
+    html: '<table><tr><td>Row 1 Cell 1</td><td>Row 1 Cell 2</td></tr></table>'
+    description: "정상: 행 전체 삭제, 테이블 구조 유지"
 ---
 
 ### Phenomenon

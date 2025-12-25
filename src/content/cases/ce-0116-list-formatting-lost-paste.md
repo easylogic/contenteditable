@@ -17,6 +17,19 @@ tags:
   - paste
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<ul><li>Item 1</li><li>Item 2</li></ul>'
+    description: "리스트 구조"
+  - label: "Clipboard"
+    html: '<strong>Bold Text</strong>'
+    description: "복사한 서식 있는 텍스트"
+  - label: "❌ After Paste"
+    html: '<p>Item 1</p><p><strong>Bold Text</strong></p><p>Item 2</p>'
+    description: "리스트 구조 손실, &lt;li&gt;가 &lt;p&gt;로 변환됨"
+  - label: "✅ Expected"
+    html: '<ul><li>Item 1</li><li><strong>Bold Text</strong></li><li>Item 2</li></ul>'
+    description: "리스트 구조 유지, 서식 적용"
 ---
 
 ### Phenomenon

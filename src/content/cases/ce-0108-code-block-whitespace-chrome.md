@@ -17,6 +17,16 @@ tags:
   - whitespace
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<pre><code>    function test() {</code></pre>'
+    description: "들여쓰기가 있는 코드 블록 (4개 공백)"
+  - label: "After Editing (Bug)"
+    html: '<pre><code> function test() {</code></pre>'
+    description: "편집 후 여러 공백이 하나로 축약됨"
+  - label: "✅ Expected"
+    html: '<pre><code>    function test() {</code></pre>'
+    description: "정상: &lt;pre&gt; 태그로 공백 보존"
 ---
 
 ### Phenomenon

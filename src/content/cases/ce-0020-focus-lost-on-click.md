@@ -16,6 +16,16 @@ tags:
   - click
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<div contenteditable="true">Hello <button>Button</button> World|</div>'
+    description: "contenteditable 내부에 버튼, 커서(|)가 'World' 뒤"
+  - label: "After Click Button (Bug)"
+    html: '<div contenteditable="true">Hello <button>Button</button> World</div>'
+    description: "버튼 클릭 후 contenteditable 포커스 손실, 커서 사라짐"
+  - label: "✅ Expected"
+    html: '<div contenteditable="true">Hello <button>Button</button> World|</div>'
+    description: "정상: 버튼 클릭 후에도 contenteditable 포커스 유지"
 ---
 
 ### Phenomenon

@@ -16,6 +16,16 @@ tags:
   - composition
   - ime
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello 한 <span style="text-decoration: underline; background: #fef08a;">글</span>'
+    description: "이미 확정된 '한'과 조합 중인 '글'"
+  - label: "After Undo (Bug)"
+    html: 'Hello '
+    description: "Undo로 '한'과 '글' 모두 삭제됨"
+  - label: "✅ Expected"
+    html: 'Hello '
+    description: "정상: 조합 중인 '글'만 취소, '한'은 유지되어야 함"
 ---
 
 ### Phenomenon

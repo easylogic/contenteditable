@@ -17,6 +17,16 @@ tags:
   - navigation
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello| World Test'
+    description: "텍스트, 커서(|)가 'Hello' 뒤"
+  - label: "After Right Arrow (Bug)"
+    html: 'Hello World| Test'
+    description: "오른쪽 화살표로 단어 단위 이동 (예상: 한 글자씩)"
+  - label: "✅ Expected"
+    html: 'Hello |World Test'
+    description: "정상: 오른쪽 화살표로 한 글자씩 이동"
 ---
 
 ### Phenomenon

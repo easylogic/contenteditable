@@ -17,6 +17,16 @@ tags:
   - enter
   - safari
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<blockquote><p>Quoted text</p></blockquote>'
+    description: "blockquote 요소, 커서가 텍스트 내부"
+  - label: "After Enter (Bug)"
+    html: '<blockquote><p>Quoted text</p><blockquote><p></p></blockquote></blockquote>'
+    description: "Enter로 중첩 blockquote 생성 (잘못된 구조)"
+  - label: "✅ Expected"
+    html: '<blockquote><p>Quoted text</p><p></p></blockquote>'
+    description: "정상: 같은 blockquote 내에 새 단락 생성"
 ---
 
 ### Phenomenon

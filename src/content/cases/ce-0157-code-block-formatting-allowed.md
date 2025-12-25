@@ -17,6 +17,16 @@ tags:
   - formatting
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<pre><code>function test() {</code></pre>'
+    description: "코드 블록 구조"
+  - label: "After Bold (Bug)"
+    html: '<pre><code>function <b>test</b>() {</code></pre>'
+    description: "코드 블록 내부에 서식 적용, 코드 구조 손상"
+  - label: "✅ Expected"
+    html: '<pre><code>function test() {</code></pre>'
+    description: "정상: 코드 블록 내부 서식 차단, 평문 텍스트 유지"
 ---
 
 ### Phenomenon

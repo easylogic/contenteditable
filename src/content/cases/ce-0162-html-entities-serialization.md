@@ -18,6 +18,19 @@ tags:
   - serialization
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<div>Test</div>'
+    description: "특수 문자 포함 콘텐츠"
+  - label: "After innerHTML (Bug - Encoded)"
+    html: '&lt;div&gt;Test&lt;/div&gt;'
+    description: "직렬화 시 HTML 엔티티로 인코딩됨"
+  - label: "After innerHTML (Bug - Not Encoded)"
+    html: '<div>Test</div>'
+    description: "직렬화 시 그대로 유지됨 (일관성 없음)"
+  - label: "✅ Expected"
+    html: '<div>Test</div>'
+    description: "정상: 일관된 인코딩 처리"
 ---
 
 ### Phenomenon

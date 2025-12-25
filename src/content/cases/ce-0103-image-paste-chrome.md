@@ -17,6 +17,16 @@ tags:
   - base64
   - chrome
 status: draft
+domSteps:
+  - label: "Clipboard"
+    html: '[Image: screenshot.png]'
+    description: "클립보드의 이미지"
+  - label: "❌ After Paste (Bug)"
+    html: '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...">'
+    description: "Base64 data URL로 삽입, HTML이 매우 큼 (수백 KB ~ MB)"
+  - label: "✅ Expected"
+    html: '<img src="/uploads/image.png">'
+    description: "정상: 서버 URL 사용 또는 적절한 크기 관리"
 ---
 
 ### Phenomenon

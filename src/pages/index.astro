@@ -7,6 +7,10 @@ import '../styles/global.css';
 
 const siteTitle = 'contenteditable lab';
 const cases = await getCollection('cases');
+const scenarios = await getCollection('scenarios');
+
+// Create a map of scenario ID to scenario entry for quick lookup
+const scenarioMap = new Map(scenarios.map((s) => [s.data.id, s]));
 
 const scenariosMap = cases.reduce(
   (acc, entry) => {
@@ -15,6 +19,7 @@ const scenariosMap = cases.reduce(
       acc[key] = {
         scenarioId: key,
         representative: entry,
+        scenarioEntry: scenarioMap.get(key) || null,
       };
     } else if (entry.data.id > acc[key].representative.data.id) {
       acc[key].representative = entry;
@@ -26,6 +31,7 @@ const scenariosMap = cases.reduce(
     {
       scenarioId: string;
       representative: (typeof cases)[number];
+      scenarioEntry: (typeof scenarios)[number] | null;
     }
   >,
 );
@@ -41,6 +47,26 @@ const osList = Array.from(new Set(cases.map((c) => c.data.os))).sort();
 const browserList = Array.from(new Set(cases.map((c) => c.data.browser))).sort();
 const confirmedCases = cases.filter((c) => c.data.status === 'confirmed').length;
 const draftCases = cases.filter((c) => c.data.status === 'draft').length;
+
+// Recently added cases (sorted by ID, assuming higher ID = newer)
+const recentlyAddedCases = [...cases]
+  .sort((a, b) => b.data.id.localeCompare(a.data.id))
+  .slice(0, 6);
+
+// Recently added scenarios (new scenarios that have been added)
+const recentlyAddedScenarios = scenarios
+  .sort((a, b) => {
+    // Try to find the latest case for each scenario
+    const aCases = cases.filter((c) => c.data.scenarioId === a.data.id);
+    const bCases = cases.filter((c) => c.data.scenarioId === b.data.id);
+    if (aCases.length === 0 && bCases.length === 0) return 0;
+    if (aCases.length === 0) return 1;
+    if (bCases.length === 0) return -1;
+    const aLatest = aCases.sort((x, y) => y.data.id.localeCompare(x.data.id))[0];
+    const bLatest = bCases.sort((x, y) => y.data.id.localeCompare(x.data.id))[0];
+    return bLatest.data.id.localeCompare(aLatest.data.id);
+  })
+  .slice(0, 3);
 ---
 
 <html lang="en">
@@ -50,100 +76,183 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
   <body>
     <SiteNav />
     <BrowserDetectionBanner client:load />
-    <main class="main-content">
+    <main class="max-w-[1280px] mx-auto px-8 py-8 pb-12">
       <!-- Hero Section -->
-      <section class="hero">
-        <div class="hero-badge">
-          <span class="hero-badge-icon">📝</span>
+      <section data-ui="hero" class="text-center py-12 px-4 mb-8 rounded-[20px] border border-border-light" style="background: var(--hero-gradient);">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-bg-surface border border-border-light rounded-full text-xs text-text-secondary mb-4">
+          <span class="text-base">📝</span>
           <span>Real-world contenteditable research</span>
         </div>
-        <h1 class="hero-title">
-          contenteditable<span class="hero-dot">.</span>lab
+        <h1 class="text-5xl font-extrabold m-0 mb-3 font-mono tracking-tight">
+          contenteditable<span class="text-accent-primary">.</span>lab
         </h1>
-        <p class="hero-description">
-          An incident catalog documenting real-world contenteditable behavior.
-          Each scenario groups multiple cases across different operating systems,
-          browsers, and keyboard setups. Reproduce, record, and understand.
+        <p class="text-lg text-text-secondary max-w-[600px] mx-auto mb-6 leading-relaxed">
+          Ever wondered why your contenteditable behaves differently in Safari vs Chrome? 
+          Or why IME composition (Chinese, Japanese, Korean, and more) breaks in some browsers? 
+          We're documenting these real-world quirks across all languages and input methods 
+          so you don't have to discover them the hard way. Each scenario groups multiple cases across 
+          different operating systems, browsers, and keyboard setups.
         </p>
-        <div class="hero-actions">
-          <a href="/cases" class="btn-hero-primary">
+        <div class="flex gap-3 justify-center flex-wrap">
+          <a href="/cases" class="inline-flex items-center gap-2 px-6 py-3 bg-accent-primary text-white rounded-lg font-semibold transition-all hover:bg-accent-primary-hover hover:text-white hover:-translate-y-0.5 hover:shadow-lg no-underline">
             Browse all cases
             <span>→</span>
           </a>
-          <a href="/playground" class="btn-hero-secondary">
+          <a href="/playground" class="inline-flex items-center px-6 py-3 bg-bg-surface text-text-primary border border-border-medium rounded-lg font-medium transition-all hover:border-accent-primary hover:bg-bg-muted hover:text-accent-primary no-underline">
             Open playground
           </a>
         </div>
       </section>
 
+      <!-- What's New Section -->
+      {(recentlyAddedCases.length > 0 || recentlyAddedScenarios.length > 0) && (
+        <section data-ui="whats-new" class="bg-gradient-to-br from-accent-primary/5 to-accent-secondary/5 border border-border-light rounded-2xl p-6 mb-8">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="text-2xl">✨</div>
+            <div>
+              <h2 class="text-lg m-0 mb-0.5 font-semibold">What's New</h2>
+              <p class="text-sm text-text-muted m-0">Fresh cases and scenarios added recently</p>
+            </div>
+          </div>
+
+          {recentlyAddedScenarios.length > 0 && (
+            <div class="mb-4">
+              <h3 class="text-sm font-semibold text-text-primary mb-2">New Scenarios</h3>
+              <div class="flex flex-wrap gap-2">
+                {recentlyAddedScenarios.map((scenario) => {
+                  const scenarioCases = cases.filter((c) => c.data.scenarioId === scenario.data.id);
+                  return (
+                    <a
+                      href={`/scenarios/${encodeURIComponent(scenario.data.id)}`}
+                      class="inline-flex items-center gap-2 px-3 py-1.5 bg-bg-surface border border-border-light rounded-lg text-xs font-medium hover:border-accent-primary hover:bg-bg-muted transition-colors no-underline"
+                    >
+                      <span class="text-accent-primary">📋</span>
+                      <span class="text-text-primary">{scenario.data.title}</span>
+                      <span class="text-text-muted">({scenarioCases.length})</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {recentlyAddedCases.length > 0 && (
+            <div>
+              <h3 class="text-sm font-semibold text-text-primary mb-2">Latest Cases</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {recentlyAddedCases.map((entry) => (
+                  <a
+                    href={`/cases/${entry.slug}`}
+                    class="block p-3 bg-bg-surface border border-border-light rounded-lg hover:border-accent-primary hover:bg-bg-muted transition-colors no-underline"
+                  >
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                      <span class="text-xs font-mono text-text-muted">{entry.data.id}</span>
+                      <span
+                        class={`text-xs px-1.5 py-0.5 rounded ${
+                          entry.data.status === 'confirmed'
+                            ? 'bg-status-confirmed/20 text-status-confirmed'
+                            : 'bg-status-draft/20 text-status-draft'
+                        }`}
+                      >
+                        {entry.data.status}
+                      </span>
+                    </div>
+                    <h4 class="text-sm font-medium text-text-primary m-0 mb-1 line-clamp-2">
+                      {entry.data.caseTitle}
+                    </h4>
+                    <p class="text-xs text-text-muted m-0">
+                      {entry.data.os} · {entry.data.browser}
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
       <!-- Stats Grid -->
-      <section class="stats-grid">
-        <div class="stat-card stat-total">
-          <div class="stat-value">{totalCases}</div>
-          <div class="stat-label">Total Cases</div>
+      <section data-ui="stats" class="grid grid-cols-6 gap-4 mb-8">
+        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold leading-none text-accent-primary">{totalCases}</div>
+          <div class="text-xs text-text-muted mt-1.5">Total Cases</div>
         </div>
-        <div class="stat-card stat-scenarios">
-          <div class="stat-value">{totalScenarios}</div>
-          <div class="stat-label">Scenarios</div>
+        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold leading-none" style="color: var(--category-ime);">{totalScenarios}</div>
+          <div class="text-xs text-text-muted mt-1.5">Scenarios</div>
         </div>
-        <div class="stat-card stat-os">
-          <div class="stat-value">{osList.length}</div>
-          <div class="stat-label">OS Variants</div>
+        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold leading-none" style="color: var(--category-formatting);">{osList.length}</div>
+          <div class="text-xs text-text-muted mt-1.5">OS Variants</div>
         </div>
-        <div class="stat-card stat-browsers">
-          <div class="stat-value">{browserList.length}</div>
-          <div class="stat-label">Browsers</div>
+        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold leading-none" style="color: var(--category-events);">{browserList.length}</div>
+          <div class="text-xs text-text-muted mt-1.5">Browsers</div>
         </div>
-        <div class="stat-card stat-confirmed">
-          <div class="stat-value">{confirmedCases}</div>
-          <div class="stat-label">Confirmed</div>
+        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold leading-none" style="color: var(--status-confirmed);">{confirmedCases}</div>
+          <div class="text-xs text-text-muted mt-1.5">Confirmed</div>
         </div>
-        <div class="stat-card stat-draft">
-          <div class="stat-value">{draftCases}</div>
-          <div class="stat-label">Draft</div>
+        <div class="bg-bg-surface border border-border-light rounded-xl p-5 text-center">
+          <div class="text-3xl font-bold leading-none" style="color: var(--status-draft);">{draftCases}</div>
+          <div class="text-xs text-text-muted mt-1.5">Draft</div>
         </div>
       </section>
 
       <!-- Browse by phenomenon -->
-      <section class="section-card section-phenomenon">
-        <div class="section-header">
-          <div class="section-icon">🔬</div>
+      <section data-ui="phenomenon" class="bg-bg-surface border border-border-light rounded-2xl p-6 mb-6">
+        <div class="flex items-start gap-4 mb-5">
+          <div class="text-3xl w-12 h-12 flex items-center justify-center bg-bg-muted rounded-xl flex-shrink-0">🔬</div>
           <div>
-            <h2>Browse by phenomenon</h2>
-            <p>Start from a specific phenomenon to see how it manifests across environments.</p>
+            <h2 class="text-lg m-0 mb-1">Browse by phenomenon</h2>
+            <p class="text-sm text-text-muted m-0">Start from a specific behavior or issue to see how it manifests across different environments. Each scenario tells a story of browser quirks and edge cases.</p>
           </div>
         </div>
 
-        <div class="scenario-grid">
-          {latestScenarios.slice(0, 6).map((item, idx) => (
-            <a
-              href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}
-              class={`scenario-card scenario-color-${idx % 6}`}
-            >
-              <div class="scenario-name">{item.scenarioId}</div>
-              <div class="scenario-env">
-                {item.representative.data.os}
-                {item.representative.data.osVersion && ` ${item.representative.data.osVersion}`} ·{' '}
-                {item.representative.data.browser}
-                {item.representative.data.browserVersion && ` ${item.representative.data.browserVersion}`}
-              </div>
-            </a>
-          ))}
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3 mb-4">
+          {latestScenarios.slice(0, 6).map((item, idx) => {
+            const colors = [
+              { bg: 'linear-gradient(135deg, #ede9fe, #fae8ff)', border: '#c4b5fd' },
+              { bg: 'linear-gradient(135deg, #cffafe, #e0f2fe)', border: '#67e8f9' },
+              { bg: 'linear-gradient(135deg, #fce7f3, #fce7f3)', border: '#f9a8d4' },
+              { bg: 'linear-gradient(135deg, #ccfbf1, #d1fae5)', border: '#5eead4' },
+              { bg: 'linear-gradient(135deg, #ffedd5, #fef3c7)', border: '#fdba74' },
+              { bg: 'linear-gradient(135deg, #e0e7ff, #dbeafe)', border: '#a5b4fc' },
+            ];
+            const color = colors[idx % 6];
+            return (
+              <a
+                href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}
+                class="block p-3.5 px-4 rounded-lg border border-transparent transition-all hover:-translate-y-0.5 hover:shadow-lg no-underline"
+                style={`background: ${color.bg}; border-color: ${color.border};`}
+              >
+                <div class="text-sm font-semibold text-text-primary mb-1">{item.scenarioId}</div>
+                <div class="text-xs text-text-muted">
+                  {item.representative.data.os}
+                  {item.representative.data.osVersion && ` ${item.representative.data.osVersion}`} ·{' '}
+                  {item.representative.data.browser}
+                  {item.representative.data.browserVersion && ` ${item.representative.data.browserVersion}`}
+                </div>
+              </a>
+            );
+          })}
         </div>
-        <a href="/scenarios" class="section-link">View all scenarios →</a>
+        <a href="/scenarios" class="inline-flex items-center mt-4 text-sm font-medium text-accent-primary hover:underline">
+          View all scenarios →
+        </a>
       </section>
 
       <!-- Browse by category -->
-      <section class="section-card section-category">
-        <div class="section-header">
-          <div class="section-icon">🏷️</div>
+      <section data-ui="category" class="bg-bg-surface border border-border-light rounded-2xl p-6 mb-6">
+        <div class="flex items-start gap-4 mb-5">
+          <div class="text-3xl w-12 h-12 flex items-center justify-center bg-bg-muted rounded-xl flex-shrink-0">🏷️</div>
           <div>
-            <h2>Browse by category</h2>
-            <p>Explore cases by topic tags or environment filters.</p>
+            <h2 class="text-lg m-0 mb-1">Browse by category</h2>
+            <p class="text-sm text-text-muted m-0">Explore cases by topic tags or environment filters.</p>
           </div>
         </div>
 
-        <div class="tag-grid">
+        <div class="flex flex-wrap gap-2 mb-4">
           {(() => {
             const allTags = Array.from(
               new Set(cases.flatMap((c) => c.data.tags)),
@@ -172,8 +281,10 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
                   return (
                     <a
                       href={`/cases?tag=${encodeURIComponent(tag)}`}
-                      class="tag-chip"
-                      style={`--tag-color: ${color}`}
+                      class="px-3.5 py-1.5 rounded-full text-xs font-medium transition-all hover:scale-105 hover:shadow-md no-underline"
+                      style={`background: color-mix(in srgb, ${color} 12%, white); color: ${color}; border: 1px solid color-mix(in srgb, ${color} 25%, transparent);`}
+                      onmouseover={`this.style.boxShadow = '0 2px 8px color-mix(in srgb, ${color} 20%, transparent)'`}
+                      onmouseout="this.style.boxShadow = ''"
                     >
                       {tag}
                     </a>
@@ -184,7 +295,7 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
           })()}
         </div>
 
-        <div class="env-grid">
+        <div class="flex flex-wrap gap-2 mb-4">
           {(() => {
             const osData = Array.from(new Set(cases.map((c) => c.data.os))).sort();
             const browserData = Array.from(new Set(cases.map((c) => c.data.browser))).sort();
@@ -192,14 +303,14 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
             return (
               <>
                 {osData.slice(0, 3).map((os) => (
-                  <a href={`/cases?q=${encodeURIComponent(os)}`} class="env-chip env-os">
-                    <span class="env-icon">💻</span>
+                  <a href={`/cases?q=${encodeURIComponent(os)}`} class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium bg-bg-muted text-text-secondary border border-border-light transition-all hover:bg-border-light hover:border-border-medium hover:text-text-primary no-underline">
+                    <span class="text-sm">💻</span>
                     {os}
                   </a>
                 ))}
                 {browserData.slice(0, 3).map((browser) => (
-                  <a href={`/cases?q=${encodeURIComponent(browser)}`} class="env-chip env-browser">
-                    <span class="env-icon">🌐</span>
+                  <a href={`/cases?q=${encodeURIComponent(browser)}`} class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium bg-bg-muted text-text-secondary border border-border-light transition-all hover:bg-border-light hover:border-border-medium hover:text-text-primary no-underline">
+                    <span class="text-sm">🌐</span>
                     {browser}
                   </a>
                 ))}
@@ -207,444 +318,156 @@ const draftCases = cases.filter((c) => c.data.status === 'draft').length;
             );
           })()}
         </div>
-        <a href="/cases" class="section-link">View all cases with filters →</a>
+        <a href="/cases" class="inline-flex items-center mt-4 text-sm font-medium text-accent-primary hover:underline">
+          View all cases with filters →
+        </a>
       </section>
 
       <!-- Pinned incidents -->
-      <section class="section-card section-pinned">
-        <div class="section-header">
-          <div class="section-icon">📌</div>
+      <section data-ui="pinned" class="bg-bg-surface border border-border-light rounded-2xl p-6 mb-6">
+        <div class="flex items-start gap-4 mb-5">
+          <div class="text-3xl w-12 h-12 flex items-center justify-center bg-bg-muted rounded-xl flex-shrink-0">📌</div>
           <div>
-            <h2>Pinned incidents</h2>
-            <p>Curated baseline references and frequently observed issues.</p>
+            <h2 class="text-lg m-0 mb-1">Pinned incidents</h2>
+            <p class="text-sm text-text-muted m-0">Curated baseline references and frequently observed issues.</p>
           </div>
         </div>
 
-        <div class="case-grid">
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
           {cases.filter((c) => c.data.tags.includes('baseline')).map((entry) => (
-            <article class="case-card">
-              <h3>{entry.data.caseTitle}</h3>
-              <p class="case-meta">
+            <article class="p-4 px-4.5 bg-bg-surface border border-border-light rounded-lg transition-colors hover:border-accent-primary">
+              <h3 class="text-[0.95rem] m-0 mb-1.5">{entry.data.caseTitle}</h3>
+              <p class="text-xs text-text-muted m-0 mb-2">
                 {entry.data.os} {entry.data.osVersion} · {entry.data.browser} {entry.data.browserVersion}
               </p>
-              <a href={`/cases/${entry.slug}`} class="case-link">Open case →</a>
+              <a href={`/cases/${entry.slug}`} class="text-xs font-medium text-accent-primary hover:underline no-underline">
+                Open case →
+              </a>
             </article>
           ))}
         </div>
       </section>
 
       <!-- Latest scenarios -->
-      <section class="section-card section-latest">
-        <div class="section-header">
-          <div class="section-icon">🆕</div>
+      <section data-ui="latest" class="bg-bg-surface border border-border-light rounded-2xl p-6">
+        <div class="flex items-start gap-4 mb-5">
+          <div class="text-3xl w-12 h-12 flex items-center justify-center bg-bg-muted rounded-xl flex-shrink-0">🆕</div>
           <div>
-            <h2>Latest scenarios</h2>
-            <p>Up to 20 scenarios, ordered by most recent case ID.</p>
+            <h2 class="text-lg m-0 mb-1">Latest scenarios</h2>
+            <p class="text-sm text-text-muted m-0">Recently documented scenarios, sorted by the most recent case added. Keep checking back for new discoveries!</p>
           </div>
         </div>
 
-        <div class="latest-grid">
-          {latestScenarios.map((item) => (
-            <article class="latest-card">
-              <h3>{item.scenarioId}</h3>
-              <p class="latest-meta">
-                {item.representative.data.id} · {item.representative.data.os} · {item.representative.data.browser}
-              </p>
-              <div class="latest-links">
-                <a href={`/scenarios/${encodeURIComponent(item.scenarioId)}`}>Scenario →</a>
-                <a href={`/cases/${item.representative.slug}`} class="secondary">Case →</a>
-              </div>
-            </article>
-          ))}
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3.5">
+          {latestScenarios.map((item) => {
+            const scenarioTitle = item.scenarioEntry?.data.title || item.representative.data.caseTitle;
+            return (
+              <article class="p-3.5 px-4 bg-bg-surface border border-border-light rounded-lg transition-colors hover:border-accent-primary">
+                <h3 class="text-sm m-0 mb-1 font-semibold text-text-primary">{scenarioTitle}</h3>
+                <p class="text-xs text-text-muted m-0 mb-1.5 font-mono">
+                  {item.scenarioId}
+                </p>
+                <p class="text-xs text-text-muted m-0 mb-2">
+                  {item.representative.data.id} · {item.representative.data.os} · {item.representative.data.browser}
+                </p>
+                <div class="flex gap-3 text-xs">
+                  <a href={`/scenarios/${encodeURIComponent(item.scenarioId)}`} class="font-medium text-accent-primary hover:underline no-underline">
+                    Scenario →
+                  </a>
+                  <a href={`/cases/${item.representative.slug}`} class="font-medium text-text-muted hover:text-text-primary hover:underline no-underline">
+                    Case →
+                  </a>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
     </main>
+
+    <footer data-ui="site-footer" class="border-t border-border-light bg-bg-surface mt-16">
+      <div class="max-w-[1280px] mx-auto px-8 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <a href="/" class="inline-flex items-center gap-2 mb-4 no-underline">
+              <span class="text-xl">⌨</span>
+              <span class="font-mono font-bold text-text-primary">
+                contenteditable<span class="text-accent-primary">.</span>lab
+              </span>
+            </a>
+            <p class="text-sm text-text-muted m-0">
+              Real-world contenteditable behavior research and documentation.
+            </p>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-semibold text-text-primary m-0 mb-3">Explore</h4>
+            <ul class="list-none p-0 m-0 space-y-2">
+              <li><a href="/cases" class="text-sm text-text-secondary hover:text-accent-primary no-underline">All Cases</a></li>
+              <li><a href="/scenarios" class="text-sm text-text-secondary hover:text-accent-primary no-underline">Scenarios</a></li>
+              <li><a href="/playground" class="text-sm text-text-secondary hover:text-accent-primary no-underline">Playground</a></li>
+              <li><a href="/coverage" class="text-sm text-text-secondary hover:text-accent-primary no-underline">Coverage</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-semibold text-text-primary m-0 mb-3">Resources</h4>
+            <ul class="list-none p-0 m-0 space-y-2">
+              <li><a href="/docs" class="text-sm text-text-secondary hover:text-accent-primary no-underline">Documentation</a></li>
+              <li><a href="/docs/input-types" class="text-sm text-text-secondary hover:text-accent-primary no-underline">Input Types</a></li>
+              <li><a href="/docs/iframe-integration" class="text-sm text-text-secondary hover:text-accent-primary no-underline">Iframe Integration</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-sm font-semibold text-text-primary m-0 mb-3">About</h4>
+            <p class="text-sm text-text-muted m-0 mb-2">
+              An open catalog documenting contenteditable behavior across different browsers, operating systems, and input methods.
+            </p>
+          </div>
+        </div>
+        
+        <div class="pt-6 border-t border-border-light flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-xs text-text-muted m-0">
+            © {new Date().getFullYear()} contenteditable.lab. Open source research project.
+          </p>
+          <div class="flex gap-4 text-xs text-text-muted">
+            <a href="https://github.com/easylogic/contenteditable" target="_blank" rel="noopener noreferrer" class="hover:text-accent-primary no-underline">
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
 
 <style>
-  .main-content {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem 2rem 3rem;
-  }
-
-  /* Hero */
-  .hero {
-    text-align: center;
-    padding: 3rem 1rem;
-    margin-bottom: 2rem;
-    background: var(--hero-gradient);
-    border-radius: 20px;
-    border: 1px solid var(--border-light);
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.9rem;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    border-radius: 999px;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-  }
-
-  .hero-badge-icon {
-    font-size: 1rem;
-  }
-
-  .hero-title {
-    font-size: 3rem;
-    font-weight: 800;
-    margin: 0 0 0.75rem;
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    letter-spacing: -0.02em;
-  }
-
-  .hero-dot {
-    color: var(--accent-primary);
-  }
-
-  .hero-description {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    max-width: 600px;
-    margin: 0 auto 1.5rem;
-    line-height: 1.6;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .btn-hero-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: var(--accent-primary);
-    color: white;
-    border-radius: 10px;
-    font-weight: 600;
-    transition: background 0.15s, transform 0.15s;
-  }
-
-  .btn-hero-primary:hover {
-    background: var(--accent-primary-hover);
-    transform: translateY(-1px);
-    color: white;
-  }
-
-  .btn-hero-secondary {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    background: var(--bg-surface);
-    color: var(--text-primary);
-    border: 1px solid var(--border-medium);
-    border-radius: 10px;
-    font-weight: 500;
-    transition: border-color 0.15s, background 0.15s;
-  }
-
-  .btn-hero-secondary:hover {
-    border-color: var(--accent-primary);
-    background: var(--bg-muted);
-    color: var(--accent-primary);
-  }
-
-  /* Stats Grid */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    padding: 1.25rem 1rem;
-    text-align: center;
-  }
-
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-top: 0.35rem;
-  }
-
-  .stat-total .stat-value { color: var(--accent-primary); }
-  .stat-scenarios .stat-value { color: var(--category-ime); }
-  .stat-os .stat-value { color: var(--category-formatting); }
-  .stat-browsers .stat-value { color: var(--category-events); }
-  .stat-confirmed .stat-value { color: var(--status-confirmed); }
-  .stat-draft .stat-value { color: var(--status-draft); }
-
-  /* Section Cards */
-  .section-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .section-icon {
-    font-size: 1.75rem;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-muted);
-    border-radius: 12px;
-    flex-shrink: 0;
-  }
-
-  .section-header h2 {
-    font-size: 1.15rem;
-    margin: 0 0 0.25rem;
-  }
-
-  .section-header p {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    margin: 0;
-  }
-
-  .section-link {
-    display: inline-flex;
-    align-items: center;
-    margin-top: 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--accent-primary);
-  }
-
-  .section-link:hover {
-    text-decoration: underline;
-  }
-
-  /* Scenario Grid */
-  .scenario-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.75rem;
-  }
-
-  .scenario-card {
-    display: block;
-    padding: 0.9rem 1rem;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-
-  .scenario-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  .scenario-color-0 { background: linear-gradient(135deg, #ede9fe, #fae8ff); border-color: #c4b5fd; }
-  .scenario-color-1 { background: linear-gradient(135deg, #cffafe, #e0f2fe); border-color: #67e8f9; }
-  .scenario-color-2 { background: linear-gradient(135deg, #fce7f3, #fce7f3); border-color: #f9a8d4; }
-  .scenario-color-3 { background: linear-gradient(135deg, #ccfbf1, #d1fae5); border-color: #5eead4; }
-  .scenario-color-4 { background: linear-gradient(135deg, #ffedd5, #fef3c7); border-color: #fdba74; }
-  .scenario-color-5 { background: linear-gradient(135deg, #e0e7ff, #dbeafe); border-color: #a5b4fc; }
-
-  .scenario-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-  }
-
-  .scenario-env {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  /* Tag Grid */
-  .tag-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .tag-chip {
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    background: color-mix(in srgb, var(--tag-color) 12%, white);
-    color: var(--tag-color);
-    border: 1px solid color-mix(in srgb, var(--tag-color) 25%, transparent);
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-
-  .tag-chip:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--tag-color) 20%, transparent);
-    color: var(--tag-color);
-  }
-
-  /* Env Grid */
-  .env-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .env-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.9rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    background: var(--bg-muted);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-light);
-    transition: background 0.15s, border-color 0.15s;
-  }
-
-  .env-chip:hover {
-    background: var(--border-light);
-    border-color: var(--border-medium);
-    color: var(--text-primary);
-  }
-
-  .env-icon {
-    font-size: 0.9rem;
-  }
-
-  /* Case Grid */
-  .case-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
-  }
-
-  .case-card {
-    padding: 1rem 1.15rem;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    border-radius: 10px;
-    transition: border-color 0.15s;
-  }
-
-  .case-card:hover {
-    border-color: var(--accent-primary);
-  }
-
-  .case-card h3 {
-    font-size: 0.95rem;
-    margin: 0 0 0.35rem;
-  }
-
-  .case-meta {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin: 0 0 0.5rem;
-  }
-
-  .case-link {
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-
-  /* Latest Grid */
-  .latest-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 0.9rem;
-  }
-
-  .latest-card {
-    padding: 0.9rem 1rem;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-light);
-    border-radius: 10px;
-    transition: border-color 0.15s;
-  }
-
-  .latest-card:hover {
-    border-color: var(--category-ime);
-  }
-
-  .latest-card h3 {
-    font-size: 0.9rem;
-    margin: 0 0 0.25rem;
-  }
-
-  .latest-meta {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin: 0 0 0.5rem;
-  }
-
-  .latest-links {
-    display: flex;
-    gap: 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .latest-links a {
-    font-weight: 500;
-  }
-
-  .latest-links .secondary {
-    color: var(--text-muted);
-  }
-
-  /* Responsive */
+  /* Responsive adjustments */
   @media (max-width: 768px) {
-    .main-content {
+    main {
       padding: 1rem;
     }
 
-    .hero {
+    [data-ui="hero"] {
       padding: 2rem 1rem;
     }
 
-    .hero-title {
+    [data-ui="hero"] h1 {
       font-size: 2rem;
     }
 
-    .stats-grid {
+    [data-ui="stats"] {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
   @media (max-width: 480px) {
-    .stats-grid {
+    [data-ui="stats"] {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .stat-value {
+    [data-ui="stats"] .text-3xl {
       font-size: 1.5rem;
     }
   }

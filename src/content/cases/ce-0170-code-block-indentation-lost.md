@@ -17,6 +17,16 @@ tags:
   - indentation
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<pre><code>    function test() {<br>        return true;<br>    }</code></pre>'
+    description: "들여쓰기가 있는 코드 블록"
+  - label: "After Editing (Bug)"
+    html: '<pre><code>function test() {<br>return true;<br>}</code></pre>'
+    description: "편집 후 들여쓰기 손실"
+  - label: "✅ Expected"
+    html: '<pre><code>    function test() {<br>        return true;<br>    }</code></pre>'
+    description: "정상: 들여쓰기 보존"
 ---
 
 ### Phenomenon

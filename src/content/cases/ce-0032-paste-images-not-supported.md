@@ -17,6 +17,16 @@ tags:
   - media
   - chrome
 status: draft
+domSteps:
+  - label: "Clipboard"
+    html: '[Image: screenshot.png]'
+    description: "클립보드의 이미지"
+  - label: "After Paste (Bug)"
+    html: ''
+    description: "붙여넣기 시도 시 무시되거나 실패, 이미지 삽입 안 됨"
+  - label: "✅ Expected"
+    html: '<img src="data:image/png;base64,..." alt="Image">'
+    description: "정상: 이미지가 &lt;img&gt; 요소로 삽입됨"
 ---
 
 ### Phenomenon

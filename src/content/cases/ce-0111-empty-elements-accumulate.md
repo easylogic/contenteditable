@@ -17,6 +17,16 @@ tags:
   - dom
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<p>Hello <span style="font-weight: bold;">World</span></p>'
+    description: "포맷팅된 텍스트"
+  - label: "After Formatting Removal (Bug)"
+    html: '<p>Hello <span></span>World</p>'
+    description: "포맷팅 제거 후 빈 span 태그가 남음"
+  - label: "✅ Expected"
+    html: '<p>Hello World</p>'
+    description: "정상: 빈 요소가 자동으로 정리됨"
 ---
 
 ### Phenomenon

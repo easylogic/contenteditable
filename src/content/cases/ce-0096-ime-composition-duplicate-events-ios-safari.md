@@ -19,6 +19,16 @@ tags:
   - safari
   - duplicate-events
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한</span>'
+    description: "한글 조합 중 (한)"
+  - label: "After composition update (Bug)"
+    html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한글</span>'
+    description: "deleteContentBackward + insertText 이벤트가 순차적으로 발생 (이중 처리)"
+  - label: "✅ Expected"
+    html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한글</span>'
+    description: "정상: insertCompositionText 이벤트만 발생 (단일 처리)"
 ---
 
 ### Phenomenon

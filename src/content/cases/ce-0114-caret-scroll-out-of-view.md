@@ -18,6 +18,19 @@ tags:
   - paste
   - chrome
 status: draft
+domSteps:
+  - label: "Before Paste"
+    html: 'Hello World'
+    description: "기본 텍스트, 커서가 보이는 위치"
+  - label: "Clipboard"
+    html: '[Large content: 100+ lines of text...]'
+    description: "큰 콘텐츠 복사"
+  - label: "After Paste (Bug)"
+    html: 'Hello World<br>[Large content...]<br>|'
+    description: "붙여넣기 후 커서가 뷰포트 밖으로 이동 (| = 커서)"
+  - label: "✅ Expected"
+    html: 'Hello World<br>[Large content...]<br>|'
+    description: "정상: 커서가 뷰포트 안에 유지되거나 자동 스크롤"
 ---
 
 ### Phenomenon

@@ -17,6 +17,19 @@ tags:
   - focus
   - chrome
 status: draft
+domSteps:
+  - label: "Before Blur"
+    html: 'Hello World Test'
+    description: "여러 편집 작업 완료"
+  - label: "After Blur and Focus"
+    html: 'Hello World Test'
+    description: "포커스 변경 후, undo 스택이 초기화됨"
+  - label: "After Undo (Bug)"
+    html: 'Hello World Test'
+    description: "Undo 불가, 이전 작업을 취소할 수 없음"
+  - label: "✅ Expected"
+    html: 'Hello World'
+    description: "정상: Undo로 이전 작업 취소 가능"
 ---
 
 ### Phenomenon

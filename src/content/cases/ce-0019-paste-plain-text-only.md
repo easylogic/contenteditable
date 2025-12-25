@@ -17,6 +17,16 @@ tags:
   - plain-text
   - safari
 status: draft
+domSteps:
+  - label: "Clipboard"
+    html: '<span style="color: red; font-weight: bold;">Formatted Text</span>'
+    description: "복사한 서식 있는 텍스트 (Word 문서 등)"
+  - label: "After Paste (Bug)"
+    html: '<span style="color: red; font-weight: bold;">Formatted Text</span>'
+    description: "붙여넣기 시 원치 않는 서식 포함 (색상, 볼드 등)"
+  - label: "✅ Expected"
+    html: 'Formatted Text'
+    description: "정상: 평문 텍스트로 붙여넣기 또는 선택 가능한 형식"
 ---
 
 ### Phenomenon

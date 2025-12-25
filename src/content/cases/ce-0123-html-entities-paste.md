@@ -18,6 +18,19 @@ tags:
   - paste
   - chrome
 status: draft
+domSteps:
+  - label: "Clipboard"
+    html: '&lt;div&gt;'
+    description: "복사한 HTML 엔티티"
+  - label: "❌ After Paste (Bug - Decoded)"
+    html: '<div>'
+    description: "엔티티가 디코딩되어 실제 HTML 태그로 삽입됨"
+  - label: "❌ After Paste (Bug - Preserved)"
+    html: '&lt;div&gt;'
+    description: "엔티티가 그대로 보존되어 텍스트로 표시됨 (일관성 없음)"
+  - label: "✅ Expected"
+    html: '&lt;div&gt;'
+    description: "정상: 일관된 엔티티 처리 (보존 또는 디코딩)"
 ---
 
 ### Phenomenon

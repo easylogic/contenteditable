@@ -17,6 +17,16 @@ tags:
   - cursor
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello <span style="background: yellow;">World</span>'
+    description: "선택된 텍스트 (World)"
+  - label: "After DOM Update (Bug)"
+    html: 'Hello <strong>World</strong>'
+    description: "DOM 조작 후 선택 손실, 커서 위치 불명확"
+  - label: "✅ Expected"
+    html: 'Hello <strong>World</strong>'
+    description: "정상: 선택 복원, 커서가 올바른 위치에 있음"
 ---
 
 ### Phenomenon

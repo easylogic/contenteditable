@@ -18,6 +18,16 @@ tags:
   - indentation
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<ul><li>Item 1</li><li>Item 2</li></ul>'
+    description: "리스트, 'Item 2' 내부에 커서"
+  - label: "After Tab (Bug)"
+    html: '<ul><li>Item 1</li><li>Item 2\t</li></ul>'
+    description: "Tab 키로 탭 문자가 삽입됨, 중첩 리스트 생성 안 됨"
+  - label: "✅ Expected"
+    html: '<ul><li>Item 1<ul><li>Item 2</li></ul></li></ul>'
+    description: "정상: Tab 키로 중첩 리스트 생성 (들여쓰기)"
 ---
 
 ### Phenomenon

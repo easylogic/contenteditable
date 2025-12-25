@@ -17,6 +17,16 @@ tags:
   - structure
   - safari
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>'
+    description: "테이블 구조, 'Cell 1' 편집 중"
+  - label: "After Editing (Bug)"
+    html: '<table><tr><td>Cell 2</td></tr></table>'
+    description: "편집 후 셀이 삭제되거나 테이블 구조 손상"
+  - label: "✅ Expected"
+    html: '<table><tr><td>New Cell 1</td><td>Cell 2</td></tr></table>'
+    description: "정상: 테이블 구조 유지, 셀 내용만 변경"
 ---
 
 ### Phenomenon

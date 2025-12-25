@@ -18,6 +18,19 @@ tags:
   - copy
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<div>Test</div>'
+    description: "특수 문자 포함 콘텐츠"
+  - label: "Clipboard (Bug - Encoded)"
+    html: '&lt;div&gt;Test&lt;/div&gt;'
+    description: "복사 시 HTML 엔티티로 인코딩됨"
+  - label: "Clipboard (Bug - Not Encoded)"
+    html: '<div>Test</div>'
+    description: "복사 시 그대로 복사됨 (일관성 없음)"
+  - label: "✅ Expected"
+    html: '<div>Test</div>'
+    description: "정상: 일관된 인코딩 처리"
 ---
 
 ### Phenomenon

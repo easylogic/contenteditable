@@ -17,6 +17,16 @@ tags:
   - position
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello World'
+    description: "텍스트, 커서가 'Hello'와 'World' 사이에 위치"
+  - label: "After Drop (Bug)"
+    html: 'Hello World<img src="image.jpg" alt="Image">'
+    description: "드롭 위치와 무관하게 이미지가 끝에 삽입됨"
+  - label: "✅ Expected"
+    html: 'Hello <img src="image.jpg" alt="Image"> World'
+    description: "정상: 드롭 위치(커서 위치)에 이미지 삽입"
 ---
 
 ### Phenomenon

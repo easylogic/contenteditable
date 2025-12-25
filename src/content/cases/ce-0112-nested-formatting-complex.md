@@ -18,6 +18,22 @@ tags:
   - italic
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Text'
+    description: "기본 텍스트"
+  - label: "After Bold"
+    html: '<b>Text</b>'
+    description: "Bold 서식 적용"
+  - label: "After Italic (Bug)"
+    html: '<b><i>Text</i></b>'
+    description: "Italic 서식 적용, 중첩 구조 생성"
+  - label: "After Underline (Bug)"
+    html: '<b><i><u>Text</u></i></b>'
+    description: "Underline 서식 적용, 깊은 중첩 구조 생성"
+  - label: "✅ Expected (Normalized)"
+    html: '<span style="font-weight: bold; font-style: italic; text-decoration: underline;">Text</span>'
+    description: "정상: 스타일 속성으로 통합, 중첩 최소화"
 ---
 
 ### Phenomenon

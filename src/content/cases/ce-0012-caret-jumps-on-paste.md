@@ -17,6 +17,16 @@ tags:
   - position
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello| World'
+    description: "텍스트, 커서(|)가 중간에 위치"
+  - label: "After Paste (Bug)"
+    html: 'Hello New Text| World'
+    description: "붙여넣기 후 커서가 붙여넣은 내용의 시작 위치로 이동"
+  - label: "✅ Expected"
+    html: 'Hello New Text| World'
+    description: "정상: 커서가 붙여넣은 내용의 끝에 위치"
 ---
 
 ### Phenomenon

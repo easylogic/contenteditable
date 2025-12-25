@@ -15,6 +15,16 @@ tags:
   - enter
   - newline
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello'
+    description: "첫 번째 줄"
+  - label: "After Enter (Bug)"
+    html: 'Hello<br><br>'
+    description: "Enter 한 번으로 두 개의 줄바꿈 삽입"
+  - label: "✅ Expected"
+    html: 'Hello<br>'
+    description: "정상: Enter 한 번으로 하나의 줄바꿈만 삽입"
 ---
 
 ### Phenomenon

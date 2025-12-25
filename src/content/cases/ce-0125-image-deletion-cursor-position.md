@@ -17,6 +17,16 @@ tags:
   - cursor
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello <img src="image.jpg" alt="Image">| World'
+    description: "이미지 뒤에 커서(|) 위치"
+  - label: "After Delete (Bug)"
+    html: 'Hello | World'
+    description: "이미지 삭제 후 커서 위치가 잘못됨 (이미지 앞으로 이동)"
+  - label: "✅ Expected"
+    html: 'Hello | World'
+    description: "정상: 커서가 이미지 위치에 유지됨"
 ---
 
 ### Phenomenon

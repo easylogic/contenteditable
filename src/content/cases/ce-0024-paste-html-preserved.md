@@ -17,6 +17,16 @@ tags:
   - html
   - safari
 status: draft
+domSteps:
+  - label: "Clipboard"
+    html: '<span style="color: red; font-size: 14px;">Text</span>'
+    description: "복사한 서식 있는 텍스트 (Word 문서 등)"
+  - label: "❌ After Paste"
+    html: '<span style="color: red; font-size: 14px;">Text</span>'
+    description: "원치 않는 HTML 구조 보존 (span 태그, 인라인 스타일)"
+  - label: "✅ Expected"
+    html: '<strong>Text</strong>'
+    description: "정상화된 HTML 구조 또는 선택 가능한 형식"
 ---
 
 ### Phenomenon

@@ -16,6 +16,16 @@ tags:
   - text
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<span style="color: red;">Hello</span>|'
+    description: "빨간색 텍스트, 커서(|)가 끝에 위치"
+  - label: "After Typing"
+    html: '<span style="color: red;">HelloWorld</span>'
+    description: "새로 입력한 텍스트도 빨간색 상속 (정상 동작)"
+  - label: "✅ Expected"
+    html: '<span style="color: red;">HelloWorld</span>'
+    description: "정상: 새로 입력한 텍스트도 색상 상속 (현재 동작이 올바름)"
 ---
 
 ### Phenomenon

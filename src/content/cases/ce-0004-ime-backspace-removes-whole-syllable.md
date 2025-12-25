@@ -16,6 +16,16 @@ tags:
   - ime
   - backspace
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello 한글'
+    description: "한글 텍스트 입력 완료"
+  - label: "After Backspace (Bug)"
+    html: 'Hello '
+    description: "전체 음절 '한글' 삭제됨 (한 번의 Backspace)"
+  - label: "✅ Expected"
+    html: 'Hello 한'
+    description: "정상: 한 글자씩 삭제 (첫 번째 Backspace로 '글'만 삭제)"
 ---
 
 ### Phenomenon

@@ -17,6 +17,16 @@ tags:
   - backspace
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: '<ul><li>Item 1<ul><li>Nested item</li></ul></li></ul>'
+    description: "중첩 리스트, 'Nested item' 시작 위치에 커서"
+  - label: "After Backspace (Bug)"
+    html: '<ul><li>Item 1</li></ul>'
+    description: "Backspace로 전체 중첩 리스트 삭제됨"
+  - label: "✅ Expected"
+    html: '<ul><li>Item 1</li><li>Nested item</li></ul>'
+    description: "정상: 중첩 항목만 상위 레벨로 이동 (들여쓰기 해제)"
 ---
 
 ### Phenomenon

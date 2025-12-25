@@ -17,6 +17,16 @@ tags:
   - granularity
   - safari
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello world| example'
+    description: "텍스트, 커서(|)가 'world' 뒤"
+  - label: "After Backspace (Bug)"
+    html: 'Hello | example'
+    description: "Backspace로 전체 단어 'world' 삭제됨 (예상: 한 글자씩)"
+  - label: "✅ Expected"
+    html: 'Hello worl| example'
+    description: "정상: Backspace로 한 글자씩 삭제 (마지막 'd'만 삭제)"
 ---
 
 ### Phenomenon

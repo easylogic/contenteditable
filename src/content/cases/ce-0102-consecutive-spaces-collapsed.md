@@ -17,6 +17,16 @@ tags:
   - html
   - all-browsers
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello'
+    description: "기본 텍스트"
+  - label: "After 5 Spaces (Bug)"
+    html: 'Hello '
+    description: "5번 Space 키 입력, DOM에는 하나의 공백만 남음 (HTML 공백 축소 규칙)"
+  - label: "✅ Expected (with CSS)"
+    html: 'Hello     '
+    description: "정상: white-space: pre-wrap 사용 시 여러 공백 보존"
 ---
 
 ### Phenomenon

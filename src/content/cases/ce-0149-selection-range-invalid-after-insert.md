@@ -17,6 +17,16 @@ tags:
   - insert
   - firefox
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello <span style="background: yellow;">World</span>'
+    description: "선택된 텍스트 (World)"
+  - label: "After Insert (Bug)"
+    html: 'Hello <span style="background: yellow;">World</span> New'
+    description: "프로그래밍 방식으로 삽입 후 선택 범위 무효화, 커서 위치 불명확"
+  - label: "✅ Expected"
+    html: 'Hello <span style="background: yellow;">World</span> New'
+    description: "정상: 선택 범위 유효, 커서가 삽입된 콘텐츠 뒤에 위치"
 ---
 
 ### Phenomenon

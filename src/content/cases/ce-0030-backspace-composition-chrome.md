@@ -17,6 +17,16 @@ tags:
   - composition
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello <span style="text-decoration: underline; background: #fef08a;">こんに</span>'
+    description: "일본어 조합 중 (こんに), 히라가나 음절 조합"
+  - label: "After Backspace (Bug)"
+    html: 'Hello '
+    description: "Backspace로 전체 음절 'こんに' 삭제됨 (한 번의 Backspace)"
+  - label: "✅ Expected"
+    html: 'Hello こん'
+    description: "정상: 한 글자씩 삭제 (첫 번째 Backspace로 'に'만 삭제)"
 ---
 
 ### Phenomenon

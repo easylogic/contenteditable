@@ -1,19 +1,26 @@
 ---
 id: scenario-ime-composition-duplicate-events
-title: IME composition triggers deleteContentBackward and insertText events sequentially in iOS Safari
-description: "During Korean IME composition in iOS Safari, each composition update fires both a deleteContentBackward event followed by an insertText event (not insertCompositionText). This sequential firing pattern differs from other browsers where only insertCompositionText fires, and can cause event handlers to execute twice for a single composition update."
+title: IME composition triggers duplicate or unexpected event sequences
+description: "During IME composition, some browsers and IME combinations fire unexpected event sequences (e.g., deleteContentBackward followed by insertText instead of insertCompositionText). This can cause event handlers to execute multiple times for a single composition update. This affects multiple languages and browser combinations."
 category: ime
 tags:
   - ime
   - composition
   - beforeinput
-  - ios
-  - safari
   - duplicate-events
 status: draft
 ---
 
-During Korean IME composition in iOS Safari, each composition update fires both a `deleteContentBackward` event followed by an `insertText` event (not `insertCompositionText`). This sequential firing pattern differs from other browsers where only `insertCompositionText` fires during composition updates, and can cause event handlers to execute twice for a single composition update.
+During IME composition, some browsers and IME combinations fire unexpected event sequences that differ from the standard behavior. This can cause event handlers to execute multiple times for a single composition update.
+
+## Language-Specific Manifestations
+
+This issue manifests differently across languages and browsers:
+
+- **Korean IME in iOS Safari**: Each composition update fires both `deleteContentBackward` followed by `insertText` (not `insertCompositionText`)
+- **Japanese IME**: May fire different event sequences depending on browser
+- **Chinese IME**: May fire different event sequences depending on browser
+- **Other IMEs**: Similar issues may occur with other languages
 
 ## Observed Behavior
 

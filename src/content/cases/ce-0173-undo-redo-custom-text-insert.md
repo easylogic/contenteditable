@@ -18,6 +18,19 @@ tags:
   - insertion
   - chrome
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello World'
+    description: "기본 텍스트"
+  - label: "After Custom Insert"
+    html: 'Hello World New'
+    description: "preventDefault()로 커스텀 텍스트 삽입"
+  - label: "After Undo (Bug)"
+    html: 'Hello World New'
+    description: "Ctrl+Z로 Undo 불가, 커스텀 작업이 undo 스택에 없음"
+  - label: "✅ Expected"
+    html: 'Hello World'
+    description: "정상: Undo로 커스텀 텍스트 삽입 취소 가능"
 ---
 
 ### Phenomenon

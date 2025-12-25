@@ -17,6 +17,16 @@ tags:
   - arrow-keys
   - edge
 status: draft
+domSteps:
+  - label: "Before"
+    html: 'Hello| 👋 world 🌍'
+    description: "텍스트와 이모지, 커서(|)가 'Hello' 뒤"
+  - label: "After Right Arrow (Bug)"
+    html: 'Hello 👋| world 🌍'
+    description: "오른쪽 화살표로 이모지를 건너뛰어 이동"
+  - label: "✅ Expected"
+    html: 'Hello |👋 world 🌍'
+    description: "정상: 오른쪽 화살표로 한 글자씩 이동 (이모지 포함)"
 ---
 
 ### Phenomenon
