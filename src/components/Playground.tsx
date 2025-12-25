@@ -184,6 +184,10 @@ class RangeVisualizer {
         if (item.type === 'composition') {
           y = r.top - editorRect.top + this.editorEl.scrollTop + r.height - 1;
           height = 1;
+        } else if (item.type === 'beforeinput') {
+          // beforeinput 타입인 경우: 아래쪽 1px 높이로 표시 (deleted 영역과 겹치지 않도록)
+          y = r.top - editorRect.top + this.editorEl.scrollTop + r.height - 1;
+          height = 1;
         } else if (heightScale !== 1) {
           const newHeight = r.height * heightScale;
           y -= (newHeight - r.height) / 2;
@@ -1504,20 +1508,26 @@ export function Playground() {
     }
 
     // DOM Change Tracker 결과 표시 (삭제/추가 영역)
+    // targetRanges가 있으면 deleted 영역은 중복이므로 제외
     if (domChangeResult) {
       const domChangeRects: RectDrawInfo[] = [];
       
-      // 삭제된 영역 (노란색 계열)
-      for (const rect of domChangeResult.deletedRects) {
-        domChangeRects.push({
-          rect,
-          fill: 'rgba(250, 204, 21, 0.3)',
-          stroke: 'rgba(250, 204, 21, 0.9)',
-          label: 'deleted',
-        });
+      // targetRanges가 없을 때만 deleted 영역 표시 (중복 방지)
+      const hasTargetRanges = beforeInputTargetRangesRef.current && beforeInputTargetRangesRef.current.length > 0;
+      
+      if (!hasTargetRanges) {
+        // 삭제된 영역 (노란색 계열) - targetRanges가 없을 때만
+        for (const rect of domChangeResult.deletedRects) {
+          domChangeRects.push({
+            rect,
+            fill: 'rgba(250, 204, 21, 0.3)',
+            stroke: 'rgba(250, 204, 21, 0.9)',
+            label: 'deleted',
+          });
+        }
       }
       
-      // 추가된 영역 (초록색)
+      // 추가된 영역 (초록색) - 항상 표시
       for (const rect of domChangeResult.addedRects) {
         domChangeRects.push({
           rect,
@@ -1527,7 +1537,9 @@ export function Playground() {
         });
       }
       
-      visualizerRef.current.drawRects(domChangeRects);
+      if (domChangeRects.length > 0) {
+        visualizerRef.current.drawRects(domChangeRects);
+      }
     }
 
     if (r.sel) {
@@ -1835,7 +1847,7 @@ export function Playground() {
     if (!editor) return;
 
     const handleBeforeInput = (e: InputEvent) => {
-      setDomBefore(editor.innerHTML);
+      // DOM Before/After 수집 제거
       
       // DOM Change Tracker: beforeinput 시점의 텍스트 노드 스냅샷
       beforeInputTextNodesRef.current = snapshotTextNodes(editor);
@@ -1865,7 +1877,7 @@ export function Playground() {
 
     const handleInput = (e: Event) => {
       const inputEvent = e as InputEvent;
-      setDomAfter(editor.innerHTML);
+      // DOM Before/After 수집 제거
       
       // targetRanges는 유지 (input 후에도 삭제될 영역 확인 가능)
       // 새로운 beforeinput이 발생하면 자동으로 교체됨
@@ -1957,15 +1969,16 @@ export function Playground() {
       if (log.data) lines.push(`data: "${normalizeDebugText(log.data)}"`);
       lines.push('');
     });
-    lines.push('```', '', '## DOM Before', '```html', domBefore || '(empty)', '```', '', '## DOM After', '```html', domAfter || '(empty)', '```');
+    lines.push('```');
+    // DOM Before/After 제거됨
 
     navigator.clipboard.writeText(lines.join('\n')).catch(() => {});
-  }, [environment, anomalies, phases, domBefore, domAfter]);
+  }, [environment, anomalies, phases]);
 
   return (
-    <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+    <div className="grid grid-cols-[1.5fr_1fr] gap-4 flex-1 min-h-0">
       {/* Left: Editor */}
-      <div className="flex flex-col gap-2 min-h-0">
+      <div className="flex flex-col gap-2 min-h-0 h-full">
         {/* Environment */}
         <div className="flex items-center gap-2 px-3 py-2 bg-accent-primary-light border border-accent-primary rounded-md text-sm">
           <span className="font-semibold">🔍</span>
@@ -2038,36 +2051,16 @@ export function Playground() {
           </div>
         </div>
 
-        {/* Editor & DOM Diff */}
-        <div className="flex-1 grid grid-rows-[0.9fr_1.1fr] gap-2 min-h-0">
+        {/* Editor */}
+        <div className="flex-1 min-h-0 h-full">
           {/* Editor with overlay wrapper */}
-          <div ref={overlayRef} className="relative min-h-0">
+          <div ref={overlayRef} className="relative h-full min-h-0">
             <div
               ref={editorRef}
               contentEditable
               suppressContentEditableWarning
               className="h-full p-3 text-base leading-[1.8] outline-none focus:outline-none focus-visible:outline-none bg-bg-surface border-2 border-accent-primary rounded-lg overflow-y-auto box-border"
             />
-          </div>
-
-          {/* DOM Diff with syntax highlighting - larger size */}
-          <div className="grid grid-cols-2 gap-2.5 min-h-0">
-            <div className="flex flex-col min-h-0">
-              <div className="text-sm font-semibold text-text-muted mb-1.5">
-                Before {domBefore && domAfter && domBefore !== domAfter && <span className="text-red-600 text-xs">(-)</span>}
-              </div>
-              <div className="flex-1 text-sm p-2.5 bg-bg-muted rounded overflow-auto font-mono leading-relaxed border border-border-light whitespace-pre-wrap break-all max-h-full">
-                <DomDiffView before={domBefore} after={domAfter} type="before" />
-              </div>
-            </div>
-            <div className="flex flex-col min-h-0">
-              <div className="text-sm font-semibold text-text-muted mb-1.5">
-                After {domBefore && domAfter && domBefore !== domAfter && <span className="text-green-600 text-xs">(+)</span>}
-              </div>
-              <div className="flex-1 text-sm p-2.5 bg-bg-muted rounded overflow-auto font-mono leading-relaxed border border-border-light whitespace-pre-wrap break-all max-h-full">
-                <DomDiffView before={domBefore} after={domAfter} type="after" />
-              </div>
-            </div>
           </div>
         </div>
       </div>
