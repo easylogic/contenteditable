@@ -11,6 +11,7 @@ import { DomChangeAnimation } from '../../components/DomChangeAnimation';
 import CasesSidebar from '../../components/CasesSidebar.astro';
 import EditOnGitHub from '../../components/EditOnGitHub.astro';
 import Comments from '../../components/Comments.astro';
+import { ResizableSidebar } from '../../components/ResizableSidebar';
 import '../../styles/global.css';
 
 export const getStaticPaths = (async () => {
@@ -33,8 +34,6 @@ if (!entry) {
 }
 
 const allCases = await getCollection('cases');
-
-const activeView = Astro.url.searchParams.get('view') ?? 'scenario';
 
 const sameScenarioCases = allCases.filter(
   (c) => c.data.scenarioId === entry.data.scenarioId,
@@ -77,11 +76,12 @@ const { Content } = await entry.render();
   <body>
     <SiteNav />
     <main class="flex max-w-full m-0 p-0">
+      <ResizableSidebar client:load storageKey="cases-sidebar-width">
       <CasesSidebar
         allCases={allCases}
         currentSlug={slug}
-        activeView={activeView}
       />
+      </ResizableSidebar>
 
         <section class="flex-1 max-w-[1120px] mx-auto py-7 px-5 pb-10 w-full">
           <header class="mb-6">

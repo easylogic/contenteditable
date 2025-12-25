@@ -3,7 +3,6 @@ interface Props {
   allScenarios: any[];
   allCases: any[];
   currentScenarioId: string;
-  activeView?: string;
   baseUrl?: string;
 }
 
@@ -11,7 +10,6 @@ const {
   allScenarios,
   allCases,
   currentScenarioId,
-  activeView = 'category',
   baseUrl = '/scenarios',
 } = Astro.props;
 
@@ -34,116 +32,77 @@ Object.keys(scenariosByCategory).forEach((category) => {
 
 <aside
   aria-label="Scenarios"
-  class="sticky top-0 h-screen overflow-y-auto w-[240px] min-w-[240px] border-r border-border-light bg-bg-muted p-0 text-sm flex-shrink-0"
+  class="sticky top-0 h-screen overflow-y-auto w-full border-r border-border-light bg-bg-muted p-0 text-sm flex-shrink-0"
 >
-  <div class="p-4 px-3 border-b border-border-light bg-bg-surface">
-    <div class="flex justify-between items-center mb-2">
-      <span class="font-semibold text-sm">Scenarios</span>
-      <a
-        href={baseUrl}
-        class="text-xs text-accent-primary no-underline"
-      >
-        All →
-      </a>
-    </div>
-
-    <div class="flex flex-wrap gap-1 text-xs">
-      <a
-        href={`?view=category`}
-        class:list={[
-          'px-2 py-0.5 rounded no-underline transition-colors',
-          activeView === 'category'
-            ? 'bg-accent-primary text-bg-surface border-none'
-            : 'bg-transparent text-accent-primary border border-border-light',
-        ]}
-      >
-        Category
-      </a>
-      <a
-        href={`?view=all`}
-        class:list={[
-          'px-2 py-0.5 rounded no-underline transition-colors',
-          activeView === 'all'
-            ? 'bg-accent-primary text-bg-surface border-none'
-            : 'bg-transparent text-accent-primary border border-border-light',
-        ]}
-      >
-        All
-      </a>
-    </div>
-  </div>
-
   <nav aria-label="Scenario list" class="py-2">
-    {activeView === 'category' && (
-      <ul class="list-none p-0 m-0">
-        {Object.entries(scenariosByCategory).map(([category, categoryScenarios]) => (
-          <li class="mb-2">
-            <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
-              {category}
-            </div>
-            <ul class="list-none p-0 m-0">
-              {categoryScenarios.map((s) => {
-                const scenarioCases = allCases.filter((c) => c.data.scenarioId === s.data.id);
-                const isActive = s.data.id === currentScenarioId;
-                return (
-                  <li class="m-0">
-                    <a
-                      href={`/scenarios/${encodeURIComponent(s.data.id)}`}
-                      title={s.data.title}
-                      class:list={[
-                        'block pl-6 pr-3 py-1.5 no-underline text-sm transition-colors',
-                        isActive
-                          ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2] hover:text-bg-surface'
-                          : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent hover:bg-bg-surface',
-                      ]}
-                    >
-                      <div class="truncate">{s.data.title}</div>
-                      <div class:list={[
-                        'text-xs mt-0.5',
-                        isActive ? 'text-bg-surface/80' : 'text-text-secondary'
-                      ]}>
-                        {scenarioCases.length} case{scenarioCases.length === 1 ? '' : 's'}
-                      </div>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    )}
-
-    {activeView === 'all' && (
-      <ul class="list-none p-0 m-0">
-        {allScenarios.map((s) => {
-          const scenarioCases = allCases.filter((c) => c.data.scenarioId === s.data.id);
-          const isActive = s.data.id === currentScenarioId;
-          return (
-            <li class="m-0">
-              <a
-                href={`/scenarios/${encodeURIComponent(s.data.id)}`}
-                title={s.data.title}
-                class:list={[
-                  'block pl-6 pr-3 py-1.5 no-underline text-sm transition-colors',
-                  isActive
-                    ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2] hover:text-bg-surface'
-                    : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent hover:bg-bg-surface',
-                ]}
-              >
-                <div class="truncate">{s.data.title}</div>
-                <div class:list={[
-                  'text-xs mt-0.5 truncate',
-                  isActive ? 'text-bg-surface/80' : 'text-text-secondary'
-                ]}>
-                  {s.data.id} · {scenarioCases.length} case{scenarioCases.length === 1 ? '' : 's'}
-                </div>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    )}
+    <ul class="list-none p-0 m-0">
+      {Object.entries(scenariosByCategory).map(([category, categoryScenarios]) => (
+        <li class="mb-2">
+          <div class="text-xs font-semibold mb-1 ml-3 text-text-secondary uppercase tracking-wide">
+            {category}
+          </div>
+          <ul class="list-none p-0 m-0">
+            {categoryScenarios.map((s) => {
+              const scenarioCases = allCases.filter((c) => c.data.scenarioId === s.data.id);
+              const isActive = s.data.id === currentScenarioId;
+              return (
+                <li class="m-0">
+                  <a
+                    href={`/scenarios/${encodeURIComponent(s.data.id)}`}
+                    title={s.data.title}
+                    data-active={isActive}
+                    class:list={[
+                      'block pl-6 pr-3 py-1.5 no-underline text-sm transition-colors',
+                      isActive
+                        ? 'bg-accent-primary text-bg-surface border-l-[3px] border-l-[#0069c2] hover:text-bg-surface'
+                        : 'bg-transparent text-text-primary border-l-[3px] border-l-transparent hover:bg-bg-surface',
+                    ]}
+                  >
+                    <div class="truncate">{s.data.title}</div>
+                    <div class:list={[
+                      'text-xs mt-0.5',
+                      isActive ? 'text-bg-surface/80' : 'text-text-secondary'
+                    ]}>
+                      {scenarioCases.length} case{scenarioCases.length === 1 ? '' : 's'}
+                    </div>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </li>
+      ))}
+    </ul>
   </nav>
 </aside>
+
+<script>
+  // Scroll to active item on page load
+  function scrollToActiveItem() {
+    const sidebar = document.querySelector('aside[aria-label="Scenarios"]');
+    const activeLink = sidebar?.querySelector('a[data-active="true"]');
+    if (activeLink && sidebar) {
+      // Calculate position relative to sidebar container
+      const sidebarRect = sidebar.getBoundingClientRect();
+      const linkRect = activeLink.getBoundingClientRect();
+      const scrollTop = sidebar.scrollTop;
+      const linkOffsetTop = linkRect.top - sidebarRect.top + scrollTop;
+      const centerOffset = sidebar.clientHeight / 2 - linkRect.height / 2;
+      
+      sidebar.scrollTo({
+        top: linkOffsetTop - centerOffset,
+        behavior: 'smooth'
+      });
+    }
+  }
+  
+  // Try multiple times to handle async rendering
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(scrollToActiveItem, 100);
+    });
+  } else {
+    setTimeout(scrollToActiveItem, 100);
+  }
+</script>
 

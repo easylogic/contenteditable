@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import ReactFlow, { Background, Controls, MiniMap } from 'reactflow';
+import { useMemo, useEffect } from 'react';
+import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState } from 'reactflow';
 import type { Node, Edge } from 'reactflow';
 import dagre from 'dagre';
 import 'reactflow/dist/style.css';
@@ -31,7 +31,7 @@ export default function ScenarioFlow({
   scenarioCategory,
   cases,
 }: ScenarioFlowProps) {
-  const { nodes, edges } = useMemo(() => {
+  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
@@ -324,6 +324,15 @@ export default function ScenarioFlow({
     return { nodes: layoutedNodes, edges: layoutedEdges };
   }, [scenarioId, scenarioTitle, scenarioDescription, scenarioCategory, cases]);
 
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Update nodes and edges when props change
+  useEffect(() => {
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+  }, [initialNodes, initialEdges, setNodes, setEdges]);
+
   const onNodeClick = (_: any, node: Node) => {
     const url = (node.data as any)?.url;
     if (url) {
@@ -336,6 +345,8 @@ export default function ScenarioFlow({
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         fitView
         defaultEdgeOptions={{ type: 'smoothstep' }}
         nodesDraggable
