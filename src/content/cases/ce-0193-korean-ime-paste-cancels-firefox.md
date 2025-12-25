@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한글</span>'
-    description: "한글 조합 중 (한글)"
+    description: "Korean composition in progress"
   - label: "After Paste (Bug)"
     html: 'Hello World'
-    description: "붙여넣기로 조합 취소, 조합 텍스트 손실, 붙여넣은 내용만 남음"
+    description: "Paste cancels composition, composition text lost, only pasted content remains"
   - label: "✅ Expected"
     html: 'Hello 한글World'
-    description: "정상: 조합 완료 후 붙여넣기 또는 조합 텍스트 보존"
+    description: "Expected: Paste after composition completes or composition text preserved"
 ---
 
 ### Phenomenon

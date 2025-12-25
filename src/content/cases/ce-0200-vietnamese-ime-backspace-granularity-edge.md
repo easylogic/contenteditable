@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello xin chào'
-    description: "베트남어 텍스트 입력 완료 (악센트 마크 포함)"
+    description: "Vietnamese text input completed (includes accent marks)"
   - label: "After Backspace (Bug)"
     html: 'Hello xin '
-    description: "전체 문자 'chào' 삭제됨 (한 번의 Backspace)"
+    description: "Entire character 'chào' deleted (single Backspace)"
   - label: "✅ Expected"
     html: 'Hello xin chà'
-    description: "정상: 한 글자씩 삭제 (첫 번째 Backspace로 'o'만 삭제)"
+    description: "Expected: Delete one character at a time (first Backspace deletes only 'o')"
 ---
 
 ### Phenomenon

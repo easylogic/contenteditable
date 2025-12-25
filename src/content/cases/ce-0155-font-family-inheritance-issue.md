@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<div style="font-family: Arial;">Hello <span style="background: yellow;">World</span></div>'
-    description: "부모 요소에 Arial 폰트, World 텍스트 선택"
+    description: "Parent element has Arial font, World text selected"
   - label: "After Font Family (Bug)"
     html: '<div style="font-family: Arial;">Hello <span style="font-family: Times; background: yellow;">World</span></div>'
-    description: "Times 폰트 적용 시도, 부모 폰트 상속으로 적용 안 됨"
+    description: "Attempting to apply Times font, not applied due to parent font inheritance"
   - label: "✅ Expected"
     html: '<div style="font-family: Arial;">Hello <span style="font-family: Times; background: yellow;">World</span></div>'
-    description: "정상: Times 폰트가 부모 폰트를 오버라이드하여 적용됨"
+    description: "Expected: Times font overrides parent font and is applied"
 ---
 
 ### Phenomenon

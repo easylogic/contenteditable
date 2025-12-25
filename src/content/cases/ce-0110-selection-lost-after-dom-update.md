@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="background: yellow;">World</span>'
-    description: "선택된 텍스트 (World)"
+    description: "Selected text (World)"
   - label: "After DOM Update (Bug)"
     html: 'Hello <strong>World</strong>'
-    description: "DOM 조작 후 선택 손실, 커서 위치 불명확"
+    description: "After DOM manipulation, selection lost, cursor position unclear"
   - label: "✅ Expected"
     html: 'Hello <strong>World</strong>'
-    description: "정상: 선택 복원, 커서가 올바른 위치에 있음"
+    description: "Expected: Selection restored, cursor at correct position"
 ---
 
 ### Phenomenon

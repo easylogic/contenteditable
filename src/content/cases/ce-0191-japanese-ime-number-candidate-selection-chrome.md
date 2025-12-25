@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">かんじ</span>'
-    description: "일본어 로마지 입력 중, 후보 목록 표시 (1. 漢字 2. 感じ 3. 幹事...)"
+    description: "Japanese romaji input in progress, candidate list displayed (1. 漢字 2. 感じ 3. 幹事...)"
   - label: "After Number 5 (Bug)"
     html: 'Hello 幹事'
-    description: "숫자 5 키로 후보 선택, 숫자 삽입 실패"
+    description: "Number 5 key selects candidate, number insertion fails"
   - label: "✅ Expected"
     html: 'Hello かんじ5'
-    description: "정상: 숫자 5가 삽입되거나 Shift+5로 숫자 입력 가능"
+    description: "Expected: Number 5 inserted or Shift+5 can input number"
 ---
 
 ### Phenomenon

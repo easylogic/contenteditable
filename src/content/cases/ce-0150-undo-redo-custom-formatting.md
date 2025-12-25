@@ -21,16 +21,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello World'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Custom Bold"
     html: 'Hello <strong>World</strong>'
-    description: "preventDefault()로 커스텀 볼드 적용"
+    description: "Custom bold applied via preventDefault()"
   - label: "After Undo (Bug)"
     html: 'Hello <strong>World</strong>'
-    description: "Ctrl+Z로 Undo 불가, 커스텀 작업이 undo 스택에 없음"
+    description: "Undo not possible with Ctrl+Z, custom operation not in undo stack"
   - label: "✅ Expected"
     html: 'Hello World'
-    description: "정상: Undo로 커스텀 서식 취소 가능"
+    description: "Expected: Custom formatting can be cancelled with Undo"
 ---
 
 ### Phenomenon

@@ -24,13 +24,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">नम</span>'
-    description: "힌디어 데바나가리 조합 중 (नम)"
+    description: "Hindi Devanagari composition in progress (नम)"
   - label: "After (Bug)"
     html: 'Hello न म स् ते'
-    description: "결합 문자 형성 실패, 모음 기호 위치 오류"
+    description: "Conjunct formation failed, vowel sign position error"
   - label: "✅ Expected"
     html: 'Hello नमस्ते'
-    description: "정상: 결합 문자와 모음 기호가 올바르게 형성됨"
+    description: "Expected: Conjuncts and vowel signs correctly formed"
 ---
 
 ### Phenomenon

@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">かんじ</span>'
-    description: "일본어 로마지 입력 중 (kanji → かんじ), 후보 목록 표시"
+    description: "Japanese romaji input in progress (kanji → かんじ), candidate list displayed"
   - label: "After Arrow Keys (Bug)"
     html: 'Hello かんじ|'
-    description: "화살표 키로 후보 탐색 시도, 커서가 이동하여 후보 탐색 실패"
+    description: "Arrow key attempts candidate navigation, cursor moves causing candidate navigation to fail"
   - label: "✅ Expected"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">かんじ</span>'
-    description: "정상: 화살표 키로 후보 탐색, 커서는 유지"
+    description: "Expected: Arrow key navigates candidates, cursor maintained"
 ---
 
 ### Phenomenon

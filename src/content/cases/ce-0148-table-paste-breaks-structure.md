@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>'
-    description: "테이블 구조"
+    description: "Table structure"
   - label: "Clipboard"
     html: '<div><strong>Bold</strong> Text</div>'
-    description: "복사한 서식 있는 콘텐츠"
+    description: "Copied formatted content"
   - label: "❌ After Paste"
     html: '<table><tr><td></td></tr></table>'
-    description: "테이블 구조 손상, 셀 삭제 또는 구조 깨짐"
+    description: "Table structure damaged, cells deleted or structure broken"
   - label: "✅ Expected"
     html: '<table><tr><td><strong>Bold</strong> Text</td><td>Cell 2</td></tr></table>'
-    description: "테이블 구조 유지, 셀 내부에 콘텐츠 삽입"
+    description: "Table structure maintained, content inserted inside cells"
 ---
 
 ### Phenomenon

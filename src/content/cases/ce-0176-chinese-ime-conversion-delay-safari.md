@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">nihao</span>'
-    description: "중국어 병음 입력 중 (nihao), 변환 대기"
+    description: "Chinese Pinyin input in progress (nihao), conversion pending"
   - label: "After Partial Conversion (Bug)"
     html: 'Hello 你hao'
-    description: "부분 변환만 완료, 일부는 병음으로 남음"
+    description: "Only partial conversion completed, some remains as Pinyin"
   - label: "✅ Expected"
     html: 'Hello 你好'
-    description: "정상: 전체 병음이 한자로 변환됨"
+    description: "Expected: Entire Pinyin converted to Chinese characters"
 ---
 
 ### Phenomenon

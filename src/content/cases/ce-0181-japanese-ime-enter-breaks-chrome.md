@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">かんじ</span>'
-    description: "일본어 로마지 입력 중 (kanji → かんじ)"
+    description: "Japanese romaji input in progress (kanji → かんじ)"
   - label: "After Enter (Bug)"
     html: 'Hello かん<br>'
-    description: "Enter 키로 조합 취소, 부분 로마지만 남음"
+    description: "Enter key cancels composition, only partial romaji remains"
   - label: "✅ Expected"
     html: 'Hello かんじ<br>'
-    description: "정상: 조합 완료 후 줄바꿈"
+    description: "Expected: Line break after composition completes"
 ---
 
 ### Phenomenon

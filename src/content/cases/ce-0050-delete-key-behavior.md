@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello|World'
-    description: "텍스트, 커서(|)가 'Hello'와 'World' 사이"
+    description: "Text, cursor (|) between 'Hello' and 'World'"
   - label: "After Backspace"
     html: 'Hell|World'
-    description: "Backspace로 'o' 삭제 (뒤로 삭제)"
+    description: "Backspace deletes 'o' (backward deletion)"
   - label: "After Delete (Bug)"
     html: 'Hello|orld'
-    description: "Delete로 'W' 삭제 (앞으로 삭제), 하지만 일관성 없음"
+    description: "Delete deletes 'W' (forward deletion), but inconsistent"
   - label: "✅ Expected"
     html: 'Hello|orld'
-    description: "정상: Delete로 'W' 삭제, Backspace와 일관된 동작"
+    description: "Expected: Delete deletes 'W', consistent behavior with Backspace"
 ---
 
 ### Phenomenon

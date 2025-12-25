@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<ul><li>Item 1<ul><li>Nested item</li></ul></li></ul>'
-    description: "중첩 리스트, 'Nested item' 내부에 커서"
+    description: "Nested list, cursor inside 'Nested item'"
   - label: "After Enter"
     html: '<ul><li>Item 1<ul><li>Nested item</li><li></li></ul></li></ul>'
-    description: "Enter로 같은 중첩 레벨에 새 항목 생성 (정상 동작)"
+    description: "Enter creates new item at same nesting level (normal behavior)"
   - label: "✅ Expected"
     html: '<ul><li>Item 1<ul><li>Nested item</li><li></li></ul></li></ul>'
-    description: "정상: 같은 중첩 레벨에 새 항목 생성 (현재 동작이 올바름)"
+    description: "Expected: New item created at same nesting level (current behavior is correct)"
 ---
 
 ### Phenomenon

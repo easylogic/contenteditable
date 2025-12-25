@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한</span>'
-    description: "한글 조합 중 (한)"
+    description: "Korean composition in progress"
   - label: "After Enter (Bug)"
     html: 'Hello '
-    description: "Enter 키로 조합 취소, 조합 텍스트 손실"
+    description: "Enter key cancels composition, composition text lost"
   - label: "✅ Expected"
     html: 'Hello 한<br>'
-    description: "정상: 조합 확정 후 줄바꿈"
+    description: "Expected: Line break after composition commits"
 ---
 
 ### Phenomenon

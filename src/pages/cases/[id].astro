@@ -151,7 +151,9 @@ const { Content } = await entry.render();
           </header>
 
           <article class="rounded-xl border border-border-light bg-bg-surface p-4 px-4.5 text-sm leading-relaxed">
-            <Content />
+            <div class="case-markdown">
+              <Content />
+            </div>
           </article>
 
           {entry.data.domSteps && entry.data.domSteps.length > 0 && (

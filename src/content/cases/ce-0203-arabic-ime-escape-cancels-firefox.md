@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<span dir="rtl">Hello <span style="text-decoration: underline; background: #fef08a;">مرح</span></span>'
-    description: "아랍어 조합 중 (مرح), RTL 방향, 문자 연결 중"
+    description: "Arabic composition in progress (مرح), RTL direction, characters joining"
   - label: "After Escape (Bug)"
     html: '<span dir="rtl">Hello </span>'
-    description: "Escape 키로 조합 취소, 문자 연결 포함 조합 텍스트 손실"
+    description: "Escape key cancels composition, composition text including character joining lost"
   - label: "✅ Expected"
     html: '<span dir="rtl">Hello مرحبا</span>'
-    description: "정상: 조합이 우아하게 처리되거나 보존됨"
+    description: "Expected: Composition handled gracefully or preserved"
 ---
 
 ### Phenomenon

@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<div contenteditable="true">Outer <div contenteditable="true">Inner</div></div>'
-    description: "중첩된 contenteditable 요소"
+    description: "Nested contenteditable elements"
   - label: "After Click Inner (Bug)"
     html: '<div contenteditable="true">Outer <div contenteditable="true">Inner</div></div>'
-    description: "내부 요소 클릭 시 포커스가 외부 요소에 남음, 선택 범위가 두 요소에 걸침"
+    description: "When clicking inner element, focus remains on outer element, selection spans both elements"
   - label: "✅ Expected"
     html: '<div contenteditable="true">Outer <div contenteditable="true">Inner</div></div>'
-    description: "정상: 내부 요소 클릭 시 내부 요소에 포커스, 선택이 내부 요소에만 제한됨"
+    description: "Expected: When clicking inner element, focus on inner element, selection limited to inner element only"
 ---
 
 ### Phenomenon

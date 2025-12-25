@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello| World Test'
-    description: "텍스트, 커서(|)가 'Hello' 뒤"
+    description: "Text, cursor (|) after 'Hello'"
   - label: "After Right Arrow (Bug)"
     html: 'Hello World| Test'
-    description: "오른쪽 화살표로 단어 단위 이동 (예상: 한 글자씩)"
+    description: "Right arrow moves by word (expected: one character at a time)"
   - label: "✅ Expected"
     html: 'Hello |World Test'
-    description: "정상: 오른쪽 화살표로 한 글자씩 이동"
+    description: "Expected: Right arrow moves one character at a time"
 ---
 
 ### Phenomenon

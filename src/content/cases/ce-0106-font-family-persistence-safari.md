@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<span style="font-family: Arial;">Hello</span>|'
-    description: "Arial 폰트가 적용된 텍스트, 커서(|)가 끝에 위치"
+    description: "Text with Arial font applied, cursor (|) at the end"
   - label: "After Typing (Bug)"
     html: '<span style="font-family: Arial;">Hello</span>World'
-    description: "새로 입력한 텍스트가 기본 폰트로 입력됨 (Arial 상속 안 됨)"
+    description: "Newly typed text uses default font (Arial not inherited)"
   - label: "✅ Expected"
     html: '<span style="font-family: Arial;">HelloWorld</span>'
-    description: "정상: 새로 입력한 텍스트도 Arial 폰트 상속됨"
+    description: "Expected: Newly typed text also inherits Arial font"
 ---
 
 ### Phenomenon

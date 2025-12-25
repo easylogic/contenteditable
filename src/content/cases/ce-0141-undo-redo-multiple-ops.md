@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello'
-    description: "초기 텍스트"
+    description: "Initial text"
   - label: "After Multiple Operations"
     html: 'Hello <strong>World</strong> Test'
-    description: "여러 작업 수행 (텍스트 입력, 서식 적용, 추가 입력)"
+    description: "Multiple operations performed (text input, formatting applied, additional input)"
   - label: "After Single Undo (Bug)"
     html: 'Hello'
-    description: "Ctrl+Z 한 번으로 여러 작업이 한꺼번에 취소됨"
+    description: "Single Ctrl+Z cancels multiple operations at once"
   - label: "✅ Expected"
     html: 'Hello <strong>World</strong> '
-    description: "정상: Ctrl+Z 한 번에 하나의 작업만 취소 (마지막 'Test'만 취소)"
+    description: "Expected: Single Ctrl+Z cancels only one operation (only last 'Test' cancelled)"
 ---
 
 ### Phenomenon

@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Clipboard"
     html: '<span style="color: red; font-weight: bold;">Formatted Text</span>'
-    description: "복사한 서식 있는 텍스트 (Word 문서 등)"
+    description: "Copied formatted text (Word document, etc.)"
   - label: "After Paste (Bug)"
     html: '<span style="color: red; font-weight: bold;">Formatted Text</span>'
-    description: "붙여넣기 시 원치 않는 서식 포함 (색상, 볼드 등)"
+    description: "Paste includes unwanted formatting (color, bold, etc.)"
   - label: "✅ Expected"
     html: 'Formatted Text'
-    description: "정상: 평문 텍스트로 붙여넣기 또는 선택 가능한 형식"
+    description: "Expected: Paste as plain text or selectable format"
 ---
 
 ### Phenomenon

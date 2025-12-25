@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello 你好'
-    description: "중국어 문자 입력 완료"
+    description: "Chinese character input completed"
   - label: "After Backspace (Bug)"
     html: 'Hello '
-    description: "전체 문자 '你好' 삭제됨 (한 번의 Backspace)"
+    description: "Entire character '你好' deleted (single Backspace)"
   - label: "✅ Expected"
     html: 'Hello 你'
-    description: "정상: 한 글자씩 삭제 (첫 번째 Backspace로 '好'만 삭제)"
+    description: "Expected: Delete one character at a time (first Backspace deletes only '好')"
 ---
 
 ### Phenomenon

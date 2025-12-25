@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello&nbsp;&nbsp;&nbsp;World'
-    description: "Non-breaking spaces 포함 텍스트"
+    description: "Text with non-breaking spaces"
   - label: "After Editing (Bug)"
     html: 'Hello World'
-    description: "편집 후 &nbsp;가 일반 공백으로 변환, 여러 공백이 하나로 축약"
+    description: "After editing, &nbsp; converted to regular space, multiple spaces collapsed to one"
   - label: "✅ Expected"
     html: 'Hello&nbsp;&nbsp;&nbsp;World'
-    description: "정상: Non-breaking spaces 보존"
+    description: "Expected: Non-breaking spaces preserved"
 ---
 
 ### Phenomenon

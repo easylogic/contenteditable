@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello 漢 <span style="text-decoration: underline; background: #fef08a;">字</span>'
-    description: "이미 확정된 '漢'과 조합 중인 '字'"
+    description: "Already committed '漢' and composing '字'"
   - label: "After Undo (Bug)"
     html: 'Hello '
-    description: "Undo로 '漢'과 '字' 모두 삭제됨"
+    description: "Undo deletes both '漢' and '字'"
   - label: "✅ Expected"
     html: 'Hello 漢'
-    description: "정상: 조합 중인 '字'만 취소, '漢'은 유지되어야 함"
+    description: "Expected: Only cancel composing '字', '漢' should be preserved"
 ---
 ---
 

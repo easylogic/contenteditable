@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한</span>'
-    description: "한글 조합 중 (한)"
+    description: "Korean composition in progress"
   - label: "After Blur (Bug)"
     html: 'Hello '
-    description: "포커스 변경으로 조합 취소, 텍스트 손실"
+    description: "Focus change cancels composition, text lost"
   - label: "✅ Expected"
     html: 'Hello 한'
-    description: "정상: 조합이 보존되거나 우아하게 처리됨"
+    description: "Expected: Composition preserved or handled gracefully"
 ---
 
 ### Phenomenon

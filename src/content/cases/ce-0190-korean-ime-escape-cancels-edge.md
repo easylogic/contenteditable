@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한글</span>'
-    description: "한글 조합 중 (한글)"
+    description: "Korean composition in progress"
   - label: "After Escape (Bug)"
     html: 'Hello '
-    description: "Escape 키로 조합 취소, 조합 텍스트 손실"
+    description: "Escape key cancels composition, composition text lost"
   - label: "✅ Expected"
     html: 'Hello 한글'
-    description: "정상: 조합이 우아하게 처리되거나 보존됨"
+    description: "Expected: Composition handled gracefully or preserved"
 ---
 
 ### Phenomenon

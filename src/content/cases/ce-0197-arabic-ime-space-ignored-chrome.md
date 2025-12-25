@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<span dir="rtl">Hello <span style="text-decoration: underline; background: #fef08a;">مرح</span></span>'
-    description: "아랍어 조합 중 (مرح), RTL 방향, 문자 연결 중"
+    description: "Arabic composition in progress (مرح), RTL direction, characters joining"
   - label: "After Space (Bug)"
     html: '<span dir="rtl">Hello مرح</span>'
-    description: "Space 키가 무시되거나 조합이 예상치 못하게 확정됨"
+    description: "Space key ignored or composition unexpectedly committed"
   - label: "✅ Expected"
     html: '<span dir="rtl">Hello مرح </span>'
-    description: "정상: Space 키로 공백 삽입 또는 조합 확정"
+    description: "Expected: Space key inserts space or commits composition"
 ---
 
 ### Phenomenon

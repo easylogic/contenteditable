@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello| World'
-    description: "텍스트, 커서(|)가 중간에 위치"
+    description: "Text, cursor (|) at middle position"
   - label: "After Paste (Bug)"
     html: 'Hello New Text| World'
-    description: "붙여넣기 후 커서가 붙여넣은 내용의 시작 위치로 이동"
+    description: "After paste, cursor moves to start of pasted content"
   - label: "✅ Expected"
     html: 'Hello New Text| World'
-    description: "정상: 커서가 붙여넣은 내용의 끝에 위치"
+    description: "Expected: Cursor positioned at end of pasted content"
 ---
 
 ### Phenomenon

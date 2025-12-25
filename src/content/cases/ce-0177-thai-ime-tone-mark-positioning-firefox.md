@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">สวัส</span>'
-    description: "태국어 조합 중 (สวัส)"
+    description: "Thai composition in progress (สวัส)"
   - label: "After (Bug)"
     html: 'Hello สวัส'
-    description: "톤 마크 위치 오류 또는 결합 문자 분리"
+    description: "Tone mark position error or combining characters separated"
   - label: "✅ Expected"
     html: 'Hello สวัสดี'
-    description: "정상: 톤 마크와 모음 마크가 올바르게 결합"
+    description: "Expected: Tone marks and vowel marks correctly combined"
 ---
 
 ### Phenomenon

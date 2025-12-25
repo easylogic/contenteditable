@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello&nbsp;&nbsp;&nbsp;World'
-    description: "Non-breaking spaces 포함 텍스트"
+    description: "Text with non-breaking spaces"
   - label: "After Narrow Container (Bug)"
     html: 'Hello&nbsp;&nbsp;&nbsp;World'
-    description: "컨테이너가 좁아져도 줄바꿈 안 됨, 텍스트 오버플로우"
+    description: "No line break even when container narrows, text overflow"
   - label: "✅ Expected"
     html: 'Hello World'
-    description: "정상: 일반 공백 사용 시 줄바꿈 가능 (또는 nbsp 동작 명확히 문서화)"
+    description: "Expected: Line break possible when using regular space (or nbsp behavior clearly documented)"
 ---
 
 ### Phenomenon

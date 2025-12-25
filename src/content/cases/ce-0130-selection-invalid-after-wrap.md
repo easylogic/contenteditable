@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="background: #bfdbfe;">World</span> Test'
-    description: "텍스트 선택됨 (World가 하이라이트)"
+    description: "Text selected (World highlighted)"
   - label: "After Wrap (Bug)"
     html: 'Hello <b>World</b> Test'
-    description: "&lt;b&gt;로 감싸기 후 선택 범위가 무효화됨, 커서 위치 손실"
+    description: "After wrapping with &lt;b&gt;, selection range invalidated, cursor position lost"
   - label: "✅ Expected"
     html: 'Hello <b>World</b>| Test'
-    description: "정상: 선택 범위 유지, 커서가 올바른 위치에 유지됨"
+    description: "Expected: Selection range maintained, cursor maintained at correct position"
 ---
 
 ### Phenomenon

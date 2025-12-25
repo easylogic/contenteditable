@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Typing 'W' (Bug)"
     html: 'HelloW'
-    description: "한 글자 입력 시 input 이벤트가 2-3번 발생 (이중/삼중 처리)"
+    description: "Single character input triggers input event 2-3 times (double/triple processing)"
   - label: "✅ Expected"
     html: 'HelloW'
-    description: "정상: 한 글자 입력 시 input 이벤트가 한 번만 발생"
+    description: "Expected: Single character input triggers input event only once"
 ---
 
 ### Phenomenon

@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<div>Hello</div>'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Enter (Bug)"
     html: '<div>Hello</div><div><br></div>'
-    description: "Enter로 &lt;div&gt; 요소 생성 (Firefox는 &lt;p&gt; 사용)"
+    description: "Enter creates &lt;div&gt; element (Firefox uses &lt;p&gt;)"
   - label: "✅ Expected (Normalized)"
     html: '<p>Hello</p><p></p>'
-    description: "정상: 일관된 요소 타입 사용 (모두 &lt;p&gt; 또는 모두 &lt;div&gt;)"
+    description: "Expected: Consistent element type used (all &lt;p&gt; or all &lt;div&gt;)"
 ---
 
 ### Phenomenon

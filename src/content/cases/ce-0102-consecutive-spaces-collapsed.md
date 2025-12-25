@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After 5 Spaces (Bug)"
     html: 'Hello '
-    description: "5번 Space 키 입력, DOM에는 하나의 공백만 남음 (HTML 공백 축소 규칙)"
+    description: "5 Space key presses, only one space remains in DOM (HTML whitespace collapse rule)"
   - label: "✅ Expected (with CSS)"
     html: 'Hello     '
-    description: "정상: white-space: pre-wrap 사용 시 여러 공백 보존"
+    description: "Expected: Multiple spaces preserved when using white-space: pre-wrap"
 ---
 
 ### Phenomenon

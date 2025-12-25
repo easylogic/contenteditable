@@ -21,16 +21,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello World'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Custom Insert"
     html: 'Hello World New'
-    description: "preventDefault()로 커스텀 텍스트 삽입"
+    description: "Custom text inserted via preventDefault()"
   - label: "After Undo (Bug)"
     html: 'Hello World New'
-    description: "Ctrl+Z로 Undo 불가, 커스텀 작업이 undo 스택에 없음"
+    description: "Undo not possible with Ctrl+Z, custom operation not in undo stack"
   - label: "✅ Expected"
     html: 'Hello World'
-    description: "정상: Undo로 커스텀 텍스트 삽입 취소 가능"
+    description: "Expected: Custom text insertion can be cancelled with Undo"
 ---
 
 ### Phenomenon

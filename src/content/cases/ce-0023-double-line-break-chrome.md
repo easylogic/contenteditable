@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello'
-    description: "첫 번째 줄"
+    description: "First line"
   - label: "After Enter (Bug)"
     html: 'Hello<br><br>'
-    description: "Enter 한 번으로 두 개의 &lt;br&gt; 요소 삽입 (Chrome macOS)"
+    description: "Single Enter inserts two &lt;br&gt; elements (Chrome macOS)"
   - label: "✅ Expected"
     html: 'Hello<br>'
-    description: "정상: Enter 한 번으로 하나의 줄바꿈만 삽입"
+    description: "Expected: Single Enter inserts only one line break"
 ---
 
 ### Phenomenon

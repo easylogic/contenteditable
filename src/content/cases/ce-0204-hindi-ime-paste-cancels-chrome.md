@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">नम</span>'
-    description: "힌디어 데바나가리 조합 중 (नम), 모음 기호와 결합 문자 포함"
+    description: "Hindi Devanagari composition in progress (नम), includes vowel signs and combining characters"
   - label: "After Paste (Bug)"
     html: 'Hello World'
-    description: "붙여넣기로 조합 취소, 조합 텍스트 손실, 붙여넣은 내용만 남음"
+    description: "Paste cancels composition, composition text lost, only pasted content remains"
   - label: "✅ Expected"
     html: 'Hello नमस्तेWorld'
-    description: "정상: 조합 완료 후 붙여넣기 또는 조합 텍스트 보존"
+    description: "Expected: Paste after composition completes or composition text preserved"
 ---
 
 ### Phenomenon

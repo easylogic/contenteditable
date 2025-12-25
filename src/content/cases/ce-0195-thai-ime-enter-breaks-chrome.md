@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">สวัส</span>'
-    description: "태국어 조합 중 (สวัส), 톤 마크와 모음 마크 포함"
+    description: "Thai composition in progress (สวัส), includes tone marks and vowel marks"
   - label: "After Enter (Bug)"
     html: 'Hello สวั<br>'
-    description: "Enter 키로 조합 취소, 톤 마크/모음 마크 손실"
+    description: "Enter key cancels composition, tone marks/vowel marks lost"
   - label: "✅ Expected"
     html: 'Hello สวัสดี<br>'
-    description: "정상: 조합 완료 후 줄바꿈, 모든 결합 문자 보존"
+    description: "Expected: Line break after composition completes, all combining characters preserved"
 ---
 
 ### Phenomenon

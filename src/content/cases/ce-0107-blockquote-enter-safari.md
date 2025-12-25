@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<blockquote><p>Quoted text</p></blockquote>'
-    description: "blockquote 요소, 커서가 텍스트 내부"
+    description: "blockquote element, cursor inside text"
   - label: "After Enter (Bug)"
     html: '<blockquote><p>Quoted text</p><blockquote><p></p></blockquote></blockquote>'
-    description: "Enter로 중첩 blockquote 생성 (잘못된 구조)"
+    description: "Enter creates nested blockquote (incorrect structure)"
   - label: "✅ Expected"
     html: '<blockquote><p>Quoted text</p><p></p></blockquote>'
-    description: "정상: 같은 blockquote 내에 새 단락 생성"
+    description: "Expected: New paragraph created within same blockquote"
 ---
 
 ### Phenomenon

@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello 한 <span style="text-decoration: underline; background: #fef08a;">글</span>'
-    description: "이미 확정된 '한'과 조합 중인 '글'"
+    description: "Already committed '한' and composing '글'"
   - label: "After Undo (Bug)"
     html: 'Hello '
-    description: "Undo로 '한'과 '글' 모두 삭제됨"
+    description: "Undo deletes both '한' and '글'"
   - label: "✅ Expected"
     html: 'Hello '
-    description: "정상: 조합 중인 '글'만 취소, '한'은 유지되어야 함"
+    description: "Expected: Only cancel composing '글', '한' should be preserved"
 ---
 ---
 

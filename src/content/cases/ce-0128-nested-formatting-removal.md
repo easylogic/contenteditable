@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <b><i>World</i></b>'
-    description: "중첩된 서식 (볼드 + 이탤릭)"
+    description: "Nested formatting (bold + italic)"
   - label: "After Removing Bold (Bug)"
     html: 'Hello <b></b><i>World</i>'
-    description: "볼드 제거 후 빈 &lt;b&gt; 요소 남음"
+    description: "After bold removal, empty &lt;b&gt; element remains"
   - label: "✅ Expected"
     html: 'Hello <i>World</i>'
-    description: "정상: 빈 요소 제거, 깨끗한 중첩 구조"
+    description: "Expected: Empty elements removed, clean nested structure"
 ---
 
 ### Phenomenon

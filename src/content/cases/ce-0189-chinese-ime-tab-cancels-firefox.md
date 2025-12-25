@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">nihao</span>'
-    description: "중국어 병음 입력 중 (nihao)"
+    description: "Chinese Pinyin input in progress (nihao)"
   - label: "After Tab (Bug)"
     html: 'Hello '
-    description: "Tab 키로 조합 취소, 포커스 이동, 조합 텍스트 손실"
+    description: "Tab key cancels composition, focus moves, composition text lost"
   - label: "✅ Expected"
     html: 'Hello 你好'
-    description: "정상: 조합 완료 후 Tab 네비게이션 또는 조합 텍스트 보존"
+    description: "Expected: Tab navigation after composition completes or composition text preserved"
 ---
 
 ### Phenomenon

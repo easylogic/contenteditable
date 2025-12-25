@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>'
-    description: "리스트 구조, Item 1과 Item 2 텍스트 선택"
+    description: "List structure, text selected from Item 1 and Item 2"
   - label: "After Bold (Bug)"
     html: '<p><b>Item 1</b></p><p><b>Item 2</b></p>'
-    description: "서식 적용 후 리스트 구조 손상, &lt;li&gt;가 &lt;p&gt;로 변환됨"
+    description: "After formatting applied, list structure damaged, &lt;li&gt; converted to &lt;p&gt;"
   - label: "✅ Expected"
     html: '<ul><li><b>Item 1</b></li><li><b>Item 2</b></li><li>Item 3</li></ul>'
-    description: "정상: 리스트 구조 유지, 각 항목 내부에 서식 적용"
+    description: "Expected: List structure maintained, formatting applied inside each item"
 ---
 
 ### Phenomenon

@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<span dir="rtl">Hello <span style="text-decoration: underline; background: #fef08a;">של</span></span>'
-    description: "히브리어 조합 중 (שלום), RTL 방향"
+    description: "Hebrew composition in progress (שלום), RTL direction"
   - label: "After (Bug)"
     html: '<span dir="rtl">Hello של</span>'
-    description: "RTL 방향 오류 또는 문자 조합 실패"
+    description: "RTL direction error or character composition failed"
   - label: "✅ Expected"
     html: '<span dir="rtl">Hello שלום</span>'
-    description: "정상: RTL 방향과 문자 조합이 올바르게 작동"
+    description: "Expected: RTL direction and character composition work correctly"
 ---
 ---
 

@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello 漢字'
-    description: "일본어 한자 입력 완료"
+    description: "Japanese kanji input completed"
   - label: "After Backspace (Bug)"
     html: 'Hello '
-    description: "전체 문자 '漢字' 삭제됨 (한 번의 Backspace)"
+    description: "Entire character '漢字' deleted (single Backspace)"
   - label: "✅ Expected"
     html: 'Hello 漢'
-    description: "정상: 한 글자씩 삭제 (첫 번째 Backspace로 '字'만 삭제)"
+    description: "Expected: Delete one character at a time (first Backspace deletes only '字')"
 ---
 
 ### Phenomenon

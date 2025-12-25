@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<ul><li>Item 1</li><li>Item 2</li></ul>'
-    description: "리스트, 첫 번째 항목 시작 위치에 커서"
+    description: "List, cursor at start of first item"
   - label: "After Backspace (Bug)"
     html: '<p>Item 1</p><ul><li>Item 2</li></ul>'
-    description: "Backspace로 첫 번째 항목이 리스트에서 제거되고 paragraph로 변환됨"
+    description: "Backspace removes first item from list and converts to paragraph"
   - label: "✅ Expected"
     html: '<ul><li>Item 2</li></ul>'
-    description: "정상: 첫 번째 항목만 삭제되고 리스트 구조 유지"
+    description: "Expected: Only first item deleted, list structure maintained"
 ---
 
 ### Phenomenon

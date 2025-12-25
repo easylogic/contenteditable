@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello World'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Color Picker (Bug)"
     html: 'Hello <span style="background-color: rgb(255,255,0);">World</span>'
-    description: "색상 선택기로 적용 시 rgb 형식"
+    description: "When applied via color picker, rgb format"
   - label: "After Text Input (Bug)"
     html: 'Hello <span style="background-color: #ffff00;">World</span>'
-    description: "텍스트 입력으로 적용 시 hex 형식 (일관성 없음)"
+    description: "When applied via text input, hex format (inconsistent)"
   - label: "✅ Expected"
     html: 'Hello <span style="background-color: #ffff00;">World</span>'
-    description: "정상: 일관된 색상 형식 (hex 또는 rgb)"
+    description: "Expected: Consistent color format (hex or rgb)"
 ---
 
 ### Phenomenon

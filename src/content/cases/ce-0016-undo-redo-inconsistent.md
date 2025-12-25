@@ -19,16 +19,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <strong>World</strong>'
-    description: "서식 적용된 텍스트"
+    description: "Formatted text"
   - label: "After typing more"
     html: 'Hello <strong>World</strong> Test'
-    description: "추가 텍스트 입력"
+    description: "Additional text input"
   - label: "After Undo (Bug)"
     html: 'Hello '
-    description: "Undo로 전체 서식 작업이 취소됨 (개별 키 입력이 아님)"
+    description: "Undo cancels entire formatting operation (not individual key presses)"
   - label: "✅ Expected"
     html: 'Hello <strong>World</strong> '
-    description: "정상: 개별 키 입력 단위로 Undo (마지막 'Test'만 취소)"
+    description: "Expected: Undo per individual key press (only last 'Test' cancelled)"
 ---
 
 ### Phenomenon

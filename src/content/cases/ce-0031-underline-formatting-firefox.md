@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<u>Hello</u>|'
-    description: "밑줄 텍스트, 커서(|)가 끝에 위치"
+    description: "Underlined text, cursor (|) at the end"
   - label: "After Typing (Bug)"
     html: '<u>Hello</u>World'
-    description: "새로 입력한 텍스트가 밑줄 적용되지 않음"
+    description: "Newly typed text not underlined"
   - label: "✅ Expected"
     html: '<u>HelloWorld</u>'
-    description: "정상: 새로 입력한 텍스트도 밑줄 상속됨"
+    description: "Expected: Newly typed text also inherits underline"
 ---
 
 ### Phenomenon

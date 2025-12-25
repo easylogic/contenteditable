@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before Blur"
     html: 'Hello World Test'
-    description: "여러 편집 작업 완료"
+    description: "Multiple editing operations completed"
   - label: "After Blur and Focus"
     html: 'Hello World Test'
-    description: "포커스 변경 후, undo 스택이 초기화됨"
+    description: "After focus change, undo stack initialized"
   - label: "After Undo (Bug)"
     html: 'Hello World Test'
-    description: "Undo 불가, 이전 작업을 취소할 수 없음"
+    description: "Undo not possible, cannot cancel previous operations"
   - label: "✅ Expected"
     html: 'Hello World'
-    description: "정상: Undo로 이전 작업 취소 가능"
+    description: "Expected: Previous operations can be cancelled with Undo"
 ---
 
 ### Phenomenon

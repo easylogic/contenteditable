@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">かんじ</span>'
-    description: "일본어 로마지 입력 중 (kanji → かんじ)"
+    description: "Japanese romaji input in progress (kanji → かんじ)"
   - label: "After Space (Bug)"
     html: 'Hello 漢字'
-    description: "Space 키로 한자 변환, 공백 삽입 실패"
+    description: "Space key converts to kanji, space insertion fails"
   - label: "✅ Expected"
     html: 'Hello 漢字 '
-    description: "정상: 한자 변환 후 공백 삽입"
+    description: "Expected: Space inserted after kanji conversion"
 ---
 
 ### Phenomenon

@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한</span>'
-    description: "한글 조합 중"
+    description: "Korean composition in progress"
   - label: "❌ After (Bug)"
     html: 'Hello 하'
-    description: "받침 'ㄴ' 손실"
+    description: "Final consonant 'ㄴ' lost"
   - label: "✅ Expected"
     html: 'Hello 한'
-    description: "정상: '한' 유지"
+    description: "Expected: '한' preserved"
 ---
 
 ### Phenomenon

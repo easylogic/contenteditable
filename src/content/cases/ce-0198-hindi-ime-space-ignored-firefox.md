@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">नम</span>'
-    description: "힌디어 데바나가리 조합 중 (नम), 모음 기호와 결합 문자 포함"
+    description: "Hindi Devanagari composition in progress (नम), includes vowel signs and combining characters"
   - label: "After Space (Bug)"
     html: 'Hello नम'
-    description: "Space 키가 무시되거나 조합이 예상치 못하게 확정됨"
+    description: "Space key ignored or composition unexpectedly committed"
   - label: "✅ Expected"
     html: 'Hello नम '
-    description: "정상: Space 키로 공백 삽입 또는 조합 확정"
+    description: "Expected: Space key inserts space or commits composition"
 ---
 
 ### Phenomenon

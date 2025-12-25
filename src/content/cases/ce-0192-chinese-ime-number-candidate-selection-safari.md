@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">nihao</span>'
-    description: "중국어 병음 입력 중, 후보 목록 표시 (1. 你好 2. 你号 3. 泥好...)"
+    description: "Chinese Pinyin input in progress, candidate list displayed (1. 你好 2. 你号 3. 泥好...)"
   - label: "After Number 3 (Bug)"
     html: 'Hello 泥好'
-    description: "숫자 3 키로 후보 선택, 숫자 삽입 실패"
+    description: "Number 3 key selects candidate, number insertion fails"
   - label: "✅ Expected"
     html: 'Hello nihao3'
-    description: "정상: 숫자 3이 삽입되거나 Shift+3으로 숫자 입력 가능"
+    description: "Expected: Number 3 inserted or Shift+3 can input number"
 ---
 
 ### Phenomenon

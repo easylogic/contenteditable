@@ -21,16 +21,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<pre><code>function test() {</code></pre>'
-    description: "코드 블록 구조"
+    description: "Code block structure"
   - label: "Clipboard"
     html: '<strong>Bold</strong> Code'
-    description: "복사한 서식 있는 텍스트"
+    description: "Copied formatted text"
   - label: "❌ After Paste (Bug)"
     html: '<p><strong>Bold</strong> Code</p>'
-    description: "코드 블록 구조 손실, &lt;pre&gt;&lt;code&gt;가 &lt;p&gt;로 변환됨"
+    description: "Code block structure lost, &lt;pre&gt;&lt;code&gt; converted to &lt;p&gt;"
   - label: "✅ Expected"
     html: '<pre><code>Bold Code</code></pre>'
-    description: "정상: 코드 블록 구조 유지, 서식 제거 (평문 텍스트)"
+    description: "Expected: Code block structure maintained, formatting removed (plain text)"
 ---
 
 ### Phenomenon

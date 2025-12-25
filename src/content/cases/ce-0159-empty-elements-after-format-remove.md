@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <b><i><span style="color: red;">World</span></i></b>'
-    description: "여러 서식이 적용된 텍스트"
+    description: "Text with multiple formatting applied"
   - label: "After Removing Formats (Bug)"
     html: 'Hello <b></b><i></i><span style="color: red;"></span>World'
-    description: "서식 제거 후 빈 래퍼 요소들(&lt;b&gt;, &lt;i&gt;, &lt;span&gt;) 남음"
+    description: "After formatting removal, empty wrapper elements (&lt;b&gt;, &lt;i&gt;, &lt;span&gt;) remain"
   - label: "✅ Expected"
     html: 'Hello World'
-    description: "정상: 빈 요소 제거, 깨끗한 DOM"
+    description: "Expected: Empty elements removed, clean DOM"
 ---
 
 ### Phenomenon

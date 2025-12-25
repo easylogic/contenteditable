@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>'
-    description: "테이블 구조, Cell 1 텍스트 선택 시도"
+    description: "Table structure, attempting to select Cell 1 text"
   - label: "After Selection (Bug)"
     html: '<table><tr><td>Cell 1</td><td>Cell 2</td></tr></table>'
-    description: "선택이 인접 셀로 확장되거나 셀 경계를 무시함"
+    description: "Selection expands to adjacent cells or ignores cell boundaries"
   - label: "✅ Expected"
     html: '<table><tr><td><span style="background: yellow;">Cell 1</span></td><td>Cell 2</td></tr></table>'
-    description: "정상: 선택이 셀 내부에만 제한됨"
+    description: "Expected: Selection limited to inside cell"
 ---
 
 ### Phenomenon

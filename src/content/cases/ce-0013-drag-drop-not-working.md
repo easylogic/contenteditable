@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<p>Paragraph 1</p><p>Paragraph 2</p>'
-    description: "두 개의 단락, 'Paragraph 1' 선택됨"
+    description: "Two paragraphs, 'Paragraph 1' selected"
   - label: "After Drag-Drop (Bug)"
     html: '<p>Paragraph 1</p><p>Paragraph 1</p><p>Paragraph 2</p>'
-    description: "드래그 앤 드롭으로 복사됨 (이동이 아님), 원본 텍스트 유지"
+    description: "Drag and drop copies (not moves), original text maintained"
   - label: "✅ Expected"
     html: '<p>Paragraph 2</p><p>Paragraph 1</p>'
-    description: "정상: 드래그 앤 드롭으로 이동, 원본 위치에서 제거됨"
+    description: "Expected: Drag and drop moves, removed from original position"
 ---
 
 ### Phenomenon

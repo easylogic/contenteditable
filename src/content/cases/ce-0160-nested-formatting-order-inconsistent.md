@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello World'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Bold then Italic"
     html: 'Hello <b><i>World</i></b>'
-    description: "볼드 먼저, 이탤릭 나중"
+    description: "Bold first, italic later"
   - label: "After Italic then Bold (Bug)"
     html: 'Hello <i><b>World</b></i>'
-    description: "이탤릭 먼저, 볼드 나중 - 다른 중첩 순서"
+    description: "Italic first, bold later - different nesting order"
   - label: "✅ Expected"
     html: 'Hello <b><i>World</i></b>'
-    description: "정상: 일관된 중첩 순서 (항상 b > i)"
+    description: "Expected: Consistent nesting order (always b > i)"
 ---
 
 ### Phenomenon

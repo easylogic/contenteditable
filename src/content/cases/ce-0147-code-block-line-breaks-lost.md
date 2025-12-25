@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<pre><code>function test() {<br>    return true;<br>}</code></pre>'
-    description: "여러 줄이 있는 코드 블록"
+    description: "Code block with multiple lines"
   - label: "After Editing (Bug)"
     html: '<pre><code>function test() { return true; }</code></pre>'
-    description: "편집 후 줄바꿈 손실, 한 줄로 합쳐짐"
+    description: "After editing, line breaks lost, merged into single line"
   - label: "✅ Expected"
     html: '<pre><code>function test() {<br>    return true;<br>}</code></pre>'
-    description: "정상: 줄바꿈 보존"
+    description: "Expected: Line breaks preserved"
 ---
 
 ### Phenomenon

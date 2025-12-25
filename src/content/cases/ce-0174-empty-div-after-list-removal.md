@@ -21,13 +21,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<ul><li>Item 1</li></ul>'
-    description: "리스트 구조"
+    description: "List structure"
   - label: "After List Removal (Bug)"
     html: '<div></div><p>Item 1</p>'
-    description: "리스트 제거 후 빈 &lt;div&gt; 요소 남음"
+    description: "After list removal, empty &lt;div&gt; element remains"
   - label: "✅ Expected"
     html: '<p>Item 1</p>'
-    description: "정상: 빈 div 제거, 깨끗한 DOM"
+    description: "Expected: Empty div removed, clean DOM"
 ---
 
 ### Phenomenon

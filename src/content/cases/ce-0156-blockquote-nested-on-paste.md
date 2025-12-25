@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<blockquote><p>Quoted text</p></blockquote>'
-    description: "기존 인용구"
+    description: "Existing blockquote"
   - label: "Clipboard"
     html: '<blockquote><p>Another quote</p></blockquote>'
-    description: "복사한 인용구 포함 콘텐츠"
+    description: "Content including copied blockquote"
   - label: "After Paste (Bug)"
     html: '<blockquote><p>Quoted text</p><blockquote><p>Another quote</p></blockquote></blockquote>'
-    description: "중첩된 인용구 생성 (잘못된 구조)"
+    description: "Nested blockquote created (incorrect structure)"
   - label: "✅ Expected"
     html: '<blockquote><p>Quoted text</p><p>Another quote</p></blockquote>'
-    description: "정상: 인용구 태그 제거, 내부 콘텐츠만 삽입"
+    description: "Expected: Blockquote tags removed, only inner content inserted"
 ---
 
 ### Phenomenon

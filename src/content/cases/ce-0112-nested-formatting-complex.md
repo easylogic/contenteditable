@@ -21,19 +21,19 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Text'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Bold"
     html: '<b>Text</b>'
-    description: "Bold 서식 적용"
+    description: "Bold formatting applied"
   - label: "After Italic (Bug)"
     html: '<b><i>Text</i></b>'
-    description: "Italic 서식 적용, 중첩 구조 생성"
+    description: "Italic formatting applied, nested structure created"
   - label: "After Underline (Bug)"
     html: '<b><i><u>Text</u></i></b>'
-    description: "Underline 서식 적용, 깊은 중첩 구조 생성"
+    description: "Underline formatting applied, deep nested structure created"
   - label: "✅ Expected (Normalized)"
     html: '<span style="font-weight: bold; font-style: italic; text-decoration: underline;">Text</span>'
-    description: "정상: 스타일 속성으로 통합, 중첩 최소화"
+    description: "Expected: Consolidated into style attribute, nesting minimized"
 ---
 
 ### Phenomenon

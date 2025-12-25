@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<div>Hello</div>'
-    description: "첫 번째 줄"
+    description: "First line"
   - label: "After Enter (Firefox)"
     html: '<div>Hello</div><p><br></p>'
-    description: "Enter 키로 &lt;p&gt; 요소 생성 (Firefox)"
+    description: "Enter key creates &lt;p&gt; element (Firefox)"
   - label: "After Enter (Chrome)"
     html: '<div>Hello</div><div><br></div>'
-    description: "Enter 키로 &lt;div&gt; 요소 생성 (Chrome)"
+    description: "Enter key creates &lt;div&gt; element (Chrome)"
   - label: "✅ Expected"
     html: '<div>Hello</div><div><br></div>'
-    description: "정상: 일관된 요소 타입 사용 (또는 선택 가능)"
+    description: "Expected: Consistent element type used (or selectable)"
 ---
 
 ### Phenomenon

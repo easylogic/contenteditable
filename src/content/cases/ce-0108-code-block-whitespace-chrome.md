@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<pre><code>    function test() {</code></pre>'
-    description: "들여쓰기가 있는 코드 블록 (4개 공백)"
+    description: "Code block with indentation (4 spaces)"
   - label: "After Editing (Bug)"
     html: '<pre><code> function test() {</code></pre>'
-    description: "편집 후 여러 공백이 하나로 축약됨"
+    description: "After editing, multiple spaces collapsed to one"
   - label: "✅ Expected"
     html: '<pre><code>    function test() {</code></pre>'
-    description: "정상: &lt;pre&gt; 태그로 공백 보존"
+    description: "Expected: Spaces preserved with &lt;pre&gt; tag"
 ---
 
 ### Phenomenon

@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<img src="image.jpg" width="200" height="150" alt="Image">'
-    description: "원본 이미지 (200x150, 비율 4:3)"
+    description: "Original image (200x150, ratio 4:3)"
   - label: "After Resize (Bug)"
     html: '<img src="image.jpg" width="300" height="150" alt="Image">'
-    description: "리사이즈 후 비율 손상 (300x150, 왜곡됨)"
+    description: "After resize, ratio damaged (300x150, distorted)"
   - label: "✅ Expected"
     html: '<img src="image.jpg" width="300" height="225" alt="Image">'
-    description: "정상: 비율 유지 (300x225, 4:3 비율 보존)"
+    description: "Expected: Ratio maintained (300x225, 4:3 ratio preserved)"
 ---
 
 ### Phenomenon

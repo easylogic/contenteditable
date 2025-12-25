@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">한</span>'
-    description: "한글 조합 중 (한)"
+    description: "Korean composition in progress"
   - label: "After Space (Bug)"
     html: 'Hello 한'
-    description: "Space 키가 무시되거나 조합이 예상치 못하게 확정됨"
+    description: "Space key ignored or composition unexpectedly committed"
   - label: "✅ Expected"
     html: 'Hello 한 '
-    description: "정상: Space 키로 공백 삽입 또는 조합 확정"
+    description: "Expected: Space key inserts space or commits composition"
 ---
 
 ### Phenomenon

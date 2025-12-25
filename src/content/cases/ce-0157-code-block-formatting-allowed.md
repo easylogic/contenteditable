@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<pre><code>function test() {</code></pre>'
-    description: "코드 블록 구조"
+    description: "Code block structure"
   - label: "After Bold (Bug)"
     html: '<pre><code>function <b>test</b>() {</code></pre>'
-    description: "코드 블록 내부에 서식 적용, 코드 구조 손상"
+    description: "Formatting applied inside code block, code structure damaged"
   - label: "✅ Expected"
     html: '<pre><code>function test() {</code></pre>'
-    description: "정상: 코드 블록 내부 서식 차단, 평문 텍스트 유지"
+    description: "Expected: Formatting blocked inside code block, plain text maintained"
 ---
 
 ### Phenomenon

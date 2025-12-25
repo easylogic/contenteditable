@@ -20,16 +20,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<blockquote><p>Quoted text</p></blockquote>'
-    description: "blockquote 요소, 커서가 텍스트 끝에 위치"
+    description: "blockquote element, cursor at end of text"
   - label: "After First Enter (Bug)"
     html: '<blockquote><p>Quoted text</p><p></p></blockquote>'
-    description: "첫 번째 Enter로 blockquote 내부에 새 단락 생성"
+    description: "First Enter creates new paragraph inside blockquote"
   - label: "After Multiple Enters (Bug)"
     html: '<blockquote><p>Quoted text</p><p></p><p></p></blockquote>'
-    description: "여러 번 Enter를 눌러도 blockquote를 벗어나기 어려움"
+    description: "Difficult to exit blockquote even after multiple Enter presses"
   - label: "✅ Expected"
     html: '<blockquote><p>Quoted text</p></blockquote><p></p>'
-    description: "정상: Enter 한 번으로 blockquote 외부에 새 단락 생성"
+    description: "Expected: Single Enter creates new paragraph outside blockquote"
 ---
 
 ### Phenomenon

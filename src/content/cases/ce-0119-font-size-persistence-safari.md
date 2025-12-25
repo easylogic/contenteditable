@@ -19,16 +19,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello World'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Font Size"
     html: 'Hello <span style="font-size: 18px;">World</span>'
-    description: "18px 폰트 크기 적용"
+    description: "18px font size applied"
   - label: "After Typing (Bug)"
     html: 'Hello <span style="font-size: 18px;">World</span> New'
-    description: "새로 입력한 텍스트에 폰트 크기 미적용"
+    description: "Newly typed text does not have font size applied"
   - label: "✅ Expected"
     html: 'Hello <span style="font-size: 18px;">World New</span>'
-    description: "정상: 새로 입력한 텍스트도 폰트 크기 상속"
+    description: "Expected: Newly typed text also inherits font size"
 ---
 
 ### Phenomenon

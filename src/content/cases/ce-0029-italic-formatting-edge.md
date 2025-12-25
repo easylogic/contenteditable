@@ -19,13 +19,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<i>Hello</i>|'
-    description: "이탤릭 텍스트, 커서(|)가 끝에 위치"
+    description: "Italic text, cursor (|) at the end"
   - label: "After Typing (Bug)"
     html: '<i>Hello</i>World'
-    description: "새로 입력한 텍스트가 이탤릭 적용되지 않음"
+    description: "Newly typed text does not have italic applied"
   - label: "✅ Expected"
     html: '<i>HelloWorld</i>'
-    description: "정상: 새로 입력한 텍스트도 이탤릭 상속됨"
+    description: "Expected: Newly typed text also inherits italic"
 ---
 
 ### Phenomenon

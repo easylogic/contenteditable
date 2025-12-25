@@ -21,16 +21,16 @@ status: draft
 domSteps:
   - label: "After Color Picker"
     html: '<span style="color: #ff0000;">Text</span>'
-    description: "색상 선택기로 빨간색 적용 (hex 형식)"
+    description: "Red color applied via color picker (hex format)"
   - label: "After Text Input (Bug)"
     html: '<span style="color: rgb(255, 0, 0);">Text</span>'
-    description: "텍스트 입력으로 같은 빨간색 적용 (rgb 형식, 형식 불일치)"
+    description: "Same red color applied via text input (rgb format, format mismatch)"
   - label: "After Named Color (Bug)"
     html: '<span style="color: red;">Text</span>'
-    description: "이름으로 같은 빨간색 적용 (named 형식, 형식 불일치)"
+    description: "Same red color applied via name (named format, format mismatch)"
   - label: "✅ Expected"
     html: '<span style="color: #ff0000;">Text</span>'
-    description: "정상: 동일한 색상은 일관된 형식(hex) 사용"
+    description: "Expected: Same color uses consistent format (hex)"
 ---
 
 ### Phenomenon

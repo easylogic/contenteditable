@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">สวัส</span>'
-    description: "태국어 조합 중 (สวัส), 톤 마크와 모음 마크 포함"
+    description: "Thai composition in progress (สวัส), includes tone marks and vowel marks"
   - label: "After Space (Bug)"
     html: 'Hello สวัส'
-    description: "Space 키가 무시되거나 조합이 예상치 못하게 확정됨"
+    description: "Space key ignored or composition unexpectedly committed"
   - label: "✅ Expected"
     html: 'Hello สวัส '
-    description: "정상: Space 키로 공백 삽입 또는 조합 확정"
+    description: "Expected: Space key inserts space or commits composition"
 ---
 
 ### Phenomenon

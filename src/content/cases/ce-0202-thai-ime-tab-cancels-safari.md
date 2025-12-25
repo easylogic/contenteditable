@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">สวัส</span>'
-    description: "태국어 조합 중 (สวัส), 톤 마크와 모음 마크 포함"
+    description: "Thai composition in progress (สวัส), includes tone marks and vowel marks"
   - label: "After Tab (Bug)"
     html: 'Hello '
-    description: "Tab 키로 조합 취소, 포커스 이동, 조합 텍스트 손실"
+    description: "Tab key cancels composition, focus moves, composition text lost"
   - label: "✅ Expected"
     html: 'Hello สวัสดี'
-    description: "정상: 조합 완료 후 Tab 네비게이션 또는 조합 텍스트 보존"
+    description: "Expected: Tab navigation after composition completes or composition text preserved"
 ---
 
 ### Phenomenon

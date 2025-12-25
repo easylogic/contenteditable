@@ -19,16 +19,16 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello World'
-    description: "기본 텍스트"
+    description: "Basic text"
   - label: "After Bold"
     html: 'Hello <strong>World</strong>'
-    description: "볼드 서식 적용"
+    description: "Bold formatting applied"
   - label: "After Typing (Bug)"
     html: 'Hello <strong>World</strong> New'
-    description: "새로 입력한 텍스트에 볼드 서식 미적용"
+    description: "Newly typed text does not have bold formatting applied"
   - label: "✅ Expected"
     html: 'Hello <strong>World New</strong>'
-    description: "정상: 새로 입력한 텍스트도 볼드 서식 상속"
+    description: "Expected: Newly typed text also inherits bold formatting"
 ---
 
 ### Phenomenon

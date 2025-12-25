@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">xin chao</span>'
-    description: "베트남어 입력 중 (xin chao)"
+    description: "Vietnamese input in progress (xin chao)"
   - label: "After (Bug)"
     html: 'Hello xin chao'
-    description: "악센트 마크 손실 (chào → chao)"
+    description: "Accent marks lost (chào → chao)"
   - label: "✅ Expected"
     html: 'Hello xin chào'
-    description: "정상: 악센트 마크 유지 (chào)"
+    description: "Expected: Accent marks preserved (chào)"
 ---
 
 ### Phenomenon

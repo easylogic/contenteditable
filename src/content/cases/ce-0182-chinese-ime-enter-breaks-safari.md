@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">nihao</span>'
-    description: "중국어 병음 입력 중 (nihao)"
+    description: "Chinese Pinyin input in progress (nihao)"
   - label: "After Enter (Bug)"
     html: 'Hello nih<br>'
-    description: "Enter 키로 조합 취소, 부분 병음만 남음"
+    description: "Enter key cancels composition, only partial Pinyin remains"
   - label: "✅ Expected"
     html: 'Hello 你好<br>'
-    description: "정상: 한자 변환 완료 후 줄바꿈"
+    description: "Expected: Line break after kanji conversion completes"
 ---
 
 ### Phenomenon

@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<blockquote><p>Quoted text</p></blockquote>'
-    description: "인용구 구조"
+    description: "Blockquote structure"
   - label: "After Bold (Bug)"
     html: '<p><b>Quoted text</b></p>'
-    description: "서식 적용 후 인용구 구조 손상, &lt;blockquote&gt; 제거됨"
+    description: "After formatting applied, blockquote structure damaged, &lt;blockquote&gt; removed"
   - label: "✅ Expected"
     html: '<blockquote><p><b>Quoted text</b></p></blockquote>'
-    description: "정상: 인용구 구조 유지, 내부에 서식 적용"
+    description: "Expected: Blockquote structure maintained, formatting applied inside"
 ---
 
 ### Phenomenon

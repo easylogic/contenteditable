@@ -21,13 +21,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="color: red; font-weight: bold;">World</span>'
-    description: "여러 서식이 적용된 텍스트"
+    description: "Text with multiple formatting applied"
   - label: "After Removing Formats (Bug)"
     html: 'Hello <span style=""></span>World'
-    description: "서식 제거 후 빈 style 속성을 가진 &lt;span&gt; 요소 남음"
+    description: "After formatting removal, &lt;span&gt; element with empty style attribute remains"
   - label: "✅ Expected"
     html: 'Hello World'
-    description: "정상: 빈 span 요소와 style 속성 제거, 깨끗한 DOM"
+    description: "Expected: Empty span element and style attribute removed, clean DOM"
 ---
 
 ### Phenomenon

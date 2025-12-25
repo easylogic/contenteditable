@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="background: yellow;">World</span> Test'
-    description: "선택된 텍스트 (World)"
+    description: "Selected text (World)"
   - label: "After Replace (Bug)"
     html: 'Hello New Test'
-    description: "프로그래밍 방식으로 교체 후 선택 범위 무효화, 커서 위치 불명확"
+    description: "After programmatic replacement, selection range invalidated, cursor position unclear"
   - label: "✅ Expected"
     html: 'Hello New Test'
-    description: "정상: 선택 범위 유효, 커서가 교체된 콘텐츠 뒤에 위치"
+    description: "Expected: Selection range valid, cursor positioned after replaced content"
 ---
 
 ### Phenomenon

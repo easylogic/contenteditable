@@ -18,13 +18,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="background: #bfdbfe;">World</span> Test'
-    description: "텍스트 선택됨 (World가 하이라이트)"
+    description: "Text selected (World highlighted)"
   - label: "After Click Outside (Bug)"
     html: 'Hello World| Test'
-    description: "외부 클릭 시 선택이 완전히 해제되지 않고 커서로 축소됨"
+    description: "When clicking outside, selection not fully cleared but collapsed to cursor"
   - label: "✅ Expected"
     html: 'Hello World Test'
-    description: "정상: 외부 클릭 시 선택이 완전히 해제됨"
+    description: "Expected: When clicking outside, selection fully cleared"
 ---
 
 ### Phenomenon

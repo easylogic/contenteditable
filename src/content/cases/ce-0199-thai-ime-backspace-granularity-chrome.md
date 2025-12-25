@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello สวัสดี'
-    description: "태국어 텍스트 입력 완료 (톤 마크와 모음 마크 포함)"
+    description: "Thai text input completed (includes tone marks and vowel marks)"
   - label: "After Backspace (Bug)"
     html: 'Hello '
-    description: "전체 문자 'สวัสดี' 삭제됨 (한 번의 Backspace)"
+    description: "Entire character 'สวัสดี' deleted (single Backspace)"
   - label: "✅ Expected"
     html: 'Hello สวัส'
-    description: "정상: 한 글자씩 삭제 (첫 번째 Backspace로 'ดี'만 삭제)"
+    description: "Expected: Delete one character at a time (first Backspace deletes only 'ดี')"
 ---
 
 ### Phenomenon

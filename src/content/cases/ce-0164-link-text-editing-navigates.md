@@ -21,13 +21,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<a href="https://example.com">Link text</a>'
-    description: "링크 요소"
+    description: "Link element"
   - label: "After Click (Bug)"
     html: '[Navigated to https://example.com]'
-    description: "클릭 시 즉시 네비게이션 발생, 텍스트 편집 불가"
+    description: "Click immediately triggers navigation, text editing not possible"
   - label: "✅ Expected"
     html: '<a href="https://example.com">Link text</a>'
-    description: "정상: 클릭으로 텍스트 선택 가능, 편집 모드 진입"
+    description: "Expected: Click can select text, enter edit mode"
 ---
 
 ### Phenomenon

@@ -24,13 +24,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<span dir="rtl">Hello <span style="text-decoration: underline; background: #fef08a;">مرح</span></span>'
-    description: "아랍어 조합 중 (مرح), RTL 방향"
+    description: "Arabic composition in progress (مرح), RTL direction"
   - label: "After (Bug)"
     html: '<span dir="rtl">Hello م ر ح</span>'
-    description: "문자 연결 실패, 개별 문자로 분리됨"
+    description: "Character joining failed, separated into individual characters"
   - label: "✅ Expected"
     html: '<span dir="rtl">Hello مرحبا</span>'
-    description: "정상: 문자가 올바르게 연결됨 (مرحبا)"
+    description: "Expected: Characters correctly joined (مرحبا)"
 ---
 
 ### Phenomenon

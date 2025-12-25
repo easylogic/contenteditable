@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<span style="font-family: Arial;">Text</span>'
-    description: "Arial 폰트가 적용된 텍스트"
+    description: "Text with Arial font applied"
   - label: "After Removing Font (Bug)"
     html: '<span style="">Text</span>'
-    description: "폰트 제거 후 빈 style 속성이 남음"
+    description: "After font removal, empty style attribute remains"
   - label: "✅ Expected"
     html: 'Text'
-    description: "정상: 빈 style 속성과 요소가 제거됨"
+    description: "Expected: Empty style attribute and element removed"
 ---
 
 ### Phenomenon

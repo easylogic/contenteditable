@@ -21,13 +21,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<ul><li><b>Bold item</b></li></ul>'
-    description: "굵은 텍스트가 있는 리스트 항목, 커서가 끝에 위치"
+    description: "List item with bold text, cursor at end"
   - label: "After Enter (Bug)"
     html: '<ul><li><b>Bold item</b></li><li></li></ul>'
-    description: "Enter로 새 항목 생성, 굵은 서식이 새 항목에 적용되지 않음"
+    description: "Enter creates new item, bold formatting not applied to new item"
   - label: "✅ Expected"
     html: '<ul><li><b>Bold item</b></li><li><b></b></li></ul>'
-    description: "정상: 새 항목에도 굵은 서식이 상속됨"
+    description: "Expected: New item also inherits bold formatting"
 ---
 
 ### Phenomenon

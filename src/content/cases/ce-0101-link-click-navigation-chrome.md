@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: '<a href="https://example.com">Link text</a>'
-    description: "링크 요소, 클릭 전"
+    description: "Link element, before click"
   - label: "After Single Click (Bug)"
     html: '<a href="https://example.com">Link text</a>'
-    description: "단일 클릭으로 페이지가 링크 URL로 이동 (텍스트 선택 불가)"
+    description: "Single click navigates to link URL (text selection not possible)"
   - label: "✅ Expected"
     html: '<a href="https://example.com">Link text</a>'
-    description: "정상: 단일 클릭으로 텍스트 선택 가능, 편집 가능"
+    description: "Expected: Single click can select text, editing possible"
 ---
 
 ### Phenomenon

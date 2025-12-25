@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">Прив</span>'
-    description: "러시아어 키릴 문자 입력 중 (Прив)"
+    description: "Russian Cyrillic character input in progress (Прив)"
   - label: "After (Bug)"
     html: 'Hello Прив'
-    description: "문자 조합 오류 또는 키보드 레이아웃 전환 문제"
+    description: "Character composition error or keyboard layout switch issue"
   - label: "✅ Expected"
     html: 'Hello Привет'
-    description: "정상: 키릴 문자가 올바르게 조합됨"
+    description: "Expected: Cyrillic characters correctly composed"
 ---
 ### Phenomenon
 

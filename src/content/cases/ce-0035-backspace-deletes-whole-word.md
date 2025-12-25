@@ -20,13 +20,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello world| example'
-    description: "텍스트, 커서(|)가 'world' 뒤"
+    description: "Text, cursor (|) after 'world'"
   - label: "After Backspace (Bug)"
     html: 'Hello | example'
-    description: "Backspace로 전체 단어 'world' 삭제됨 (예상: 한 글자씩)"
+    description: "Backspace deletes entire word 'world' (expected: one character at a time)"
   - label: "✅ Expected"
     html: 'Hello worl| example'
-    description: "정상: Backspace로 한 글자씩 삭제 (마지막 'd'만 삭제)"
+    description: "Expected: Backspace deletes one character at a time (only last 'd' deleted)"
 ---
 
 ### Phenomenon

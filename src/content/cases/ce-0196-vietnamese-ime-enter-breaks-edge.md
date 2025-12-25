@@ -22,13 +22,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">xin chao</span>'
-    description: "베트남어 입력 중 (xin chao), 악센트 마크 조합 중"
+    description: "Vietnamese input in progress (xin chao), accent marks composing"
   - label: "After Enter (Bug)"
     html: 'Hello xin chao<br>'
-    description: "Enter 키로 조합 취소, 악센트 마크 손실"
+    description: "Enter key cancels composition, accent marks lost"
   - label: "✅ Expected"
     html: 'Hello xin chào<br>'
-    description: "정상: 조합 완료 후 줄바꿈, 모든 악센트 마크 보존"
+    description: "Expected: Line break after composition completes, all accent marks preserved"
 ---
 
 ### Phenomenon

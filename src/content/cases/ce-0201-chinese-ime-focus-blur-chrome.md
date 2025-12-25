@@ -23,13 +23,13 @@ status: draft
 domSteps:
   - label: "Before"
     html: 'Hello <span style="text-decoration: underline; background: #fef08a;">nihao</span>'
-    description: "중국어 병음 입력 중 (nihao), 후보 목록 표시"
+    description: "Chinese Pinyin input in progress (nihao), candidate list displayed"
   - label: "After Blur (Bug)"
     html: 'Hello '
-    description: "포커스 변경으로 조합 취소, 불완전한 한자 변환 손실"
+    description: "Focus change cancels composition, incomplete kanji conversion lost"
   - label: "✅ Expected"
     html: 'Hello 你好'
-    description: "정상: 조합이 보존되거나 우아하게 처리됨"
+    description: "Expected: Composition preserved or handled gracefully"
 ---
 
 ### Phenomenon
