@@ -1977,23 +1977,61 @@ export function Playground() {
     <div className="grid grid-cols-[1.5fr_1fr] gap-4 flex-1 min-h-0">
       {/* Left: Editor */}
       <div className="flex flex-col gap-2 min-h-0 h-full">
-        {/* Preset selector + Actions */}
-        <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-bg-muted rounded-md text-xs text-text-secondary flex-wrap">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[0.7rem] text-text-muted">
-              {t.playground.sampleHTML}
-            </span>
-            <select
-              value={selectedPresetId}
-              onChange={(e) => setSelectedPresetId(e.target.value)}
-              className="h-7 px-2 rounded-md border border-border-light bg-bg-surface text-[0.75rem] text-text-primary cursor-pointer"
-            >
-              {EDITOR_PRESETS.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.labels[uiLocale] ?? preset.labels.en}
-                </option>
-              ))}
-            </select>
+        {/* Preset selector + Legend */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-bg-muted rounded-md text-xs text-text-secondary flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[0.7rem] text-text-muted">
+                {t.playground.sampleHTML}
+              </span>
+              <select
+                value={selectedPresetId}
+                onChange={(e) => setSelectedPresetId(e.target.value)}
+                className="h-7 px-2 rounded-md border border-border-light bg-bg-surface text-[0.75rem] text-text-primary cursor-pointer"
+              >
+                {EDITOR_PRESETS.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.labels[uiLocale] ?? preset.labels.en}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {/* Visualization Legend */}
+          <div className="px-3 py-2 bg-bg-muted rounded-md text-xs">
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 rounded border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.5)' }}></div>
+                <span className="text-text-secondary">{t.playground.legendSelection}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 rounded" style={{ backgroundColor: 'rgba(139, 92, 246, 0.3)', borderTop: '1px solid rgba(139, 92, 246, 1)' }}></div>
+                <span className="text-text-secondary">{t.playground.legendComposition}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-1 rounded" style={{ backgroundColor: 'rgba(249, 115, 22, 0.3)', borderTop: '1px solid rgba(249, 115, 22, 1)' }}></div>
+                <span className="text-text-secondary">{t.playground.legendBeforeinput}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 rounded border" style={{ backgroundColor: 'rgba(250, 204, 21, 0.3)', borderColor: 'rgba(250, 204, 21, 0.9)', borderStyle: 'dashed' }}></div>
+                <span className="text-text-secondary">{t.playground.legendDeleted}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 rounded border" style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 0.8)' }}></div>
+                <span className="text-text-secondary">{t.playground.legendAdded}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-3 rounded border" style={{ backgroundColor: 'rgba(107, 114, 128, 0.3)', borderColor: 'rgba(107, 114, 128, 0.8)' }}></div>
+                <span className="text-text-secondary">{t.playground.legendNonEditable}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 flex items-center justify-center relative">
+                  <div className="w-2 h-2 rounded-full border-2 border-purple-500"></div>
+                  <div className="absolute top-3 w-0.5 h-2 bg-purple-500"></div>
+                </div>
+                <span className="text-text-secondary">{t.playground.legendInvisibleChars}</span>
+              </div>
+            </div>
           </div>
         </div>
 
