@@ -131,6 +131,62 @@
       "en": "Non-editable elements (contenteditable=false)",
       "ko": "편집 불가능한 요소 (contenteditable=false)"
     }
+  },
+  {
+    "id": "html-entities",
+    "labels": {
+      "en": "HTML entities (&lt;, &gt;, &amp;, etc.)",
+      "ko": "HTML 엔티티 (&lt;, &gt;, &amp; 등)"
+    }
+  },
+  {
+    "id": "link-editing",
+    "labels": {
+      "en": "Link editing (nested links, boundaries)",
+      "ko": "링크 편집 (중첩 링크, 경계)"
+    }
+  },
+  {
+    "id": "table-editing",
+    "labels": {
+      "en": "Table editing (cells, boundaries)",
+      "ko": "테이블 편집 (셀, 경계)"
+    }
+  },
+  {
+    "id": "code-block-editing",
+    "labels": {
+      "en": "Code block editing (pre, code)",
+      "ko": "코드 블록 편집 (pre, code)"
+    }
+  },
+  {
+    "id": "empty-elements",
+    "labels": {
+      "en": "Empty elements (empty p, div)",
+      "ko": "빈 요소들 (빈 p, div)"
+    }
+  },
+  {
+    "id": "rtl-ltr-mixed",
+    "labels": {
+      "en": "RTL + LTR mixed (Arabic + English)",
+      "ko": "RTL + LTR 혼합 (아랍어 + 영어)"
+    }
+  },
+  {
+    "id": "emoji-text-mixed",
+    "labels": {
+      "en": "Emoji + text mixed",
+      "ko": "이모지 + 텍스트 혼합"
+    }
+  },
+  {
+    "id": "long-text-wrapping",
+    "labels": {
+      "en": "Long text + line wrapping",
+      "ko": "긴 텍스트 + 줄바꿈"
+    }
   }
 ]
 
