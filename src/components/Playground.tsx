@@ -1199,7 +1199,7 @@ export function Playground() {
   const [uiLocale, setUiLocale] = useState<Locale>('en');
   const [selectedPresetId, setSelectedPresetId] = useState<string>('rich-inline-list-previous-default');
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
-  const [showSnapshotHistory, setShowSnapshotHistory] = useState(false);
+  const [activeTab, setActiveTab] = useState<'snapshots' | 'events'>('events');
   const selectedPreset = useMemo(
     () => EDITOR_PRESETS.find((p) => p.id === selectedPresetId) ?? EDITOR_PRESETS[0],
     [selectedPresetId],
@@ -1433,8 +1433,6 @@ export function Playground() {
           }
         }
       }, 0);
-      
-      setShowSnapshotHistory(false);
     } catch (error) {
       console.error('Failed to restore snapshot:', error);
       alert('Failed to restore snapshot');
@@ -1979,16 +1977,6 @@ export function Playground() {
     <div className="grid grid-cols-[1.5fr_1fr] gap-4 flex-1 min-h-0">
       {/* Left: Editor */}
       <div className="flex flex-col gap-2 min-h-0 h-full">
-        {/* Environment */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-accent-primary-light border border-accent-primary rounded-md text-sm">
-          <span className="font-semibold">🔍</span>
-          <span>{environment.os} {environment.osVersion}</span>
-          <span className="text-text-muted">•</span>
-          <span>{environment.browser} {environment.browserVersion}</span>
-          <span className="text-text-muted">•</span>
-          <span>{environment.device}</span>
-        </div>
-
         {/* Preset selector + Actions */}
         <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-bg-muted rounded-md text-xs text-text-secondary flex-wrap">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -2006,48 +1994,6 @@ export function Playground() {
                 </option>
               ))}
             </select>
-          </div>
-          <div className="flex gap-1.5">
-            <button 
-              type="button" 
-              onClick={resetAll}
-              className="px-2.5 py-1.5 text-xs rounded-md border border-border-light bg-bg-surface text-text-primary cursor-pointer hover:bg-bg-muted transition-colors"
-            >
-              🗑️ {t.playground.reset}
-            </button>
-            <button 
-              type="button" 
-              onClick={() => {
-                if (visualizerRef.current) {
-                  visualizerRef.current.drawInvisibleCharacters();
-                }
-              }}
-              className="px-2.5 py-1.5 text-xs rounded-md border border-border-light bg-bg-surface text-text-primary cursor-pointer hover:bg-bg-muted transition-colors"
-              title="Show invisible characters (ZWNBSP, LF, etc.) in the parent paragraph"
-            >
-              👁️ {t.playground.showInvisibleChars}
-            </button>
-            <button 
-              type="button" 
-              onClick={handleSaveSnapshot}
-              className="px-2.5 py-1.5 text-xs rounded-md border border-border-light bg-bg-surface text-text-primary cursor-pointer hover:bg-bg-muted transition-colors"
-            >
-              {t.playground.saveSnapshot}
-            </button>
-            <button 
-              type="button" 
-              onClick={() => setShowSnapshotHistory(!showSnapshotHistory)}
-              className="px-2.5 py-1.5 text-xs rounded-md border border-border-light bg-bg-surface text-text-primary cursor-pointer hover:bg-bg-muted transition-colors"
-            >
-              📚 {t.playground.snapshotHistoryTitle} ({snapshots.length})
-            </button>
-            <button 
-              type="button" 
-              onClick={copyReport}
-              className="px-2.5 py-1.5 text-xs rounded-md border-none bg-accent-primary text-white cursor-pointer hover:bg-accent-primary-hover transition-colors"
-            >
-              {t.playground.copyReport}
-            </button>
           </div>
         </div>
 
@@ -2067,24 +2013,75 @@ export function Playground() {
 
       {/* Right: Event Phases & Snapshot History */}
       <div className="flex flex-col gap-1.5 overflow-x-hidden min-h-0 h-full">
-        {/* Snapshot History */}
-        {showSnapshotHistory && (
-          <div className="mb-2 p-3 bg-bg-muted rounded-lg border border-border-light">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-text-primary m-0">Snapshot History</h3>
-              <button
-                type="button"
-                onClick={() => setShowSnapshotHistory(false)}
-                className="text-xs text-text-muted hover:text-text-primary"
-              >
-                ✕
-              </button>
-            </div>
-            {snapshots.length === 0 ? (
-              <p className="text-xs text-text-muted m-0">No snapshots saved yet.</p>
-            ) : (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {snapshots.map((snapshot) => (
+        {/* Toolbar */}
+        <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-bg-muted rounded-md">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('events')}
+              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                activeTab === 'events'
+                  ? 'bg-accent-primary text-white'
+                  : 'bg-bg-surface text-text-primary hover:bg-bg-muted'
+              }`}
+            >
+              {t.playground.eventLog}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('snapshots')}
+              className={`px-3 py-1 text-xs rounded-md transition-colors relative ${
+                activeTab === 'snapshots'
+                  ? 'bg-accent-primary text-white'
+                  : 'bg-bg-surface text-text-primary hover:bg-bg-muted'
+              }`}
+            >
+              📚 {t.playground.snapshotHistory}
+              {snapshots.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[0.65rem] rounded-full w-4 h-4 flex items-center justify-center">
+                  {snapshots.length}
+                </span>
+              )}
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={copyReport}
+            className="px-2.5 py-1 text-xs rounded-md border-none bg-accent-primary text-white cursor-pointer hover:bg-accent-primary-hover transition-colors"
+          >
+            {t.playground.copyReport}
+          </button>
+        </div>
+
+        {/* Anomalies - Always visible */}
+        {anomalies.length > 0 && (
+          <div className="flex flex-col gap-1">
+            {anomalies.map((a, i) => (
+              <div key={i} className="p-1.5 bg-red-50 dark:bg-red-950/20 border border-red-500 dark:border-red-600 rounded">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-red-600 dark:text-red-400 text-sm whitespace-nowrap">
+                    ⚠️ {a.type}
+                  </span>
+                  <span className="text-xs text-red-800 dark:text-red-300">{a.description}</span>
+                </div>
+                <code className="text-xs text-red-900 dark:text-red-200 block mt-1.5">
+                  {a.detail}
+                </code>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Tab Content */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {activeTab === 'snapshots' ? (
+            <div className="flex flex-col gap-2">
+              {snapshots.length === 0 ? (
+                <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
+                  {t.playground.noSnapshots}
+                </div>
+              ) : (
+                snapshots.map((snapshot) => (
                   <div
                     key={snapshot.id}
                     className="p-2 bg-bg-surface rounded border border-border-light text-xs"
@@ -2137,39 +2134,18 @@ export function Playground() {
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {/* Anomalies */}
-        {anomalies.length > 0 && (
-          <div className="flex flex-col gap-1">
-            {anomalies.map((a, i) => (
-              <div key={i} className="p-1.5 bg-red-50 dark:bg-red-950/20 border border-red-500 dark:border-red-600 rounded">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-red-600 dark:text-red-400 text-sm whitespace-nowrap">
-                    ⚠️ {a.type}
-                  </span>
-                  <span className="text-xs text-red-800 dark:text-red-300">{a.description}</span>
-                </div>
-                <code className="text-xs text-red-900 dark:text-red-200 block mt-1.5">
-                  {a.detail}
-                </code>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Phase Blocks */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          {phases.length === 0 ? (
-            <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
-              {t.playground.eventLogEmpty}
+                ))
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
-              {phases.map((phase, i) => <PhaseBlockView key={i} phase={phase} t={t} />)}
+              {phases.length === 0 ? (
+                <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
+                  {t.playground.eventLogEmpty}
+                </div>
+              ) : (
+                phases.map((phase, i) => <PhaseBlockView key={i} phase={phase} t={t} />)
+              )}
             </div>
           )}
         </div>
