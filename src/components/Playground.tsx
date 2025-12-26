@@ -2066,7 +2066,7 @@ export function Playground() {
       </div>
 
       {/* Right: Event Phases & Snapshot History */}
-      <div className="flex flex-col gap-1.5 overflow-y-auto overflow-x-hidden min-h-0 flex-1">
+      <div className="flex flex-col gap-1.5 overflow-x-hidden min-h-0 h-full">
         {/* Snapshot History */}
         {showSnapshotHistory && (
           <div className="mb-2 p-3 bg-bg-muted rounded-lg border border-border-light">
@@ -2162,13 +2162,17 @@ export function Playground() {
         )}
 
         {/* Phase Blocks */}
-        {phases.length === 0 ? (
-          <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
-            {t.playground.eventLogEmpty}
-          </div>
-        ) : (
-          phases.map((phase, i) => <PhaseBlockView key={i} phase={phase} t={t} />)
-        )}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {phases.length === 0 ? (
+            <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
+              {t.playground.eventLogEmpty}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              {phases.map((phase, i) => <PhaseBlockView key={i} phase={phase} t={t} />)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -24,46 +24,18 @@ const t = getTranslation(locale);
 const localeInfo = locales[locale];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={locale} dir={localeInfo.dir} class="h-full">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <title>{t.playground.title} | contenteditable lab</title>
   </head>
-  <body>
+  <body class="h-full m-0 flex flex-col">
     <SiteNav />
-    <main class="playground-page">
-      <header class="page-header">
-        <h1>{t.playground.title}</h1>
-        <p>{t.playground.description}</p>
-      </header>
+    <main class="flex-1 max-w-[1280px] w-full mx-auto px-5 pt-4 box-border flex flex-col min-h-0">
       <Playground client:load />
     </main>
   </body>
 </html>
-
-<style>
-  .playground-page {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .page-header {
-    margin-bottom: 2rem;
-  }
-
-  .page-header h1 {
-    font-size: 2rem;
-    margin: 0 0 0.5rem;
-  }
-
-  .page-header p {
-    color: var(--text-muted);
-    margin: 0;
-    font-size: 1rem;
-    max-width: 600px;
-  }
-</style>
 
