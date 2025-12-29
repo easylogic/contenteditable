@@ -248,6 +248,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
                 pushLog('keydown', {
                   key: event.key,
                   code: event.code,
+                  keyCode: (event as KeyboardEvent).keyCode,
                   ctrlKey: event.ctrlKey,
                   altKey: event.altKey,
                   metaKey: event.metaKey,

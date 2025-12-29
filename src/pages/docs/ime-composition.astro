@@ -431,7 +431,7 @@ element.addEventListener('compositionend', (e) => {
             </p>
           </div>
 
-          <div>
+          <div class="mb-6">
             <h3 class="text-lg m-0 mb-2 text-text-primary">
               Undo during composition
             </h3>
@@ -440,6 +440,18 @@ element.addEventListener('compositionend', (e) => {
             </p>
             <p class="m-0 text-[0.85rem] text-text-muted">
               See cases: <a href="/scenarios/scenario-undo-with-composition" class="text-accent-primary">scenario-undo-with-composition</a>
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
+              Duplicate keydown events with keyCode 229
+            </h3>
+            <p class="m-0 mb-2">
+              During IME composition, pressing certain keys (especially Enter) may trigger duplicate <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">keydown</code> events. The first event has <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">keyCode: 229</code> (indicating IME is processing the input), followed by the actual key's keyCode (e.g., 13 for Enter). This can cause event handlers to execute twice for a single key press.
+            </p>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-ime-composition-keydown-keycode-229" class="text-accent-primary">scenario-ime-composition-keydown-keycode-229</a>
             </p>
           </div>
         </DocSection>
