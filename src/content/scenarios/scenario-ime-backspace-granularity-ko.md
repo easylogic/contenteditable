@@ -1,7 +1,7 @@
 ---
 id: scenario-ime-backspace-granularity
-title: Backspace가 단일 문자 구성 요소 대신 전체 조합 단위를 제거함
-description: contenteditable 요소에서 IME로 텍스트를 편집할 때 Backspace를 누르면 단일 구성 요소 대신 전체 조합 단위(음절, 문자 등)가 제거됩니다. 이것은 세밀한 수정을 어렵게 만들고 네이티브 입력 필드와 다릅니다. 이것은 한글, 일본어, 중국어 및 기타 언어를 포함하여 여러 언어에 영향을 줍니다.
+title: "Backspace가 단일 문자 구성 요소 대신 전체 조합 단위를 제거함"
+description: "contenteditable 요소에서 IME로 텍스트를 편집할 때 Backspace를 누르면 단일 구성 요소 대신 전체 조합 단위(음절, 문자 등)가 제거됩니다. 이것은 세밀한 수정을 어렵게 만들고 네이티브 입력 필드와 다릅니다. 이것은 한글, 일본어, 중국어 및 기타 언어를 포함하여 여러 언어에 영향을 줍니다."
 category: ime
 tags:
   - composition

@@ -1,7 +1,7 @@
 ---
 id: scenario-space-during-composition
-title: 컴포지션 중 Space 키가 무시되거나 일관되지 않게 커밋됨
-description: contenteditable 요소에서 IME로 텍스트를 컴포지션하는 동안 Space 키를 누르면 무시되거나 네이티브 텍스트 컨트롤과 비교하여 일관되지 않은 방식으로 컴포지션이 커밋됩니다. 한국어, 일본어, 중국어, 태국어 및 기타 언어를 포함한 여러 언어에 영향을 미칩니다.
+title: "컴포지션 중 Space 키가 무시되거나 일관되지 않게 커밋됨"
+description: "contenteditable 요소에서 IME로 텍스트를 컴포지션하는 동안 Space 키를 누르면 무시되거나 네이티브 텍스트 컨트롤과 비교하여 일관되지 않은 방식으로 컴포지션이 커밋됩니다. 한국어, 일본어, 중국어, 태국어 및 기타 언어를 포함한 여러 언어에 영향을 미칩니다."
 category: ime
 tags:
   - composition

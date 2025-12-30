@@ -1,7 +1,7 @@
 ---
 id: scenario-caret-movement-with-emoji
-title: contenteditable에서 화살표 키가 이모지를 건너뜀
-description: 이모지를 포함하는 `contenteditable` 요소에서 왼쪽 및 오른쪽 화살표 키를 사용할 때
+title: "contenteditable에서 화살표 키가 이모지를 건너뜀"
+description: "이모지를 포함하는 `contenteditable` 요소에서 왼쪽 및 오른쪽 화살표 키를 사용할 때"
 category: caret
 tags:
   - caret

@@ -1,7 +1,7 @@
 ---
 id: scenario-ime-enter-breaks
-title: contenteditable 내에서 Enter를 누르면 컴포지션이 취소됨
-description: contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 Enter를 누르면 컴포지션이 취소되고 때로는 부분 문자 또는 음절만 커밋됩니다. 캐럿이 다음 줄로 이동하지만 마지막 컴포지션된 문자가 손실될 수 있습니다. 한국어, 일본어, 중국어 및 기타 언어를 포함한 여러 언어에 영향을 미칩니다.
+title: "contenteditable 내에서 Enter를 누르면 컴포지션이 취소됨"
+description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 Enter를 누르면 컴포지션이 취소되고 때로는 부분 문자 또는 음절만 커밋됩니다. 캐럿이 다음 줄로 이동하지만 마지막 컴포지션된 문자가 손실될 수 있습니다. 한국어, 일본어, 중국어 및 기타 언어를 포함한 여러 언어에 영향을 미칩니다."
 category: ime
 tags:
   - composition

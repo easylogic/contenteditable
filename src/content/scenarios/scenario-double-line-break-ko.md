@@ -1,7 +1,7 @@
 ---
 id: scenario-double-line-break
-title: contenteditable에서 Enter를 누르면 두 개의 줄바꿈이 삽입됨
-description: 일반 `contenteditable` 요소에서 Enter를 누르면 하나 대신 두 개의 보이는 줄바꿈이 삽입됩니다.
+title: "contenteditable에서 Enter를 누르면 두 개의 줄바꿈이 삽입됨"
+description: "일반 `contenteditable` 요소에서 Enter를 누르면 하나 대신 두 개의 보이는 줄바꿈이 삽입됩니다."
 category: other
 tags:
   - enter
