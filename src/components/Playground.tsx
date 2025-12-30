@@ -1714,6 +1714,17 @@ export function Playground() {
       });
     }
 
+    // 9. InputType mismatch detection
+    if (lastBi && lastIn && lastBi.inputType && lastIn.inputType) {
+      if (lastBi.inputType !== lastIn.inputType) {
+        newAnomalies.push({
+          type: 'inputtype-mismatch',
+          description: 'beforeinput과 input의 inputType이 다름',
+          detail: `beforeinput: "${lastBi.inputType}" vs input: "${lastIn.inputType}"`,
+        });
+      }
+    }
+
     setAnomalies(newAnomalies);
 
     const blocks: PhaseBlock[] = [];
@@ -1731,7 +1742,7 @@ export function Playground() {
       type: 'input',
       log: lastIn,
       delta: lastIn.timestamp - baseTs,
-      highlight: newAnomalies.some(a => ['parent-mismatch', 'text-leak', 'node-type-change', 'sibling-created', 'missing-beforeinput'].includes(a.type)) ? 'error' : undefined,
+      highlight: newAnomalies.some(a => ['parent-mismatch', 'text-leak', 'node-type-change', 'sibling-created', 'missing-beforeinput', 'inputtype-mismatch'].includes(a.type)) ? 'error' : undefined,
     });
 
     setPhases(blocks);

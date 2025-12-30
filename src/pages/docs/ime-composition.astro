@@ -258,6 +258,42 @@ element.addEventListener('compositionend', (e) => {
               <li class="mb-2"><strong>Test across platforms:</strong> Test with different keyboards, browsers, and devices</li>
             </ul>
           </DocInfoBox>
+
+          <DocAlert type="warning" title="⚠️ Important: Store targetRanges from beforeinput" class="mt-4">
+            <p class="m-0 mb-2 text-sm">
+              <strong>When beforeinput and input have different inputType values:</strong>
+            </p>
+            <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+              <li class="mb-1">The <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">targetRanges</code> from <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> are crucial for understanding actual DOM changes</li>
+              <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">targetRanges</code> are only available in <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> events, not in <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> events</li>
+              <li class="mb-1">Always store <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">targetRanges</code> from <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> for use in <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">input</code> handlers</li>
+              <li class="mb-1">Compare <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> values between events to detect mismatches</li>
+            </ul>
+            <DocCodeBlock code={`// Store targetRanges from beforeinput
+let lastBeforeInputTargetRanges = null;
+let lastBeforeInputType = null;
+
+element.addEventListener('beforeinput', (e) => {
+  // Store targetRanges, inputType for use in input handler
+  lastBeforeInputTargetRanges = e.getTargetRanges?.() || [];
+  lastBeforeInputType = e.inputType;
+});
+
+element.addEventListener('input', (e) => {
+  // Check for inputType mismatch
+  if (lastBeforeInputType && e.inputType !== lastBeforeInputType) {
+    // Use targetRanges from beforeinput to understand actual change
+    if (lastBeforeInputTargetRanges && lastBeforeInputTargetRanges.length > 0) {
+      // Process based on targetRanges rather than inputType
+      handleActualChange(lastBeforeInputTargetRanges, e);
+    }
+  }
+  
+  // Clear stored values
+  lastBeforeInputTargetRanges = null;
+  lastBeforeInputType = null;
+});`} />
+          </DocAlert>
         </DocSection>
 
         <DocSection title="Selection During Composition">
@@ -443,7 +479,7 @@ element.addEventListener('compositionend', (e) => {
             </p>
           </div>
 
-          <div>
+          <div class="mb-6">
             <h3 class="text-lg m-0 mb-2 text-text-primary">
               Duplicate keydown events with keyCode 229
             </h3>
@@ -452,6 +488,18 @@ element.addEventListener('compositionend', (e) => {
             </p>
             <p class="m-0 text-[0.85rem] text-text-muted">
               See cases: <a href="/scenarios/scenario-ime-composition-keydown-keycode-229" class="text-accent-primary">scenario-ime-composition-keydown-keycode-229</a>
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-lg m-0 mb-2 text-text-primary">
+              beforeinput and input inputType mismatch
+            </h3>
+            <p class="m-0 mb-2">
+              During IME composition, the <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event may have a different <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> than the corresponding <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> event. For example, <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> may fire with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> while <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> fires with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContentBackward</code>. This requires storing <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code>'s <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">targetRanges</code> for use in <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> event handling.
+            </p>
+            <p class="m-0 text-[0.85rem] text-text-muted">
+              See cases: <a href="/scenarios/scenario-beforeinput-input-inputtype-mismatch" class="text-accent-primary">scenario-beforeinput-input-inputtype-mismatch</a>
             </p>
           </div>
         </DocSection>
