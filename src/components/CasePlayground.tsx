@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 
 type CasePlaygroundProps = {
   id: string;
@@ -72,16 +72,28 @@ export function CasePlayground(props: CasePlaygroundProps) {
   });
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [html, setHtml] = useState<string>(
-    '<p>Use this editable area to reproduce the described case.</p>',
-  );
+  const editableRef = useRef<HTMLDivElement>(null);
+  const isInitializedRef = useRef(false);
+  const logIdCounterRef = useRef(0);
 
-  const resetLogs = () => setLogs([]);
+  // Initialize content only once
+  useEffect(() => {
+    if (editableRef.current && !isInitializedRef.current) {
+      editableRef.current.innerHTML = '<p>Use this editable area to reproduce the described case.</p>';
+      isInitializedRef.current = true;
+    }
+  }, []);
+
+  const resetLogs = () => {
+    setLogs([]);
+    logIdCounterRef.current = 0;
+  };
 
   const pushLog = (type: string, data: Record<string, unknown>) => {
+    logIdCounterRef.current += 1;
     setLogs((prev) => [
       {
-        id: prev.length ? prev[prev.length - 1].id + 1 : 1,
+        id: logIdCounterRef.current,
         time: formatTime(new Date()),
         type,
         data,
@@ -142,7 +154,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
   return (
     <section
       aria-label="Case playground"
-      className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 mt-7"
+      className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 mt-7 items-stretch"
     >
       <div className="flex flex-col gap-3.5">
         <header>
@@ -236,12 +248,15 @@ export function CasePlayground(props: CasePlaygroundProps) {
 
           <div className="border border-border-light rounded-xl p-2.5 bg-bg-surface mt-1">
             <div
+              ref={editableRef}
               contentEditable
               suppressContentEditableWarning
               onInput={(event) => {
-                setHtml((event.target as HTMLElement).innerHTML);
+                const target = event.target as HTMLElement;
+                // Don't update state - let the DOM manage itself
+                // This prevents React from re-rendering and resetting cursor position
                 pushLog('input', {
-                  textContent: (event.target as HTMLElement).textContent,
+                  textContent: target.textContent,
                 });
               }}
               onKeyDown={(event) => {
@@ -277,7 +292,6 @@ export function CasePlayground(props: CasePlaygroundProps) {
                 });
               }}
               className="min-h-[140px] border border-border-medium rounded-lg p-2.5 text-sm leading-normal outline-none overflow-y-auto"
-              dangerouslySetInnerHTML={{ __html: html }}
             />
           </div>
         </div>
@@ -285,7 +299,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
 
       <section
         aria-label="Event log"
-        className="border border-border-light rounded-xl p-3 bg-bg-muted flex flex-col gap-1.5"
+        className="border border-border-light rounded-xl p-3 bg-bg-muted flex flex-col gap-1.5 h-full"
       >
         <header className="flex justify-between items-center">
           <div>
@@ -299,7 +313,7 @@ export function CasePlayground(props: CasePlaygroundProps) {
           </div>
         </header>
 
-        <div className="flex-1 min-h-[180px] max-h-[420px] overflow-y-auto border border-border-light rounded-lg bg-bg-surface p-2 font-mono text-[0.78rem]">
+        <div className="flex-1 min-h-[180px] overflow-y-auto border border-border-light rounded-lg bg-bg-surface p-2 font-mono text-[0.78rem]">
           {logs.length === 0 ? (
             <div className="text-text-faint p-1">
               Interact with the editable area to see events here.
