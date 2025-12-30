@@ -7,6 +7,7 @@ tags:
   - selection
   - caret
 status: draft
+locale: ko
 ---
 
 `contenteditable` 요소 내부에서 텍스트 범위가 선택되어 있을 때 요소 외부를 클릭하면

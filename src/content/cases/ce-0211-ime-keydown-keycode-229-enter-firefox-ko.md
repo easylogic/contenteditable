@@ -32,7 +32,7 @@ domSteps:
     description: "Expected: Single line break after composition commits"
 ---
 
-### 현상
+## 현상
 
 Firefox의 `contenteditable` 요소에서 한글 IME 조합 중 Enter를 누르면 두 개의 `keydown` 이벤트가 순차적으로 발생합니다:
 1. 첫 번째 이벤트: `keyCode: 229` (IME가 입력을 처리 중임을 나타냄)
@@ -40,7 +40,7 @@ Firefox의 `contenteditable` 요소에서 한글 IME 조합 중 Enter를 누르�
 
 이것은 `keydown` 이벤트를 수신하는 이벤트 핸들러가 단일 Enter 키 입력에 대해 두 번 실행될 수 있습니다.
 
-### 재현 예시
+## 재현 예시
 
 1. Firefox에서 `contenteditable` 요소에 포커스를 둡니다.
 2. 한글 IME를 활성화합니다.
@@ -48,7 +48,7 @@ Firefox의 `contenteditable` 요소에서 한글 IME 조합 중 Enter를 누르�
 4. 조합이 활성화된 상태에서 Enter를 누릅니다.
 5. 브라우저 콘솔이나 이벤트 로그에서 `keydown` 이벤트를 관찰합니다.
 
-### 관찰된 동작
+## 관찰된 동작
 
 Enter를 조합 중에 누를 때:
 
@@ -67,14 +67,14 @@ Enter를 조합 중에 누를 때:
    - `keyCode === 13`인 `keydown`을 수신하는 이벤트 핸들러가 두 번 실행됨
    - 이것은 중복 줄바꿈, 중복 명령 실행 또는 기타 의도하지 않은 동작을 일으킬 수 있음
 
-### 예상 동작
+## 예상 동작
 
 - 단일 Enter 키 입력에 대해 하나의 `keydown` 이벤트만 발생해야 합니다
 - `keyCode 229`가 발생하면 실제 키 이벤트와 명확히 구별 가능해야 합니다
 - 이벤트 핸들러가 조합 중 키 이벤트를 중복 제거하기 위한 특별한 로직이 필요하지 않아야 합니다
 - `keyCode 229` 이벤트가 실제 키를 위한 핸들러를 트리거하지 않아야 합니다
 
-### 영향
+## 영향
 
 이것은 다음을 일으킬 수 있습니다:
 
@@ -84,13 +84,13 @@ Enter를 조합 중에 누를 때:
 - **상태 동기화 문제**: 애플리케이션 상태가 일관되지 않을 수 있음
 - **예상치 못한 UI 동작**: UI가 단일 사용자 작업에 대해 두 번 응답할 수 있음
 
-### 브라우저 비교
+## 브라우저 비교
 
 - **Chrome/Edge**: 조합 중 `keyCode 229` 다음에 실제 `keyCode 13` 발생
 - **Firefox**: 유사한 동작 - `keyCode 229` 다음에 `keyCode 13` 발생
 - **Safari**: 동작이 다양할 수 있음
 
-### 참고 및 해결 방법 가능한 방향
+## 참고 및 해결 방법 가능한 방향
 
 - **`keyCode 229` 확인**: 조합 중 `keyCode 229`인 `keydown` 이벤트를 무시합니다:
   ```javascript

@@ -8,6 +8,7 @@ tags:
   - composition
   - escape
 status: draft
+locale: ko
 ---
 
 `contenteditable` 요소에서 IME로 텍스트를 컴포지션할 때 Escape 키를 누르면 컴포지션이 취소되거나, 컴포지션된 텍스트가 손실되거나, 일관되지 않게 동작할 수 있습니다. 이는 Escape를 취소 또는 대화상자 닫기에 사용하는 UI 상호작용과 충돌할 수 있습니다.

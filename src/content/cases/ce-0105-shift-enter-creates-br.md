@@ -29,35 +29,35 @@ domSteps:
     description: "Expected: Shift+Enter creates line break, Enter creates new paragraph (current behavior is correct)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pressing Shift+Enter in a contenteditable element, a `<br>` line break element is created instead of a new paragraph. This behavior is consistent across Chrome, Firefox, and Safari.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus a contenteditable element
 2. Type some text
 3. Press Shift+Enter
 
-### Observed behavior
+## Observed behavior
 
 - A `<br>` element is inserted
 - Text continues on the next line without creating a new block element
 - This is consistent across all major browsers
 - Useful for line breaks within paragraphs
 
-### Expected behavior
+## Expected behavior
 
 - Shift+Enter should create a line break (current behavior is correct)
 - Enter should create a new paragraph/block
 - Behavior should be consistent (which it is)
 
-### Browser Comparison
+## Browser Comparison
 
 - **All browsers**: Shift+Enter creates `<br>` consistently
 - This is expected and correct behavior
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - This behavior is generally correct and expected
 - May need to handle edge cases where `<br>` is in unexpected contexts

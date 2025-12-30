@@ -8,6 +8,7 @@ tags:
   - submission
   - chrome
 status: draft
+locale: en
 ---
 
 When a contenteditable region is inside a `<form>`, its content is not automatically included in form submission. Unlike `<input>` and `<textarea>`, contenteditable content must be manually extracted and added to the form data.

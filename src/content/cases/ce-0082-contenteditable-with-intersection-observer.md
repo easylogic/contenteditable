@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When an IntersectionObserver is used to detect when a contenteditable element becomes visible or hidden, the observer may not fire correctly during editing. Changes to content size or position during editing may not trigger intersection updates as expected.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div that can scroll in and out of view.
 2. Attach an IntersectionObserver to detect visibility.
@@ -31,14 +31,14 @@ When an IntersectionObserver is used to detect when a contenteditable element be
 4. Scroll the contenteditable in and out of view.
 5. Observe whether intersection callbacks fire correctly.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, IntersectionObserver may not update correctly during editing.
 - Content size changes may not trigger intersection recalculations.
 - Visibility detection may be delayed or incorrect.
 - The observer may miss rapid content changes.
 
-### Expected behavior
+## Expected behavior
 
 - IntersectionObserver should work correctly with contenteditable.
 - Content changes should trigger intersection recalculations.

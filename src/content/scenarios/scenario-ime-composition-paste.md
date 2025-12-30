@@ -8,6 +8,7 @@ tags:
   - composition
   - paste
 status: draft
+locale: en
 ---
 
 When composing text with an IME in a `contenteditable` element, pasting content (Ctrl+V / Cmd+V) may cancel the active composition, lose the composed text, or cause the pasted content to be inserted in an unexpected position.

@@ -32,37 +32,37 @@ domSteps:
     description: "Expected: Number 3 inserted or Shift+3 can input number"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using Chinese Pinyin IME in a `contenteditable` element, pressing number keys (1-9) during character conversion selects candidates from the conversion list instead of inserting numbers. This prevents users from inserting numbers while the candidate list is active.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Chinese Pinyin IME.
 3. Type Pinyin text (e.g., "nihao") and trigger character conversion (candidate list appears).
 4. Try to press a number key (e.g., "3") to insert the number "3".
 
-### Observed behavior
+## Observed behavior
 
 - Number keys (1-9) select candidates from the conversion list instead of inserting numbers
 - Users cannot insert numbers while candidate list is active
 - After conversion completes, number keys work normally
 - Behavior differs from native input fields where numbers can be inserted
 
-### Expected behavior
+## Expected behavior
 
 - Users should be able to insert numbers even when candidate list is active
 - Number keys should have a way to insert numbers (e.g., Shift+Number or different key combination)
 - Behavior should be consistent with native input fields
 
-### Browser Comparison
+## Browser Comparison
 
 - **Safari**: Number keys trigger candidate selection, especially on macOS
 - **Chrome**: Similar behavior
 - **Firefox**: May have different number key behavior
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent number key default behavior and insert numbers manually
 - Use alternative key combinations for number input during candidate selection

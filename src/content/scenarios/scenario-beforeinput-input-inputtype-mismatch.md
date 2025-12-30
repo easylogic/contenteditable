@@ -11,6 +11,7 @@ tags:
   - inputtype-mismatch
   - targetranges
 status: draft
+locale: en
 ---
 
 During IME composition or in certain browser/IME combinations, the `beforeinput` event may have a different `inputType` than the corresponding `input` event. This mismatch can cause handlers to misinterpret the actual DOM change and requires storing `beforeinput`'s `targetRanges` for use in `input` event handling.

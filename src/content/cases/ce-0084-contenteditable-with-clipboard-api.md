@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using the Clipboard API (navigator.clipboard.readText/writeText) with contenteditable elements, the behavior may be inconsistent. Reading clipboard content may not work during paste events, and writing to clipboard may not preserve formatting.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Listen for paste events.
@@ -31,14 +31,14 @@ When using the Clipboard API (navigator.clipboard.readText/writeText) with conte
 4. Try to write formatted content to clipboard.
 5. Observe any errors or inconsistencies.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Windows, Clipboard API may not work correctly with contenteditable.
 - Reading clipboard during paste may require user gesture.
 - Writing formatted content may not preserve HTML.
 - Permissions may be required inconsistently.
 
-### Expected behavior
+## Expected behavior
 
 - Clipboard API should work seamlessly with contenteditable.
 - Reading should work during paste events.

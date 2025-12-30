@@ -9,6 +9,7 @@ tags:
   - ios
   - safari
 status: draft
+locale: ko
 ---
 
 모바일 키보드에서 자동 대문자화를 제어하는 `autocapitalize` 속성이 contenteditable 요소에서 일관되지 않게 작동합니다. 동작이 표준 입력 요소와 다를 수 있습니다.

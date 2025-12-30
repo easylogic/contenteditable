@@ -9,6 +9,7 @@ tags:
   - navigation
   - editing
 status: draft
+locale: en
 ---
 
 When a link is inside a contenteditable element, clicking on the link may navigate away or trigger unexpected behavior instead of allowing text editing. The behavior varies across browsers and can make it difficult to edit link text or select links for deletion.

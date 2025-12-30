@@ -8,6 +8,7 @@ tags:
   - clipboard
   - formatting
 status: draft
+locale: en
 ---
 
 When pasting content from a rich text source (such as a word processor or a web page) into a

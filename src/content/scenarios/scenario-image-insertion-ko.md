@@ -9,6 +9,7 @@ tags:
   - drag-drop
   - file
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에 이미지를 삽입할 때 동작이 브라우저마다 크게 다릅니다. 이미지가 `<img>` 태그로, base64 데이터 URL로 삽입되거나 전혀 지원되지 않을 수 있습니다. 크기, 위치 및 편집 동작도 다릅니다.

@@ -9,6 +9,7 @@ tags:
   - contenteditable
   - firefox
 status: draft
+locale: en
 ---
 
 When a contenteditable region is inside a table cell (`<td>`), editing the content may cause layout issues in Firefox. The table may resize unexpectedly or the cell may overflow.

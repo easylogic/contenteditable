@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable region contains a large amount of content (thousands of DOM nodes), typing becomes noticeably slow. There is a visible lag between pressing keys and seeing characters appear.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Insert a large amount of content (e.g., 10,000+ DOM nodes).
@@ -31,13 +31,13 @@ When a contenteditable region contains a large amount of content (thousands of D
 4. Start typing rapidly.
 5. Observe the delay between keypress and character appearance.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome, typing becomes slow when the contenteditable contains many DOM nodes.
 - There is a noticeable lag between keypress and character rendering.
 - The browser may become unresponsive during rapid typing.
 
-### Expected behavior
+## Expected behavior
 
 - Typing should remain responsive regardless of content size.
 - The browser should optimize rendering for large contenteditable regions.

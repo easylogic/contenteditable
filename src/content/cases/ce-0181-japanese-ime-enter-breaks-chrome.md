@@ -31,38 +31,38 @@ domSteps:
     description: "Expected: Line break after composition completes"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Japanese text with IME in a `contenteditable` element, pressing Enter cancels the composition and may commit only partial romaji or incomplete kanji conversion. In some browser and IME combinations, the caret moves to the next line but the last composed character or conversion may be lost.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Japanese IME.
 3. Type romaji text (e.g., "kanji") and start kanji conversion.
 4. Press Enter to insert a new line before completing the conversion.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data.
 - The caret moves to the next line.
 - Partial romaji or incomplete kanji conversion may be lost.
 - The conversion candidate list may disappear without committing the selection.
 
-### Expected behavior
+## Expected behavior
 
 - The IME finalizes the current composition before inserting a line break.
 - The last composed character or conversion remains in the DOM text content.
 - If a candidate list is active, it should be handled appropriately.
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: May cancel composition when Enter is pressed
 - **Edge**: Similar to Chrome
 - **Firefox**: May have different behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Observe the sequence of `beforeinput`, `compositionend`, and `input` events.
 - Check whether the browser emits a `beforeinput` event with `inputType = 'insertParagraph'` before or after `compositionend`.

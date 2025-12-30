@@ -9,6 +9,7 @@ tags:
   - typography
   - css
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 글꼴 크기를 변경하는 것이 브라우저마다 일관되지 않게 동작합니다. 글꼴 크기가 인라인 스타일로, font 태그로 적용되거나 새 텍스트를 입력할 때 유지되지 않을 수 있습니다. 단위(px, em, rem) 처리도 다양합니다.

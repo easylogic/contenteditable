@@ -6,8 +6,8 @@ import { BrowserDetectionBanner } from '../components/BrowserDetectionBanner';
 import '../styles/global.css';
 
 const siteTitle = 'contenteditable lab';
-const cases = await getCollection('cases');
-const scenarios = await getCollection('scenarios');
+const cases = await getCollection('cases', ({ data }) => data.locale === 'en');
+const scenarios = await getCollection('scenarios', ({ data }) => data.locale === 'en');
 
 // Create a map of scenario ID to scenario entry for quick lookup
 const scenarioMap = new Map(scenarios.map((s) => [s.data.id, s]));

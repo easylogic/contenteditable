@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: Entire row deleted, table structure maintained"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When trying to delete a table row in a contenteditable element in Chrome, there's no native way to delete rows. Users must manually delete all cell content or use custom implementation.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a table with multiple rows
 2. Try to delete an entire row
 3. Observe available options
 
-### Observed behavior
+## Observed behavior
 
 - No native way to delete rows
 - Must delete cell content manually
 - Or use custom implementation
 - Row deletion is not intuitive
 
-### Expected behavior
+## Expected behavior
 
 - Should be able to delete rows easily
 - Or native row deletion should be available
 - Deletion should be intuitive
 - Table structure should be maintained
 
-### Browser Comparison
+## Browser Comparison
 
 - **All browsers**: No native row deletion
 - Custom implementation needed for row operations
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Implement custom row deletion
 - Provide UI for row operations

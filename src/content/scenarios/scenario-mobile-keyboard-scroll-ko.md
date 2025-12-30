@@ -8,6 +8,7 @@ tags:
   - keyboard
   - scroll
 status: draft
+locale: ko
 ---
 
 모바일 기기에서 `contenteditable` 요소에 포커스를 줄 때 가상 키보드가 나타나면,

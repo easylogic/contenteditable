@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### 현상
+## 현상
 
 Clipboard API(`navigator.clipboard.readText()` 또는 `navigator.clipboard.read()`)를 사용하여 contenteditable 영역에 프로그래밍 방식으로 콘텐츠를 붙여넣을 때 붙여넣기 작업이 실패하거나 예상대로 작동하지 않을 수 있습니다.
 
-### 재현 예시
+## 재현 예시
 
 1. contenteditable div를 만듭니다.
 2. 클립보드에 일부 텍스트를 복사합니다.
@@ -31,13 +31,13 @@ Clipboard API(`navigator.clipboard.readText()` 또는 `navigator.clipboard.read(
 4. 텍스트를 contenteditable에 삽입하려고 시도합니다.
 5. 붙여넣기가 올바르게 작동하는지 관찰합니다.
 
-### 관찰된 동작
+## 관찰된 동작
 
 - macOS의 Chrome에서 Clipboard API 작업이 contenteditable 컨텍스트에서 실패할 수 있습니다.
 - 권한 오류가 발생할 수 있습니다.
 - 붙여넣기가 예상 이벤트나 동작을 트리거하지 않을 수 있습니다.
 
-### 예상 동작
+## 예상 동작
 
 - Clipboard API는 contenteditable 컨텍스트에서 안정적으로 작동해야 합니다.
 - 권한이 올바르게 처리되어야 합니다.

@@ -9,6 +9,7 @@ tags:
   - drag-drop
   - file
 status: draft
+locale: en
 ---
 
 When inserting images into contenteditable elements, the behavior varies significantly across browsers. Images may be inserted as `<img>` tags, as base64 data URLs, or may not be supported at all. The size, positioning, and editing behavior also differs.

@@ -9,6 +9,7 @@ tags:
   - position
   - firefox
 status: draft
+locale: en
 ---
 
 After pasting content into a contenteditable region, the caret position does not end up at the expected location, sometimes jumping to the beginning of the pasted content or to an unexpected position.

@@ -19,25 +19,25 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using the HTML5 Drag and Drop API with contenteditable elements, the behavior differs from standard elements. Dragging text within a contenteditable may not work as expected, and drop zones may not be recognized correctly.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with draggable text inside.
 2. Try to drag text within the contenteditable.
 3. Try to drag text from outside into the contenteditable.
 4. Observe drag and drop event handling.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS, drag and drop behavior is inconsistent in contenteditable.
 - Dragging text within contenteditable may not work.
 - Drop events may not fire correctly.
 - The default drag behavior may interfere with editing.
 
-### Expected behavior
+## Expected behavior
 
 - Drag and drop should work consistently in contenteditable.
 - Events should fire correctly.

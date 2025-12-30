@@ -9,6 +9,7 @@ tags:
   - chrome
   - macos
 status: draft
+locale: en
 ---
 
 When a contenteditable element has CSS filters applied (blur, brightness, etc.), editing performance may be degraded. Typing may lag, and selection may be slow to update.

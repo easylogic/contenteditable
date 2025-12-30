@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using the Clipboard API (`navigator.clipboard.readText()` or `navigator.clipboard.read()`) to programmatically paste content into a contenteditable region, the paste operation may fail or not work as expected.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Copy some text to the clipboard.
@@ -31,13 +31,13 @@ When using the Clipboard API (`navigator.clipboard.readText()` or `navigator.cli
 4. Try to insert the text into the contenteditable.
 5. Observe whether the paste works correctly.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS, Clipboard API operations may fail in contenteditable contexts.
 - Permission errors may occur.
 - The paste may not trigger expected events or behaviors.
 
-### Expected behavior
+## Expected behavior
 
 - Clipboard API should work reliably in contenteditable contexts.
 - Permissions should be handled correctly.

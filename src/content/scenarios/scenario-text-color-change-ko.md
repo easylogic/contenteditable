@@ -9,6 +9,7 @@ tags:
   - css
   - formatting
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 텍스트 색상을 변경하는 것은 브라우저마다 일관되지 않게 동작합니다. 색상이 인라인 스타일, font 태그로 적용되거나, 입력 시 유지되지 않을 수 있습니다. 색상 형식(hex, rgb, 명명된 색상) 처리도 다릅니다.

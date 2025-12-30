@@ -9,6 +9,7 @@ tags:
   - contenteditable
   - chrome
 status: draft
+locale: en
 ---
 
 When a contenteditable region contains child elements with `contenteditable="false"`, the behavior is inconsistent. Some browsers allow editing within these elements, while others correctly prevent it.

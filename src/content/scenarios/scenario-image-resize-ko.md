@@ -9,6 +9,7 @@ tags:
   - drag
   - dimensions
 status: draft
+locale: ko
 ---
 
 contenteditable 요소 내에서 이미지 크기 조정이 제한되거나 브라우저마다 일관되지 않게 동작합니다. 일부 브라우저는 네이티브 크기 조정 핸들을 지원하지만 다른 브라우저는 수동 구현이 필요합니다. 크기 조정 동작이 예상치 못하게 DOM 구조에 영향을 줄 수도 있습니다.

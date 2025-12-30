@@ -33,37 +33,37 @@ domSteps:
     description: "Expected: Code block structure maintained, formatting removed (plain text)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pasting formatted content (with HTML formatting) into a code block in Firefox, the formatting is preserved but the code block structure may be lost. The code block may be converted to regular paragraphs.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a code block: `<pre><code>function test() {</code></pre>`
 2. Paste formatted HTML content into it
 3. Observe the DOM structure
 
-### Observed behavior
+## Observed behavior
 
 - Code block structure is lost
 - `<pre><code>` may be converted to `<p>` elements
 - Formatting is preserved but code context is lost
 - Code block is broken
 
-### Expected behavior
+## Expected behavior
 
 - Code block structure should be maintained
 - Formatting should be stripped (code should be plain text)
 - Code block should remain as `<pre><code>`
 - Structure should be preserved
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May preserve or break structure
 - **Firefox**: More likely to break structure (this case)
 - **Safari**: Most likely to break structure
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept paste in code blocks
 - Strip all formatting from pasted content

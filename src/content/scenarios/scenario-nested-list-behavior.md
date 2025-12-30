@@ -10,6 +10,7 @@ tags:
   - tab
   - enter
 status: draft
+locale: en
 ---
 
 When editing nested lists (lists within list items), the behavior of Enter, Backspace, Delete, and Tab keys varies significantly across browsers. Creating, editing, and deleting nested list items can result in unexpected DOM structures or lost formatting.

@@ -9,6 +9,7 @@ tags:
   - encoding
   - special-characters
 status: draft
+locale: ko
 ---
 
 contenteditable 요소의 특수 문자가 브라우저마다 일관되지 않게 HTML 엔티티(`&lt;`, `&gt;`, `&amp;` 등)로 인코딩되거나 실제 문자로 디코딩될 수 있습니다. 이것은 콘텐츠를 복사, 붙여넣기 또는 직렬화할 때 문제를 일으킬 수 있습니다.

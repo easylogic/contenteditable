@@ -26,10 +26,12 @@ if (!scenarioId) {
 }
 
 // Get scenario entry if it exists
-const allScenarios = await getCollection('scenarios');
+const allScenarios = await getCollection('scenarios', ({ data }) => data.locale === 'en');
+const allScenariosAllLocales = await getCollection('scenarios'); // For sidebar - all locales
 const scenarioEntry = allScenarios.find((s) => s.data.id === scenarioId) || null;
 
-const allCases = await getCollection('cases');
+const allCases = await getCollection('cases', ({ data }) => data.locale === 'en');
+const allCasesAllLocales = await getCollection('cases'); // For sidebar - all locales
 const scenarioCases = allCases.filter((c) => c.data.scenarioId === scenarioId);
 
 if (scenarioCases.length === 0) {
@@ -160,9 +162,10 @@ const relatedScenarios = allScenarios
     <main class="flex max-w-full m-0 p-0">
       <ResizableSidebar client:load storageKey="scenarios-sidebar-width">
         <ScenariosSidebar
-          allScenarios={allScenarios}
-          allCases={allCases}
+          allScenarios={allScenariosAllLocales}
+          allCases={allCasesAllLocales}
           currentScenarioId={scenarioId}
+          locale="en"
         />
       </ResizableSidebar>
 

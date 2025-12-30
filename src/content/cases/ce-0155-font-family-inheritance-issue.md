@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Times font overrides parent font and is applied"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying font family to text in Firefox, the font may be inherited from parent elements unexpectedly. This causes inconsistent font rendering and makes it difficult to control typography.
 
-### Reproduction example
+## Reproduction example
 
 1. Create contenteditable with parent element having font-family
 2. Apply different font to selected text
 3. Observe font rendering
 
-### Observed behavior
+## Observed behavior
 
 - Font may be inherited from parent
 - Applied font may not take effect
 - Font rendering is inconsistent
 - Typography control is difficult
 
-### Expected behavior
+## Expected behavior
 
 - Applied font should override parent font
 - Font should be applied as specified
 - Inheritance should be predictable
 - Typography should be controllable
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Font application generally works
 - **Firefox**: Font inheritance issues (this case)
 - **Safari**: Font inheritance varies
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Use more specific CSS selectors
 - Apply font with `!important` if needed

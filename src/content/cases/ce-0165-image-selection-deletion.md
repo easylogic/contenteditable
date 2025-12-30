@@ -32,37 +32,37 @@ domSteps:
     description: "Expected: Immediately deleted on first Delete key press"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When selecting an image in a contenteditable element in Chrome, deleting it may require multiple Delete or Backspace key presses. The image may not be deleted on the first attempt.
 
-### Reproduction example
+## Reproduction example
 
 1. Insert an image into contenteditable
 2. Click to select the image
 3. Press Delete or Backspace once
 
-### Observed behavior
+## Observed behavior
 
 - Image may not be deleted on first key press
 - Multiple key presses may be needed
 - Or image selection may be lost before deletion
 - Deletion is unreliable
 
-### Expected behavior
+## Expected behavior
 
 - Image should be deleted on first key press
 - Deletion should be immediate and reliable
 - Selection should be maintained until deletion
 - Behavior should be consistent
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May require multiple presses (this case)
 - **Firefox**: Similar deletion issues
 - **Safari**: Deletion behavior most inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept Delete/Backspace on selected images
 - Ensure image is deleted immediately

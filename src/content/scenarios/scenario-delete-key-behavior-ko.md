@@ -9,6 +9,7 @@ tags:
   - consistency
   - firefox
 status: draft
+locale: ko
 ---
 
 Linux의 Firefox에서 Delete 키가 Backspace와 일관되지 않은 방식으로 다르게 동작합니다. Delete가 Backspace와 비교하여 다른 양의 텍스트를 제거하거나 예상치 못하게 동작할 수 있습니다.

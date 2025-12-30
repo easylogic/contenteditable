@@ -31,38 +31,38 @@ domSteps:
     description: "Expected: Space key inserts space or commits composition"
 ---
 
-### Phenomenon
+## Phenomenon
 
 While composing Arabic text with IME in a `contenteditable` element, pressing the Space key may be ignored or may commit the composition unexpectedly. This behavior differs from native text controls and can affect word boundary detection in RTL text.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Arabic IME.
 3. Start composing Arabic text with character joining (e.g., "مرحبا").
 4. Press Space one or more times during composition.
 
-### Observed behavior
+## Observed behavior
 
 - The Space key sometimes does not insert a visible space
 - In some sequences, the composition is committed and a space is inserted, but the order of events differs from native controls
 - Character joining may be affected by Space key presses
 - Word boundaries may not be detected correctly in RTL context
 
-### Expected behavior
+## Expected behavior
 
 - Space behaves consistently across `contenteditable` and native text inputs
 - Space should insert reliably during or after composition
 - Word boundaries should be detected correctly in RTL text
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: Space may be ignored during Arabic composition
 - **Edge**: Similar to Chrome
 - **Firefox**: May have different behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Monitor composition state to handle Space key appropriately
 - Consider RTL text direction when handling word boundaries

@@ -31,38 +31,38 @@ domSteps:
     description: "Expected: Composition handled gracefully or preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Korean text with IME in a `contenteditable` element, pressing Escape cancels the composition and loses the composed text. This can interfere with UI interactions that use Escape for cancellation or closing dialogs.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area (e.g., in a modal dialog or dropdown).
 2. Activate Korean IME.
 3. Start composing Korean text (e.g., type "한글").
 4. Press Escape to close the dialog or cancel an action.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - The composed text is lost
 - Escape may trigger both composition cancellation and other UI actions
 - No recovery mechanism for lost composition
 
-### Expected behavior
+## Expected behavior
 
 - Composition should be handled gracefully when Escape is pressed
 - Composed text should not be lost
 - Escape key behavior should be consistent and predictable
 
-### Browser Comparison
+## Browser Comparison
 
 - **Edge**: Escape may cancel composition
 - **Chrome**: Similar to Edge
 - **Firefox**: May have different Escape key behavior during composition
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent Escape during active composition if composition preservation is critical
 - Consider committing composition before allowing Escape

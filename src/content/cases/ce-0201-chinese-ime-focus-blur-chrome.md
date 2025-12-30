@@ -32,38 +32,38 @@ domSteps:
     description: "Expected: Composition preserved or handled gracefully"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Chinese text with Pinyin IME in a `contenteditable` element, clicking elsewhere or changing focus causes incomplete character conversions to be lost. The composition may be cancelled before conversion is complete, resulting in lost work.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Chinese Pinyin IME.
 3. Type Pinyin text (e.g., "nihao") and start character conversion.
 4. Click elsewhere or change focus before completing the conversion.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - Incomplete character conversions are lost
 - The blur event may fire before or after compositionend
 - Candidate list disappears without committing selection
 
-### Expected behavior
+## Expected behavior
 
 - Composition should be preserved or gracefully handled when focus changes
 - Incomplete conversions should not be lost
 - Event sequence should be predictable and consistent
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: Composition may be lost on blur
 - **Edge**: Similar to Chrome
 - **Firefox**: May have different behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Monitor blur and compositionend events to detect composition loss
 - Consider storing pending conversion state for recovery

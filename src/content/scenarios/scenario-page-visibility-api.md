@@ -9,6 +9,7 @@ tags:
   - safari
   - macos
 status: draft
+locale: en
 ---
 
 When a page with a contenteditable element becomes hidden (tab switch, minimize), the Page Visibility API may affect editing state. Focus may be lost, and composition may be interrupted.

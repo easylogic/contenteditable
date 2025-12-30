@@ -20,11 +20,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a page with a contenteditable element responds to media query changes (e.g., orientation change, window resize), the layout changes may disrupt editing. The caret position may jump, and selection may be lost.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div on a responsive page.
 2. Start editing with text selected.
@@ -32,14 +32,14 @@ When a page with a contenteditable element responds to media query changes (e.g.
 4. Observe whether editing continues smoothly.
 5. Check if caret position and selection are maintained.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on iOS, layout changes may disrupt editing.
 - Caret position may jump during layout recalculation.
 - Selection may be lost.
 - The virtual keyboard may close unexpectedly.
 
-### Expected behavior
+## Expected behavior
 
 - Layout changes should not disrupt editing.
 - Caret position should be preserved.

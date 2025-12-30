@@ -9,6 +9,7 @@ tags:
   - whitespace
   - formatting
 status: draft
+locale: en
 ---
 
 Editing text within code blocks (`<pre><code>`) in contenteditable elements behaves inconsistently across browsers. Line breaks, indentation, whitespace preservation, and formatting may be handled differently, making it difficult to maintain code formatting.

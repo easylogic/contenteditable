@@ -7,6 +7,7 @@ tags:
   - enter
   - newline
 status: draft
+locale: en
 ---
 
 In a plain `contenteditable` element, pressing Enter inserts two visible line breaks instead of one.

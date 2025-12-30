@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable element has CSS transforms applied (translate, scale, rotate), the selection handles and caret may appear in incorrect positions. The visual position may not match the actual selection position.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `transform: scale(0.8) translateX(50px)`.
 2. Select text in the contenteditable.
@@ -31,14 +31,14 @@ When a contenteditable element has CSS transforms applied (translate, scale, rot
 4. Observe the caret position during editing.
 5. Compare visual position with actual selection.
 
-### Observed behavior
+## Observed behavior
 
 - In Edge on Windows, CSS transforms may cause selection handle misalignment.
 - Caret position may appear offset.
 - Selection handles may not align with selected text.
 - Touch selection on mobile may be affected.
 
-### Expected behavior
+## Expected behavior
 
 - CSS transforms should not affect selection handle positioning.
 - Caret should appear in the correct visual position.

@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable element has CSS `will-change` property set, performance may be affected. In some cases, it may improve performance by hinting the browser about upcoming changes. In other cases, it may degrade performance by creating unnecessary layers.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `will-change: contents` or `will-change: transform`.
 2. Type text rapidly and measure performance.
@@ -31,14 +31,14 @@ When a contenteditable element has CSS `will-change` property set, performance m
 4. Compare performance with and without will-change.
 5. Check memory usage.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS, will-change may have mixed effects on performance.
 - Some values may improve performance.
 - Other values may degrade performance.
 - Memory usage may increase.
 
-### Expected behavior
+## Expected behavior
 
 - will-change should provide consistent performance benefits.
 - Or, the behavior should be clearly documented.

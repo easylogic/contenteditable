@@ -18,23 +18,23 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 The `disabled` attribute, which disables form inputs, does not work on contenteditable regions in Safari. The contenteditable remains editable and interactive even when `disabled` is set.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `disabled` attribute.
 2. Try to focus and edit the content.
 3. Observe whether the element is disabled.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, the `disabled` attribute does not disable contenteditable.
 - The element remains editable and focusable.
 - The attribute is ignored.
 
-### Expected behavior
+## Expected behavior
 
 - The `disabled` attribute should disable contenteditable.
 - The element should not be editable or focusable when disabled.

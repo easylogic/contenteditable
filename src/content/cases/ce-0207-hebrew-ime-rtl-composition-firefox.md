@@ -33,11 +33,11 @@ domSteps:
 ---
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Hebrew text with IME in a `contenteditable` element, RTL text direction may not be handled correctly, and Hebrew characters may not compose properly. Character joining and text direction can be problematic.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Set direction to RTL or use auto direction.
@@ -45,28 +45,28 @@ When composing Hebrew text with IME in a `contenteditable` element, RTL text dir
 4. Type Hebrew text (e.g., "שלום").
 5. Observe RTL direction and character composition.
 
-### Observed behavior
+## Observed behavior
 
 - RTL text direction may not be handled correctly
 - Hebrew characters may not compose properly
 - Text may display left-to-right instead of right-to-left
 - Caret movement may be incorrect in RTL context
 
-### Expected behavior
+## Expected behavior
 
 - RTL text direction should be handled correctly
 - Hebrew characters should compose properly
 - Text should display right-to-left correctly
 - Caret should move correctly in RTL context
 
-### Browser Comparison
+## Browser Comparison
 
 - **Firefox**: May have issues with Hebrew RTL and composition
 - **Chrome**: Generally better RTL support
 - **Edge**: Similar to Chrome
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Ensure proper RTL direction is set (dir="rtl")
 - Monitor for Hebrew text and set direction automatically

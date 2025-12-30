@@ -18,23 +18,23 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 The `readonly` attribute, which should prevent editing on form inputs, does not work on contenteditable regions in Firefox. Users can still edit the content even when `readonly` is set.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `readonly` attribute.
 2. Try to edit the content.
 3. Observe whether editing is prevented.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Linux, the `readonly` attribute does not prevent editing.
 - Users can still modify content.
 - The attribute is ignored.
 
-### Expected behavior
+## Expected behavior
 
 - The `readonly` attribute should prevent editing on contenteditable.
 - Content should be view-only when `readonly` is set.

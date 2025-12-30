@@ -8,6 +8,7 @@ tags:
   - selection
   - chrome
 status: draft
+locale: en
 ---
 
 Dragging selected text within a contenteditable region to move it to a different position does not work consistently. Sometimes the text is copied instead of moved, or the drop target is not where the mouse pointer indicates.

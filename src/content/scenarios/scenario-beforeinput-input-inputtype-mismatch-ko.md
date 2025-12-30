@@ -11,6 +11,7 @@ tags:
   - inputtype-mismatch
   - targetranges
 status: draft
+locale: ko
 ---
 
 IME 조합 중 또는 특정 브라우저/IME 조합에서 `beforeinput` 이벤트가 해당 `input` 이벤트와 다른 `inputType`을 가질 수 있습니다. 이 불일치는 핸들러가 실제 DOM 변경을 잘못 해석하게 만들 수 있으며, `input` 이벤트 처리에서 사용하기 위해 `beforeinput`의 `targetRanges`를 저장해야 합니다.

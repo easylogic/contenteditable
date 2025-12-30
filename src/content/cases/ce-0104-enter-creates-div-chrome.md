@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: Consistent element type used (all &lt;p&gt; or all &lt;div&gt;)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pressing Enter in a contenteditable element in Chrome, a new `<div>` element is created instead of a `<p>` paragraph. This differs from Firefox which creates `<p>` elements, and can cause CSS styling differences.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus a contenteditable element
 2. Type some text
 3. Press Enter
 
-### Observed behavior
+## Observed behavior
 
 - A new `<div>` element is created (e.g., `<div><br></div>`)
 - Firefox creates `<p>` elements instead
 - CSS default margins differ between `<div>` and `<p>`
 - DOM structure is inconsistent across browsers
 
-### Expected behavior
+## Expected behavior
 
 - Either `<div>` or `<p>` should be used consistently
 - Or behavior should be configurable
 - CSS styling should account for element type differences
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Creates `<div>` elements (this case)
 - **Firefox**: Creates `<p>` elements
 - **Safari**: May create `<div>`, `<p>`, or `<br>` depending on context
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Normalize DOM structure after Enter key
 - Convert all `<div>` elements to `<p>` for consistency

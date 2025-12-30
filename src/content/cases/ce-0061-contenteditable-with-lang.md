@@ -19,23 +19,23 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 The `lang` attribute on a contenteditable region does not affect the spellcheck language in Safari. Spellcheck always uses the browser's default language, regardless of the `lang` attribute value.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `lang="fr"` and `spellcheck="true"`.
 2. Type French text.
 3. Observe whether spellcheck uses French dictionary.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, the `lang` attribute does not affect spellcheck.
 - Spellcheck always uses the browser's default language.
 - Multi-language content cannot be properly spellchecked.
 
-### Expected behavior
+## Expected behavior
 
 - The `lang` attribute should control the spellcheck language.
 - Spellcheck should use the appropriate dictionary for the specified language.

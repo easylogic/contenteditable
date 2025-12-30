@@ -31,38 +31,38 @@ domSteps:
     description: "Expected: Line break after composition completes, all accent marks preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Vietnamese text with IME in a `contenteditable` element, pressing Enter cancels the composition and may lose diacritic marks (accents) that were being composed. The caret moves to the next line but the last composed character or diacritics may be lost.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Vietnamese IME (Telex or VNI input method).
 3. Type Vietnamese text with diacritics (e.g., "xin chào").
 4. Press Enter to insert a new line during composition.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - The caret moves to the next line
 - Diacritic marks may be lost
 - Base letters and diacritics may not be properly combined
 
-### Expected behavior
+## Expected behavior
 
 - The IME finalizes the current composition before inserting a line break
 - All diacritic marks should be preserved
 - The last composed character should remain in the DOM text content
 
-### Browser Comparison
+## Browser Comparison
 
 - **Edge**: May cancel composition when Enter is pressed
 - **Chrome**: Similar to Edge
 - **Firefox**: May have different behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Observe the sequence of `beforeinput`, `compositionend`, and `input` events
 - Check whether diacritics are properly preserved

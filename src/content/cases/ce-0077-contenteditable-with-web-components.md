@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable element is inside a Web Component (custom element), its behavior may differ from when it's in standard HTML. Event handling, selection, and focus management may be affected by the component's shadow DOM or encapsulation.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a custom Web Component.
 2. Inside the component, create a contenteditable div.
@@ -31,14 +31,14 @@ When a contenteditable element is inside a Web Component (custom element), its b
 4. Observe event handling and selection behavior.
 5. Compare with a contenteditable outside the component.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, contenteditable behavior may differ inside Web Components.
 - Events may not bubble correctly through shadow DOM boundaries.
 - Selection may be affected by encapsulation.
 - Focus management may be inconsistent.
 
-### Expected behavior
+## Expected behavior
 
 - contenteditable should behave identically inside and outside Web Components.
 - Events should work correctly across shadow DOM boundaries.

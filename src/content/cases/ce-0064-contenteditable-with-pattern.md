@@ -19,23 +19,23 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 The `pattern` attribute, which allows regex-based validation on form inputs, does not work on contenteditable regions. Content cannot be validated against a pattern.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `pattern="[0-9]+"` (numbers only).
 2. Type non-numeric characters.
 3. Observe whether validation occurs.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Windows, the `pattern` attribute is ignored on contenteditable.
 - No validation occurs.
 - Invalid content can be entered freely.
 
-### Expected behavior
+## Expected behavior
 
 - The `pattern` attribute should validate contenteditable content.
 - Invalid content should be rejected or flagged.

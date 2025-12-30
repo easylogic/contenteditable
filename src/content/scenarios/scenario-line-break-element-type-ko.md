@@ -10,6 +10,7 @@ tags:
   - div
   - dom-structure
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 줄바꿈을 생성할 때 브라우저는 다른 HTML 요소를 사용합니다: `<br>`, `<p>`, 또는 `<div>`. 이 불일치는 DOM 구조를 예측하고 정규화하기 어렵게 만들며, 특히 리치 텍스트 에디터를 작업할 때 그렇습니다.

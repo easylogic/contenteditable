@@ -33,38 +33,38 @@ domSteps:
     description: "Expected: Same color uses consistent format (hex)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying text colors in Chrome, the color format (hex, rgb, named colors) may vary inconsistently. The same color may be stored as `#ff0000`, `rgb(255,0,0)`, or `red` depending on how it was applied.
 
-### Reproduction example
+## Reproduction example
 
 1. Apply red color via color picker
 2. Apply red color via text input
 3. Apply red color via named color
 4. Observe the DOM color values
 
-### Observed behavior
+## Observed behavior
 
 - Color format varies: `#ff0000`, `rgb(255,0,0)`, `red`
 - Same color stored in different formats
 - Inconsistent color representation
 - Difficult to query or modify colors
 
-### Expected behavior
+## Expected behavior
 
 - Color format should be consistent
 - Or format should be predictable
 - Same color should use same format
 - Format should be easy to work with
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Format varies (this case)
 - **Firefox**: Similar format inconsistency
 - **Safari**: Format handling varies
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Normalize color format after application
 - Convert all colors to consistent format (e.g., hex)

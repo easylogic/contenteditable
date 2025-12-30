@@ -30,37 +30,37 @@ domSteps:
     description: "Expected: Original unit (em) preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying font sizes in Chrome, the units (px, em, rem) may be converted inconsistently. Relative units may be converted to absolute units, or vice versa, making it difficult to maintain consistent sizing.
 
-### Reproduction example
+## Reproduction example
 
 1. Apply font size with em unit: `font-size: 1.2em`
 2. Edit the text or apply other formatting
 3. Observe the font-size value
 
-### Observed behavior
+## Observed behavior
 
 - Units may be converted: `1.2em` becomes `19.2px`
 - Or units may be preserved
 - Conversion is inconsistent
 - Relative sizing is lost
 
-### Expected behavior
+## Expected behavior
 
 - Units should be preserved as specified
 - Or conversion should be predictable
 - Relative units should remain relative
 - Behavior should be consistent
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May convert units (this case)
 - **Firefox**: Similar conversion behavior
 - **Safari**: Unit handling varies
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Preserve original units explicitly
 - Convert units only when necessary

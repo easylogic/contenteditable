@@ -9,6 +9,7 @@ tags:
   - viewport
   - typing
 status: draft
+locale: en
 ---
 
 When typing near the edges of a contenteditable element, browsers automatically scroll to keep the cursor visible. However, the scroll behavior, timing, and smoothness varies across browsers, which can cause jarring user experiences.

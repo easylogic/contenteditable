@@ -9,6 +9,7 @@ tags:
   - navigation
   - editing
 status: draft
+locale: ko
 ---
 
 링크가 contenteditable 요소 내부에 있을 때 링크를 클릭하면 텍스트 편집을 허용하는 대신 이동하거나 예상치 못한 동작이 트리거될 수 있습니다. 동작은 브라우저마다 다르며 링크 텍스트를 편집하거나 삭제할 링크를 선택하기 어렵게 만들 수 있습니다.

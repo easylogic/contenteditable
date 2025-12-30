@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Only one empty paragraph maintained for cursor placement"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When deleting all text from a paragraph in Chrome, empty paragraph elements with only `<br>` tags accumulate in the DOM. These empty paragraphs cause unnecessary spacing and bloat the HTML.
 
-### Reproduction example
+## Reproduction example
 
 1. Create multiple paragraphs with text
 2. Delete all text from each paragraph
 3. Observe the DOM structure
 
-### Observed behavior
+## Observed behavior
 
 - Empty `<p><br></p>` elements remain
 - Multiple empty paragraphs accumulate
 - DOM becomes bloated
 - Unnecessary spacing appears
 
-### Expected behavior
+## Expected behavior
 
 - Empty paragraphs should be cleaned up
 - Or at least one empty paragraph should remain for cursor
 - DOM should be minimal
 - No unnecessary spacing
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Leaves empty paragraphs (this case)
 - **Firefox**: More likely to leave empty elements
 - **Safari**: Most likely to accumulate empty elements
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Clean up empty paragraphs after deletion
 - Keep only one empty paragraph for cursor placement

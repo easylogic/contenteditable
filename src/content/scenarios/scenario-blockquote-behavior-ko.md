@@ -9,6 +9,7 @@ tags:
   - indentation
   - structure
 status: draft
+locale: ko
 ---
 
 contenteditable에서 blockquote 요소 내에서 텍스트를 편집하는 것이 브라우저마다 일관되지 않게 동작합니다. Enter를 누르거나, 서식을 적용하거나, 콘텐츠를 붙여넣으면 blockquote 구조가 깨지거나, 중첩 blockquote가 생성되거나, 예상치 못하게 동작할 수 있습니다.

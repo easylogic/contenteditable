@@ -32,37 +32,37 @@ domSteps:
     description: "Expected: Blockquote tags removed, only inner content inserted"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pasting content that contains blockquote elements into an existing blockquote in Safari, nested blockquote structures are created. This creates invalid or confusing HTML structure.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a blockquote: `<blockquote><p>Quoted text</p></blockquote>`
 2. Copy content that contains a blockquote
 3. Paste into the existing blockquote
 
-### Observed behavior
+## Observed behavior
 
 - Nested blockquotes are created: `<blockquote><p>Text</p><blockquote>...</blockquote></blockquote>`
 - Structure becomes confusing
 - Visual appearance may be unexpected
 - HTML structure is nested unnecessarily
 
-### Expected behavior
+## Expected behavior
 
 - Blockquote tags should be stripped from pasted content
 - Or pasted content should be inserted without blockquote wrapper
 - No nested blockquotes should be created
 - Structure should remain clean
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May create nested blockquotes
 - **Firefox**: More likely to create nested structures
 - **Safari**: Most likely to create nested blockquotes (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept paste in blockquote context
 - Strip blockquote tags from pasted content

@@ -28,13 +28,13 @@ domSteps:
     description: "Formatting maintained"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pasting content from a rich text source (such as a word processor or a web page) into a
 `contenteditable` element, the resulting DOM loses headings, lists, or inline formatting that were
 present in the source.
 
-### Reproduction example
+## Reproduction example
 
 1. Copy a short formatted snippet from another application or web page:
    - A heading
@@ -43,18 +43,18 @@ present in the source.
 2. Focus the editable area.
 3. Paste the content using the keyboard shortcut or context menu.
 
-### Observed behavior
+## Observed behavior
 
 - The pasted content appears as plain text.
 - List markers become plain characters, or multiple lines collapse into one.
 - Inline styles such as bold or italic are not preserved in the DOM.
 
-### Expected behavior
+## Expected behavior
 
 - At least some structural markup (headings, lists, paragraphs) is preserved.
 - Inline formatting is preserved or deliberately normalized in a documented way.
 
-### Notes
+## Notes
 
 - Compare behavior across browsers and OS combinations using the same source content.
 - Decide whether the product should preserve external markup, normalize it to a limited internal

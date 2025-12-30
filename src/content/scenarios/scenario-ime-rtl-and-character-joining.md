@@ -12,6 +12,7 @@ tags:
   - arabic
   - hebrew
 status: draft
+locale: en
 ---
 
 Languages that use right-to-left (RTL) text direction and contextual character joining (where letters connect differently based on their position in a word) can experience issues in contenteditable elements. Both RTL direction and character joining can be problematic, especially when mixed with left-to-right (LTR) text.

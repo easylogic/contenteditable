@@ -9,6 +9,7 @@ tags:
   - typing
   - chrome
 status: draft
+locale: en
 ---
 
 When a contenteditable region contains a large amount of content (thousands of DOM nodes), typing becomes noticeably slow. There is a visible lag between pressing keys and seeing characters appear.

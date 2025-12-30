@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: New paragraph created within same blockquote"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pressing Enter inside a blockquote element in Safari, nested blockquote structures may be created unexpectedly. This breaks the intended quote structure and creates invalid or confusing HTML.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a blockquote: `<blockquote><p>Quoted text</p></blockquote>`
 2. Place cursor inside the blockquote text
 3. Press Enter
 
-### Observed behavior
+## Observed behavior
 
 - A nested blockquote may be created: `<blockquote><p>Text</p><blockquote><p></p></blockquote></blockquote>`
 - Or the blockquote structure may break
 - DOM structure becomes malformed
 - Visual appearance may be unexpected
 
-### Expected behavior
+## Expected behavior
 
 - A new paragraph should be created within the same blockquote
 - No nested blockquotes should be created
 - Blockquote structure should be maintained
 - Behavior should be consistent with Chrome/Edge
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Creates paragraph within blockquote (correct)
 - **Firefox**: May break blockquote structure
 - **Safari**: May create nested blockquotes (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept Enter key in blockquote context
 - Prevent default behavior

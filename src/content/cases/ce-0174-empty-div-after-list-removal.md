@@ -30,37 +30,37 @@ domSteps:
     description: "Expected: Empty div removed, clean DOM"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When removing a list (converting list items to paragraphs) in Chrome, empty wrapper div elements may remain in the DOM. These empty divs cause layout issues and bloat the HTML.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a list: `<ul><li>Item 1</li></ul>`
 2. Remove the list (convert to paragraph)
 3. Observe the DOM structure
 
-### Observed behavior
+## Observed behavior
 
 - Empty `<div></div>` elements may remain
 - Or divs with only whitespace remain
 - DOM becomes bloated
 - Layout has unexpected spacing
 
-### Expected behavior
+## Expected behavior
 
 - Empty div elements should be removed
 - DOM should be clean
 - No unnecessary elements should remain
 - Structure should be normalized
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May leave empty divs (this case)
 - **Firefox**: More likely to leave empty elements
 - **Safari**: Most likely to accumulate empty elements
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Clean up empty div elements after list removal
 - Remove wrapper elements if empty

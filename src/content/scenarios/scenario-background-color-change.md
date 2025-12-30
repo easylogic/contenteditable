@@ -9,6 +9,7 @@ tags:
   - highlight
   - css
 status: draft
+locale: en
 ---
 
 Changing background color (highlighting) in contenteditable elements behaves inconsistently across browsers. Background colors may be applied as inline styles, may not persist when typing, or may interfere with text selection. The behavior differs from text color changes.

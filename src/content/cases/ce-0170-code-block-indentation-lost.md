@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Indentation preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When editing text within a code block in Chrome, indentation (leading spaces or tabs) may be lost or converted incorrectly. This breaks code formatting and structure.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a code block with indented code: `<pre><code>    function test() {</code></pre>`
 2. Edit the code (add, delete, modify)
 3. Observe indentation preservation
 
-### Observed behavior
+## Observed behavior
 
 - Leading spaces may be lost
 - Tabs may be converted to spaces or vice versa
 - Indentation is not preserved
 - Code structure is broken
 
-### Expected behavior
+## Expected behavior
 
 - Indentation should be preserved
 - Spaces and tabs should be maintained
 - Code structure should remain intact
 - Formatting should be preserved
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Indentation may be lost (this case)
 - **Firefox**: Similar indentation issues
 - **Safari**: Indentation preservation inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Ensure `white-space: pre` CSS is applied
 - Preserve leading whitespace during editing

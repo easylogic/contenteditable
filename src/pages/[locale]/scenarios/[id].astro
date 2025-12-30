@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import SiteNav from '../../../components/SiteNav.astro';
+import ScenariosSidebar from '../../../components/ScenariosSidebar.astro';
+import { ResizableSidebar } from '../../../components/ResizableSidebar';
 import '../../../styles/global.css';
 import {
   locales,
@@ -12,11 +14,11 @@ import {
 } from '../../../i18n/translations';
 
 export const getStaticPaths = (async () => {
-  const cases = await getCollection('cases');
-  const scenarioIds = Array.from(new Set(cases.map((c) => c.data.scenarioId)));
   const paths = [];
 
   for (const locale of supportedLocales.filter((l) => l !== defaultLocale)) {
+    const cases = await getCollection('cases', ({ data }) => data.locale === locale);
+    const scenarioIds = Array.from(new Set(cases.map((c) => c.data.scenarioId)));
     for (const id of scenarioIds) {
       paths.push({
         params: { locale, id },
@@ -36,7 +38,11 @@ if (!scenarioId) {
   throw new Error('Scenario ID is missing.');
 }
 
-const allCases = await getCollection('cases');
+const allCases = await getCollection('cases', ({ data }) => data.locale === locale);
+const allCasesAllLocales = await getCollection('cases'); // For sidebar - all locales
+const allScenarios = await getCollection('scenarios', ({ data }) => data.locale === locale);
+const allScenariosAllLocales = await getCollection('scenarios'); // For sidebar - all locales
+const scenarioEntry = allScenarios.find((s) => s.data.id === scenarioId) || null;
 const scenarioCases = allCases.filter((c) => c.data.scenarioId === scenarioId);
 
 if (scenarioCases.length === 0) {
@@ -76,7 +82,17 @@ const localePath = (path: string) => `/${locale}${path}`;
   </head>
   <body>
     <SiteNav />
-    <main class="scenario-page">
+    <main class="flex max-w-full m-0 p-0">
+      <ResizableSidebar client:load storageKey="scenarios-sidebar-width">
+        <ScenariosSidebar
+          allScenarios={allScenariosAllLocales}
+          allCases={allCasesAllLocales}
+          currentScenarioId={scenarioId}
+          locale={locale}
+        />
+      </ResizableSidebar>
+      
+      <section class="flex-1 max-w-[1120px] mx-auto py-7 px-5 pb-10 w-full">
       <header class="page-header">
         <a href={localePath('/scenarios')} class="back-link">← {t.caseDetail.backToScenarios}</a>
         <h1>{scenarioId}</h1>
@@ -108,15 +124,20 @@ const localePath = (path: string) => `/${locale}${path}`;
                     <td class="status-cell">
                       {cell.hasCase ? (
                         <div class="cell-content">
-                          {cell.cases.map((c) => (
-                            <a
-                              href={localePath(`/cases/${c.slug}`)}
-                              class={`case-badge status-${c.data.status}`}
-                              title={c.data.caseTitle}
-                            >
-                              {c.data.id}
-                            </a>
-                          ))}
+                          {cell.cases.map((c) => {
+                            const urlSlug = c.slug.endsWith(`-${c.data.locale}`)
+                              ? c.slug.slice(0, -(c.data.locale.length + 1))
+                              : c.slug;
+                            return (
+                              <a
+                                href={localePath(`/cases/${urlSlug}`)}
+                                class={`case-badge status-${c.data.status}`}
+                                title={c.data.caseTitle}
+                              >
+                                {c.data.id}
+                              </a>
+                            );
+                          })}
                         </div>
                       ) : (
                         <span class="no-case">—</span>
@@ -141,19 +162,24 @@ const localePath = (path: string) => `/${locale}${path}`;
       <section class="cases-section">
         <h2>{t.caseDetail.allVariants}</h2>
         <div class="cases-grid">
-          {scenarioCases.map((entry) => (
-            <a href={localePath(`/cases/${entry.slug}`)} class="case-card">
-              <div class="case-id">{entry.data.id}</div>
-              <h3>{entry.data.caseTitle}</h3>
-              <div class="case-meta">
-                <span>{entry.data.os} {entry.data.osVersion}</span>
-                <span>{entry.data.browser} {entry.data.browserVersion}</span>
-              </div>
-              <span class={`status status-${entry.data.status}`}>
-                {entry.data.status === 'confirmed' ? t.caseDetail.statusConfirmed : t.caseDetail.statusDraft}
-              </span>
-            </a>
-          ))}
+          {scenarioCases.map((entry) => {
+            const urlSlug = entry.slug.endsWith(`-${entry.data.locale}`)
+              ? entry.slug.slice(0, -(entry.data.locale.length + 1))
+              : entry.slug;
+            return (
+              <a href={localePath(`/cases/${urlSlug}`)} class="case-card">
+                <div class="case-id">{entry.data.id}</div>
+                <h3>{entry.data.caseTitle}</h3>
+                <div class="case-meta">
+                  <span>{entry.data.os} {entry.data.osVersion}</span>
+                  <span>{entry.data.browser} {entry.data.browserVersion}</span>
+                </div>
+                <span class={`status status-${entry.data.status}`}>
+                  {entry.data.status === 'confirmed' ? t.caseDetail.statusConfirmed : t.caseDetail.statusDraft}
+                </span>
+              </a>
+            );
+          })}
         </div>
       </section>
     </main>

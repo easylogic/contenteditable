@@ -32,11 +32,11 @@ domSteps:
     description: "Expected: Delete deletes 'W', consistent behavior with Backspace"
 ---
 
-### Phenomenon
+## Phenomenon
 
 In Firefox on Linux, the Delete key behaves differently from Backspace in ways that are inconsistent. Delete may remove different amounts of text or behave unexpectedly compared to Backspace.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text.
@@ -45,13 +45,13 @@ In Firefox on Linux, the Delete key behaves differently from Backspace in ways t
 5. Press Delete and observe what is deleted.
 6. Compare the behaviors.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Linux, Delete and Backspace may delete different amounts of text.
 - The granularity of deletion may be inconsistent.
 - Delete may behave unexpectedly in certain contexts.
 
-### Expected behavior
+## Expected behavior
 
 - Delete should remove the character after the caret (forward deletion).
 - Backspace should remove the character before the caret (backward deletion).

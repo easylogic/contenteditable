@@ -9,6 +9,7 @@ tags:
   - css
   - formatting
 status: draft
+locale: en
 ---
 
 Changing font family in contenteditable elements behaves inconsistently across browsers. The font-family CSS property may be applied inline, as a style attribute, or may not be applied at all. The behavior also varies when editing text after applying a font.

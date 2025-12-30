@@ -9,6 +9,7 @@ tags:
   - granularity
   - safari
 status: draft
+locale: en
 ---
 
 In Safari on macOS, pressing Backspace may delete entire words instead of single characters, especially when the caret is positioned at word boundaries or after spaces.

@@ -29,23 +29,23 @@ domSteps:
     description: "Normalized HTML structure or selectable format"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pasting content from external sources (like Word documents or web pages) into a contenteditable region in Safari, the HTML structure is preserved, including unwanted elements like `<span>` tags with inline styles, `<div>` elements, and other formatting markup.
 
-### Reproduction example
+## Reproduction example
 
 1. Copy formatted text from a Word document or web page.
 2. Paste it into a contenteditable div in Safari.
 3. Inspect the DOM structure of the pasted content.
 
-### Observed behavior
+## Observed behavior
 
 - Safari preserves the full HTML structure from the source.
 - Unwanted elements like `<span style="...">`, `<div>`, and other formatting tags are included.
 - The pasted content may have inconsistent styling.
 
-### Expected behavior
+## Expected behavior
 
 - The paste operation should normalize or clean the HTML structure.
 - Or, there should be a way to control what gets pasted (plain text vs. formatted).

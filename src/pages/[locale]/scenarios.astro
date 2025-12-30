@@ -23,7 +23,7 @@ const locale = Astro.params.locale as Locale;
 const t = getTranslation(locale);
 const localeInfo = locales[locale];
 
-const cases = await getCollection('cases');
+const cases = await getCollection('cases', ({ data }) => data.locale === locale);
 
 // Group cases by scenario
 const scenariosMap = cases.reduce(

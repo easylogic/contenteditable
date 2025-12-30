@@ -20,11 +20,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable element has CSS `backdrop-filter` applied, rendering may be affected. Text may appear blurry, selection may not render correctly, and performance may be degraded, especially on mobile devices.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `backdrop-filter: blur(10px)`.
 2. Type text and observe rendering quality.
@@ -32,14 +32,14 @@ When a contenteditable element has CSS `backdrop-filter` applied, rendering may 
 4. Scroll the contenteditable and observe performance.
 5. Test on a mobile device.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on iOS, backdrop-filter may cause rendering issues.
 - Text may appear blurry or distorted.
 - Selection may not render correctly.
 - Performance may be poor, especially on mobile.
 
-### Expected behavior
+## Expected behavior
 
 - backdrop-filter should not affect text rendering quality.
 - Selection should render correctly.

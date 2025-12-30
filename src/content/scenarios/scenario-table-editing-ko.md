@@ -9,6 +9,7 @@ tags:
   - row
   - column
 status: draft
+locale: ko
 ---
 
 contenteditable 요소 내에서 테이블 편집은 제한적이며 브라우저마다 일관되지 않게 동작합니다. 테이블 생성, 셀 편집, 행/열 추가/제거, 테이블 구조 유지 모두 브라우저별 동작과 제한이 있습니다.

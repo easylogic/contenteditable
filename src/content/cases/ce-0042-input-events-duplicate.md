@@ -29,24 +29,24 @@ domSteps:
     description: "Expected: Single character input triggers input event only once"
 ---
 
-### Phenomenon
+## Phenomenon
 
 In Edge on Windows, the `input` event may fire multiple times for a single keystroke, causing event handlers to execute more than expected. This can lead to performance issues and incorrect behavior.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Add an event listener for the `input` event that logs each event.
 3. Type a single character.
 4. Observe how many times the `input` event fires.
 
-### Observed behavior
+## Observed behavior
 
 - In Edge on Windows, the `input` event may fire 2-3 times for a single keystroke.
 - Event handlers are executed multiple times unnecessarily.
 - This can cause performance degradation and incorrect application behavior.
 
-### Expected behavior
+## Expected behavior
 
 - The `input` event should fire exactly once per user input action.
 - Event duplication should not occur.

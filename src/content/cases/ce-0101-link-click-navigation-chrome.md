@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: Single click can select text, editing possible"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When clicking on a link inside a contenteditable element in Chrome, a single click may navigate to the link URL instead of allowing text selection for editing. This makes it difficult to edit link text.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a link in contenteditable: `<a href="https://example.com">Link text</a>`
 2. Single click on the link text
 
-### Observed behavior
+## Observed behavior
 
 - Browser may navigate to the link URL
 - Or text selection may be allowed (behavior inconsistent)
 - Double-click usually selects text for editing
 - Right-click shows context menu
 
-### Expected behavior
+## Expected behavior
 
 - Single click should select text for editing (not navigate)
 - Navigation should only occur on explicit link activation
 - Behavior should be consistent
 - Users should be able to edit link text easily
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May navigate on single click (this case)
 - **Firefox**: More likely to navigate immediately
 - **Safari**: Behavior inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent default link behavior on click
 - Use `e.preventDefault()` in click handler

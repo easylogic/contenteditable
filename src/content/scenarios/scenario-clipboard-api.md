@@ -9,6 +9,7 @@ tags:
   - paste
   - chrome
 status: draft
+locale: en
 ---
 
 When using the Clipboard API (`navigator.clipboard.readText()` or `navigator.clipboard.read()`) to programmatically paste content into a contenteditable region, the paste operation may fail or not work as expected.

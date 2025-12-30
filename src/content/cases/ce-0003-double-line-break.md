@@ -27,29 +27,29 @@ domSteps:
     description: "Expected: Single Enter inserts only one line break"
 ---
 
-### Phenomenon
+## Phenomenon
 
 In a plain `contenteditable` element, pressing Enter inserts two visible line breaks instead of one.
 The resulting DOM contains nested `<div>` or `<br>` elements that render as an extra blank line.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Type a short word on the first line.
 3. Press Enter once.
 4. Type another word on what appears to be the second line.
 
-### Observed behavior
+## Observed behavior
 
 - The visual gap between the lines is larger than a single line height.
 - Inspecting the DOM shows two consecutive block-level containers or a sequence of `<br>` elements
   that corresponds to two line breaks.
 
-### Expected behavior
+## Expected behavior
 
 - Pressing Enter once inserts a single paragraph break.
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Check whether the browser uses `<div>`, `<p>`, or `<br>` to represent paragraph breaks in this
   configuration.

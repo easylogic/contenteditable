@@ -9,6 +9,7 @@ tags:
   - screen-reader
   - safari
 status: draft
+locale: ko
 ---
 
 contenteditable 영역에 ARIA 속성(`role`, `aria-label`, `aria-describedby` 등)을 적용할 때 스크린 리더가 Safari에서 이를 올바르게 알리지 않을 수 있습니다. 접근성 정보가 손실됩니다.

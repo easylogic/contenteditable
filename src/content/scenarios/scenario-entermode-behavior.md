@@ -10,6 +10,7 @@ tags:
   - ios
   - safari
 status: draft
+locale: en
 ---
 
 On mobile devices, the combination of `enterkeyhint` and `inputmode` attributes may affect Enter key behavior inconsistently on contenteditable elements. The Enter key may insert line breaks when it should perform an action, or vice versa.

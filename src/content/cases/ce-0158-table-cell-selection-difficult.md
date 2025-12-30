@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Selection limited to inside cell"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When trying to select text within a table cell in Chrome, the selection may extend outside the cell or may not work properly. It's difficult to select and edit cell content precisely.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a table with cells containing text
 2. Try to select text within a cell
 3. Observe selection behavior
 
-### Observed behavior
+## Observed behavior
 
 - Selection may extend to adjacent cells
 - Or selection may not work at all
 - Cell boundaries are not respected
 - Precise selection is difficult
 
-### Expected behavior
+## Expected behavior
 
 - Selection should be contained within cell
 - Cell boundaries should be respected
 - Selection should work smoothly
 - Editing should be precise
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Selection may extend outside cell (this case)
 - **Firefox**: Similar selection issues
 - **Safari**: Selection behavior most inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Constrain selection to cell boundaries
 - Intercept selection events in table cells

@@ -9,6 +9,7 @@ tags:
   - tab
   - navigation
 status: draft
+locale: en
 ---
 
 When composing text with an IME in a `contenteditable` element, pressing Tab may cancel the composition, cause unexpected focus navigation, or commit the composition in an unexpected way. This can interfere with keyboard navigation in forms, tables, or other interactive elements.

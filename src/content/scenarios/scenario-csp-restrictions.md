@@ -9,6 +9,7 @@ tags:
   - chrome
   - windows
 status: draft
+locale: en
 ---
 
 When a page has a strict Content Security Policy (CSP), certain contenteditable operations may be restricted. Pasting content, executing scripts, or inserting HTML may be blocked depending on the CSP directives.

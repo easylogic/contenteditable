@@ -15,7 +15,7 @@ import { ResizableSidebar } from '../../components/ResizableSidebar';
 import '../../styles/global.css';
 
 export const getStaticPaths = (async () => {
-  const cases = await getCollection('cases');
+  const cases = await getCollection('cases', ({ data }) => data.locale === 'en');
   return cases.map((entry) => ({
     params: { id: entry.slug },
   }));
@@ -33,7 +33,8 @@ if (!entry) {
   throw new Error(`Case entry for slug "${slug}" was not found.`);
 }
 
-const allCases = await getCollection('cases');
+const allCases = await getCollection('cases', ({ data }) => data.locale === 'en');
+const allCasesAllLocales = await getCollection('cases'); // For sidebar - all locales
 
 const sameScenarioCases = allCases.filter(
   (c) => c.data.scenarioId === entry.data.scenarioId,
@@ -78,8 +79,10 @@ const { Content } = await entry.render();
     <main class="flex max-w-full m-0 p-0">
       <ResizableSidebar client:load storageKey="cases-sidebar-width">
       <CasesSidebar
-        allCases={allCases}
+        allCases={allCasesAllLocales}
         currentSlug={slug}
+        currentCaseId={entry.data.id}
+        locale="en"
       />
       </ResizableSidebar>
 

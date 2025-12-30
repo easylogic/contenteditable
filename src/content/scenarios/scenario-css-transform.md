@@ -9,6 +9,7 @@ tags:
   - edge
   - windows
 status: draft
+locale: en
 ---
 
 When a contenteditable element has CSS transforms applied (translate, scale, rotate), the selection handles and caret may appear in incorrect positions. The visual position may not match the actual selection position.

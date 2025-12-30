@@ -18,11 +18,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using CSS `::before` or `::after` pseudo-elements to create placeholder text for a contenteditable region, the placeholder disappears immediately when the element receives focus, even if the content is empty. This differs from `<input>` and `<textarea>` behavior.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with placeholder styling:
    ```css
@@ -34,13 +34,13 @@ When using CSS `::before` or `::after` pseudo-elements to create placeholder tex
 2. Focus the contenteditable.
 3. Observe whether the placeholder disappears.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, the placeholder disappears on focus even if content is empty.
 - This differs from standard input elements where placeholder persists until text is entered.
 - The behavior is inconsistent with user expectations.
 
-### Expected behavior
+## Expected behavior
 
 - Placeholder should persist when focused if content is empty.
 - It should disappear only when content is actually entered.

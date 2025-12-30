@@ -9,6 +9,7 @@ tags:
   - plain-text
   - safari
 status: draft
+locale: en
 ---
 
 When pasting content from external sources (like Word documents or web pages) into a contenteditable region, unwanted formatting is often included. There is no simple way to paste as plain text without manually stripping the formatting.

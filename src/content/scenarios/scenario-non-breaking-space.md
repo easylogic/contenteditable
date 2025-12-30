@@ -9,6 +9,7 @@ tags:
   - space
   - line-break
 status: draft
+locale: en
 ---
 
 Non-breaking spaces (`&nbsp;` or `\u00A0`) are used to preserve spacing in HTML, but they behave differently from regular spaces in contenteditable elements. They may be converted to regular spaces during editing, or may prevent line breaks in unexpected ways.

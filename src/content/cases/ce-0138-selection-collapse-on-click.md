@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Selection collapses to click position (predictable behavior)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When clicking on the contenteditable element during editing operations in Safari, the text selection may collapse unexpectedly. The selection range becomes invalid or moves to an unexpected position.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text
 2. Click elsewhere in the contenteditable
 3. Observe selection state
 
-### Observed behavior
+## Observed behavior
 
 - Selection collapses to a point
 - Or selection moves to unexpected position
 - Selection range may become invalid
 - Cannot maintain selection across clicks
 
-### Expected behavior
+## Expected behavior
 
 - Selection should collapse to click position (normal behavior)
 - Or selection should be maintained if desired
 - Behavior should be predictable
 - Selection should remain valid
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Selection generally behaves correctly
 - **Firefox**: Selection may collapse unexpectedly
 - **Safari**: Selection collapse most unpredictable (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Handle click events to preserve selection if needed
 - Restore selection after click if desired

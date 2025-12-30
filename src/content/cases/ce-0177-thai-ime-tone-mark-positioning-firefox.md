@@ -32,11 +32,11 @@ domSteps:
     description: "Expected: Tone marks and vowel marks correctly combined"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Thai text with IME in a contenteditable element in Firefox on Windows, tone marks (ไม้เอก, ไม้โท, etc.) and vowel marks may not position correctly relative to base consonants. Combining characters may not render properly, resulting in Thai text that is difficult or impossible to read.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Switch to Thai IME.
@@ -44,7 +44,7 @@ When composing Thai text with IME in a contenteditable element in Firefox on Win
 4. Observe the positioning of tone marks and vowel marks.
 5. Check text rendering in different browsers.
 
-### Observed behavior
+## Observed behavior
 
 - Tone marks may appear above or below the wrong character
 - Vowel marks may not combine correctly with consonants
@@ -52,7 +52,7 @@ When composing Thai text with IME in a contenteditable element in Firefox on Win
 - Text may appear correct in DOM but render incorrectly visually
 - Backspace may not delete combining characters correctly
 
-### Expected behavior
+## Expected behavior
 
 - Tone marks should position correctly relative to base consonants
 - Vowel marks should combine correctly with consonants
@@ -60,19 +60,19 @@ When composing Thai text with IME in a contenteditable element in Firefox on Win
 - Visual rendering should match logical structure
 - Backspace should handle combining characters correctly
 
-### Impact
+## Impact
 
 - Thai text may be unreadable or difficult to read
 - Users cannot reliably input correct Thai text
 - Text may appear correct in one browser but wrong in another
 
-### Browser Comparison
+## Browser Comparison
 
 - **Firefox**: More issues with combining character positioning
 - **Chrome**: Generally better support for Thai composition
 - **Safari**: Rendering can be inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Validate Thai character composition after input
 - Check for proper combining character order

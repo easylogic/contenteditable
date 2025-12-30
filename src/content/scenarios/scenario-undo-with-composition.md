@@ -8,6 +8,7 @@ tags:
   - composition
   - ime
 status: draft
+locale: en
 ---
 
 Pressing Undo while an IME composition is active in a `contenteditable` element removes more text

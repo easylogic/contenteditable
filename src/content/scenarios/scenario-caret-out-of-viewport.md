@@ -9,6 +9,7 @@ tags:
   - viewport
   - scroll
 status: draft
+locale: en
 ---
 
 The text caret (cursor) in contenteditable elements may move outside the visible viewport during editing operations, making it difficult for users to see where they are typing. This can happen during paste operations, formatting changes, or programmatic content updates.

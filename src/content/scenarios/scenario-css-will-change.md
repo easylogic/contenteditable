@@ -9,6 +9,7 @@ tags:
   - chrome
   - macos
 status: draft
+locale: en
 ---
 
 When a contenteditable element has CSS `will-change` property set, performance may be affected. In some cases, it may improve performance by hinting the browser about upcoming changes. In other cases, it may degrade performance by creating unnecessary layers.

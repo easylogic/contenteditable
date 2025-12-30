@@ -9,6 +9,7 @@ tags:
   - focus
   - blur
 status: draft
+locale: en
 ---
 
 When composing text with an IME in a `contenteditable` element, changing focus (blur) or clicking elsewhere may cancel the composition, lose the composed text, or commit it unexpectedly. This can occur when interacting with other UI elements, scrolling, or programmatic focus changes.

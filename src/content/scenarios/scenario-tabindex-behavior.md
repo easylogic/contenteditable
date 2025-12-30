@@ -9,6 +9,7 @@ tags:
   - keyboard-navigation
   - edge
 status: draft
+locale: en
 ---
 
 When multiple contenteditable regions have `tabindex` attributes, the tab order may not follow the `tabindex` values correctly in Edge. The focus order may be inconsistent or incorrect.

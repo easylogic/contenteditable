@@ -28,11 +28,11 @@ domSteps:
     description: "Expected: Newly typed text also inherits underline"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying underline formatting to selected text and then continuing to type, the underline formatting is not maintained for the newly typed characters in Firefox on Linux.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text.
@@ -40,12 +40,12 @@ When applying underline formatting to selected text and then continuing to type,
 4. Place the caret at the end of the underlined text.
 5. Continue typing.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Linux, newly typed characters after the underlined text are not underlined.
 - The formatting state appears to be lost when the caret moves.
 
-### Expected behavior
+## Expected behavior
 
 - Newly typed characters should inherit the formatting of the preceding text when the caret is within or immediately after formatted text.
 

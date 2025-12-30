@@ -9,6 +9,7 @@ tags:
   - tab
   - navigation
 status: draft
+locale: ko
 ---
 
 `contenteditable` 요소에서 IME로 텍스트를 컴포지션할 때 Tab 키를 누르면 컴포지션이 취소되거나, 예상치 못한 포커스 탐색이 발생하거나, 컴포지션이 예상치 못한 방식으로 커밋될 수 있습니다. 이는 폼, 테이블 또는 기타 대화형 요소의 키보드 탐색과 충돌할 수 있습니다.

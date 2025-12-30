@@ -8,6 +8,7 @@ tags:
   - emoji
   - navigation
 status: draft
+locale: en
 ---
 
 When using the left and right arrow keys in a `contenteditable` element that contains emoji, the

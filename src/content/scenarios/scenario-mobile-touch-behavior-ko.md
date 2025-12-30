@@ -9,6 +9,7 @@ tags:
   - focus
   - ios
 status: draft
+locale: ko
 ---
 
 iOS Safari에서 contenteditable 영역에 대한 터치 이벤트(탭, 길게 누르기)가 요소를 올바르게 포커스하지 못할 수 있습니다. 가상 키보드가 나타나지 않거나 포커스가 예상치 못하게 손실될 수 있습니다.

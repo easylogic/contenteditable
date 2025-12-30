@@ -32,18 +32,18 @@ domSteps:
     description: "Expected: Composition preserved during scroll or handled gracefully"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Japanese text with IME in a `contenteditable` element on iOS Safari, scrolling (touch scroll) cancels the active composition and loses incomplete kanji conversions. This is especially problematic on mobile devices where scrolling is common during text input.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area on an iOS device.
 2. Activate Japanese IME.
 3. Type romaji text (e.g., "kanji") and start kanji conversion.
 4. Scroll the page (touch scroll) before completing the conversion.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - Incomplete kanji conversions are lost
@@ -51,20 +51,20 @@ When composing Japanese text with IME in a `contenteditable` element on iOS Safa
 - Candidate list disappears
 - No recovery mechanism for lost composition
 
-### Expected behavior
+## Expected behavior
 
 - Composition should be preserved during scrolling
 - Incomplete conversions should not be lost
 - Scrolling should not interfere with composition
 - IME UI should reposition correctly after scroll
 
-### Browser Comparison
+## Browser Comparison
 
 - **iOS Safari**: Scrolling cancels composition
 - **Chrome on iOS**: May have different scroll behavior
 - **Desktop browsers**: May have different behavior
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent scroll during active composition (may degrade UX)
 - Monitor scroll events and preserve composition state

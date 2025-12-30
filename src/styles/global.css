@@ -154,6 +154,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Restore list styles that Tailwind base removes */
+ol, ul, menu {
+  list-style: revert;
+  margin: revert;
+  padding: revert;
+}
+
 /* Links */
 a {
   color: var(--accent-primary);

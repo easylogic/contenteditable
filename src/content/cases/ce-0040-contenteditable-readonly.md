@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable region contains child elements with `contenteditable="false"`, the behavior is inconsistent. Some browsers allow editing within these elements, while others correctly prevent it.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Inside it, add a child element with `contenteditable="false"`:
@@ -36,13 +36,13 @@ When a contenteditable region contains child elements with `contenteditable="fal
 3. Try to edit the text in the child element with `contenteditable="false"`.
 4. Observe whether editing is prevented.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome, child elements with `contenteditable="false"` may still be editable.
 - The attribute is not consistently respected.
 - Selection and editing may work within elements that should be read-only.
 
-### Expected behavior
+## Expected behavior
 
 - Elements with `contenteditable="false"` should not be editable.
 - The attribute should be respected regardless of parent element state.

@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable element enters or exits fullscreen mode using the Fullscreen API, focus and selection may be lost. The caret position may reset, and editing may be disrupted.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with some selected text.
 2. Enter fullscreen mode programmatically.
@@ -31,14 +31,14 @@ When a contenteditable element enters or exits fullscreen mode using the Fullscr
 4. Exit fullscreen mode.
 5. Check if focus and selection are restored.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, fullscreen transitions may cause focus loss.
 - Selection may be cleared when entering fullscreen.
 - Caret position may reset.
 - Editing may be disrupted during transition.
 
-### Expected behavior
+## Expected behavior
 
 - Focus and selection should be maintained during fullscreen transitions.
 - Caret position should be preserved.

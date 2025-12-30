@@ -8,6 +8,7 @@ tags:
   - composition
   - escape
 status: draft
+locale: en
 ---
 
 When composing text with an IME in a `contenteditable` element, pressing Escape may cancel the composition, lose the composed text, or behave inconsistently. This can interfere with UI interactions that use Escape for cancellation or closing dialogs.

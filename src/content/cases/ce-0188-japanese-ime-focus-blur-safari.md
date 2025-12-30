@@ -32,37 +32,37 @@ domSteps:
     description: "Expected: Composition preserved or handled gracefully"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Japanese text with IME in a `contenteditable` element, clicking elsewhere or changing focus causes incomplete kanji conversions to be lost. The composition may be cancelled before conversion is complete, resulting in lost work.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Japanese IME.
 3. Type romaji text (e.g., "kanji") and start kanji conversion.
 4. Click elsewhere or change focus before completing the conversion.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - Incomplete kanji conversions are lost
 - The blur event may fire before or after compositionend
 - Candidate list disappears without committing selection
 
-### Expected behavior
+## Expected behavior
 
 - Composition should be preserved or gracefully handled when focus changes
 - Incomplete conversions should not be lost
 - Event sequence should be predictable and consistent
 
-### Browser Comparison
+## Browser Comparison
 
 - **Safari**: Composition may be lost on blur, especially on macOS
 - **Chrome**: May have different behavior
 - **Firefox**: May have different behavior
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Monitor blur and compositionend events to detect composition loss
 - Consider storing pending conversion state for recovery

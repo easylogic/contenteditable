@@ -7,6 +7,7 @@ tags:
   - selection
   - caret
 status: draft
+locale: en
 ---
 
 When a range of text is selected inside a `contenteditable` element, clicking outside the element

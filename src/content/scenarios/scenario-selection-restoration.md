@@ -9,6 +9,7 @@ tags:
   - cursor
   - dom-manipulation
 status: draft
+locale: en
 ---
 
 After programmatically manipulating the DOM in a contenteditable element, restoring the text selection (cursor position) is unreliable across browsers. The selection may be lost, moved to an incorrect position, or become invalid.

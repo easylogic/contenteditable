@@ -18,23 +18,23 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 The `maxlength` attribute, which works on `<input>` and `<textarea>` elements, is not supported on contenteditable regions. There is no built-in way to limit the amount of content that can be entered.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `maxlength="100"`.
 2. Try to type more than 100 characters.
 3. Observe whether the input is limited.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, the `maxlength` attribute is ignored on contenteditable.
 - Users can enter unlimited content.
 - No built-in validation or limitation exists.
 
-### Expected behavior
+## Expected behavior
 
 - The `maxlength` attribute should be supported on contenteditable.
 - Input should be limited to the specified length.

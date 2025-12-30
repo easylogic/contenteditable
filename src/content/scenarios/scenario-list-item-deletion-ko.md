@@ -10,6 +10,7 @@ tags:
   - delete
   - browser-compatibility
 status: draft
+locale: ko
 ---
 
 리스트 항목(`<li>`)의 시작 또는 끝에서 Backspace 또는 Delete를 누를 때 동작이 브라우저마다 크게 다릅니다. 일부 브라우저는 리스트 항목을 삭제하고 인접한 콘텐츠와 병합하는 반면, 다른 브라우저는 전체 리스트를 삭제하거나 예상치 못한 DOM 구조를 생성할 수 있습니다.

@@ -8,6 +8,7 @@ tags:
   - redo
   - browser-compatibility
 status: draft
+locale: en
 ---
 
 The undo and redo functionality (Ctrl+Z / Ctrl+Y or Cmd+Z / Cmd+Shift+Z) behaves differently across browsers. Some browsers undo individual keystrokes, while others undo larger operations. The undo stack may also be cleared unexpectedly.

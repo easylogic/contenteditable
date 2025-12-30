@@ -9,6 +9,7 @@ tags:
   - space
   - line-break
 status: draft
+locale: ko
 ---
 
 줄바꿈 없는 공백(`&nbsp;` 또는 `\u00A0`)은 HTML에서 간격을 보존하는 데 사용되지만, contenteditable 요소에서 일반 공백과 다르게 동작합니다. 편집 중에 일반 공백으로 변환되거나 예상치 못한 방식으로 줄바꿈을 방지할 수 있습니다.

@@ -29,24 +29,24 @@ domSteps:
     description: "Expected: Right arrow moves one character at a time (including emoji)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 In Edge on Windows, when navigating with arrow keys through text containing emoji, the caret position behaves unexpectedly. The arrow keys may skip over emoji characters or position the caret incorrectly.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text with emoji, for example: "Hello 👋 world 🌍".
 3. Use the left and right arrow keys to move the caret through the text.
 4. Observe the caret position relative to the emoji.
 
-### Observed behavior
+## Observed behavior
 
 - In Edge on Windows, arrow keys may skip over emoji characters.
 - The caret may jump past emoji instead of moving character by character.
 - The visual position of the caret may not match the actual text position.
 
-### Expected behavior
+## Expected behavior
 
 - Arrow keys should move the caret one character at a time, including emoji.
 - The caret should be positioned correctly relative to emoji characters.

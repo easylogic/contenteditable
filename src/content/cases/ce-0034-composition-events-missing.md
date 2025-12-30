@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using certain IMEs (Input Method Editors) like Chinese IME in Safari, composition events (`compositionstart`, `compositionupdate`, `compositionend`) may not fire consistently or may fire in an unexpected order.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Add event listeners for `compositionstart`, `compositionupdate`, and `compositionend`.
@@ -31,13 +31,13 @@ When using certain IMEs (Input Method Editors) like Chinese IME in Safari, compo
 4. Start typing Chinese characters.
 5. Observe which events fire and in what order.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS with Chinese IME, composition events may not fire for all keystrokes.
 - The event order may be inconsistent.
 - Some composition operations may complete without firing `compositionend`.
 
-### Expected behavior
+## Expected behavior
 
 - Composition events should fire consistently for all IMEs.
 - The event order should be predictable: `compositionstart` → `compositionupdate` (multiple) → `compositionend`.

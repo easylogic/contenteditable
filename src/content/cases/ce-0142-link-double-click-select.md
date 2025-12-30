@@ -30,36 +30,36 @@ domSteps:
     description: "Expected: Double click only selects text, no navigation"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When double-clicking on a link in a contenteditable element in Chrome, the link text is selected for editing, but the link may still navigate if the double-click is too fast or timing is off.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a link: `<a href="https://example.com">Link text</a>`
 2. Double-click on the link text quickly
 
-### Observed behavior
+## Observed behavior
 
 - Link text is selected
 - But navigation may still occur
 - Timing is critical
 - Behavior is inconsistent
 
-### Expected behavior
+## Expected behavior
 
 - Double-click should select text without navigation
 - Navigation should be prevented during editing
 - Behavior should be consistent
 - Users should be able to edit link text easily
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May navigate on double-click (this case)
 - **Firefox**: More likely to navigate
 - **Safari**: Navigation behavior inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent default link behavior on all clicks
 - Handle double-click explicitly

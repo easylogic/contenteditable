@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Selection range valid, cursor positioned after replaced content"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When programmatically replacing selected content in Safari, the selection range becomes invalid. The cursor position is lost and cannot be restored, making it impossible to continue editing.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text
 2. Programmatically replace it with new content
 3. Check selection state
 
-### Observed behavior
+## Observed behavior
 
 - Selection range becomes invalid
 - Cursor position is lost
 - Cannot continue editing at correct position
 - Selection cannot be restored
 
-### Expected behavior
+## Expected behavior
 
 - Selection should remain valid after replacement
 - Cursor should be positioned after replaced content
 - User should be able to continue editing
 - Selection should be restored properly
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Selection generally remains valid
 - **Firefox**: Selection may become invalid
 - **Safari**: Selection restoration most unreliable (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Save selection before replacement
 - Restore selection after replacement

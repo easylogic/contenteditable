@@ -8,6 +8,7 @@ tags:
   - ime
   - enter
 status: draft
+locale: en
 ---
 
 When composing text with an IME in a `contenteditable` element, pressing Enter cancels the composition and sometimes commits only a partial character or syllable. In some browser and IME combinations, the caret moves to the next line but the last composed character is lost.

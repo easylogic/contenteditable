@@ -28,29 +28,29 @@ domSteps:
     description: "Expected: Right arrow moves one character at a time (including emoji)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using the left and right arrow keys in a `contenteditable` element that contains emoji, the
 caret sometimes jumps over entire emoji clusters instead of moving by a single visual position.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Type a short ASCII word.
 3. Insert one or more emoji characters (for example, from the macOS emoji picker).
 4. Use the left and right arrow keys to move the caret across the text and emoji.
 
-### Observed behavior
+## Observed behavior
 
 - The caret jumps over emoji, landing either before or after the entire emoji cluster.
 - Intermediate caret positions inside the cluster are not reachable with arrow keys.
 
-### Expected behavior
+## Expected behavior
 
 - The caret moves consistently across visual positions, or at least behaves in the same way as a
   native `<textarea>` in the same environment.
 
-### Notes
+## Notes
 
 - This behavior can affect selection granularity, especially when users try to select text around
   emoji.

@@ -9,6 +9,7 @@ tags:
   - formatting
   - chrome
 status: draft
+locale: en
 ---
 
 When using `document.execCommand('insertHTML', ...)` to insert HTML content into a contenteditable region, the DOM structure may be broken or reformatted unexpectedly. Nested elements may be flattened or reorganized.

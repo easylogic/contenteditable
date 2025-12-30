@@ -10,7 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: Korean (IME)
 caseTitle: beforeinput은 insertCompositionText로 발생하지만 input은 deleteContentBackward로 발생함
-description: "iOS Safari에서 한글 IME 조합 중 beforeinput은 inputType 'insertCompositionText'로 발생하는 반면 해당 input 이벤트는 'deleteContentBackward'로 발생할 수 있습니다. 이 불일치는 beforeinput의 targetRanges를 저장하여 실제 DOM 변경을 올바르게 이해하는 데 필요합니다."
+description: "IME 조합 중 beforeinput은 inputType 'insertCompositionText'로 발생하는 반면 해당 input 이벤트는 'deleteContentBackward'로 발생할 수 있습니다. 이 불일치는 iOS Safari뿐만 아니라 다양한 브라우저/IME 조합에서 발생할 수 있으며, beforeinput의 targetRanges를 저장하여 실제 DOM 변경을 올바르게 이해하는 데 필요합니다."
 tags:
   - composition
   - ime
@@ -36,19 +36,20 @@ domSteps:
     description: "Expected: Composition text '한글' inserted, inputType should match beforeinput"
 ---
 
-### 현상
+## 현상
 
-iOS Safari에서 한글 IME 조합 중 `beforeinput`은 `inputType: 'insertCompositionText'`로 발생하는 반면 해당 `input` 이벤트는 `inputType: 'deleteContentBackward'`로 발생할 수 있습니다. 이 불일치는 `input` 이벤트의 `inputType`만 사용하여 DOM 변경을 올바르게 이해하는 것을 불가능하게 만듭니다.
+IME 조합 중 `beforeinput`은 `inputType: 'insertCompositionText'`로 발생하는 반면 해당 `input` 이벤트는 `inputType: 'deleteContentBackward'`로 발생할 수 있습니다. 이 불일치는 iOS Safari의 한글 IME뿐만 아니라 다양한 브라우저/IME 조합에서 발생할 수 있으며, Firefox의 특정 IME, 다른 모바일 브라우저 등에서도 관찰됩니다. 이 불일치는 `input` 이벤트의 `inputType`만 사용하여 DOM 변경을 올바르게 이해하는 것을 불가능하게 만듭니다.
 
-### 재현 예시
+## 재현 예시
 
-1. iOS Safari에서 `contenteditable` 요소에 포커스를 둡니다.
-2. 한글 IME를 활성화합니다.
-3. 한글 텍스트 조합을 시작합니다 (예: "ㅎ" 그 다음 "ㅏ" 그 다음 "ㄴ"을 입력하여 "한" 조합).
-4. 조합을 업데이트하기 위해 계속 입력합니다 (예: "ㄱ" 그 다음 "ㅡ" 그 다음 "ㄹ"을 입력하여 "한글"로 업데이트).
+1. `contenteditable` 요소에 포커스를 둡니다.
+2. IME를 활성화합니다 (한글, 일본어, 중국어 또는 기타 언어).
+3. 텍스트 조합을 시작합니다 (예: 한글의 경우 "ㅎ" 그 다음 "ㅏ" 그 다음 "ㄴ"을 입력하여 "한" 조합).
+4. 조합을 업데이트하기 위해 계속 입력합니다 (예: 한글의 경우 "ㄱ" 그 다음 "ㅡ" 그 다음 "ㄹ"을 입력하여 "한글"로 업데이트).
 5. 브라우저 콘솔이나 이벤트 로그에서 `beforeinput`과 `input` 이벤트를 관찰합니다.
+6. `beforeinput.inputType`이 `input.inputType`과 일치하는지 확인합니다 - 다를 수 있습니다.
 
-### 관찰된 동작
+## 관찰된 동작
 
 조합 텍스트를 업데이트할 때:
 
@@ -70,14 +71,14 @@ iOS Safari에서 한글 IME 조합 중 `beforeinput`은 `inputType: 'insertCompo
    - `beforeinput`의 `targetRanges`가 손실되고 `input`에서 사용할 수 없습니다
    - 애플리케이션 상태가 DOM 상태와 일관되지 않을 수 있습니다
 
-### 예상 동작
+## 예상 동작
 
 - `input` 이벤트의 `inputType`이 `beforeinput` 이벤트의 `inputType`과 일치해야 합니다
 - `beforeinput`이 `insertCompositionText`로 발생하면 `input`도 `insertCompositionText`를 가져야 합니다
 - `input.data`가 `beforeinput.data`와 일치해야 합니다 (또는 실제 커밋된 텍스트를 반영해야 함)
 - DOM 변경이 `beforeinput`에서 나타난 것과 일치해야 합니다
 
-### 영향
+## 영향
 
 이것은 다음을 일으킬 수 있습니다:
 
@@ -87,14 +88,16 @@ iOS Safari에서 한글 IME 조합 중 `beforeinput`은 `inputType: 'insertCompo
 - **상태 동기화 문제**: 애플리케이션 상태가 일관되지 않게 됩니다
 - **이벤트 핸들러 실패**: 일치하는 `inputType` 값을 기대하는 핸들러가 실패합니다
 
-### 브라우저 비교
+## 브라우저 비교
 
-- **iOS Safari**: `beforeinput`에서 `insertCompositionText`를 발생시키지만 `input`에서 `deleteContentBackward`를 발생시킬 수 있음
-- **Chrome/Edge**: 일반적으로 이벤트 간 일관된 `inputType`
-- **Firefox**: 특정 시나리오에서 불일치를 가질 수 있음
-- **Android Chrome**: 동작이 다양할 수 있음
+- **iOS Safari**: `beforeinput`에서 `insertCompositionText`를 발생시키지만 `input`에서 `deleteContentBackward`를 발생시킬 수 있음, 특히 한글 및 일본어 IME에서 자주 발생
+- **macOS Safari**: 특정 IME 조합에서 유사한 불일치를 보일 수 있음
+- **Firefox**: 특정 IME 시나리오에서 불일치를 가질 수 있음, 특히 모바일 기기에서
+- **Chrome/Edge**: 일반적으로 이벤트 간 일관된 `inputType`이지만 엣지 케이스가 있을 수 있음
+- **Android Chrome**: 텍스트 예측 및 IME 변형으로 인해 불일치 가능성이 더 높음
+- **모바일 브라우저**: 다양한 IME에서 일반적으로 불일치 가능성이 더 높음
 
-### 참고 및 해결 방법 가능한 방향
+## 참고 및 해결 방법 가능한 방향
 
 - **beforeinput에서 targetRanges 저장**: `input` 핸들러에서 사용하기 위해 `targetRanges`를 저장합니다:
   ```javascript

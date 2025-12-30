@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: New item created at same nesting level (current behavior is correct)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pressing Enter in a nested list item in Chrome, a new list item is created at the same nesting level. This behavior is generally correct, but may differ from user expectations or other browsers.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a nested list: `<ul><li>Item 1<ul><li>Nested item</li></ul></li></ul>`
 2. Place cursor inside "Nested item"
 3. Press Enter
 
-### Observed behavior
+## Observed behavior
 
 - A new list item is created at the same nesting level (inside the nested `<ul>`)
 - The list structure is maintained
 - If cursor is at the end, new item is created after
 - If cursor is in the middle, text is split
 
-### Expected behavior
+## Expected behavior
 
 - New list item should be created at the same nesting level
 - List structure should be maintained
 - Behavior should be consistent across browsers
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Creates item at same level (this case)
 - **Firefox**: May create item or paragraph, behavior inconsistent
 - **Safari**: May create unexpected nesting levels
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - This behavior is generally acceptable
 - May need to handle edge cases where list structure breaks

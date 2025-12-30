@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Line breaks preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When editing text within a code block in Chrome, line breaks may be lost or converted to `<br>` tags instead of being preserved as newlines. This breaks code formatting and structure.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a code block with multiple lines
 2. Edit the code (add, delete, modify lines)
 3. Observe line break preservation
 
-### Observed behavior
+## Observed behavior
 
 - Line breaks are lost
 - Or line breaks are converted to `<br>` tags
 - Code structure is broken
 - Formatting is lost
 
-### Expected behavior
+## Expected behavior
 
 - Line breaks should be preserved
 - Code structure should be maintained
 - Formatting should remain intact
 - Behavior should match code editors
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Line breaks may be lost (this case)
 - **Firefox**: Similar line break issues
 - **Safari**: Line break preservation inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Ensure `white-space: pre` CSS is applied
 - Intercept Enter key to insert newlines properly

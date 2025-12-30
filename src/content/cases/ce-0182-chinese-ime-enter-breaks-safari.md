@@ -31,37 +31,37 @@ domSteps:
     description: "Expected: Line break after kanji conversion completes"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Chinese text with Pinyin IME in a `contenteditable` element, pressing Enter cancels the composition and may commit only partial Pinyin or incomplete character conversion. In some browser and IME combinations, the caret moves to the next line but the last composed character or conversion may be lost.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Chinese Pinyin IME.
 3. Type Pinyin text (e.g., "nihao") and start character conversion.
 4. Press Enter to insert a new line before completing the conversion.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data.
 - The caret moves to the next line.
 - Partial Pinyin or incomplete character conversion may be lost.
 - The conversion candidate list may disappear without committing the selection.
 
-### Expected behavior
+## Expected behavior
 
 - The IME finalizes the current composition before inserting a line break.
 - The last composed character or conversion remains in the DOM text content.
 - If a candidate list is active, it should be handled appropriately.
 
-### Browser Comparison
+## Browser Comparison
 
 - **Safari**: May cancel composition when Enter is pressed, especially on macOS
 - **Chrome**: May have different behavior
 - **Firefox**: May have different behavior
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Observe the sequence of `beforeinput`, `compositionend`, and `input` events.
 - Check whether the browser emits a `beforeinput` event with `inputType = 'insertParagraph'` before or after `compositionend`.

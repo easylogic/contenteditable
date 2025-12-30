@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When multiple contenteditable regions have `tabindex` attributes, the tab order may not follow the `tabindex` values correctly in Edge. The focus order may be inconsistent or incorrect.
 
-### Reproduction example
+## Reproduction example
 
 1. Create multiple contenteditable divs with different `tabindex` values:
    ```html
@@ -34,13 +34,13 @@ When multiple contenteditable regions have `tabindex` attributes, the tab order 
 2. Use Tab key to navigate.
 3. Observe the focus order.
 
-### Observed behavior
+## Observed behavior
 
 - In Edge on Windows, `tabindex` may not control focus order correctly.
 - The focus may skip elements or follow an unexpected order.
 - Keyboard navigation is inconsistent.
 
-### Expected behavior
+## Expected behavior
 
 - `tabindex` should control focus order as specified.
 - Elements should be focused in the order of their `tabindex` values.

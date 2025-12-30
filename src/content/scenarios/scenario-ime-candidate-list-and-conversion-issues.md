@@ -11,6 +11,7 @@ tags:
   - japanese
   - chinese
 status: draft
+locale: en
 ---
 
 IMEs that convert phonetic input to characters (such as Japanese romaji-to-kanji, Chinese Pinyin-to-characters) display candidate lists for user selection. In contenteditable elements, this conversion process can be disrupted, causing the candidate list to not appear, disappear prematurely, or interfere with normal editing operations. The conversion may also be delayed, interrupted, or produce incorrect results.

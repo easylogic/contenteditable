@@ -18,24 +18,24 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable region is inside a `<form>`, its content is not automatically included in form submission. Unlike `<input>` and `<textarea>`, contenteditable content must be manually extracted and added to the form data.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a form with a contenteditable div inside it.
 2. Enter some content in the contenteditable.
 3. Submit the form.
 4. Inspect the form data to see if contenteditable content is included.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, contenteditable content is not included in form submission.
 - The content must be manually extracted and added.
 - No automatic form integration exists.
 
-### Expected behavior
+## Expected behavior
 
 - Contenteditable content should be included in form submission.
 - Or, there should be a standard way to associate contenteditable with form fields.

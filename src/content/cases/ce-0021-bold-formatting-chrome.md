@@ -28,11 +28,11 @@ domSteps:
     description: "Expected: Newly typed text also inherits bold"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying bold formatting to selected text and then continuing to type, the bold formatting is not maintained for the newly typed characters in Chrome on Windows.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text.
@@ -40,12 +40,12 @@ When applying bold formatting to selected text and then continuing to type, the 
 4. Place the caret at the end of the bold text.
 5. Continue typing.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, newly typed characters after the bold text are not bold.
 - The formatting state appears to be lost when the caret moves.
 
-### Expected behavior
+## Expected behavior
 
 - Newly typed characters should inherit the formatting of the preceding text when the caret is within or immediately after formatted text.
 

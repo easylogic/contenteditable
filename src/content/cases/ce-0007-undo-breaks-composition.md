@@ -28,30 +28,30 @@ domSteps:
     description: "Expected: Only cancel composing '글', '한' should be preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 Pressing Undo while an IME composition is active in a `contenteditable` element removes more text
 than expected, including characters that were committed before the current composition.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Type a short word and finalize it.
 3. Activate a Korean IME and start composing another word, but do not finalize it.
 4. Press Ctrl+Z (or the platform-specific Undo shortcut).
 
-### Observed behavior
+## Observed behavior
 
 - Both the active composition and previously committed characters are removed.
 - The event log shows a sequence of `beforeinput` / `input` events that do not map cleanly to user
   intent.
 
-### Expected behavior
+## Expected behavior
 
 - Undo reverts only the last committed edit step, or at least behaves in the same way as native
   controls in the same environment.
 
-### Notes
+## Notes
 
 - This behavior can interfere with predictable text editing and undo/redo stacks in products that
   build their own model on top of `contenteditable`.

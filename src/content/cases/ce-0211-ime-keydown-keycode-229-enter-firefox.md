@@ -32,7 +32,7 @@ domSteps:
     description: "Expected: Single line break after composition commits"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pressing Enter during Korean IME composition in a `contenteditable` element in Firefox, two `keydown` events fire sequentially:
 1. First event with `keyCode: 229` (indicating IME is processing the input)
@@ -40,7 +40,7 @@ When pressing Enter during Korean IME composition in a `contenteditable` element
 
 This can cause event handlers listening to `keydown` events to execute twice for a single Enter key press.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus a `contenteditable` element in Firefox.
 2. Activate Korean IME.
@@ -48,7 +48,7 @@ This can cause event handlers listening to `keydown` events to execute twice for
 4. While composition is active, press Enter.
 5. Observe `keydown` events in the browser console or event log.
 
-### Observed behavior
+## Observed behavior
 
 When pressing Enter during composition:
 
@@ -67,14 +67,14 @@ When pressing Enter during composition:
    - Event handlers listening to `keydown` with `keyCode === 13` execute twice
    - This can cause duplicate line breaks, duplicate command execution, or other unintended behavior
 
-### Expected behavior
+## Expected behavior
 
 - Only one `keydown` event should fire for a single Enter key press
 - If `keyCode 229` fires, it should be clearly distinguishable from the actual key event
 - Event handlers should not need special logic to deduplicate key events during composition
 - The `keyCode 229` event should not trigger handlers intended for the actual key
 
-### Impact
+## Impact
 
 This can lead to:
 
@@ -84,13 +84,13 @@ This can lead to:
 - **State synchronization issues**: Application state may become inconsistent
 - **Unexpected UI behavior**: UI may respond twice to a single user action
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Fires `keyCode 229` followed by actual `keyCode 13` during composition
 - **Firefox**: Similar behavior - fires `keyCode 229` followed by `keyCode 13`
 - **Safari**: Behavior may vary
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - **Check for `keyCode 229`**: Ignore `keydown` events with `keyCode 229` during composition:
   ```javascript

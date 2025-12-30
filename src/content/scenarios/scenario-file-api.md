@@ -9,6 +9,7 @@ tags:
   - safari
   - macos
 status: draft
+locale: en
 ---
 
 When trying to drag and drop files into a contenteditable element, the File API may not work as expected. File drop events may not fire, or file content may not be accessible.

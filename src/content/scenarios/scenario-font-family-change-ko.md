@@ -9,6 +9,7 @@ tags:
   - css
   - formatting
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 글꼴 패밀리를 변경하는 것이 브라우저마다 일관되지 않게 동작합니다. font-family CSS 속성이 인라인으로, style 속성으로 적용되거나 전혀 적용되지 않을 수 있습니다. 글꼴을 적용한 후 텍스트를 편집할 때도 동작이 다양합니다.

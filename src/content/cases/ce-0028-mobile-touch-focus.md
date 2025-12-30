@@ -19,25 +19,25 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 On iOS Safari, touch events (tap, long-press) on a contenteditable region may not properly focus the element. The virtual keyboard may not appear, or focus may be lost unexpectedly.
 
-### Reproduction example
+## Reproduction example
 
 1. Open a contenteditable region on iOS Safari.
 2. Tap on the contenteditable area.
 3. Observe whether the element receives focus and the keyboard appears.
 4. Try long-pressing to select text.
 
-### Observed behavior
+## Observed behavior
 
 - In iOS Safari, tapping may not focus the contenteditable.
 - The virtual keyboard may not appear.
 - Long-press for text selection may trigger browser context menu instead.
 - Focus may be lost when interacting with other page elements.
 
-### Expected behavior
+## Expected behavior
 
 - Tapping should focus the contenteditable and show the virtual keyboard.
 - Long-press should allow text selection.

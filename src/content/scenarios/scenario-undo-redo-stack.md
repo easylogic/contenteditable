@@ -9,6 +9,7 @@ tags:
   - history
   - stack
 status: draft
+locale: en
 ---
 
 The undo/redo stack in contenteditable elements behaves inconsistently across browsers. Programmatic DOM changes may or may not be added to the undo stack, and the stack may be cleared unexpectedly. Custom undo/redo implementation is often necessary.

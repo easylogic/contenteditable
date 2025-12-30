@@ -28,37 +28,37 @@ domSteps:
     description: "Expected: Newly typed text also inherits Arial font"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying a font family to selected text in Safari and then continuing to type, the new text does not inherit the font family. The font formatting is lost for newly typed characters.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text in a contenteditable element
 2. Apply a font family (e.g., "Arial")
 3. Place cursor after the formatted text
 4. Type new text
 
-### Observed behavior
+## Observed behavior
 
 - The newly typed text uses the default font, not the applied font
 - Font formatting is not maintained for new text
 - This differs from Chrome/Edge where font persists
 - User must reapply font for each new text segment
 
-### Expected behavior
+## Expected behavior
 
 - Newly typed text should inherit the font family
 - Font formatting should persist until explicitly changed
 - Behavior should be consistent with Chrome/Edge
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Font family persists for new text
 - **Firefox**: Font persistence may be less reliable
 - **Safari**: Font does not persist (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept text insertion and apply font formatting
 - Use `beforeinput` event to detect text insertion

@@ -28,11 +28,11 @@ domSteps:
     description: "Expected: contenteditable focus maintained after button click"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable region contains interactive elements (buttons, links, etc.), clicking on these elements causes the contenteditable to lose focus. This interrupts the editing flow and may cause the caret to disappear.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Inside it, add a button or link element.
@@ -40,14 +40,14 @@ When a contenteditable region contains interactive elements (buttons, links, etc
 4. Click on the button or link.
 5. Observe that focus moves away from the contenteditable.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Windows, clicking interactive elements removes focus from the contenteditable.
 - The caret disappears.
 - Typing no longer inserts text into the contenteditable.
 - Focus must be manually restored.
 
-### Expected behavior
+## Expected behavior
 
 - Interactive elements within contenteditable should be clickable without removing focus from the parent.
 - Or, focus should be easily restorable after interacting with nested elements.

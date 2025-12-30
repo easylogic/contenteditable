@@ -9,6 +9,7 @@ tags:
   - backspace
   - delete
 status: draft
+locale: en
 ---
 
 Deleting images from contenteditable elements behaves differently across browsers. Some browsers delete the image cleanly, while others may leave empty elements, break the DOM structure, or require multiple delete operations.

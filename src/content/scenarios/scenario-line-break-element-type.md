@@ -10,6 +10,7 @@ tags:
   - div
   - dom-structure
 status: draft
+locale: en
 ---
 
 When creating line breaks in contenteditable elements, browsers use different HTML elements: `<br>`, `<p>`, or `<div>`. This inconsistency makes it difficult to predict and normalize the DOM structure, especially when working with rich text editors.

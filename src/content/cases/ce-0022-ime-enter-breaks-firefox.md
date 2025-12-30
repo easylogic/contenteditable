@@ -29,24 +29,24 @@ domSteps:
     description: "Expected: Line break after composition commits"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using a Korean IME (Input Method Editor) in Firefox on Windows, pressing Enter during composition cancels the composition instead of committing it. This breaks the expected IME workflow.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Switch to Korean IME.
 3. Start typing Korean characters (e.g., "한글").
 4. While the composition is active (characters are still being composed), press Enter.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Windows with Korean IME, pressing Enter cancels the composition.
 - The partially composed characters are lost.
 - The Enter key does not commit the composition as expected.
 
-### Expected behavior
+## Expected behavior
 
 - Pressing Enter during IME composition should commit the composed characters.
 - The composition should complete and the characters should be inserted into the contenteditable.

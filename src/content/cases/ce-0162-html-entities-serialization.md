@@ -33,37 +33,37 @@ domSteps:
     description: "Expected: Consistent encoding handling"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When serializing contenteditable content (e.g., using `innerHTML`) in Chrome, special characters may be encoded as HTML entities or kept as actual characters inconsistently. This makes it difficult to predict the output format.
 
-### Reproduction example
+## Reproduction example
 
 1. Insert text with special characters: `<div>Test</div>`
 2. Serialize using `element.innerHTML`
 3. Observe the output
 
-### Observed behavior
+## Observed behavior
 
 - Characters may be encoded: `&lt;div&gt;Test&lt;/div&gt;`
 - Or characters may be kept as-is: `<div>Test</div>`
 - Encoding is inconsistent
 - Output format is unpredictable
 
-### Expected behavior
+## Expected behavior
 
 - Entity encoding should be consistent
 - Or encoding should be predictable
 - Special characters should be handled correctly
 - Output format should be reliable
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Encoding inconsistent (this case)
 - **Firefox**: Similar encoding inconsistency
 - **Safari**: Encoding behavior varies
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Normalize entity encoding after serialization
 - Use consistent encoding strategy

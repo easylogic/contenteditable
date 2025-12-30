@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: Only first item deleted, list structure maintained"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pressing Backspace at the beginning of the first list item in Chrome, the list item is deleted and converted to a paragraph element. This behavior differs from Firefox and Safari, which may delete the entire list or create unexpected structures.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a list with at least one item: `<ul><li>Item 1</li><li>Item 2</li></ul>`
 2. Place cursor at the very beginning of "Item 1" (before the text)
 3. Press Backspace
 
-### Observed behavior
+## Observed behavior
 
 - The first list item is removed from the list
 - The list item content is converted to a `<p>` paragraph element
 - The remaining list items stay in the list structure
 - If it was the only item, the list may be removed entirely
 
-### Expected behavior
+## Expected behavior
 
 - The list item should be deleted and merged with previous content (if any)
 - Or the list item should be removed while maintaining list structure
 - Behavior should be consistent across browsers
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Converts list item to paragraph
 - **Firefox**: May delete entire list or create nested structures
 - **Safari**: May create empty list items or unexpected structures
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept `beforeinput` events with `inputType: 'deleteContentBackward'`
 - Check if cursor is at the beginning of a list item

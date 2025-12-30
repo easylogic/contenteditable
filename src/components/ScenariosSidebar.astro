@@ -4,6 +4,7 @@ interface Props {
   allCases: any[];
   currentScenarioId: string;
   baseUrl?: string;
+  locale?: string;
 }
 
 const {
@@ -11,17 +12,42 @@ const {
   allCases,
   currentScenarioId,
   baseUrl = '/scenarios',
+  locale,
 } = Astro.props;
 
+const localePrefix = locale && locale !== 'en' ? `/${locale}` : '';
+const fullBaseUrl = `${localePrefix}${baseUrl}`;
+
+// Group scenarios by scenario ID (same scenario in different locales)
+const scenariosById = allScenarios.reduce(
+  (acc, s) => {
+    const id = s.data.id;
+    if (!acc[id]) acc[id] = [];
+    acc[id].push(s);
+    return acc;
+  },
+  {} as Record<string, typeof allScenarios>,
+);
+
+// For each scenario ID, pick the best locale version:
+// 1. Current locale if available
+// 2. Otherwise 'en'
+// 3. Otherwise first available
+const bestScenarios = Object.values(scenariosById).map((scenarios) => {
+  const currentLocaleScenario = scenarios.find((s) => s.data.locale === locale);
+  const enScenario = scenarios.find((s) => s.data.locale === 'en');
+  return currentLocaleScenario || enScenario || scenarios[0];
+});
+
 // Group scenarios by category for sidebar
-const scenariosByCategory = allScenarios.reduce(
+const scenariosByCategory = bestScenarios.reduce(
   (acc, s) => {
     const category = s.data.category || 'other';
     if (!acc[category]) acc[category] = [];
     acc[category].push(s);
     return acc;
   },
-  {} as Record<string, typeof allScenarios>,
+  {} as Record<string, typeof bestScenarios>,
 );
 
 // Sort scenarios within each category
@@ -43,12 +69,17 @@ Object.keys(scenariosByCategory).forEach((category) => {
           </div>
           <ul class="list-none p-0 m-0">
             {categoryScenarios.map((s) => {
+              // Count cases for this scenario (all locales)
               const scenarioCases = allCases.filter((c) => c.data.scenarioId === s.data.id);
+              // Group by case ID to avoid double counting
+              const uniqueCaseIds = new Set(scenarioCases.map((c) => c.data.id));
+              const caseCount = uniqueCaseIds.size;
+              
               const isActive = s.data.id === currentScenarioId;
               return (
                 <li class="m-0">
                   <a
-                    href={`/scenarios/${encodeURIComponent(s.data.id)}`}
+                    href={`${fullBaseUrl}/${encodeURIComponent(s.data.id)}`}
                     title={s.data.title}
                     data-active={isActive}
                     class:list={[
@@ -63,7 +94,7 @@ Object.keys(scenariosByCategory).forEach((category) => {
                       'text-xs mt-0.5',
                       isActive ? 'text-bg-surface/80' : 'text-text-secondary'
                     ]}>
-                      {scenarioCases.length} case{scenarioCases.length === 1 ? '' : 's'}
+                      {caseCount} case{caseCount === 1 ? '' : 's'}
                     </div>
                   </a>
                 </li>
@@ -76,33 +107,164 @@ Object.keys(scenariosByCategory).forEach((category) => {
   </nav>
 </aside>
 
-<script>
-  // Scroll to active item on page load
+<script is:inline>
+  console.log('[ScenariosSidebar] Script loaded');
+  
+  // Scroll to active item
   function scrollToActiveItem() {
+    console.log('[ScenariosSidebar] scrollToActiveItem called');
     const sidebar = document.querySelector('aside[aria-label="Scenarios"]');
-    const activeLink = sidebar?.querySelector('a[data-active="true"]');
-    if (activeLink && sidebar) {
-      // Calculate position relative to sidebar container
+    if (!sidebar) {
+      console.log('[ScenariosSidebar] Sidebar not found');
+      return false;
+    }
+    
+    const activeLink = sidebar.querySelector('a[data-active="true"]');
+    if (!activeLink) {
+      console.log('[ScenariosSidebar] Active link not found');
+      return false;
+    }
+    
+    console.log('[ScenariosSidebar] Active link found:', activeLink.textContent);
+    
+    // Wait for layout to be ready
+    requestAnimationFrame(() => {
       const sidebarRect = sidebar.getBoundingClientRect();
       const linkRect = activeLink.getBoundingClientRect();
       const scrollTop = sidebar.scrollTop;
       const linkOffsetTop = linkRect.top - sidebarRect.top + scrollTop;
       const centerOffset = sidebar.clientHeight / 2 - linkRect.height / 2;
+      const targetScroll = Math.max(0, linkOffsetTop - centerOffset);
+      
+      console.log('[ScenariosSidebar] Scrolling to:', {
+        linkOffsetTop,
+        centerOffset,
+        targetScroll,
+        currentScrollTop: scrollTop,
+        sidebarHeight: sidebar.clientHeight
+      });
       
       sidebar.scrollTo({
-        top: linkOffsetTop - centerOffset,
+        top: targetScroll,
         behavior: 'smooth'
       });
+    });
+    
+    return true;
+  }
+  
+  // Scroll when clicking sidebar links
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('aside[aria-label="Scenarios"] a');
+    if (link && link.href) {
+      console.log('[ScenariosSidebar] Link clicked:', link.textContent, link.href);
+      const sidebar = document.querySelector('aside[aria-label="Scenarios"]');
+      if (sidebar) {
+        const linkRect = link.getBoundingClientRect();
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const scrollTop = sidebar.scrollTop;
+        const linkOffsetTop = linkRect.top - sidebarRect.top + scrollTop;
+        console.log('[ScenariosSidebar] Saving scroll position:', linkOffsetTop);
+        sessionStorage.setItem('scenariosSidebarScroll', linkOffsetTop.toString());
+      }
+    }
+  });
+  
+  // Initialize scroll with multiple attempts
+  function initScroll() {
+    console.log('[ScenariosSidebar] initScroll called');
+    const sidebar = document.querySelector('aside[aria-label="Scenarios"]');
+    if (!sidebar) {
+      console.log('[ScenariosSidebar] Sidebar not found in initScroll');
+      return;
+    }
+    
+    // Check if we have a saved scroll position
+    const savedScroll = sessionStorage.getItem('scenariosSidebarScroll');
+    if (savedScroll) {
+      const scrollPos = parseInt(savedScroll, 10);
+      const centerOffset = sidebar.clientHeight / 2;
+      const targetScroll = Math.max(0, scrollPos - centerOffset);
+      
+      console.log('[ScenariosSidebar] Restoring saved scroll position:', {
+        saved: scrollPos,
+        centerOffset,
+        targetScroll,
+        sidebarHeight: sidebar.clientHeight
+      });
+      
+      requestAnimationFrame(() => {
+        sidebar.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        });
+      });
+      
+      sessionStorage.removeItem('scenariosSidebarScroll');
+      return;
+    }
+    
+    // Otherwise scroll to active item
+    console.log('[ScenariosSidebar] No saved scroll, scrolling to active item');
+    if (!scrollToActiveItem()) {
+      // Retry if active item not found yet
+      console.log('[ScenariosSidebar] Active item not found, will retry');
+      setTimeout(() => scrollToActiveItem(), 100);
     }
   }
   
-  // Try multiple times to handle async rendering
+  // Use MutationObserver to wait for sidebar to be fully rendered
+  function observeAndScroll() {
+    console.log('[ScenariosSidebar] observeAndScroll called');
+    const sidebar = document.querySelector('aside[aria-label="Scenarios"]');
+    if (!sidebar) {
+      console.log('[ScenariosSidebar] Sidebar not found, retrying...');
+      // Retry if sidebar not found
+      setTimeout(observeAndScroll, 50);
+      return;
+    }
+    
+    // Check if sidebar has content
+    const hasContent = sidebar.querySelector('a');
+    if (!hasContent) {
+      console.log('[ScenariosSidebar] No content yet, setting up MutationObserver');
+      // Wait for content to load
+      const observer = new MutationObserver(() => {
+        if (sidebar.querySelector('a')) {
+          console.log('[ScenariosSidebar] Content detected via MutationObserver');
+          observer.disconnect();
+          initScroll();
+        }
+      });
+      observer.observe(sidebar, { childList: true, subtree: true });
+      setTimeout(() => {
+        console.log('[ScenariosSidebar] MutationObserver timeout, initializing scroll');
+        observer.disconnect();
+        initScroll();
+      }, 1000);
+      return;
+    }
+    
+    // Sidebar is ready, initialize scroll
+    console.log('[ScenariosSidebar] Sidebar has content, initializing scroll');
+    initScroll();
+  }
+  
+  // Start observing when DOM is ready
+  console.log('[ScenariosSidebar] Initializing, readyState:', document.readyState);
   if (document.readyState === 'loading') {
+    console.log('[ScenariosSidebar] DOM is loading, waiting for DOMContentLoaded');
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(scrollToActiveItem, 100);
+      console.log('[ScenariosSidebar] DOMContentLoaded fired');
+      setTimeout(observeAndScroll, 50);
+      setTimeout(initScroll, 200);
+      setTimeout(initScroll, 500);
     });
   } else {
-    setTimeout(scrollToActiveItem, 100);
+    console.log('[ScenariosSidebar] DOM already loaded, starting immediately');
+    setTimeout(observeAndScroll, 50);
+    setTimeout(initScroll, 200);
+    setTimeout(initScroll, 500);
   }
 </script>
 

@@ -32,37 +32,37 @@ domSteps:
     description: "Expected: Newly typed text also inherits font size (current behavior is correct)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying a font size to selected text in Edge and then continuing to type, the new text inherits the font size. This is the expected behavior and works correctly in Edge.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text in a contenteditable element
 2. Apply a font size (e.g., 18px)
 3. Place cursor after the formatted text
 4. Type new text
 
-### Observed behavior
+## Observed behavior
 
 - The newly typed text inherits the applied font size
 - Font size formatting persists for new text
 - This is the correct and expected behavior
 - Works consistently in Edge/Chrome
 
-### Expected behavior
+## Expected behavior
 
 - Newly typed text should inherit the font size (current behavior is correct)
 - Font size formatting should persist until explicitly changed
 - Behavior should be consistent (which it is in Edge/Chrome)
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Font size persists correctly (this case - correct behavior)
 - **Firefox**: Size persistence may be less reliable
 - **Safari**: Font size does not persist
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - This behavior is correct and expected
 - May need to handle size removal explicitly

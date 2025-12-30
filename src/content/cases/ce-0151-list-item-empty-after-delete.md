@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Empty list item removed, clean list structure"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When deleting all text from a list item in Safari, empty list items may remain in the DOM. These empty `<li>` elements cause layout issues and make the list structure confusing.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a list: `<ul><li>Item 1</li><li>Item 2</li></ul>`
 2. Delete all text from "Item 2"
 3. Observe the DOM
 
-### Observed behavior
+## Observed behavior
 
 - Empty `<li></li>` or `<li><br></li>` elements remain
 - List structure includes empty items
 - Layout has unexpected spacing
 - Empty items are visible
 
-### Expected behavior
+## Expected behavior
 
 - Empty list items should be removed
 - Or at least one empty item should remain for cursor
 - List structure should be clean
 - No unnecessary empty items
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May remove empty items or leave one
 - **Firefox**: More likely to leave empty items
 - **Safari**: Most likely to leave empty items (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Clean up empty list items after deletion
 - Remove empty items but preserve list structure

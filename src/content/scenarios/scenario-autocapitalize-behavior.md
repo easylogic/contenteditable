@@ -9,6 +9,7 @@ tags:
   - ios
   - safari
 status: draft
+locale: en
 ---
 
 The `autocapitalize` attribute, which controls automatic capitalization on mobile keyboards, works inconsistently on contenteditable elements. The behavior may differ from standard input elements.

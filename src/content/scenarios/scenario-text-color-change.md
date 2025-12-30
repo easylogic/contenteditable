@@ -9,6 +9,7 @@ tags:
   - css
   - formatting
 status: draft
+locale: en
 ---
 
 Changing text color in contenteditable elements behaves inconsistently across browsers. Colors may be applied as inline styles, as font tags, or may not persist when typing. The color format (hex, rgb, named colors) handling also varies.

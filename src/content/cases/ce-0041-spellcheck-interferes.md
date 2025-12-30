@@ -18,24 +18,24 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When `spellcheck="true"` is enabled on a contenteditable region in Safari, the spellcheck functionality may interfere with normal editing. Red underlines may appear incorrectly, and the spellcheck UI may block text selection or editing.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `spellcheck="true"`.
 2. Type some text, including intentionally misspelled words.
 3. Observe the spellcheck behavior.
 4. Try to select text that has spellcheck underlines.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, spellcheck underlines may interfere with text selection.
 - The spellcheck UI may appear in unexpected locations.
 - Editing may be blocked or delayed by spellcheck processing.
 
-### Expected behavior
+## Expected behavior
 
 - Spellcheck should not interfere with normal editing operations.
 - Text selection should work regardless of spellcheck underlines.

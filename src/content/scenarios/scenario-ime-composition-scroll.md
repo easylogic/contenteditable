@@ -9,6 +9,7 @@ tags:
   - scroll
   - mobile
 status: draft
+locale: en
 ---
 
 When composing text with an IME in a `contenteditable` element, scrolling (mouse wheel, touch, or programmatic) may cancel the active composition, lose the composed text, or cause the composition UI to be positioned incorrectly. This is especially problematic on mobile devices where scrolling is common during text input.

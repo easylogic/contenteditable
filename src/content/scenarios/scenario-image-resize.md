@@ -9,6 +9,7 @@ tags:
   - drag
   - dimensions
 status: draft
+locale: en
 ---
 
 Resizing images within contenteditable elements is limited or behaves inconsistently across browsers. Some browsers support native resize handles, while others require manual implementation. The resize behavior may also affect the DOM structure unexpectedly.

@@ -9,6 +9,7 @@ tags:
   - form
   - chrome
 status: draft
+locale: en
 ---
 
 The `required` attribute, which works on form inputs to indicate mandatory fields, is not supported on contenteditable regions. There is no built-in way to mark a contenteditable as required for form validation.

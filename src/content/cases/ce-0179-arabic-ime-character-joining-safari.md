@@ -33,11 +33,11 @@ domSteps:
     description: "Expected: Characters correctly joined (مرحبا)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Arabic text with IME in a contenteditable element in Safari on macOS, Arabic letters may not join correctly based on their context, appearing as separate disconnected characters instead of forming connected words. RTL (right-to-left) text direction may also not be handled correctly, and caret movement may be incorrect in RTL context.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Set direction to RTL or use auto direction.
@@ -45,7 +45,7 @@ When composing Arabic text with IME in a contenteditable element in Safari on ma
 4. Type Arabic text (e.g., "مرحبا").
 5. Observe character joining and text direction.
 
-### Observed behavior
+## Observed behavior
 
 - Arabic letters may not join correctly, appearing disconnected
 - Text may display left-to-right instead of right-to-left
@@ -53,7 +53,7 @@ When composing Arabic text with IME in a contenteditable element in Safari on ma
 - Text selection may not work correctly in RTL context
 - Mixed Arabic and Latin text may have incorrect direction handling
 
-### Expected behavior
+## Expected behavior
 
 - Arabic letters should join contextually based on their position
 - Text should display right-to-left correctly
@@ -61,19 +61,19 @@ When composing Arabic text with IME in a contenteditable element in Safari on ma
 - Text selection should work correctly in RTL
 - Mixed-direction text should handle direction correctly
 
-### Impact
+## Impact
 
 - Arabic text may be unreadable or difficult to read
 - Users cannot reliably input correct Arabic text
 - Mixed-direction text (Arabic + English) may display incorrectly
 
-### Browser Comparison
+## Browser Comparison
 
 - **Safari**: RTL and character joining can be inconsistent, especially on macOS
 - **Chrome**: Generally better RTL support, but character joining can still fail
 - **Firefox**: RTL support is good, but some edge cases exist
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Ensure proper RTL direction is set (dir="rtl")
 - Monitor for Arabic text and set direction automatically

@@ -5,9 +5,10 @@ interface Props {
   locale: Locale;
   contentType?: 'case' | 'doc' | 'page';
   originalPath?: string;
+  entryLocale?: string; // The locale of the actual content entry
 }
 
-const { locale, contentType = 'page', originalPath } = Astro.props;
+const { locale, contentType = 'page', originalPath, entryLocale } = Astro.props;
 const localeInfo = locales[locale];
 
 // Translation notice messages for each locale
@@ -59,7 +60,8 @@ const notices: Record<Locale, { title: string; message: string; contribute: stri
 const notice = notices[locale];
 
 // Don't show for English (default locale)
-const shouldShow = locale !== defaultLocale;
+// Don't show if the entry is already translated to the current locale
+const shouldShow = locale !== defaultLocale && entryLocale !== locale;
 ---
 
 {shouldShow && (

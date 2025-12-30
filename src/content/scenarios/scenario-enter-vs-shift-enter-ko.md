@@ -9,6 +9,7 @@ tags:
   - paragraph
   - newline
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 Enter와 Shift+Enter 키의 동작이 브라우저마다 다릅니다. Enter는 새 단락, 줄바꿈 또는 div를 만들 수 있는 반면 Shift+Enter는 줄바꿈을 만들거나 다르게 동작할 수 있습니다. 결과 DOM 구조도 다양합니다.

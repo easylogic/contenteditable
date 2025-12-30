@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When content changes in a contenteditable region (text is typed, deleted, or formatted), screen readers do not announce these changes to users. This makes it difficult for users relying on assistive technologies to understand what is happening in the editor.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with appropriate ARIA attributes.
 2. Enable VoiceOver (macOS) or NVDA (Windows).
@@ -31,13 +31,13 @@ When content changes in a contenteditable region (text is typed, deleted, or for
 4. Type some text or delete text.
 5. Observe what the screen reader announces.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari with VoiceOver, changes to contenteditable regions are not announced.
 - The screen reader may not indicate when formatting is applied or removed.
 - Selection changes may not be announced.
 
-### Expected behavior
+## Expected behavior
 
 - Screen readers should announce when text is inserted or deleted.
 - Formatting changes should be announced.

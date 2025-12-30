@@ -8,6 +8,7 @@ tags:
   - click
   - firefox
 status: draft
+locale: en
 ---
 
 When a contenteditable region contains interactive elements (buttons, links, etc.), clicking on these elements causes the contenteditable to lose focus. This interrupts the editing flow and may cause the caret to disappear.

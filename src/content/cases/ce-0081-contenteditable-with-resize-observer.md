@@ -20,11 +20,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a ResizeObserver is attached to a contenteditable element, the observer may trigger during editing as content changes size. This can cause layout recalculations and visual jumps, especially when the contenteditable has dynamic height.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with auto height.
 2. Attach a ResizeObserver to monitor size changes.
@@ -32,14 +32,14 @@ When a ResizeObserver is attached to a contenteditable element, the observer may
 4. Observe any layout shifts or visual jumps.
 5. Check if the observer callbacks affect editing performance.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, ResizeObserver may trigger frequently during editing.
 - Layout recalculations can cause visual jumps.
 - The caret position may shift unexpectedly.
 - Performance may be affected by frequent resize events.
 
-### Expected behavior
+## Expected behavior
 
 - ResizeObserver should not cause layout shifts during editing.
 - Or, resize events should be debounced or batched.

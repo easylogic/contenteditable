@@ -32,18 +32,18 @@ domSteps:
     description: "Expected: Composition preserved during scroll or handled gracefully"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Chinese text with Pinyin IME in a `contenteditable` element on Android Chrome, scrolling (touch scroll) cancels the active composition and loses incomplete character conversions. This is especially problematic on mobile devices where scrolling is common during text input.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area on an Android device.
 2. Activate Chinese Pinyin IME.
 3. Type Pinyin text (e.g., "nihao") and start character conversion.
 4. Scroll the page (touch scroll) before completing the conversion.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - Incomplete character conversions are lost
@@ -51,20 +51,20 @@ When composing Chinese text with Pinyin IME in a `contenteditable` element on An
 - Candidate list disappears
 - No recovery mechanism for lost composition
 
-### Expected behavior
+## Expected behavior
 
 - Composition should be preserved during scrolling
 - Incomplete conversions should not be lost
 - Scrolling should not interfere with composition
 - IME UI should reposition correctly after scroll
 
-### Browser Comparison
+## Browser Comparison
 
 - **Android Chrome**: Scrolling cancels composition
 - **iOS Safari**: Similar behavior
 - **Desktop browsers**: May have different behavior
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent scroll during active composition (may degrade UX)
 - Monitor scroll events and preserve composition state

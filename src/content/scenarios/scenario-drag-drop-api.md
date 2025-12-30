@@ -9,6 +9,7 @@ tags:
   - chrome
   - macos
 status: draft
+locale: en
 ---
 
 When using the HTML5 Drag and Drop API with contenteditable elements, the behavior differs from standard elements. Dragging text within a contenteditable may not work as expected, and drop zones may not be recognized correctly.

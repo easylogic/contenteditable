@@ -9,6 +9,7 @@ tags:
   - typography
   - css
 status: draft
+locale: en
 ---
 
 Changing font size in contenteditable elements behaves inconsistently across browsers. Font sizes may be applied as inline styles, as font tags, or may not persist when typing new text. The unit (px, em, rem) handling also varies.

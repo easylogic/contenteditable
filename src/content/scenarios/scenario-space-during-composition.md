@@ -8,6 +8,7 @@ tags:
   - ime
   - space
 status: draft
+locale: en
 ---
 
 While composing text with an IME in a `contenteditable` element, pressing the Space key is either ignored or commits the composition in an inconsistent way compared to native text controls.

@@ -31,11 +31,11 @@ domSteps:
     description: "Expected: Space inserted after kanji conversion"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using Japanese IME in a `contenteditable` element, the Space key is used for kanji conversion, which conflicts with inserting a space character. Pressing Space during composition may trigger conversion instead of inserting a space, or may behave inconsistently compared to native text controls.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Japanese IME.
@@ -43,27 +43,27 @@ When using Japanese IME in a `contenteditable` element, the Space key is used fo
 4. Press Space to trigger kanji conversion.
 5. Try to insert a space character after conversion.
 
-### Observed behavior
+## Observed behavior
 
 - Space key triggers kanji conversion instead of inserting a space character
 - After conversion, inserting a space may require multiple Space presses
 - Behavior may differ from native text input controls
 - The order of events (composition, conversion, space insertion) may be inconsistent
 
-### Expected behavior
+## Expected behavior
 
 - Space key behavior should be consistent across `contenteditable` and native text inputs
 - Users should be able to reliably insert space characters
 - Conversion and space insertion should not conflict
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: Space key behavior may conflict with conversion
 - **Edge**: Similar to Chrome
 - **Firefox**: May have different behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Monitor composition and conversion state to distinguish between conversion Space and insertion Space
 - Consider using alternative methods to insert spaces during composition

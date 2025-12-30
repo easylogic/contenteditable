@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 In Chrome on Windows, calling `preventDefault()` on the `paste` event does not always prevent the default paste behavior. Content may still be pasted despite the prevention.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Add a `paste` event listener that calls `event.preventDefault()`.
@@ -31,13 +31,13 @@ In Chrome on Windows, calling `preventDefault()` on the `paste` event does not a
 4. Paste into the contenteditable.
 5. Observe whether the paste is prevented.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, `preventDefault()` on `paste` may not work.
 - Content may still be pasted.
 - The default behavior is not consistently prevented.
 
-### Expected behavior
+## Expected behavior
 
 - `preventDefault()` on `paste` should prevent the default paste behavior.
 - No content should be pasted when prevented.

@@ -12,6 +12,7 @@ tags:
   - arabic
   - hebrew
 status: draft
+locale: ko
 ---
 
 오른쪽에서 왼쪽(RTL) 텍스트 방향과 문맥적 문자 결합(문자 위치에 따라 다르게 연결됨)을 사용하는 언어는 contenteditable 요소에서 문제를 경험할 수 있습니다. RTL 방향과 문자 결합 모두 문제가 될 수 있으며, 특히 왼쪽에서 오른쪽(LTR) 텍스트와 혼합될 때 그렇습니다.

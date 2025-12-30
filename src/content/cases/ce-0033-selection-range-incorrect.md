@@ -29,11 +29,11 @@ domSteps:
     description: "Expected: getSelection() returns accurate range matching visual selection"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When selecting text that spans across multiple HTML elements (e.g., `<p>`, `<div>`, `<span>`) in a contenteditable region, the selection range may not accurately reflect the visual selection. The `Selection` and `Range` APIs may return incorrect boundaries.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with nested elements:
    ```html
@@ -46,13 +46,13 @@ When selecting text that spans across multiple HTML elements (e.g., `<p>`, `<div
 3. Use JavaScript to inspect the selection range.
 4. Observe the reported start and end positions.
 
-### Observed behavior
+## Observed behavior
 
 - In Edge on Windows, the selection range boundaries may not match the visual selection.
 - The `Range.startOffset` and `Range.endOffset` may be incorrect.
 - Selecting across element boundaries can produce unexpected results.
 
-### Expected behavior
+## Expected behavior
 
 - The selection range should accurately reflect the visual selection.
 - Boundaries should be correctly reported even when spanning multiple elements.

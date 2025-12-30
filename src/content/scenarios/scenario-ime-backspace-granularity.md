@@ -8,6 +8,7 @@ tags:
   - ime
   - backspace
 status: draft
+locale: en
 ---
 
 When editing text with an IME in a `contenteditable` element, pressing Backspace removes the entire composed unit instead of a single component. This makes fine-grained correction difficult and differs from native input fields on the same platform.

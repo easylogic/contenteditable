@@ -13,6 +13,7 @@ tags:
   - hindi
   - devanagari
 status: draft
+locale: en
 ---
 
 Many languages use combining characters, diacritics, tone marks, or complex character compositions where base characters combine with marks in specific ways. In contenteditable elements, the positioning, ordering, and combination of these marks can fail, resulting in incorrectly displayed or unreadable text.

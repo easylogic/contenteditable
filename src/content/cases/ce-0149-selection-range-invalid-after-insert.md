@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Selection range valid, cursor positioned after inserted content"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When programmatically inserting content (text, elements) into a contenteditable element in Firefox, the selection range becomes invalid. The cursor position is lost and cannot be restored.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text
 2. Programmatically insert content at selection
 3. Check selection state
 
-### Observed behavior
+## Observed behavior
 
 - Selection range becomes invalid
 - Cursor position is lost
 - Cannot continue editing at correct position
 - Selection cannot be restored
 
-### Expected behavior
+## Expected behavior
 
 - Selection should remain valid after insertion
 - Cursor should be positioned after inserted content
 - User should be able to continue editing
 - Selection should be restored properly
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Selection generally remains valid
 - **Firefox**: Selection becomes invalid (this case)
 - **Safari**: Selection restoration most unreliable
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Save selection before insertion
 - Restore selection after insertion

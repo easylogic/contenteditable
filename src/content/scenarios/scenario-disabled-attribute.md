@@ -8,6 +8,7 @@ tags:
   - editing
   - safari
 status: draft
+locale: en
 ---
 
 The `disabled` attribute, which disables form inputs, does not work on contenteditable regions in Safari. The contenteditable remains editable and interactive even when `disabled` is set.

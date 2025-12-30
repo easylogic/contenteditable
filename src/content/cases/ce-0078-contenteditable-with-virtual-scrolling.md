@@ -20,11 +20,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable element is used with virtual scrolling libraries (e.g., for large documents), the virtual scrolling mechanism may interfere with text selection and caret positioning. The selection may be lost when elements are removed from the DOM during scrolling.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable region with a virtual scrolling library.
 2. Load a large amount of content.
@@ -32,14 +32,14 @@ When a contenteditable element is used with virtual scrolling libraries (e.g., f
 4. Scroll to trigger virtual scrolling (DOM elements being removed/added).
 5. Observe whether selection is maintained.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS, virtual scrolling may cause selection to be lost.
 - Caret position may jump when DOM elements are recycled.
 - Selection ranges may become invalid.
 - Editing may be disrupted during scrolling.
 
-### Expected behavior
+## Expected behavior
 
 - Virtual scrolling should not interfere with contenteditable selection.
 - Selection should be maintained across DOM updates.

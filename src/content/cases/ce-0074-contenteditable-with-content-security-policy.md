@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a page has a strict Content Security Policy (CSP), certain contenteditable operations may be restricted. Pasting content, executing scripts, or inserting HTML may be blocked depending on the CSP directives.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a page with a strict CSP header (e.g., `default-src 'self'`).
 2. Create a contenteditable div on the page.
@@ -31,14 +31,14 @@ When a page has a strict Content Security Policy (CSP), certain contenteditable 
 4. Try to insert HTML programmatically.
 5. Observe any CSP violations or blocked operations.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, CSP may block certain contenteditable operations.
 - Pasting may be restricted if `unsafe-inline` is not allowed.
 - Script execution within contenteditable may be blocked.
 - CSP violations may be logged in the console.
 
-### Expected behavior
+## Expected behavior
 
 - CSP should not interfere with basic contenteditable editing.
 - Pasting should work within CSP constraints.

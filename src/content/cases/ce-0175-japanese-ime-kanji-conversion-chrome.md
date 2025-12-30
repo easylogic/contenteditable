@@ -32,11 +32,11 @@ domSteps:
     description: "Expected: Arrow key navigates candidates, cursor maintained"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Japanese text with IME in a contenteditable element in Chrome on Windows, converting romaji to kanji involves displaying a candidate list. The candidate list may appear in an incorrect position, or arrow keys used to navigate candidates may move the caret in the contenteditable instead of navigating the candidate list.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Switch to Japanese IME (Microsoft IME or Google Japanese Input).
@@ -44,34 +44,34 @@ When composing Japanese text with IME in a contenteditable element in Chrome on 
 4. Press Space or Enter to trigger kanji conversion.
 5. Observe the candidate list position and try navigating with arrow keys.
 
-### Observed behavior
+## Observed behavior
 
 - Candidate list may appear far from the input position
 - Arrow keys (Up/Down) may move the caret instead of navigating candidates
 - Candidate list may disappear when clicking elsewhere
 - Selected kanji may not be inserted correctly
 
-### Expected behavior
+## Expected behavior
 
 - Candidate list should appear near the input position
 - Arrow keys should navigate candidates without moving the caret
 - Candidate selection should work reliably
 - Selected kanji should be inserted correctly
 
-### Impact
+## Impact
 
 - Users cannot reliably convert romaji to kanji
 - Workflow is disrupted when candidate selection fails
 - Inconsistent behavior creates confusion
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: Candidate list positioning can be inconsistent
 - **Edge**: Similar to Chrome
 - **Firefox**: May have different candidate list behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Monitor composition events to detect when candidate list is active
 - Prevent default arrow key behavior during candidate navigation

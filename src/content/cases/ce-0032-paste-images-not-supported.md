@@ -29,11 +29,11 @@ domSteps:
     description: "Expected: Image inserted as &lt;img&gt; element"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When attempting to paste images (from clipboard) into a contenteditable region, the behavior is inconsistent across browsers. Some browsers ignore the paste, while others may insert a placeholder or fail silently.
 
-### Reproduction example
+## Reproduction example
 
 1. Copy an image to the clipboard (e.g., from an image editor or screenshot).
 2. Create a contenteditable div.
@@ -41,13 +41,13 @@ When attempting to paste images (from clipboard) into a contenteditable region, 
 4. Paste (Cmd+V or Ctrl+V).
 5. Observe what happens.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS, pasting images may be ignored or fail silently.
 - No visual feedback indicates that the paste was attempted.
 - The image data may be available in the clipboard but not inserted.
 
-### Expected behavior
+## Expected behavior
 
 - Images should be pasted as `<img>` elements with appropriate `src` attributes.
 - Or, the `beforeinput` event should allow intercepting and handling image paste.

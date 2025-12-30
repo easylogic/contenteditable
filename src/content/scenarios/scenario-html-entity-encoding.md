@@ -9,6 +9,7 @@ tags:
   - encoding
   - special-characters
 status: draft
+locale: en
 ---
 
 Special characters in contenteditable elements may be encoded as HTML entities (`&lt;`, `&gt;`, `&amp;`, etc.) or decoded to their actual characters inconsistently across browsers. This can cause issues when copying, pasting, or serializing content.

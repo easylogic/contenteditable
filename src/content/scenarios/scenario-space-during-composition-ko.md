@@ -8,6 +8,7 @@ tags:
   - ime
   - space
 status: draft
+locale: ko
 ---
 
 `contenteditable` 요소에서 IME로 텍스트를 컴포지션하는 동안 Space 키를 누르면 무시되거나 네이티브 텍스트 컨트롤과 비교하여 일관되지 않은 방식으로 컴포지션이 커밋됩니다.

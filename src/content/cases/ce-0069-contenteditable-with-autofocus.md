@@ -19,23 +19,23 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 The `autofocus` attribute, which automatically focuses form inputs on page load, does not work on contenteditable elements. There is no built-in way to automatically focus a contenteditable region when a page loads.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `autofocus` attribute.
 2. Load the page.
 3. Observe whether the contenteditable receives focus automatically.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, the `autofocus` attribute is ignored on contenteditable.
 - The contenteditable does not receive focus automatically.
 - Manual JavaScript focus() call is required.
 
-### Expected behavior
+## Expected behavior
 
 - The `autofocus` attribute should work on contenteditable.
 - Or, there should be a standard way to auto-focus contenteditable regions.

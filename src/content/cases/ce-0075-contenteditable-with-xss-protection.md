@@ -19,25 +19,25 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 Browser XSS protection mechanisms may interfere with programmatic HTML insertion in contenteditable elements. Script tags or event handlers inserted via innerHTML or similar methods may be stripped or sanitized.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Try to insert HTML with script tags or event handlers programmatically.
 3. Observe whether the HTML is inserted as-is or sanitized.
 4. Check if script execution is blocked.
 
-### Observed behavior
+## Observed behavior
 
 - In Edge on Windows, XSS protection may strip script tags from inserted HTML.
 - Event handlers may be removed from attributes.
 - Some HTML may be sanitized automatically.
 - Behavior may differ from standard DOM manipulation.
 
-### Expected behavior
+## Expected behavior
 
 - XSS protection should work transparently.
 - Or, there should be clear documentation on what is allowed.

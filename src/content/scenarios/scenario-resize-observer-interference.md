@@ -10,6 +10,7 @@ tags:
   - chrome
   - windows
 status: draft
+locale: en
 ---
 
 When a ResizeObserver is attached to a contenteditable element, the observer may trigger during editing as content changes size. This can cause layout recalculations and visual jumps, especially when the contenteditable has dynamic height.

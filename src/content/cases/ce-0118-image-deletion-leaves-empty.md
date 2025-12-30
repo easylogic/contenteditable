@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Empty elements removed, clean DOM"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When deleting an image from a contenteditable element, empty wrapper divs or other elements may be left in the DOM. These empty elements cause layout issues and bloat the HTML.
 
-### Reproduction example
+## Reproduction example
 
 1. Insert an image into contenteditable
 2. Select the image
 3. Press Delete or Backspace
 
-### Observed behavior
+## Observed behavior
 
 - Image is deleted
 - Empty wrapper `<div>` elements may remain
 - Or empty `<p>` elements may remain
 - DOM structure becomes bloated
 
-### Expected behavior
+## Expected behavior
 
 - Image should be deleted cleanly
 - No empty elements should remain
 - DOM should be clean
 - Cursor position should be correct
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May leave empty elements (this case)
 - **Firefox**: More likely to leave empty structures
 - **Safari**: Most likely to leave empty elements
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept image deletion
 - Clean up empty wrapper elements

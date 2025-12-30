@@ -9,6 +9,7 @@ tags:
   - navigation
   - chrome
 status: draft
+locale: en
 ---
 
 In Chrome on Windows, arrow keys may move the caret by word instead of by character, even when no modifier keys are pressed. This makes precise cursor positioning difficult.

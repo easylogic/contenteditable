@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### 현상
+## 현상
 
 contenteditable 영역에 `contenteditable="false"`가 있는 자식 요소가 포함되어 있을 때 동작이 일관되지 않습니다. 일부 브라우저는 이러한 요소 내에서 편집을 허용하는 반면, 다른 브라우저는 올바르게 편집을 방지합니다.
 
-### 재현 예시
+## 재현 예시
 
 1. contenteditable div를 만듭니다.
 2. 그 안에 `contenteditable="false"`가 있는 자식 요소를 추가합니다:
@@ -36,13 +36,13 @@ contenteditable 영역에 `contenteditable="false"`가 있는 자식 요소가 �
 3. `contenteditable="false"`가 있는 자식 요소의 텍스트를 편집하려고 시도합니다.
 4. 편집이 방지되는지 관찰합니다.
 
-### 관찰된 동작
+## 관찰된 동작
 
 - Chrome에서 `contenteditable="false"`가 있는 자식 요소가 여전히 편집 가능할 수 있습니다.
 - 속성이 일관되게 존중되지 않습니다.
 - 읽기 전용이어야 하는 요소 내에서 선택 및 편집이 작동할 수 있습니다.
 
-### 예상 동작
+## 예상 동작
 
 - `contenteditable="false"`가 있는 요소는 편집 가능하지 않아야 합니다.
 - 부모 요소 상태에 관계없이 속성이 존중되어야 합니다.

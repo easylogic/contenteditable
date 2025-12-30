@@ -32,37 +32,37 @@ domSteps:
     description: "Expected: Tab navigation after composition completes or composition text preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Thai text with IME in a `contenteditable` element, pressing Tab cancels the composition and causes focus to navigate to the next element. The composed text including tone marks and vowel marks may be lost or partially committed before navigation occurs.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area (e.g., in a form or table).
 2. Activate Thai IME.
 3. Type Thai text with tone marks and vowel marks (e.g., "สวัสดี").
 4. Press Tab to navigate to the next element.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - Focus moves to the next element
 - Composed text including combining marks may be lost
 - The Tab key behavior conflicts with composition handling
 
-### Expected behavior
+## Expected behavior
 
 - Composition should complete before Tab navigation occurs
 - All combining characters should be preserved
 - Tab navigation should work consistently with or without active composition
 
-### Browser Comparison
+## Browser Comparison
 
 - **Safari**: Tab may cancel composition and navigate focus, especially on macOS
 - **Chrome**: May have different Tab key behavior during composition
 - **Firefox**: May have different Tab key behavior during composition
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent Tab during active composition
 - Wait for composition to complete before allowing Tab navigation

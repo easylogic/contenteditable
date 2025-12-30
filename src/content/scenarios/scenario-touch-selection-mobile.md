@@ -9,6 +9,7 @@ tags:
   - selection
   - ios
 status: draft
+locale: en
 ---
 
 On mobile devices, selecting text in a contenteditable region using touch is difficult. The selection handles are small and hard to grab, and the selection range may change unexpectedly when trying to adjust it.

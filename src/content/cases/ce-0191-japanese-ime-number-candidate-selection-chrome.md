@@ -32,38 +32,38 @@ domSteps:
     description: "Expected: Number 5 inserted or Shift+5 can input number"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using Japanese IME in a `contenteditable` element, pressing number keys (1-9) during kanji conversion selects candidates from the conversion list instead of inserting numbers. This prevents users from inserting numbers while the candidate list is active.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Japanese IME.
 3. Type romaji text (e.g., "kanji") and trigger kanji conversion (candidate list appears).
 4. Try to press a number key (e.g., "5") to insert the number "5".
 
-### Observed behavior
+## Observed behavior
 
 - Number keys (1-9) select candidates from the conversion list instead of inserting numbers
 - Users cannot insert numbers while candidate list is active
 - After conversion completes, number keys work normally
 - Behavior differs from native input fields where numbers can be inserted
 
-### Expected behavior
+## Expected behavior
 
 - Users should be able to insert numbers even when candidate list is active
 - Number keys should have a way to insert numbers (e.g., Shift+Number or different key combination)
 - Behavior should be consistent with native input fields
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: Number keys trigger candidate selection
 - **Edge**: Similar to Chrome
 - **Firefox**: May have different number key behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent number key default behavior and insert numbers manually
 - Use alternative key combinations for number input during candidate selection

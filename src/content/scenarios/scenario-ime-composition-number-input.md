@@ -9,6 +9,7 @@ tags:
   - number-input
   - candidate-selection
 status: draft
+locale: en
 ---
 
 When composing text with an IME in a `contenteditable` element, pressing number keys may trigger IME-specific functions (like candidate selection in Japanese/Chinese IME) instead of inserting numbers, or may cause composition to be cancelled unexpectedly.

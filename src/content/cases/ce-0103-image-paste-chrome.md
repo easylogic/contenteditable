@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: Use server URL or appropriate size management"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pasting an image from clipboard in Chrome, the image is inserted as an `<img>` tag with a base64 data URL. This can create very large HTML and may cause performance issues.
 
-### Reproduction example
+## Reproduction example
 
 1. Copy an image to clipboard (e.g., screenshot)
 2. Focus a contenteditable element
 3. Paste (Ctrl+V)
 
-### Observed behavior
+## Observed behavior
 
 - Image is inserted as `<img src="data:image/png;base64,...">`
 - Base64 data URL can be very long (hundreds of KB to MB)
 - HTML becomes bloated
 - May cause performance issues with large images
 
-### Expected behavior
+## Expected behavior
 
 - Image should be inserted but data URL size should be manageable
 - Or option to upload image to server instead
 - HTML should not become excessively large
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Inserts as base64 data URL (this case)
 - **Firefox**: May not support image pasting or handle differently
 - **Safari**: Behavior varies
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept paste event and handle images separately
 - Upload image to server and use URL instead of data URL

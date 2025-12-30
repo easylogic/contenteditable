@@ -9,6 +9,7 @@ tags:
   - viewport
   - scroll
 status: draft
+locale: ko
 ---
 
 contenteditable 요소의 텍스트 커서(커서)가 편집 작업 중에 보이는 뷰포트 밖으로 이동할 수 있어 사용자가 어디에 입력하고 있는지 보기 어렵습니다. 이것은 붙여넣기 작업, 서식 변경 또는 프로그래밍 방식 콘텐츠 업데이트 중에 발생할 수 있습니다.

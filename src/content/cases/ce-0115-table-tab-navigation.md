@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: Tab key moves to next cell, tab character not inserted"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When editing a table cell in a contenteditable element, pressing Tab inserts a tab character instead of moving to the next cell. This makes table navigation difficult.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a table in contenteditable
 2. Click inside a table cell
 3. Press Tab key
 
-### Observed behavior
+## Observed behavior
 
 - Tab character is inserted into the cell
 - Cursor does not move to next cell
 - Table navigation is broken
 - Users cannot easily navigate between cells
 
-### Expected behavior
+## Expected behavior
 
 - Tab should move to next cell
 - Shift+Tab should move to previous cell
 - Tab character should not be inserted
 - Navigation should work like spreadsheet applications
 
-### Browser Comparison
+## Browser Comparison
 
 - **All browsers**: Tab inserts character (default behavior)
 - Custom handling needed for table navigation
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept Tab key in table cells
 - Prevent default behavior

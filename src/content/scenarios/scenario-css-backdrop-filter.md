@@ -10,6 +10,7 @@ tags:
   - ios
   - safari
 status: draft
+locale: en
 ---
 
 When a contenteditable element has CSS `backdrop-filter` applied, rendering may be affected. Text may appear blurry, selection may not render correctly, and performance may be degraded, especially on mobile devices.

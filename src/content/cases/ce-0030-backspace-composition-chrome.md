@@ -29,24 +29,24 @@ domSteps:
     description: "Expected: Delete one character at a time (first Backspace deletes only 'に')"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When using a Japanese IME in Chrome on macOS, pressing Backspace during composition removes the entire composed syllable (hiragana/katakana) instead of removing individual characters one at a time.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Switch to Japanese IME.
 3. Start typing Japanese characters (e.g., "こんにちは").
 4. While the composition is active, press Backspace.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS with Japanese IME, Backspace removes the entire composed syllable.
 - Individual characters within the syllable cannot be deleted one at a time.
 - The granularity of deletion is coarser than expected.
 
-### Expected behavior
+## Expected behavior
 
 - Backspace should remove characters one at a time, even during composition.
 - Or, the deletion granularity should be consistent and predictable.

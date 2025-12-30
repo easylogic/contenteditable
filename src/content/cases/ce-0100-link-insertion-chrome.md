@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Existing link removed then new link created"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When creating a link from selected text in Chrome, the link is created successfully, but if the selection is already inside a link, nested links may be created, which is invalid HTML.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a link: `<a href="url1">Link text</a>`
 2. Select part of "Link text"
 3. Create a new link (Ctrl+K or programmatically)
 
-### Observed behavior
+## Observed behavior
 
 - A nested link structure may be created: `<a href="url1"><a href="url2">Link text</a></a>`
 - This is invalid HTML (links cannot be nested)
 - Browser may render it incorrectly
 - DOM structure becomes malformed
 
-### Expected behavior
+## Expected behavior
 
 - Existing link should be removed first
 - New link should replace the old one
 - No nested links should be created
 - HTML structure should remain valid
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May create nested links (this case)
 - **Firefox**: More likely to create nested links
 - **Safari**: May create unexpected structures
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Check if selection is inside an existing link before creating new one
 - Remove existing link structure first

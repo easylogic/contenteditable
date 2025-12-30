@@ -14,14 +14,19 @@ import {
 } from '../../../i18n/translations';
 
 export const getStaticPaths = (async () => {
-  const cases = await getCollection('cases');
   const paths = [];
 
   // Generate paths for all non-default locales and all cases
   for (const locale of supportedLocales.filter((l) => l !== defaultLocale)) {
+    const cases = await getCollection('cases', ({ data }) => data.locale === locale);
     for (const entry of cases) {
+      // Remove locale suffix from slug (e.g., "ce-0040-ko" -> "ce-0040")
+      let slug = entry.slug;
+      if (slug.endsWith(`-${locale}`)) {
+        slug = slug.slice(0, -(locale.length + 1)); // Remove "-ko" or "-en" etc.
+      }
       paths.push({
-        params: { locale, id: entry.slug },
+        params: { locale, id: slug },
       });
     }
   }
@@ -38,22 +43,47 @@ if (!slug) {
   throw new Error('Case slug is missing in route params.');
 }
 
-const entry = await getEntry('cases', slug);
+// Find entry with locale suffix (e.g., "ce-0040-contenteditable-readonly-ko")
+const entrySlug = `${slug}-${locale}`;
+const entry = await getEntry('cases', entrySlug);
 
 if (!entry) {
   throw new Error(`Case entry for slug "${slug}" was not found.`);
 }
 
-const allCases = await getCollection('cases');
+const allCases = await getCollection('cases', ({ data }) => data.locale === locale);
+const allCasesAllLocales = await getCollection('cases'); // For sidebar - all locales
 
-const casesByScenario = allCases.reduce(
+// Group cases by case ID (same case in different locales)
+const casesById = allCasesAllLocales.reduce(
+  (acc, c) => {
+    const id = c.data.id;
+    if (!acc[id]) acc[id] = [];
+    acc[id].push(c);
+    return acc;
+  },
+  {} as Record<string, typeof allCasesAllLocales>,
+);
+
+// For each case ID, pick the best locale version:
+// 1. Current locale if available
+// 2. Otherwise 'en'
+// 3. Otherwise first available
+const bestCases = Object.values(casesById).map((cases) => {
+  const currentLocaleCase = cases.find((c) => c.data.locale === locale);
+  const enCase = cases.find((c) => c.data.locale === 'en');
+  return currentLocaleCase || enCase || cases[0];
+});
+
+// Group by scenario for sidebar
+const casesByScenario = bestCases.reduce(
   (acc, c) => {
     const key = c.data.scenarioId;
     if (!acc[key]) acc[key] = [];
     acc[key].push(c);
     return acc;
   },
-  {} as Record<string, typeof allCases>,
+  {} as Record<string, typeof bestCases>,
 );
 
 const sameScenarioCases = allCases.filter(
@@ -88,17 +118,27 @@ const localePath = (path: string) => `/${locale}${path}`;
             <div class="sidebar-group">
               <div class="sidebar-group-title">{scenarioId}</div>
               <ul class="sidebar-list">
-                {scenarioCases.map((c) => (
-                  <li>
-                    <a
-                      href={localePath(`/cases/${c.slug}`)}
-                      class:list={['sidebar-item', { active: c.slug === slug }]}
-                      title={c.data.caseTitle}
-                    >
-                      {c.data.caseTitle}
-                    </a>
-                  </li>
-                ))}
+                {scenarioCases.map((c) => {
+                  // Generate URL slug (remove locale suffix for URL)
+                  const urlSlug = c.slug.endsWith(`-${c.data.locale}`)
+                    ? c.slug.slice(0, -(c.data.locale.length + 1))
+                    : c.slug;
+                  
+                  // Check if this is the active case by comparing IDs
+                  const isActive = entry.data.id === c.data.id;
+                  
+                  return (
+                    <li>
+                      <a
+                        href={localePath(`/cases/${urlSlug}`)}
+                        class:list={['sidebar-item', { active: isActive }]}
+                        title={c.data.caseTitle}
+                      >
+                        {c.data.caseTitle}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -134,7 +174,7 @@ const localePath = (path: string) => `/${locale}${path}`;
           )}
         </header>
 
-        <TranslationNotice locale={locale} contentType="case" originalPath={`/cases/${slug}`} />
+        <TranslationNotice locale={locale} contentType="case" originalPath={`/cases/${slug}`} entryLocale={entry.data.locale} />
 
         <article class="case-article">
           <Content />

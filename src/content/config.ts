@@ -38,6 +38,7 @@ const scenarios = defineCollection({
     category: z.string().optional(), // Category (ime, formatting, paste, etc.)
     tags: z.array(z.string()).default([]), // Additional tags
     status: z.enum(['draft', 'confirmed']).default('draft'),
+    locale: z.string().default('en'), // Locale for the scenario content
   }),
 });
 

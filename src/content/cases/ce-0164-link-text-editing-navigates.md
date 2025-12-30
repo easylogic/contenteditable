@@ -30,36 +30,36 @@ domSteps:
     description: "Expected: Click can select text, enter edit mode"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When trying to edit link text in Safari, clicking or selecting the text may trigger navigation to the link URL. It's very difficult to edit link text without accidentally navigating.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a link: `<a href="https://example.com">Link text</a>`
 2. Try to click and select the text for editing
 
-### Observed behavior
+## Observed behavior
 
 - Clicking triggers navigation immediately
 - Text selection is interrupted
 - Cannot edit link text easily
 - Navigation happens before editing can occur
 
-### Expected behavior
+## Expected behavior
 
 - Clicking should allow text selection
 - Navigation should be prevented during editing
 - Users should be able to edit link text
 - Navigation should only occur on explicit activation
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May navigate but usually allows selection
 - **Firefox**: More likely to navigate immediately
 - **Safari**: Most likely to navigate on click (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent default link behavior on all clicks
 - Allow text selection without navigation

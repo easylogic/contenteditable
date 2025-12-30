@@ -9,6 +9,7 @@ tags:
   - paragraph
   - newline
 status: draft
+locale: en
 ---
 
 The behavior of Enter and Shift+Enter keys in contenteditable elements varies across browsers. Enter may create a new paragraph, line break, or div, while Shift+Enter may create a line break or behave differently. The resulting DOM structure also varies.

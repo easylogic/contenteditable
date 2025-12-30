@@ -9,6 +9,7 @@ tags:
   - ltr
   - firefox
 status: draft
+locale: en
 ---
 
 When the `dir` attribute is changed dynamically on a contenteditable region (e.g., switching between `ltr` and `rtl`), the text direction may not update correctly during active editing in Firefox. The caret position and text flow may be incorrect.

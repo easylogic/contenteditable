@@ -20,37 +20,37 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying a background color (highlighting) to text, the background color may interfere with text selection visibility. Selected text with background color may be hard to see.
 
-### Reproduction example
+## Reproduction example
 
 1. Apply a background color to some text (e.g., yellow highlight)
 2. Select the highlighted text
 3. Observe selection visibility
 
-### Observed behavior
+## Observed behavior
 
 - Selection highlight may be hard to see against background color
 - Or selection highlight may conflict with background color
 - Text selection is less visible
 - User experience is degraded
 
-### Expected behavior
+## Expected behavior
 
 - Selection should be clearly visible
 - Background color and selection highlight should work together
 - Or selection highlight should override background color
 - Text should always be readable when selected
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Selection visibility may be affected (this case)
 - **Firefox**: Similar visibility issues
 - **Safari**: Selection behavior may differ
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Adjust selection highlight color when background color is present
 - Use different selection style for highlighted text

@@ -8,6 +8,7 @@ tags:
   - emoji
   - navigation
 status: draft
+locale: ko
 ---
 
 이모지를 포함하는 `contenteditable` 요소에서 왼쪽 및 오른쪽 화살표 키를 사용할 때

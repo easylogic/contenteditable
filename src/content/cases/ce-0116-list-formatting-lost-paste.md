@@ -32,37 +32,37 @@ domSteps:
     description: "List structure maintained, formatting applied"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pasting formatted content (with bold, italic, etc.) into a list item, the list structure may be broken and list items may be converted to paragraphs. The formatting is preserved but the list structure is lost.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a list: `<ul><li>Item 1</li><li>Item 2</li></ul>`
 2. Copy formatted text from elsewhere (e.g., bold text)
 3. Paste into a list item
 
-### Observed behavior
+## Observed behavior
 
 - List items may be converted to paragraphs
 - List structure is broken
 - Formatting is preserved but list is lost
 - DOM structure becomes: `<p>Item 1</p><p>Item 2</p>` instead of list
 
-### Expected behavior
+## Expected behavior
 
 - List structure should be maintained
 - Formatting should be applied within list items
 - List items should remain as `<li>` elements
 - Structure should not break
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May break list structure (this case)
 - **Firefox**: More likely to break structure
 - **Safari**: Most likely to break structure
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept paste event in list context
 - Strip block-level elements from pasted content

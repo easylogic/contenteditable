@@ -7,6 +7,7 @@ tags:
   - enter
   - newline
 status: draft
+locale: ko
 ---
 
 일반 `contenteditable` 요소에서 Enter를 누르면 하나 대신 두 개의 보이는 줄바꿈이 삽입됩니다.

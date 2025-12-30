@@ -10,6 +10,7 @@ tags:
   - safari
   - macos
 status: draft
+locale: en
 ---
 
 When a MutationObserver is attached to a contenteditable element or its parent, the observer callbacks may interfere with editing performance. Frequent DOM mutations during typing can trigger many observer callbacks, causing lag or jank.

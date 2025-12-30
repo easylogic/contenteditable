@@ -9,6 +9,7 @@ tags:
   - href
   - formatting
 status: draft
+locale: en
 ---
 
 When inserting or editing links in contenteditable elements, the behavior varies significantly across browsers. Creating links, editing link text, and removing links can result in unexpected DOM structures or lost formatting.

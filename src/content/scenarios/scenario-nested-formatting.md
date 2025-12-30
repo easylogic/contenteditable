@@ -10,6 +10,7 @@ tags:
   - italic
   - structure
 status: draft
+locale: en
 ---
 
 Applying multiple formatting operations (bold, italic, underline, etc.) creates nested HTML elements that can become complex and hard to manage. Browsers handle nested formatting differently, and the resulting DOM structure can be inconsistent.

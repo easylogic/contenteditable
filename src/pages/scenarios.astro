@@ -4,8 +4,8 @@ import SiteNav from '../components/SiteNav.astro';
 import BaseHead from '../components/BaseHead.astro';
 import '../styles/global.css';
 
-const allCases = await getCollection('cases');
-const allScenarios = await getCollection('scenarios');
+const allCases = await getCollection('cases', ({ data }) => data.locale === 'en');
+const allScenarios = await getCollection('scenarios', ({ data }) => data.locale === 'en');
 
 // Create a map of scenarioId -> scenario entry
 const scenarioEntriesMap = new Map(

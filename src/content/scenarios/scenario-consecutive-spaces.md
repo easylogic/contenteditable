@@ -9,6 +9,7 @@ tags:
   - html
   - formatting
 status: draft
+locale: en
 ---
 
 When typing multiple consecutive spaces in a contenteditable element, browsers collapse them into a single space by default (following HTML whitespace rules). This behavior differs from native text inputs and can be unexpected for users who need to preserve multiple spaces.

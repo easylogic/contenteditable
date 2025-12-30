@@ -9,6 +9,7 @@ tags:
   - safari
   - macos
 status: draft
+locale: en
 ---
 
 When spellcheck is enabled on a contenteditable element, browser spellcheck suggestions can interfere with editing. The spellcheck UI may overlap with content, and accepting suggestions may cause unexpected behavior.

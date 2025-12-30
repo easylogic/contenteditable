@@ -2,23 +2,52 @@
 interface Props {
   allCases: any[];
   currentSlug: string;
+  currentCaseId?: string; // Optional: current case ID for active state detection
   baseUrl?: string;
+  locale?: string;
 }
 
 const {
   allCases,
   currentSlug,
+  currentCaseId,
   baseUrl = '/cases',
+  locale = 'en',
 } = Astro.props;
 
-const casesByScenario = allCases.reduce(
+const localePrefix = locale && locale !== 'en' ? `/${locale}` : '';
+const fullBaseUrl = `${localePrefix}${baseUrl}`;
+
+// Group cases by case ID (same case in different locales)
+const casesById = allCases.reduce(
+  (acc, c) => {
+    const id = c.data.id;
+    if (!acc[id]) acc[id] = [];
+    acc[id].push(c);
+    return acc;
+  },
+  {} as Record<string, typeof allCases>,
+);
+
+// For each case ID, pick the best locale version:
+// 1. Current locale if available
+// 2. Otherwise 'en'
+// 3. Otherwise first available
+const bestCases = Object.values(casesById).map((cases) => {
+  const currentLocaleCase = cases.find((c) => c.data.locale === locale);
+  const enCase = cases.find((c) => c.data.locale === 'en');
+  return currentLocaleCase || enCase || cases[0];
+});
+
+// Group by scenario
+const casesByScenario = bestCases.reduce(
   (acc, c) => {
     const key = c.data.scenarioId;
     if (!acc[key]) acc[key] = [];
     acc[key].push(c);
     return acc;
   },
-  {} as Record<string, typeof allCases>,
+  {} as Record<string, typeof bestCases>,
 );
 
 const osGroups = allCases.reduce(
@@ -65,11 +94,29 @@ const deviceGroups = allCases.reduce(
           </div>
           <ul class="list-none p-0 m-0">
             {scenarioCases.map((c) => {
-              const isActive = c.slug === currentSlug;
+              // Generate URL slug (remove locale suffix for URL)
+              const urlSlug = c.slug.endsWith(`-${c.data.locale}`)
+                ? c.slug.slice(0, -(c.data.locale.length + 1))
+                : c.slug;
+              
+              // Check if this is the active case by comparing IDs
+              // Use currentCaseId if provided, otherwise compare slugs
+              const isActive = currentCaseId 
+                ? c.data.id === currentCaseId
+                : (() => {
+                    const slugWithoutLocale = c.slug.endsWith(`-${c.data.locale}`)
+                      ? c.slug.slice(0, -(c.data.locale.length + 1))
+                      : c.slug;
+                    const currentSlugWithoutLocale = currentSlug.endsWith(`-${locale}`)
+                      ? currentSlug.slice(0, -(locale.length + 1))
+                      : currentSlug;
+                    return slugWithoutLocale === currentSlugWithoutLocale;
+                  })();
+              
               return (
                 <li class="m-0">
                   <a
-                    href={`/cases/${c.slug}`}
+                    href={`${fullBaseUrl}/${urlSlug}`}
                     title={`${c.data.id}: ${c.data.caseTitle} (${c.data.browser})`}
                     data-active={isActive}
                     class:list={[
@@ -97,33 +144,164 @@ const deviceGroups = allCases.reduce(
   </nav>
 </aside>
 
-<script>
-  // Scroll to active item on page load
+<script is:inline>
+  console.log('[CasesSidebar] Script loaded');
+  
+  // Scroll to active item
   function scrollToActiveItem() {
+    console.log('[CasesSidebar] scrollToActiveItem called');
     const sidebar = document.querySelector('aside[aria-label="Cases"]');
-    const activeLink = sidebar?.querySelector('a[data-active="true"]');
-    if (activeLink && sidebar) {
-      // Calculate position relative to sidebar container
+    if (!sidebar) {
+      console.log('[CasesSidebar] Sidebar not found');
+      return false;
+    }
+    
+    const activeLink = sidebar.querySelector('a[data-active="true"]');
+    if (!activeLink) {
+      console.log('[CasesSidebar] Active link not found');
+      return false;
+    }
+    
+    console.log('[CasesSidebar] Active link found:', activeLink.textContent);
+    
+    // Wait for layout to be ready
+    requestAnimationFrame(() => {
       const sidebarRect = sidebar.getBoundingClientRect();
       const linkRect = activeLink.getBoundingClientRect();
       const scrollTop = sidebar.scrollTop;
       const linkOffsetTop = linkRect.top - sidebarRect.top + scrollTop;
       const centerOffset = sidebar.clientHeight / 2 - linkRect.height / 2;
+      const targetScroll = Math.max(0, linkOffsetTop - centerOffset);
+      
+      console.log('[CasesSidebar] Scrolling to:', {
+        linkOffsetTop,
+        centerOffset,
+        targetScroll,
+        currentScrollTop: scrollTop,
+        sidebarHeight: sidebar.clientHeight
+      });
       
       sidebar.scrollTo({
-        top: linkOffsetTop - centerOffset,
+        top: targetScroll,
         behavior: 'smooth'
       });
+    });
+    
+    return true;
+  }
+  
+  // Scroll when clicking sidebar links
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('aside[aria-label="Cases"] a');
+    if (link && link.href) {
+      console.log('[CasesSidebar] Link clicked:', link.textContent, link.href);
+      const sidebar = document.querySelector('aside[aria-label="Cases"]');
+      if (sidebar) {
+        const linkRect = link.getBoundingClientRect();
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const scrollTop = sidebar.scrollTop;
+        const linkOffsetTop = linkRect.top - sidebarRect.top + scrollTop;
+        console.log('[CasesSidebar] Saving scroll position:', linkOffsetTop);
+        sessionStorage.setItem('casesSidebarScroll', linkOffsetTop.toString());
+      }
+    }
+  });
+  
+  // Initialize scroll with multiple attempts
+  function initScroll() {
+    console.log('[CasesSidebar] initScroll called');
+    const sidebar = document.querySelector('aside[aria-label="Cases"]');
+    if (!sidebar) {
+      console.log('[CasesSidebar] Sidebar not found in initScroll');
+      return;
+    }
+    
+    // Check if we have a saved scroll position
+    const savedScroll = sessionStorage.getItem('casesSidebarScroll');
+    if (savedScroll) {
+      const scrollPos = parseInt(savedScroll, 10);
+      const centerOffset = sidebar.clientHeight / 2;
+      const targetScroll = Math.max(0, scrollPos - centerOffset);
+      
+      console.log('[CasesSidebar] Restoring saved scroll position:', {
+        saved: scrollPos,
+        centerOffset,
+        targetScroll,
+        sidebarHeight: sidebar.clientHeight
+      });
+      
+      requestAnimationFrame(() => {
+        sidebar.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        });
+      });
+      
+      sessionStorage.removeItem('casesSidebarScroll');
+      return;
+    }
+    
+    // Otherwise scroll to active item
+    console.log('[CasesSidebar] No saved scroll, scrolling to active item');
+    if (!scrollToActiveItem()) {
+      // Retry if active item not found yet
+      console.log('[CasesSidebar] Active item not found, will retry');
+      setTimeout(() => scrollToActiveItem(), 100);
     }
   }
   
-  // Try multiple times to handle async rendering
+  // Use MutationObserver to wait for sidebar to be fully rendered
+  function observeAndScroll() {
+    console.log('[CasesSidebar] observeAndScroll called');
+    const sidebar = document.querySelector('aside[aria-label="Cases"]');
+    if (!sidebar) {
+      console.log('[CasesSidebar] Sidebar not found, retrying...');
+      // Retry if sidebar not found
+      setTimeout(observeAndScroll, 50);
+      return;
+    }
+    
+    // Check if sidebar has content
+    const hasContent = sidebar.querySelector('a');
+    if (!hasContent) {
+      console.log('[CasesSidebar] No content yet, setting up MutationObserver');
+      // Wait for content to load
+      const observer = new MutationObserver(() => {
+        if (sidebar.querySelector('a')) {
+          console.log('[CasesSidebar] Content detected via MutationObserver');
+          observer.disconnect();
+          initScroll();
+        }
+      });
+      observer.observe(sidebar, { childList: true, subtree: true });
+      setTimeout(() => {
+        console.log('[CasesSidebar] MutationObserver timeout, initializing scroll');
+        observer.disconnect();
+        initScroll();
+      }, 1000);
+      return;
+    }
+    
+    // Sidebar is ready, initialize scroll
+    console.log('[CasesSidebar] Sidebar has content, initializing scroll');
+    initScroll();
+  }
+  
+  // Start observing when DOM is ready
+  console.log('[CasesSidebar] Initializing, readyState:', document.readyState);
   if (document.readyState === 'loading') {
+    console.log('[CasesSidebar] DOM is loading, waiting for DOMContentLoaded');
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(scrollToActiveItem, 100);
+      console.log('[CasesSidebar] DOMContentLoaded fired');
+      setTimeout(observeAndScroll, 50);
+      setTimeout(initScroll, 200);
+      setTimeout(initScroll, 500);
     });
   } else {
-    setTimeout(scrollToActiveItem, 100);
+    console.log('[CasesSidebar] DOM already loaded, starting immediately');
+    setTimeout(observeAndScroll, 50);
+    setTimeout(initScroll, 200);
+    setTimeout(initScroll, 500);
   }
 </script>
 

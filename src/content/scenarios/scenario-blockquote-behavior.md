@@ -9,6 +9,7 @@ tags:
   - indentation
   - structure
 status: draft
+locale: en
 ---
 
 Editing text within blockquote elements in contenteditable behaves inconsistently across browsers. Pressing Enter, applying formatting, or pasting content may break the blockquote structure, create nested blockquotes, or behave unexpectedly.

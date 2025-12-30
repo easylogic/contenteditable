@@ -36,11 +36,11 @@ domSteps:
     description: "Expected: Consolidated into style attribute, nesting minimized"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying multiple formatting operations (bold, italic, underline) to text, deeply nested HTML structures are created (e.g., `<b><i><u>text</u></i></b>`). This makes the DOM complex and hard to manage.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text
 2. Apply bold formatting
@@ -48,27 +48,27 @@ When applying multiple formatting operations (bold, italic, underline) to text, 
 4. Apply underline formatting
 5. Observe the DOM structure
 
-### Observed behavior
+## Observed behavior
 
 - Deeply nested structure: `<b><i><u>text</u></i></b>`
 - Or different nesting order depending on application sequence
 - DOM becomes complex and bloated
 - Difficult to manage formatting state
 
-### Expected behavior
+## Expected behavior
 
 - Formatting should be applied efficiently
 - Nesting should be minimized where possible
 - Structure should be normalized
 - Formatting state should be easy to query
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Creates nested structures (this case)
 - **Firefox**: Similar nesting behavior
 - **Safari**: Most complex nesting
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Normalize formatting structure after operations
 - Merge same-type formatting elements

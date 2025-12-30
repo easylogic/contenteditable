@@ -10,6 +10,7 @@ tags:
   - ios
   - safari
 status: draft
+locale: en
 ---
 
 When a page with a contenteditable element responds to media query changes (e.g., orientation change, window resize), the layout changes may disrupt editing. The caret position may jump, and selection may be lost.

@@ -19,25 +19,25 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable region is inside a Shadow DOM, its behavior may be broken or inconsistent. Selection, focus, and editing may not work as expected.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a custom element with Shadow DOM.
 2. Inside the Shadow DOM, create a contenteditable div.
 3. Try to interact with the contenteditable (type, select, etc.).
 4. Observe the behavior.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS, contenteditable may not work correctly inside Shadow DOM.
 - Selection may be broken.
 - Focus may not work.
 - Events may not fire correctly.
 
-### Expected behavior
+## Expected behavior
 
 - contenteditable should work correctly inside Shadow DOM.
 - Selection and focus should work as expected.

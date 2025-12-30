@@ -8,6 +8,7 @@ tags:
   - keyboard
   - scroll
 status: draft
+locale: en
 ---
 
 On mobile devices, when the virtual keyboard appears while focusing a `contenteditable` element,

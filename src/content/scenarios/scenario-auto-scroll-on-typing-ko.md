@@ -9,6 +9,7 @@ tags:
   - viewport
   - typing
 status: draft
+locale: ko
 ---
 
 contenteditable 요소의 가장자리 근처에서 입력할 때 브라우저가 커서를 보이게 유지하기 위해 자동으로 스크롤합니다. 그러나 스크롤 동작, 타이밍 및 부드러움이 브라우저마다 다르며, 이것은 불쾌한 사용자 경험을 일으킬 수 있습니다.

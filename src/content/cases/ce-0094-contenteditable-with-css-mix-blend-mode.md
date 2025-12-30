@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable element has CSS `mix-blend-mode` applied, text rendering may be affected. Text may appear with incorrect colors, selection may not be visible, and caret may not render correctly.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `mix-blend-mode: multiply` over a colored background.
 2. Type text and observe color rendering.
@@ -31,14 +31,14 @@ When a contenteditable element has CSS `mix-blend-mode` applied, text rendering 
 4. Observe caret rendering.
 5. Compare with a contenteditable without mix-blend-mode.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Windows, mix-blend-mode may affect text rendering.
 - Text colors may be incorrect.
 - Selection may not be visible.
 - Caret may not render correctly.
 
-### Expected behavior
+## Expected behavior
 
 - mix-blend-mode should not affect text readability.
 - Selection should be visible.

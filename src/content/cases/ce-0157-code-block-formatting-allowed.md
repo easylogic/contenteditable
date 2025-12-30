@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: Formatting blocked inside code block, plain text maintained"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When editing text within a code block in Chrome, formatting operations (bold, italic, etc.) can still be applied. This breaks the code formatting and creates invalid code structure.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a code block: `<pre><code>function test() {</code></pre>`
 2. Select text inside the code block
 3. Apply bold formatting (Ctrl+B)
 
-### Observed behavior
+## Observed behavior
 
 - Formatting is applied: `<pre><code>function <b>test</b>() {</code></pre>`
 - Code structure is broken
 - Formatting should not be in code
 - Invalid code structure
 
-### Expected behavior
+## Expected behavior
 
 - Formatting should be prevented in code blocks
 - Code should remain plain text
 - Structure should be preserved
 - Formatting operations should be blocked
 
-### Browser Comparison
+## Browser Comparison
 
 - **All browsers**: Formatting can be applied (default behavior)
 - Custom implementation needed to prevent formatting
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept formatting operations in code blocks
 - Prevent default behavior for formatting

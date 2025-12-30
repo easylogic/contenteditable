@@ -7,6 +7,7 @@ tags:
   - composition
   - baseline
 status: draft
+locale: en
 ---
 
 This case describes a baseline scenario for inspecting how a plain `contenteditable` region behaves

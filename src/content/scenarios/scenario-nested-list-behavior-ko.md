@@ -10,6 +10,7 @@ tags:
   - tab
   - enter
 status: draft
+locale: ko
 ---
 
 중첩된 리스트(리스트 항목 내의 리스트)를 편집할 때 Enter, Backspace, Delete, Tab 키의 동작이 브라우저마다 크게 다릅니다. 중첩된 리스트 항목 생성, 편집, 삭제는 예상치 못한 DOM 구조나 손실된 포맷팅을 초래할 수 있습니다.

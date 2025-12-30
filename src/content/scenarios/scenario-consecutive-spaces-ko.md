@@ -9,6 +9,7 @@ tags:
   - html
   - formatting
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 여러 개의 연속된 공백을 입력할 때 브라우저가 기본적으로 하나의 공백으로 축소합니다(HTML 공백 규칙을 따름). 이 동작은 네이티브 텍스트 입력과 다르며 여러 공백을 보존해야 하는 사용자에게 예상치 못할 수 있습니다.

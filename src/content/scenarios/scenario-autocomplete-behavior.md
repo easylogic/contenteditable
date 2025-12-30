@@ -8,6 +8,7 @@ tags:
   - suggestions
   - chrome
 status: draft
+locale: en
 ---
 
 Browser autocomplete suggestions (for forms, addresses, etc.) do not appear when typing in contenteditable regions, even when appropriate `autocomplete` attributes are set. This limits the usefulness of contenteditable for form-like inputs.

@@ -32,11 +32,11 @@ domSteps:
     description: "Expected: Entire Pinyin converted to Chinese characters"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Chinese text with Pinyin IME in a contenteditable element in Safari on macOS, character conversion may be delayed significantly, or only part of the Pinyin input may be converted to Chinese characters while the rest remains as Pinyin. The conversion process may also be interrupted by clicking, arrow keys, or other interactions.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Switch to Chinese Pinyin IME.
@@ -44,7 +44,7 @@ When composing Chinese text with Pinyin IME in a contenteditable element in Safa
 4. Wait for conversion or press Space/Enter to trigger conversion.
 5. Observe conversion timing and completeness.
 
-### Observed behavior
+## Observed behavior
 
 - Conversion may take several seconds or not complete
 - Only first character may convert while rest remains as Pinyin
@@ -52,26 +52,26 @@ When composing Chinese text with Pinyin IME in a contenteditable element in Safa
 - Multiple candidate selection may not work correctly
 - Mixed Pinyin and Chinese characters may appear in text
 
-### Expected behavior
+## Expected behavior
 
 - Conversion should complete quickly and reliably
 - All Pinyin input should be converted to Chinese characters
 - Conversion should not be interrupted by normal interactions
 - Candidate selection should work correctly
 
-### Impact
+## Impact
 
 - Users experience frustration with slow or incomplete conversions
 - Workflow is disrupted when conversions fail
 - Text may contain unintentional mixed Pinyin and Chinese characters
 
-### Browser Comparison
+## Browser Comparison
 
 - **Safari**: Conversion delays and interruptions are more common
 - **Chrome**: Generally more reliable conversion
 - **Firefox**: May have different conversion behavior
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Monitor composition events to detect conversion state
 - Delay handling of user interactions during conversion

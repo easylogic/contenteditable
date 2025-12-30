@@ -10,6 +10,7 @@ tags:
   - keycode-229
   - duplicate-events
 status: draft
+locale: en
 ---
 
 During IME composition, pressing certain keys (especially Enter) may trigger duplicate `keydown` events. The first event has `keyCode 229` (indicating IME is processing the input), followed by the actual key's `keyCode` (e.g., 13 for Enter). This can cause event handlers to execute twice for a single key press.

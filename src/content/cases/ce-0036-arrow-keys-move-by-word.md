@@ -29,24 +29,24 @@ domSteps:
     description: "Expected: Right arrow moves one character at a time"
 ---
 
-### Phenomenon
+## Phenomenon
 
 In Chrome on Windows, arrow keys may move the caret by word instead of by character, even when no modifier keys are pressed. This makes precise cursor positioning difficult.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text with multiple words.
 3. Use the left and right arrow keys to move the caret.
 4. Observe the caret movement granularity.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on Windows, arrow keys may jump by word instead of character.
 - The behavior is inconsistent and may depend on text content or formatting.
 - Precise character-by-character navigation is difficult.
 
-### Expected behavior
+## Expected behavior
 
 - Arrow keys should move the caret one character at a time by default.
 - Word-level movement should only occur with modifier keys (e.g., Ctrl+Arrow).

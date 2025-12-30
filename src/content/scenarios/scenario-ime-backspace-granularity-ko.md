@@ -8,6 +8,7 @@ tags:
   - ime
   - backspace
 status: draft
+locale: ko
 ---
 
 `contenteditable` 요소에서 IME로 텍스트를 편집할 때 Backspace를 누르면 단일 구성 요소 대신 전체 조합 단위가 제거됩니다. 이것은 세밀한 수정을 어렵게 만들고 같은 플랫폼의 네이티브 입력 필드와 다릅니다.

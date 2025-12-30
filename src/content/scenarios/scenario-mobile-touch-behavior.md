@@ -9,6 +9,7 @@ tags:
   - focus
   - ios
 status: draft
+locale: en
 ---
 
 On iOS Safari, touch events (tap, long-press) on a contenteditable region may not properly focus the element. The virtual keyboard may not appear, or focus may be lost unexpectedly.

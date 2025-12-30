@@ -9,6 +9,7 @@ tags:
   - edge
   - windows
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에 CSS 변환이 적용되어 있을 때(translate, scale, rotate) 선택 핸들과 커서가 잘못된 위치에 나타날 수 있습니다. 시각적 위치가 실제 선택 위치와 일치하지 않을 수 있습니다.

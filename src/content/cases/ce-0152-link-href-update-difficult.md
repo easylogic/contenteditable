@@ -29,36 +29,36 @@ domSteps:
     description: "Expected: href update immediately reflected in DOM"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a link already exists in contenteditable, updating the href attribute is difficult. There's no native way to edit the URL, and programmatic updates may not be reflected in the DOM immediately.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a link: `<a href="url1">Link text</a>`
 2. Try to update the href to a different URL
 3. Observe the DOM
 
-### Observed behavior
+## Observed behavior
 
 - No native way to edit href
 - Programmatic updates may not work
 - Or updates may not be reflected
 - Difficult to modify existing links
 
-### Expected behavior
+## Expected behavior
 
 - Should be able to edit link URL easily
 - Or programmatic updates should work reliably
 - Changes should be reflected immediately
 - Link editing should be intuitive
 
-### Browser Comparison
+## Browser Comparison
 
 - **All browsers**: No native href editing
 - Custom implementation needed for link editing
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Provide UI for editing link href
 - Intercept link clicks to show edit dialog

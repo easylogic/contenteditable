@@ -10,6 +10,7 @@ tags:
   - keycode-229
   - duplicate-events
 status: draft
+locale: ko
 ---
 
 IME 컴포지션 중 특정 키(특히 Enter)를 누르면 중복된 `keydown` 이벤트가 발생할 수 있습니다. 첫 번째 이벤트는 `keyCode 229`(IME가 입력을 처리 중임을 나타냄)를 가지며, 그 다음 실제 키의 `keyCode`(예: Enter의 경우 13)가 발생합니다. 이로 인해 단일 키 입력에 대해 이벤트 핸들러가 두 번 실행될 수 있습니다.

@@ -31,18 +31,18 @@ domSteps:
     description: "Expected: Only insertCompositionText event occurs (single processing)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 During Korean IME composition in iOS Safari, each composition update fires both a `deleteContentBackward` event followed by an `insertText` event (not `insertCompositionText`). This sequential firing pattern differs from other browsers where only `insertCompositionText` fires during composition updates, and can cause event handlers to execute twice for a single composition update.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus a `contenteditable` element on iOS Safari.
 2. Activate Korean IME.
 3. Start composing a word (e.g., type "ㅎ" then "ㅏ" then "ㄴ" to compose "한").
 4. Observe the `beforeinput` events in the browser console or event log.
 
-### Observed behavior
+## Observed behavior
 
 When composing Korean text (e.g., typing "한글"):
 1. User types a character that updates the composition
@@ -52,14 +52,14 @@ When composing Korean text (e.g., typing "한글"):
 5. Event handlers that process both `deleteContentBackward` and `insertText` will execute twice for each composition update
 6. The fact that `insertText` (not `insertCompositionText`) fires during composition can cause handlers expecting `insertCompositionText` to miss these events
 
-### Expected behavior
+## Expected behavior
 
 - During composition updates, only `insertCompositionText` should fire (as in Chrome/Edge)
 - If both events fire, they should be treated as a single atomic operation
 - Event handlers should not need special logic to deduplicate composition updates
 - `insertText` should not fire during active composition (only `insertCompositionText` should)
 
-### Impact
+## Impact
 
 This can lead to:
 - Performance issues (double processing)
@@ -67,13 +67,13 @@ This can lead to:
 - Duplicate validation or formatting logic execution
 - State synchronization issues
 
-### Browser Comparison
+## Browser Comparison
 
 - **iOS Safari**: Fires `deleteContentBackward` followed by `insertText` (not `insertCompositionText`) during composition updates
 - **Chrome/Edge**: Fires only `insertCompositionText` during composition updates
 - **Firefox**: Behavior varies but generally more consistent with Chrome (fires `insertCompositionText`)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Check if the event is part of a composition sequence (`e.isComposing === true`)
 - Avoid processing `deleteContentBackward` events during composition when they are immediately followed by `insertText`

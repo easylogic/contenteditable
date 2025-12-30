@@ -32,11 +32,11 @@ domSteps:
     description: "Expected: Consistent nesting order (always b > i)"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying multiple formatting operations in Safari, the nesting order of elements varies inconsistently. The same formatting may result in `<b><i>text</i></b>` or `<i><b>text</b></i>` depending on application order.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text
 2. Apply bold, then italic
@@ -44,27 +44,27 @@ When applying multiple formatting operations in Safari, the nesting order of ele
 4. Remove formatting and reapply in reverse order (italic, then bold)
 5. Observe nesting: `<i><b>text</b></i>`
 
-### Observed behavior
+## Observed behavior
 
 - Nesting order depends on application order
 - Same visual result has different DOM structure
 - Inconsistent structure makes management difficult
 - Querying formatting state is complex
 
-### Expected behavior
+## Expected behavior
 
 - Nesting order should be consistent
 - Or order should be predictable
 - Same formatting should have same structure
 - Structure should be normalized
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Nesting order more consistent
 - **Firefox**: Similar nesting behavior
 - **Safari**: Nesting order most inconsistent (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Normalize formatting structure after operations
 - Use consistent nesting order (e.g., always b > i > u)

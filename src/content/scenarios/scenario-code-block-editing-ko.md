@@ -9,6 +9,7 @@ tags:
   - whitespace
   - formatting
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 코드 블록(`<pre><code>`) 내에서 텍스트를 편집하는 것이 브라우저마다 일관되지 않게 동작합니다. 줄바꿈, 들여쓰기, 공백 보존 및 서식이 다르게 처리될 수 있어 코드 서식을 유지하기 어렵습니다.

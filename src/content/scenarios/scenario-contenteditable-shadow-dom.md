@@ -9,6 +9,7 @@ tags:
   - isolation
   - chrome
 status: draft
+locale: en
 ---
 
 When a contenteditable region is inside a Shadow DOM, its behavior may be broken or inconsistent. Selection, focus, and editing may not work as expected.

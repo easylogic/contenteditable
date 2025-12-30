@@ -8,6 +8,7 @@ tags:
   - editing
   - safari
 status: draft
+locale: en
 ---
 
 When `spellcheck="true"` is enabled on a contenteditable region in Safari, the spellcheck functionality may interfere with normal editing. Red underlines may appear incorrectly, and the spellcheck UI may block text selection or editing.

@@ -8,6 +8,7 @@ tags:
   - clipboard
   - formatting
 status: draft
+locale: ko
 ---
 
 리치 텍스트 소스(워드 프로세서나 웹 페이지 등)에서

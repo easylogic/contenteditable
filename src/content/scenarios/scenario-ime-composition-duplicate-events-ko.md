@@ -9,6 +9,7 @@ tags:
   - beforeinput
   - duplicate-events
 status: draft
+locale: ko
 ---
 
 IME 컴포지션 중 일부 브라우저와 IME 조합에서 표준 동작과 다른 예상치 못한 이벤트 시퀀스가 발생합니다. 이로 인해 단일 컴포지션 업데이트에 대해 이벤트 핸들러가 여러 번 실행될 수 있습니다.

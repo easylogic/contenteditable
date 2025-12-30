@@ -9,6 +9,7 @@ tags:
   - edge
   - windows
 status: draft
+locale: en
 ---
 
 Browser XSS protection mechanisms may interfere with programmatic HTML insertion in contenteditable elements. Script tags or event handlers inserted via innerHTML or similar methods may be stripped or sanitized.

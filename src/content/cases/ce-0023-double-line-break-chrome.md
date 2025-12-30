@@ -28,24 +28,24 @@ domSteps:
     description: "Expected: Single Enter inserts only one line break"
 ---
 
-### Phenomenon
+## Phenomenon
 
 In Chrome on macOS, pressing Enter in a contenteditable region inserts two line breaks (`<br>` elements) instead of one, causing unexpected spacing between paragraphs.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text.
 3. Press Enter to create a new line.
 4. Observe the DOM structure.
 
-### Observed behavior
+## Observed behavior
 
 - In Chrome on macOS, pressing Enter creates two `<br>` elements.
 - This results in double spacing between lines.
 - The behavior is inconsistent with other browsers.
 
-### Expected behavior
+## Expected behavior
 
 - Pressing Enter should insert a single line break or create a new paragraph element.
 - The spacing should be consistent with standard text editing behavior.

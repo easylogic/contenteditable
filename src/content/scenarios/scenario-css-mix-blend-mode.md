@@ -9,6 +9,7 @@ tags:
   - firefox
   - windows
 status: draft
+locale: en
 ---
 
 When a contenteditable element has CSS `mix-blend-mode` applied, text rendering may be affected. Text may appear with incorrect colors, selection may not be visible, and caret may not render correctly.

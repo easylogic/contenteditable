@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When ARIA attributes (like `role`, `aria-label`, `aria-describedby`) are applied to contenteditable regions, screen readers may not properly announce them in Safari. The accessibility information is lost.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with ARIA attributes:
    ```html
@@ -35,13 +35,13 @@ When ARIA attributes (like `role`, `aria-label`, `aria-describedby`) are applied
 3. Navigate to the contenteditable.
 4. Observe what is announced.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, ARIA attributes may not be announced by screen readers.
 - The role and label information is lost.
 - Users relying on screen readers may not understand the purpose of the element.
 
-### Expected behavior
+## Expected behavior
 
 - ARIA attributes should be properly announced by screen readers.
 - Role, label, and description should be communicated.

@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When the `dir` attribute is changed dynamically on a contenteditable region (e.g., switching between `ltr` and `rtl`), the text direction may not update correctly during active editing in Firefox. The caret position and text flow may be incorrect.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `dir="ltr"`.
 2. Start typing some text.
@@ -31,13 +31,13 @@ When the `dir` attribute is changed dynamically on a contenteditable region (e.g
 4. Continue typing.
 5. Observe the text direction and caret position.
 
-### Observed behavior
+## Observed behavior
 
 - In Firefox on Windows, changing `dir` during editing may not take effect immediately.
 - The caret position may be incorrect.
 - Text flow may not update properly.
 
-### Expected behavior
+## Expected behavior
 
 - The `dir` attribute should update text direction immediately.
 - Caret position should adjust correctly.

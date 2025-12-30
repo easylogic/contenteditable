@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When a contenteditable region loses focus, `window.getSelection()` may return `null` in Safari, even if there was a valid selection before the focus loss. This makes it difficult to preserve or work with selections.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Select some text within it.
@@ -31,13 +31,13 @@ When a contenteditable region loses focus, `window.getSelection()` may return `n
 4. Call `window.getSelection()`.
 5. Observe the return value.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, `window.getSelection()` returns `null` after focus loss.
 - The selection information is lost.
 - There is no way to retrieve the previous selection state.
 
-### Expected behavior
+## Expected behavior
 
 - `window.getSelection()` should return a valid Selection object even after focus loss.
 - Or, there should be a way to preserve selection state before focus loss.

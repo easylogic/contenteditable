@@ -10,7 +10,7 @@ browser: Safari
 browserVersion: "17.0"
 keyboard: Korean (IME)
 caseTitle: beforeinput fires with insertCompositionText but input fires with deleteContentBackward
-description: "During Korean IME composition in iOS Safari, beforeinput may fire with inputType 'insertCompositionText' while the corresponding input event fires with 'deleteContentBackward'. This mismatch requires storing beforeinput's targetRanges to correctly understand the actual DOM change."
+description: "During IME composition, beforeinput may fire with inputType 'insertCompositionText' while the corresponding input event fires with 'deleteContentBackward'. This mismatch can occur in various browser/IME combinations, not limited to iOS Safari, and requires storing beforeinput's targetRanges to correctly understand the actual DOM change."
 tags:
   - composition
   - ime
@@ -36,19 +36,20 @@ domSteps:
     description: "Expected: Composition text '한글' inserted, inputType should match beforeinput"
 ---
 
-### Phenomenon
+## Phenomenon
 
-During Korean IME composition in iOS Safari, `beforeinput` may fire with `inputType: 'insertCompositionText'` while the corresponding `input` event fires with `inputType: 'deleteContentBackward'`. This mismatch makes it impossible to correctly understand the DOM change using only the `input` event's `inputType`.
+During IME composition, `beforeinput` may fire with `inputType: 'insertCompositionText'` while the corresponding `input` event fires with `inputType: 'deleteContentBackward'`. This mismatch can occur in various browser/IME combinations, including but not limited to iOS Safari with Korean IME, Firefox with certain IMEs, and other mobile browsers. This mismatch makes it impossible to correctly understand the DOM change using only the `input` event's `inputType`.
 
-### Reproduction example
+## Reproduction example
 
-1. Focus a `contenteditable` element on iOS Safari.
-2. Activate Korean IME.
-3. Start composing Korean text (e.g., type "ㅎ" then "ㅏ" then "ㄴ" to compose "한").
-4. Continue typing to update composition (e.g., type "ㄱ" then "ㅡ" then "ㄹ" to update to "한글").
+1. Focus a `contenteditable` element.
+2. Activate an IME (Korean, Japanese, Chinese, or other language).
+3. Start composing text (e.g., for Korean: type "ㅎ" then "ㅏ" then "ㄴ" to compose "한").
+4. Continue typing to update composition (e.g., for Korean: type "ㄱ" then "ㅡ" then "ㄹ" to update to "한글").
 5. Observe `beforeinput` and `input` events in the browser console or event log.
+6. Check if `beforeinput.inputType` matches `input.inputType` - they may differ.
 
-### Observed behavior
+## Observed behavior
 
 When updating composition text:
 
@@ -70,14 +71,14 @@ When updating composition text:
    - The `targetRanges` from `beforeinput` are lost and not available in `input`
    - Application state may become inconsistent with DOM state
 
-### Expected behavior
+## Expected behavior
 
 - The `input` event's `inputType` should match the `beforeinput` event's `inputType`
 - If `beforeinput` fires with `insertCompositionText`, `input` should also have `insertCompositionText`
 - The `input.data` should match `beforeinput.data` (or reflect the actual committed text)
 - The DOM change should match what was indicated in `beforeinput`
 
-### Impact
+## Impact
 
 This can lead to:
 
@@ -87,14 +88,16 @@ This can lead to:
 - **State synchronization issues**: Application state becomes inconsistent
 - **Event handler failures**: Handlers expecting matching `inputType` values fail
 
-### Browser Comparison
+## Browser Comparison
 
-- **iOS Safari**: May fire `insertCompositionText` in `beforeinput` but `deleteContentBackward` in `input`
-- **Chrome/Edge**: Generally consistent `inputType` between events
-- **Firefox**: May have mismatches in certain scenarios
-- **Android Chrome**: Behavior may vary
+- **iOS Safari**: Frequently fires `insertCompositionText` in `beforeinput` but `deleteContentBackward` in `input`, especially with Korean and Japanese IME
+- **macOS Safari**: May exhibit similar mismatches, particularly with certain IME combinations
+- **Firefox**: May have mismatches in certain IME scenarios, especially on mobile devices
+- **Chrome/Edge**: Generally consistent `inputType` between events, but may have edge cases
+- **Android Chrome**: Higher likelihood of mismatches due to text prediction and IME variations
+- **Mobile browsers**: Generally higher likelihood of mismatches across different IMEs
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - **Store targetRanges from beforeinput**: Save `targetRanges` for use in `input` handler:
   ```javascript

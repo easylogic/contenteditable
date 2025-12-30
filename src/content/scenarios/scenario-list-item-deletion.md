@@ -10,6 +10,7 @@ tags:
   - delete
   - browser-compatibility
 status: draft
+locale: en
 ---
 
 When pressing Backspace or Delete at the beginning or end of a list item (`<li>`), the behavior varies significantly across browsers. Some browsers delete the list item and merge with adjacent content, while others may delete the entire list or create unexpected DOM structures.

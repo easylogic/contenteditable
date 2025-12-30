@@ -31,37 +31,37 @@ domSteps:
     description: "Expected: Newly typed text also inherits font size"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying a font size to selected text in Safari and then continuing to type, the new text does not inherit the font size. The size formatting is lost for newly typed characters.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text in a contenteditable element
 2. Apply a font size (e.g., 18px)
 3. Place cursor after the formatted text
 4. Type new text
 
-### Observed behavior
+## Observed behavior
 
 - The newly typed text uses the default font size
 - Font size formatting is not maintained for new text
 - This differs from Chrome/Edge where size persists
 - User must reapply font size for each new text segment
 
-### Expected behavior
+## Expected behavior
 
 - Newly typed text should inherit the font size
 - Font size formatting should persist until explicitly changed
 - Behavior should be consistent with Chrome/Edge
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Font size persists for new text
 - **Firefox**: Size persistence may be less reliable
 - **Safari**: Font size does not persist (this case)
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Intercept text insertion and apply font size
 - Use `beforeinput` event to detect text insertion

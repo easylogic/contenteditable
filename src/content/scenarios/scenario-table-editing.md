@@ -9,6 +9,7 @@ tags:
   - row
   - column
 status: draft
+locale: en
 ---
 
 Editing tables within contenteditable elements is limited and behaves inconsistently across browsers. Creating tables, editing cells, adding/removing rows and columns, and maintaining table structure all have browser-specific behaviors and limitations.

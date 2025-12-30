@@ -28,11 +28,11 @@ domSteps:
     description: "Expected: Newly typed text also inherits italic"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When applying italic formatting to selected text and then continuing to type, the italic formatting is not maintained for the newly typed characters in Edge on Windows.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text.
@@ -40,12 +40,12 @@ When applying italic formatting to selected text and then continuing to type, th
 4. Place the caret at the end of the italic text.
 5. Continue typing.
 
-### Observed behavior
+## Observed behavior
 
 - In Edge on Windows, newly typed characters after the italic text are not italic.
 - The formatting state appears to be lost when the caret moves.
 
-### Expected behavior
+## Expected behavior
 
 - Newly typed characters should inherit the formatting of the preceding text when the caret is within or immediately after formatted text.
 

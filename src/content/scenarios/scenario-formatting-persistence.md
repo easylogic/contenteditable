@@ -8,6 +8,7 @@ tags:
   - bold
   - safari
 status: draft
+locale: en
 ---
 
 When applying bold formatting to selected text and then continuing to type, the bold formatting is not maintained for the newly typed characters in Safari.

@@ -9,6 +9,7 @@ tags:
   - chrome
   - windows
 status: draft
+locale: en
 ---
 
 When a contenteditable element enters or exits fullscreen mode using the Fullscreen API, focus and selection may be lost. The caret position may reset, and editing may be disrupted.

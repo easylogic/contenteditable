@@ -8,6 +8,7 @@ tags:
   - composition
   - paste
 status: draft
+locale: ko
 ---
 
 `contenteditable` 요소에서 IME로 텍스트를 컴포지션할 때 콘텐츠를 붙여넣기(Ctrl+V / Cmd+V)하면 활성 컴포지션이 취소되거나, 컴포지션된 텍스트가 손실되거나, 붙여넣은 콘텐츠가 예상치 못한 위치에 삽입될 수 있습니다.

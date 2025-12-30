@@ -9,6 +9,7 @@ tags:
   - backspace
   - delete
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 이미지를 삭제하는 것이 브라우저마다 다르게 동작합니다. 일부 브라우저는 이미지를 깨끗하게 삭제하지만 다른 브라우저는 빈 요소를 남기거나, DOM 구조를 깨뜨리거나, 여러 삭제 작업이 필요할 수 있습니다.

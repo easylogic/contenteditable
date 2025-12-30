@@ -19,11 +19,11 @@ tags:
 status: draft
 ---
 
-### Phenomenon
+## Phenomenon
 
 When spellcheck is enabled on a contenteditable element, browser spellcheck suggestions can interfere with editing. The spellcheck UI may overlap with content, and accepting suggestions may cause unexpected behavior.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div with `spellcheck="true"`.
 2. Type text with intentional misspellings.
@@ -31,14 +31,14 @@ When spellcheck is enabled on a contenteditable element, browser spellcheck sugg
 4. Try to accept or ignore suggestions.
 5. Continue editing and observe any interference.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, spellcheck suggestions appear as expected.
 - Accepting suggestions may cause the caret to jump unexpectedly.
 - The spellcheck UI may overlap with content during editing.
 - Spellcheck may interfere with IME composition.
 
-### Expected behavior
+## Expected behavior
 
 - Spellcheck should work seamlessly with contenteditable.
 - Suggestions should not interfere with editing flow.

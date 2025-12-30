@@ -9,6 +9,7 @@ tags:
   - dom
   - structure
 status: draft
+locale: en
 ---
 
 During editing operations, empty elements (empty paragraphs, divs, spans with no content) accumulate in the DOM. These elements can cause layout issues, make the HTML bloated, and create unexpected behavior. Browsers handle empty element cleanup inconsistently.

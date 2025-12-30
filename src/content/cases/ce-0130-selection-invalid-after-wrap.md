@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Selection range maintained, cursor maintained at correct position"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When programmatically wrapping selected content in a new element (e.g., applying bold by wrapping in `<b>`), the selection range becomes invalid in Firefox. The cursor position is lost.
 
-### Reproduction example
+## Reproduction example
 
 1. Select some text
 2. Programmatically wrap it in a `<b>` element
 3. Check selection state
 
-### Observed behavior
+## Observed behavior
 
 - Selection range becomes invalid
 - Cursor position is lost
 - Cannot continue editing at correct position
 - Selection cannot be restored
 
-### Expected behavior
+## Expected behavior
 
 - Selection should remain valid after wrapping
 - Cursor should be positioned correctly
 - User should be able to continue editing
 - Selection should be restored properly
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Selection generally remains valid
 - **Firefox**: Selection becomes invalid (this case)
 - **Safari**: Selection restoration most unreliable
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Save selection before wrapping
 - Restore selection after wrapping

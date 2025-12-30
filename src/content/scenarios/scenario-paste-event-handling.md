@@ -9,6 +9,7 @@ tags:
   - preventDefault
   - chrome
 status: draft
+locale: en
 ---
 
 In Chrome on Windows, calling `preventDefault()` on the `paste` event does not always prevent the default paste behavior. Content may still be pasted despite the prevention.

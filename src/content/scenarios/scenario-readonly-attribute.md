@@ -8,6 +8,7 @@ tags:
   - editing
   - firefox
 status: draft
+locale: en
 ---
 
 The `readonly` attribute, which should prevent editing on form inputs, does not work on contenteditable regions in Firefox. Users can still edit the content even when `readonly` is set.

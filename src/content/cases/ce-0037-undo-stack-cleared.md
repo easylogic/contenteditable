@@ -31,11 +31,11 @@ domSteps:
     description: "Expected: Previous manual edits can be restored with Undo"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When programmatically modifying the content of a contenteditable region (e.g., using `innerHTML` or `textContent`), the undo stack is cleared in Safari. This prevents users from undoing their previous manual edits.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Type some text manually.
@@ -43,13 +43,13 @@ When programmatically modifying the content of a contenteditable region (e.g., u
 4. Try to undo (Cmd+Z).
 5. Observe whether the previous manual edits can be undone.
 
-### Observed behavior
+## Observed behavior
 
 - In Safari on macOS, programmatic content changes clear the undo stack.
 - Users cannot undo their previous manual edits after programmatic changes.
 - The undo history is lost unexpectedly.
 
-### Expected behavior
+## Expected behavior
 
 - Programmatic changes should not clear the undo stack for manual edits.
 - Or, there should be a way to preserve undo history across programmatic modifications.

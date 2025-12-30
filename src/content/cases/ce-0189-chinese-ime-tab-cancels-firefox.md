@@ -32,38 +32,38 @@ domSteps:
     description: "Expected: Tab navigation after composition completes or composition text preserved"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Chinese text with Pinyin IME in a `contenteditable` element, pressing Tab cancels the composition and causes focus to navigate to the next element. The composed text may be lost or partially committed before navigation occurs.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area (e.g., in a form or table).
 2. Activate Chinese Pinyin IME.
 3. Type Pinyin text (e.g., "nihao") and start character conversion.
 4. Press Tab to navigate to the next element.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - Focus moves to the next element
 - Composed text may be lost or partially committed
 - The Tab key behavior conflicts with composition handling
 
-### Expected behavior
+## Expected behavior
 
 - Composition should complete before Tab navigation occurs
 - Composed text should not be lost
 - Tab navigation should work consistently with or without active composition
 
-### Browser Comparison
+## Browser Comparison
 
 - **Firefox**: Tab may cancel composition and navigate focus
 - **Chrome**: May have different Tab key behavior during composition
 - **Edge**: Similar to Chrome
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Prevent Tab during active composition
 - Wait for composition to complete before allowing Tab navigation

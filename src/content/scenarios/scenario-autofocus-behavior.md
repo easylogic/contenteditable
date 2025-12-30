@@ -9,6 +9,7 @@ tags:
   - chrome
   - windows
 status: draft
+locale: en
 ---
 
 The `autofocus` attribute, which automatically focuses form inputs on page load, does not work on contenteditable elements. There is no built-in way to automatically focus a contenteditable region when a page loads.

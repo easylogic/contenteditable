@@ -9,6 +9,7 @@ tags:
   - safari
   - macos
 status: draft
+locale: en
 ---
 
 When a contenteditable element has the CSS `isolation: isolate` property, it creates a new stacking context. This may affect how selection handles and IME candidate windows are positioned relative to the contenteditable.

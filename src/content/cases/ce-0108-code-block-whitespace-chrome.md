@@ -29,37 +29,37 @@ domSteps:
     description: "Expected: Spaces preserved with &lt;pre&gt; tag"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When editing text within a `<pre><code>` code block, multiple consecutive spaces may still be collapsed despite the `<pre>` tag which should preserve whitespace. This can break code formatting.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a code block: `<pre><code>function test() {</code></pre>`
 2. Try to type multiple spaces for indentation
 3. Observe the DOM
 
-### Observed behavior
+## Observed behavior
 
 - Multiple spaces may be collapsed to single space
 - Even though `<pre>` should preserve whitespace
 - Code indentation is lost
 - Formatting breaks
 
-### Expected behavior
+## Expected behavior
 
 - `<pre>` tag should preserve all whitespace
 - Multiple spaces should be maintained
 - Code formatting should be preserved
 - Behavior should match native code editors
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: May collapse spaces despite `<pre>` (this case)
 - **Firefox**: Similar whitespace handling issues
 - **Safari**: Whitespace preservation inconsistent
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Ensure `white-space: pre` CSS is applied
 - Intercept space insertion and use `&nbsp;` if needed

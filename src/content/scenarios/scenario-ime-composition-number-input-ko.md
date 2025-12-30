@@ -9,6 +9,7 @@ tags:
   - number-input
   - candidate-selection
 status: draft
+locale: ko
 ---
 
 `contenteditable` 요소에서 IME로 텍스트를 컴포지션할 때 숫자 키를 누르면 숫자를 삽입하는 대신 IME 특정 기능(예: 일본어/중국어 IME의 후보 선택)이 트리거되거나, 컴포지션이 예상치 못하게 취소될 수 있습니다.

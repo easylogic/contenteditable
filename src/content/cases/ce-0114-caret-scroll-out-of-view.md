@@ -33,38 +33,38 @@ domSteps:
     description: "Expected: Cursor maintained inside viewport or auto-scroll"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When pasting large content into a contenteditable element, the caret (cursor) may end up outside the visible viewport. Users cannot see where they are typing and must manually scroll to find the cursor.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable element with some content
 2. Scroll to a position where cursor is visible
 3. Paste large content
 4. Check cursor position
 
-### Observed behavior
+## Observed behavior
 
 - Cursor ends up outside visible viewport
 - User cannot see typing position
 - Must manually scroll to find cursor
 - Poor user experience
 
-### Expected behavior
+## Expected behavior
 
 - Cursor should remain visible after paste
 - Viewport should scroll to show cursor
 - User should always see where they are typing
 - Behavior should be automatic
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome/Edge**: Caret may go out of view (this case)
 - **Firefox**: More likely to lose caret position
 - **Safari**: Caret position most unpredictable
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Scroll caret into view after paste
 - Use `scrollIntoView()` on selection

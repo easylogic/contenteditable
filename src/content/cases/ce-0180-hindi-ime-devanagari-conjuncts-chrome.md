@@ -33,11 +33,11 @@ domSteps:
     description: "Expected: Conjuncts and vowel signs correctly formed"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Hindi text with Devanagari IME in a contenteditable element in Chrome on Windows, consonant+vowel combinations and conjunct characters (where multiple consonants combine) may not form correctly. Vowel signs (matras) may be misplaced relative to consonants, or conjunct characters may not render properly, resulting in incorrectly formed Devanagari text.
 
-### Reproduction example
+## Reproduction example
 
 1. Create a contenteditable div.
 2. Switch to Hindi IME with Devanagari script.
@@ -45,7 +45,7 @@ When composing Hindi text with Devanagari IME in a contenteditable element in Ch
 4. Observe vowel sign positioning and conjunct formation.
 5. Check text rendering.
 
-### Observed behavior
+## Observed behavior
 
 - Vowel signs (matras) may not position correctly relative to consonants
 - Multiple consonants may not combine into conjunct characters
@@ -53,7 +53,7 @@ When composing Hindi text with Devanagari IME in a contenteditable element in Ch
 - Characters may be logically correct but render incorrectly visually
 - Backspace may not work correctly with complex character combinations
 
-### Expected behavior
+## Expected behavior
 
 - Vowel signs should position correctly relative to consonants
 - Multiple consonants should combine into conjunct characters correctly
@@ -61,20 +61,20 @@ When composing Hindi text with Devanagari IME in a contenteditable element in Ch
 - Visual rendering should match logical structure
 - Backspace should handle complex character combinations correctly
 
-### Impact
+## Impact
 
 - Hindi/Indian language text may be unreadable or incorrect
 - Users cannot reliably input correct text
 - Complex character combinations may fail to form
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: Generally better support but conjunct formation can fail
 - **Edge**: Similar to Chrome
 - **Firefox**: May have more issues with conjunct formation
 - **Safari**: Devanagari rendering can be inconsistent, especially on mobile
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Validate Devanagari character formation after input
 - Check for proper vowel sign positioning

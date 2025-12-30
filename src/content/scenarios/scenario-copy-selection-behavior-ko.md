@@ -8,6 +8,7 @@ tags:
   - selection
   - safari
 status: draft
+locale: ko
 ---
 
 Safari에서 Cmd+C를 사용하여 contenteditable 영역에서 선택한 텍스트를 복사한 후 선택이 손실됩니다. 사용자가 추가 작업을 수행하려면 텍스트를 다시 선택해야 합니다.

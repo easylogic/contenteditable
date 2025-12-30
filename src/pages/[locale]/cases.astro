@@ -23,7 +23,7 @@ const locale = Astro.params.locale as Locale;
 const t = getTranslation(locale);
 const localeInfo = locales[locale];
 
-const cases = await getCollection('cases');
+const cases = await getCollection('cases', ({ data }) => data.locale === locale);
 
 // Get unique values for filters
 const allOS = Array.from(new Set(cases.map((c) => c.data.os))).sort();

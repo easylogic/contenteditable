@@ -9,6 +9,7 @@ tags:
   - keyboard
   - ios
 status: draft
+locale: en
 ---
 
 The `inputmode` attribute, which should control the type of virtual keyboard shown on mobile devices, does not work on contenteditable regions in iOS Safari. The keyboard type cannot be controlled.

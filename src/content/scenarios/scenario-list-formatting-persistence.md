@@ -10,6 +10,7 @@ tags:
   - bold
   - italic
 status: draft
+locale: en
 ---
 
 When editing text within list items, formatting such as bold, italic, or links may be lost or behave unexpectedly. The list structure itself may also be lost when certain operations are performed, such as pasting content or applying formatting.

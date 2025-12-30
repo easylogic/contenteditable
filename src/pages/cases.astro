@@ -4,7 +4,7 @@ import SiteNav from '../components/SiteNav.astro';
 import BaseHead from '../components/BaseHead.astro';
 import '../styles/global.css';
 
-const allCases = await getCollection('cases');
+const allCases = await getCollection('cases', ({ data }) => data.locale === 'en');
 
 const locales = Array.from(new Set(allCases.map((entry) => entry.data.locale))).sort();
 const defaultLocale = locales.includes('en') ? 'en' : locales[0];

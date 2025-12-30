@@ -32,38 +32,38 @@ domSteps:
     description: "Expected: Composition preserved or handled gracefully"
 ---
 
-### Phenomenon
+## Phenomenon
 
 When composing Korean text with IME in a `contenteditable` element, clicking elsewhere or programmatically changing focus causes the composition to be cancelled and the composed text to be lost. This differs from native input fields where composition may be preserved or handled more gracefully.
 
-### Reproduction example
+## Reproduction example
 
 1. Focus the editable area.
 2. Activate Korean IME.
 3. Start composing Korean text (e.g., type "한").
 4. Click elsewhere or programmatically blur the element before completing composition.
 
-### Observed behavior
+## Observed behavior
 
 - The compositionend event fires with incomplete data
 - The composed text is lost
 - The blur event may fire before or after compositionend
 - No recovery mechanism for lost composition
 
-### Expected behavior
+## Expected behavior
 
 - Composition should be preserved or gracefully handled when focus changes
 - Composed text should not be lost
 - Event sequence should be predictable and consistent
 
-### Browser Comparison
+## Browser Comparison
 
 - **Chrome**: Composition may be lost on blur
 - **Edge**: Similar to Chrome
 - **Firefox**: May have different behavior
 - **Safari**: Not applicable on Windows
 
-### Notes and possible direction for workarounds
+## Notes and possible direction for workarounds
 
 - Monitor blur and compositionend events to detect composition loss
 - Consider storing pending composition text for recovery

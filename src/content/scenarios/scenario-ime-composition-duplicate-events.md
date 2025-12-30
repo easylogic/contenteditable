@@ -9,6 +9,7 @@ tags:
   - beforeinput
   - duplicate-events
 status: draft
+locale: en
 ---
 
 During IME composition, some browsers and IME combinations fire unexpected event sequences that differ from the standard behavior. This can cause event handlers to execute multiple times for a single composition update.

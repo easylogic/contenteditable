@@ -9,6 +9,7 @@ tags:
   - href
   - formatting
 status: draft
+locale: ko
 ---
 
 contenteditable 요소에서 링크를 삽입하거나 편집할 때 동작이 브라우저마다 크게 다릅니다. 링크 생성, 링크 텍스트 편집, 링크 제거는 예상치 못한 DOM 구조나 손실된 포맷팅을 초래할 수 있습니다.
