@@ -1,4 +1,6 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { EDITOR_PRESETS, type EditorPreset } from '../data/presets';
+import { getTranslation, type Locale, supportedLocales } from '../i18n/translations';
 
 type CasePlaygroundProps = {
   id: string;
@@ -10,6 +12,8 @@ type CasePlaygroundProps = {
   browser: string;
   browserVersion?: string;
   keyboard: string;
+  initialHtml?: string;
+  locale?: string;
 };
 
 type LogEntry = {
@@ -57,6 +61,66 @@ function detectEnvironment(): DetectedEnv {
   return { os, browser };
 }
 
+// Get default preset based on keyboard and locale
+function getDefaultPresetId(keyboard: string, locale?: string): string {
+  const keyboardLower = keyboard.toLowerCase();
+  const localeLower = (locale || 'en').toLowerCase();
+  
+  // Korean IME
+  if (keyboardLower.includes('korean') || keyboardLower.includes('한국어')) {
+    return 'plain-cjk-paragraph';
+  }
+  
+  // Japanese IME
+  if (keyboardLower.includes('japanese') || keyboardLower.includes('日本語')) {
+    return 'plain-japanese-paragraph';
+  }
+  
+  // Chinese IME
+  if (keyboardLower.includes('chinese') || keyboardLower.includes('中文') || keyboardLower.includes('中国')) {
+    return 'plain-chinese-paragraph';
+  }
+  
+  // Thai IME
+  if (keyboardLower.includes('thai') || keyboardLower.includes('태국어')) {
+    return 'plain-thai-paragraph';
+  }
+  
+  // Vietnamese IME
+  if (keyboardLower.includes('vietnamese') || keyboardLower.includes('베트남어')) {
+    return 'plain-vietnamese-paragraph';
+  }
+  
+  // Arabic IME
+  if (keyboardLower.includes('arabic') || keyboardLower.includes('아랍어')) {
+    return 'plain-arabic-paragraph';
+  }
+  
+  // Hindi IME
+  if (keyboardLower.includes('hindi') || keyboardLower.includes('힌디어')) {
+    return 'plain-hindi-paragraph';
+  }
+  
+  // Korean locale
+  if (localeLower === 'ko') {
+    return 'plain-cjk-paragraph';
+  }
+  
+  // Default: plain CJK paragraph (works for most cases)
+  return 'plain-cjk-paragraph';
+}
+
+// Get language-specific default text
+function getDefaultText(locale?: string): string {
+  const localeLower = (locale || 'en').toLowerCase();
+  
+  if (localeLower === 'ko') {
+    return '<p>이 편집 가능한 영역에서 설명된 케이스를 재현해보세요.</p>';
+  }
+  
+  return '<p>Use this editable area to reproduce the described case.</p>';
+}
+
 export function CasePlayground(props: CasePlaygroundProps) {
   const [reportedEnv] = useState({
     os: props.os,
@@ -74,6 +138,25 @@ export function CasePlayground(props: CasePlaygroundProps) {
     keyboard: reportedEnv.keyboard,
   });
 
+  // Detect UI locale from browser
+  const uiLocale = useMemo<Locale>(() => {
+    if (typeof navigator === 'undefined') return 'en';
+    const browserLang = navigator.language.split('-')[0];
+    return supportedLocales.includes(browserLang as Locale) ? (browserLang as Locale) : 'en';
+  }, []);
+
+  // Get default preset based on keyboard and locale
+  const defaultPresetId = useMemo(() => 
+    getDefaultPresetId(props.keyboard, props.locale || uiLocale),
+    [props.keyboard, props.locale, uiLocale]
+  );
+
+  const [selectedPresetId, setSelectedPresetId] = useState(defaultPresetId);
+  const selectedPreset = useMemo(() => 
+    EDITOR_PRESETS.find((p) => p.id === selectedPresetId) ?? EDITOR_PRESETS[0],
+    [selectedPresetId]
+  );
+
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [anomalies, setAnomalies] = useState<Array<{ type: string; description: string; detail: string }>>([]);
   const editableRef = useRef<HTMLDivElement>(null);
@@ -85,10 +168,30 @@ export function CasePlayground(props: CasePlaygroundProps) {
   // Initialize content only once
   useEffect(() => {
     if (editableRef.current && !isInitializedRef.current) {
-      editableRef.current.innerHTML = '<p>Use this editable area to reproduce the described case.</p>';
+      // Use initialHtml if provided, otherwise use preset or default text
+      if (props.initialHtml) {
+        editableRef.current.innerHTML = props.initialHtml;
+      } else if (selectedPreset.html) {
+        editableRef.current.innerHTML = selectedPreset.html;
+      } else {
+        editableRef.current.innerHTML = getDefaultText(props.locale || uiLocale);
+      }
       isInitializedRef.current = true;
     }
-  }, []);
+  }, [props.initialHtml, selectedPreset.html, props.locale, uiLocale]);
+
+  // Update content when preset changes
+  useEffect(() => {
+    if (editableRef.current && isInitializedRef.current && selectedPreset.html) {
+      editableRef.current.innerHTML = selectedPreset.html;
+      // Reset logs when preset changes
+      setLogs([]);
+      setAnomalies([]);
+      logIdCounterRef.current = 0;
+      lastBeforeInputRef.current = null;
+      lastInputRef.current = null;
+    }
+  }, [selectedPresetId, selectedPreset.html]);
 
   const resetLogs = () => {
     setLogs([]);
@@ -670,6 +773,23 @@ export function CasePlayground(props: CasePlaygroundProps) {
           </div>
 
           <div className="border border-border-light rounded-xl p-2.5 bg-bg-surface mt-1">
+            {/* Preset selector */}
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-xs text-text-secondary">
+                {getTranslation(uiLocale).playground.sampleHTML}:
+              </span>
+              <select
+                value={selectedPresetId}
+                onChange={(e) => setSelectedPresetId(e.target.value)}
+                className="h-7 px-2 rounded-md border border-border-light bg-bg-surface text-xs text-text-primary cursor-pointer flex-1 max-w-[300px]"
+              >
+                {EDITOR_PRESETS.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.labels[uiLocale] ?? preset.labels.en}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div
               ref={editableRef}
               contentEditable

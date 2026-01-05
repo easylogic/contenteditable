@@ -24,6 +24,8 @@ const cases = defineCollection({
     description: z.string().optional(), // Case-specific description
     tags: z.array(z.string()).default([]),
     status: z.enum(['draft', 'confirmed']).default('draft'),
+    // Initial HTML for playground (optional)
+    initialHtml: z.string().optional(),
     // DOM change animation steps
     domSteps: z.array(domStepSchema).optional(),
   }),
