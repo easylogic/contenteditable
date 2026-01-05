@@ -774,14 +774,14 @@ export function CasePlayground(props: CasePlaygroundProps) {
 
           <div className="border border-border-light rounded-xl p-2.5 bg-bg-surface mt-1">
             {/* Preset selector */}
-            <div className="mb-2 flex items-center gap-2">
-              <span className="text-xs text-text-secondary">
+            <div className="mb-2 flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-text-secondary whitespace-nowrap">
                 {getTranslation(uiLocale).playground.sampleHTML}:
               </span>
               <select
                 value={selectedPresetId}
                 onChange={(e) => setSelectedPresetId(e.target.value)}
-                className="h-7 px-2 rounded-md border border-border-light bg-bg-surface text-xs text-text-primary cursor-pointer flex-1 max-w-[300px]"
+                className="h-7 px-2 rounded-md border border-border-light bg-bg-surface text-xs text-text-primary cursor-pointer min-w-0 flex-1 max-w-full"
               >
                 {EDITOR_PRESETS.map((preset) => (
                   <option key={preset.id} value={preset.id}>
