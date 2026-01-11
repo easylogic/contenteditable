@@ -4,6 +4,8 @@ import { snapshotTextNodes, type TextNodeInfo } from '../utils/text-node-tracker
 import { calculateDeletedRects, detectDomChanges, type DomChangeResult } from '../utils/dom-change-tracker';
 import { saveSnapshot, getAllSnapshots, deleteSnapshot, type Snapshot, type SnapshotTrigger } from '../utils/snapshot-db';
 import { getTranslation, type Locale, supportedLocales } from '../i18n/translations';
+import { TouchHandler, isTouchDevice, type TouchGesture } from '../utils/touch-handler';
+import { MobileEventLog } from './MobileEventLog';
 
 // ============================================================
 // Types
@@ -1200,6 +1202,10 @@ export function Playground() {
   const [selectedPresetId, setSelectedPresetId] = useState<string>('rich-inline-list-previous-default');
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [activeTab, setActiveTab] = useState<'snapshots' | 'events'>('events');
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [touchScale, setTouchScale] = useState(1);
+  const [touchPan, setTouchPan] = useState({ x: 0, y: 0 });
+  const touchHandlerRef = useRef<TouchHandler | null>(null);
   const selectedPreset = useMemo(
     () => EDITOR_PRESETS.find((p) => p.id === selectedPresetId) ?? EDITOR_PRESETS[0],
     [selectedPresetId],
@@ -1236,6 +1242,99 @@ export function Playground() {
 
   // Get translations for current locale
   const t = useMemo(() => getTranslation(uiLocale), [uiLocale]);
+
+  // Mobile detection and responsive handling
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Touch handling setup with range interaction
+  useEffect(() => {
+    if (!isTouchDevice() || !editorRef.current || !overlayRef.current) return;
+
+    const touchHandler = new TouchHandler({
+      tapTimeout: 300,
+      doubleTapTimeout: 300,
+      longPressTimeout: 500,
+      pinchThreshold: 10,
+      swipeThreshold: 50,
+      panThreshold: 10,
+    });
+
+    touchHandlerRef.current = touchHandler;
+
+    // Register gesture callbacks
+    touchHandler.on('double-tap', () => {
+      setTouchScale(1);
+      setTouchPan({ x: 0, y: 0 });
+    });
+
+    touchHandler.on('pinch', (gesture: TouchGesture) => {
+      if (gesture.scale) {
+        const newScale = Math.max(0.5, Math.min(3, touchScale * gesture.scale));
+        setTouchScale(newScale);
+      }
+    });
+
+    touchHandler.on('pan', (gesture: TouchGesture) => {
+      if (gesture.velocity) {
+        setTouchPan(prev => ({
+          x: prev.x + gesture.velocity!.x * 0.1,
+          y: prev.y + gesture.velocity!.y * 0.1,
+        }));
+      }
+    });
+
+    touchHandler.on('long-press', (gesture: TouchGesture) => {
+      // Toggle invisible character visualization on long press
+      if (visualizerRef.current) {
+        visualizerRef.current.drawInvisibleCharacters();
+      }
+    });
+
+    // Touch events for editor and overlay
+    const editor = editorRef.current;
+    const overlay = overlayRef.current;
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      // Check if touch is on a visualized range
+      const touch = e.touches[0];
+      const element = document.elementFromPoint(touch.clientX, touch.clientY);
+      
+      if (element && element.closest('[data-ui^="range-rect"]')) {
+        // Show tooltip for range info
+        const rangeType = element.getAttribute('data-ui')?.split('-')[2];
+        if (rangeType) {
+          console.log(`Touch detected on: ${rangeType} range`);
+        }
+      }
+      
+      touchHandler.handleTouchStart(e);
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => touchHandler.handleTouchMove(e);
+    const handleTouchEnd = (e: TouchEvent) => touchHandler.handleTouchEnd(e);
+
+    editor.addEventListener('touchstart', handleTouchStart, { passive: true });
+    editor.addEventListener('touchmove', handleTouchMove, { passive: true });
+    editor.addEventListener('touchend', handleTouchEnd, { passive: true });
+    
+    overlay.addEventListener('touchstart', handleTouchStart, { passive: true });
+
+    return () => {
+      editor.removeEventListener('touchstart', handleTouchStart);
+      editor.removeEventListener('touchmove', handleTouchMove);
+      editor.removeEventListener('touchend', handleTouchEnd);
+      overlay.removeEventListener('touchstart', handleTouchStart);
+      touchHandler.destroy();
+    };
+  }, [touchScale]);
 
   // 스크롤 이벤트 리스너: 보이지 않는 문자 시각화 업데이트
   useEffect(() => {
@@ -1985,7 +2084,7 @@ export function Playground() {
   }, [environment, anomalies, phases]);
 
   return (
-    <div className="grid grid-cols-[1.5fr_1fr] gap-4 flex-1 min-h-0">
+    <div className={`${isMobileView ? 'flex flex-col' : 'grid grid-cols-[1.5fr_1fr]'} gap-4 flex-1 min-h-0`}>
       {/* Left: Editor */}
       <div className="flex flex-col gap-2 min-h-0 h-full">
         {/* Preset selector + Legend */}
@@ -2007,10 +2106,39 @@ export function Playground() {
                 ))}
               </select>
             </div>
+            {/* Mobile zoom controls */}
+            {isMobileView && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTouchScale(Math.max(0.5, touchScale - 0.1))}
+                  className="w-8 h-8 flex items-center justify-center rounded-md bg-bg-surface border border-border-light text-text-primary text-xs hover:bg-bg-muted"
+                >
+                  −
+                </button>
+                <span className="text-xs text-text-muted min-w-[3rem] text-center">
+                  {Math.round(touchScale * 100)}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setTouchScale(Math.min(3, touchScale + 0.1))}
+                  className="w-8 h-8 flex items-center justify-center rounded-md bg-bg-surface border border-border-light text-text-primary text-xs hover:bg-bg-muted"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setTouchScale(1); setTouchPan({ x: 0, y: 0 }); }}
+                  className="w-8 h-8 flex items-center justify-center rounded-md bg-bg-surface border border-border-light text-text-primary text-xs hover:bg-muted"
+                >
+                  ⟲
+                </button>
+              </div>
+            )}
           </div>
-          {/* Visualization Legend */}
+{/* Visualization Legend */}
           <div className="px-3 py-2 bg-bg-muted rounded-md text-xs">
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+            <div className={`${isMobileView ? 'space-y-2' : 'flex flex-wrap gap-x-4 gap-y-1.5'}`}>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-3 rounded border" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.5)' }}></div>
                 <span className="text-text-secondary">{t.playground.legendSelection}</span>
@@ -2044,24 +2172,51 @@ export function Playground() {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+          
+          {/* Mobile Touch Controls Legend */}
+          {isMobileView && (
+            <div className="px-3 py-2 bg-bg-muted rounded-md text-xs">
+              <div className="font-medium text-text-primary mb-2">Touch Controls:</div>
+              <div className="space-y-1 text-text-secondary">
+                <div>• Double-tap: Reset zoom</div>
+                <div>• Pinch: Zoom in/out</div>
+                <div>• Pan: Move view</div>
+                <div>• Long-press: Show context</div>
+              </div>
+            </div>
+          )}
 
         {/* Editor */}
         <div className="flex-1 min-h-0 h-full">
           {/* Editor with overlay wrapper */}
-          <div ref={overlayRef} className="relative h-full min-h-0">
+          <div 
+            ref={overlayRef} 
+            className="relative h-full min-h-0 overflow-hidden"
+            style={{ 
+              transform: isMobileView ? `scale(${touchScale}) translate(${touchPan.x}px, ${touchPan.y}px)` : 'none',
+              transformOrigin: 'top left',
+              transition: isMobileView ? 'transform 0.2s ease-out' : 'none'
+            }}
+          >
             <div
               ref={editorRef}
               contentEditable
               suppressContentEditableWarning
-              className="h-full p-3 text-base leading-[1.8] outline-none focus:outline-none focus-visible:outline-none bg-bg-surface border-2 border-accent-primary rounded-lg overflow-y-auto box-border"
+              className={`h-full p-3 text-base leading-[1.8] outline-none focus:outline-none focus-visible:outline-none bg-bg-surface border-2 border-accent-primary rounded-lg box-border ${
+                isMobileView ? 'overflow-y-auto' : 'overflow-y-auto'
+              }`}
+              style={{
+                fontSize: isMobileView ? `${16 * touchScale}px` : '16px',
+                touchAction: isMobileView ? 'manipulation' : 'auto'
+              }}
             />
           </div>
         </div>
       </div>
 
       {/* Right: Event Phases & Snapshot History */}
-      <div className="flex flex-col gap-1.5 overflow-x-hidden min-h-0 h-full">
+      <div className={`flex flex-col gap-1.5 overflow-x-hidden min-h-0 ${isMobileView ? 'h-96' : 'h-full'}`}>
         {/* Toolbar */}
         <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-bg-muted rounded-md">
           <div className="flex gap-1">
@@ -2096,7 +2251,9 @@ export function Playground() {
           <button
             type="button"
             onClick={copyReport}
-            className="px-2.5 py-1 text-xs rounded-md border-none bg-accent-primary text-white cursor-pointer hover:bg-accent-primary-hover transition-colors"
+            className={`px-2.5 py-1 text-xs rounded-md border-none bg-accent-primary text-white cursor-pointer hover:bg-accent-primary-hover transition-colors ${
+              isMobileView ? 'px-2 py-0.5 text-[0.65rem]' : ''
+            }`}
           >
             {t.playground.copyReport}
           </button>
@@ -2121,14 +2278,69 @@ export function Playground() {
           </div>
         )}
 
-        {/* Tab Content */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
+{/* Tab Content */}
+        <div className={`flex-1 min-h-0 overflow-y-auto ${isMobileView ? 'pb-4' : ''}`}>
           {activeTab === 'snapshots' ? (
             <div className="flex flex-col gap-2">
               {snapshots.length === 0 ? (
                 <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
                   {t.playground.noSnapshots}
                 </div>
+              ) : (
+                snapshots.map((snap) => (
+                  <div key={snap.id} className="p-3 bg-bg-surface rounded-lg border border-border-light hover:border-accent-primary-hover transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-medium text-sm text-text-primary">
+                        {new Date(snap.timestamp).toLocaleString()}
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleRestoreSnapshot(snap)}
+                          className={`px-2 py-1 text-xs rounded bg-accent-primary text-white hover:bg-accent-primary-hover transition-colors ${isMobileView ? 'text-xs px-1.5 py-0.5' : ''}`}
+                        >
+                          {t.playground.restore}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSnapshot(snap.id)}
+                          className={`px-2 py-1 text-xs rounded bg-red-500 text-white hover:bg-red-600 transition-colors ${isMobileView ? 'text-xs px-1.5 py-0.5' : ''}`}
+                        >
+                          {t.playground.delete}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-xs text-text-muted mb-2">
+                      {snap.trigger && (
+                        <div className="mb-1">
+                          <strong>Trigger:</strong> {snap.trigger}
+                        </div>
+                      )}
+                      {snap.triggerDetail && (
+                        <div className="mb-1">
+                          <strong>Detail:</strong> {snap.triggerDetail}
+                        </div>
+                      )}
+                      <div>
+                        <strong>Environment:</strong> {snap.environment.os} {snap.environment.browser} {snap.environment.device}
+                      </div>
+                    </div>
+                    {snap.anomalies && snap.anomalies.length > 0 && (
+                      <div className="mt-2 p-2 bg-red-50 dark:bg-red-950/20 rounded border border-red-500">
+                        <div className="font-semibold text-red-600 dark:text-red-400 text-xs mb-1">
+                          Anomalies ({snap.anomalies.length}):
+                        </div>
+                        {snap.anomalies.map((a, i) => (
+                          <div key={i} className="text-xs text-red-800 dark:text-red-300">
+                            • {a.type}: {a.description}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
               ) : (
                 snapshots.map((snapshot) => (
                   <div
@@ -2186,15 +2398,21 @@ export function Playground() {
                 ))
               )}
             </div>
+) : isMobileView ? (
+            <MobileEventLog phases={phases} isMobileView={isMobileView} />
           ) : (
-            <div className="flex flex-col gap-1.5">
+            <div className="space-y-2">
               {phases.length === 0 ? (
                 <div className="p-6 text-center text-text-muted bg-bg-muted rounded-lg text-sm">
-                  {t.playground.eventLogEmpty}
+                  {t.playground.noEvents}
                 </div>
               ) : (
-                phases.map((phase, i) => <PhaseBlockView key={i} phase={phase} t={t} />)
+                phases.map((phase, i) => (
+                  <EventPhase key={i} phase={phase} />
+                ))
               )}
+            </div>
+          )}
             </div>
           )}
         </div>
