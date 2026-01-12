@@ -937,7 +937,7 @@ const specialCharClasses: Record<string, string> = {
 };
 
 // Render text with special character highlighting
-function DebugText({ text }: { text: string | null | undefined }) {
+export function DebugText({ text }: { text: string | null | undefined }) {
   if (!text) return <span className="text-text-muted">-</span>;
   
   const normalized = normalizeDebugText(text);
@@ -2341,64 +2341,7 @@ export function Playground() {
                 ))
               )}
             </div>
-              ) : (
-                snapshots.map((snapshot) => (
-                  <div
-                    key={snapshot.id}
-                    className="p-2 bg-bg-surface rounded border border-border-light text-xs"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-text-secondary">
-                        {new Date(snapshot.timestamp).toLocaleString()}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => snapshot.id && handleDeleteSnapshot(snapshot.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        {t.playground.delete}
-                      </button>
-                    </div>
-                    <div className="text-text-muted mb-1">
-                      {snapshot.environment.browser} {snapshot.environment.browserVersion} · {snapshot.environment.os}
-                    </div>
-                    {snapshot.trigger && (
-                      <div className="mb-1">
-                        <span className="inline-block px-1.5 py-0.5 text-[0.65rem] rounded bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700">
-                          {snapshot.trigger}
-                        </span>
-                      </div>
-                    )}
-                    {snapshot.triggerDetail && (
-                      <div className="text-[0.65rem] text-text-muted mb-1 line-clamp-2">
-                        {snapshot.triggerDetail}
-                      </div>
-                    )}
-                    <div className="flex gap-1">
-                      <button
-                        type="button"
-                        onClick={() => handleRestoreSnapshot(snapshot)}
-                        className="px-2 py-1 text-xs rounded border border-border-light bg-bg-muted hover:bg-bg-surface transition-colors"
-                      >
-                        {t.playground.restore}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const data = JSON.stringify(snapshot, null, 2);
-                          navigator.clipboard.writeText(data);
-                          alert('Snapshot data copied to clipboard');
-                        }}
-                        className="px-2 py-1 text-xs rounded border border-border-light bg-bg-muted hover:bg-bg-surface transition-colors"
-                      >
-                        {t.playground.copy}
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-) : isMobileView ? (
+          ) : isMobileView ? (
             <MobileEventLog phases={phases} isMobileView={isMobileView} />
           ) : (
             <div className="space-y-2">
@@ -2411,8 +2354,6 @@ export function Playground() {
                   <EventPhase key={i} phase={phase} />
                 ))
               )}
-            </div>
-          )}
             </div>
           )}
         </div>
