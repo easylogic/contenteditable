@@ -4,7 +4,16 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'browser-specific-behavior', text: 'Browser-Specific Behavior' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +21,13 @@ import '../../../styles/global.css';
   description="How formatIndent inputType applies indentation to paragraphs and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatIndent</code> inputType is triggered when the user increases indentation of selected paragraphs (typically via <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Tab</kbd> or toolbar button). The browser increases the left margin or padding of the affected elements.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Paragraph selected">
             <div class="space-y-4">
               <div>
@@ -41,7 +50,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Behavior">
+        <DocSection id="browser-specific-behavior" title="Browser-Specific Behavior">
           <DocInfoBox>
             <div class="space-y-3 text-sm">
               <div>
@@ -71,7 +80,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle indentation differently. Here's how major editors implement formatIndent:
           </p>
@@ -172,5 +181,6 @@ element.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

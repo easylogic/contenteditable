@@ -4,7 +4,18 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'security-considerations', text: 'Security Considerations' },
+  { depth: 2, slug: 'browser-specific-behavior', text: 'Browser-Specific Behavior' },
+  { depth: 2, slug: 'ime-composition-inserthtml', text: 'IME Composition + insertHTML' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +23,13 @@ import '../../../styles/global.css';
   description="How insertHTML inputType inserts HTML content and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertHTML</code> inputType is triggered when HTML content is inserted programmatically (e.g., from paste operations or programmatic insertion). The browser parses the HTML string and inserts it as DOM nodes at the selection position.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario 1: HTML string inserted at cursor">
             <div class="space-y-4">
               <div>
@@ -62,7 +73,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Security Considerations">
+        <DocSection id="security-considerations" title="Security Considerations">
           <DocAlert type="warning" title="⚠️ XSS Risk">
             <p class="m-0 mb-2 text-sm">
               <strong>Warning:</strong> Inserting arbitrary HTML can lead to XSS (Cross-Site Scripting) vulnerabilities. Always sanitize HTML content before insertion.
@@ -73,7 +84,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Browser-Specific Behavior">
+        <DocSection id="browser-specific-behavior" title="Browser-Specific Behavior">
           <DocInfoBox>
             <ul class="m-0 pl-6 text-sm text-text-secondary">
               <li class="mb-2">HTML parsing behavior may vary between browsers</li>
@@ -83,7 +94,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="IME Composition + insertHTML">
+        <DocSection id="ime-composition-inserthtml" title="IME Composition + insertHTML">
           <DocAlert type="error" title="⚠️ Critical Issue">
             <p class="m-0 mb-2 text-sm">
               During IME composition, inserting HTML (e.g., from paste operations) may cancel the active composition. The composition text may be lost or the HTML may be inserted in an unexpected location.
@@ -94,7 +105,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle HTML insertion differently, typically converting HTML to their internal model format. Here's how major editors implement insertHTML:
           </p>
@@ -214,5 +225,6 @@ element.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

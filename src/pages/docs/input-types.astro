@@ -5,7 +5,20 @@ import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../components/EditorExample.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'editor-internal-models-dom-synchronization', text: 'Editor Internal Models & DOM Synchronization' },
+  { depth: 2, slug: 'critical-edge-cases', text: 'Critical Edge Cases' },
+  { depth: 2, slug: 'event-firing-patterns', text: 'Event Firing Patterns' },
+  { depth: 2, slug: 'browser-specific-behavior', text: 'Browser-Specific Behavior' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+  { depth: 2, slug: 'mobile-specific-input-types', text: 'Mobile-Specific Input Types' },
+  { depth: 2, slug: 'testing-debugging', text: 'Testing & Debugging' },
+];
 
 const beforeInputExample = `element.addEventListener('beforeinput', (e) => {
   console.log('beforeinput:', e.inputType);
@@ -128,7 +141,7 @@ view.dom.addEventListener('beforeinput', (e) => {
   description="Understanding inputType values, their behavior, and edge cases in contenteditable elements."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">inputType</code> property in <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> events indicates what kind of operation is being performed. However, the behavior can vary significantly based on:
           </p>
@@ -140,7 +153,7 @@ view.dom.addEventListener('beforeinput', (e) => {
           </ul>
         </DocSection>
 
-        <DocSection title="Editor Internal Models & DOM Synchronization">
+        <DocSection id="editor-internal-models-dom-synchronization" title="Editor Internal Models & DOM Synchronization">
           <DocAlert type="error" title="⚠️ Critical Exception: preventDefault() and Internal Models">
             <p class="m-0 mb-2 text-sm">
               <strong>When editors use internal models and preventDefault():</strong>
@@ -200,7 +213,7 @@ view.dom.addEventListener('beforeinput', (e) => {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Critical Edge Cases">
+        <DocSection id="critical-edge-cases" title="Critical Edge Cases">
           <DocAlert type="error" title="⚠️ macOS + Korean IME + Collapsed Cursor + Formatting Shortcuts">
             <p class="m-0 mb-2 text-sm">
               <strong>macOS specific critical issue:</strong> During Korean IME composition with a collapsed cursor, pressing formatting shortcuts (e.g., <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + B</kbd>, <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + I</kbd>, <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + U</kbd>, <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Cmd + K</kbd>) behaves unexpectedly:
@@ -244,7 +257,7 @@ view.dom.addEventListener('beforeinput', (e) => {
           <DocCodeBlock code={collapsedSelectionIssue} />
         </DocSection>
 
-        <DocSection title="Event Firing Patterns">
+        <DocSection id="event-firing-patterns" title="Event Firing Patterns">
           <DocInfoBox title="When beforeinput vs input Fires">
             <div class="space-y-4">
               <div>
@@ -296,7 +309,7 @@ view.dom.addEventListener('beforeinput', (e) => {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Behavior">
+        <DocSection id="browser-specific-behavior" title="Browser-Specific Behavior">
           <DocInfoBox title="Known Browser Differences">
             <div class="space-y-4 text-sm">
               <div>
@@ -339,7 +352,7 @@ view.dom.addEventListener('beforeinput', (e) => {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editors handle these edge cases differently. Here's how they approach IME composition and collapsed selection:
           </p>
@@ -389,7 +402,7 @@ view.dom.addEventListener('beforeinput', (e) => {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Mobile-Specific Input Types">
+        <DocSection id="mobile-specific-input-types" title="Mobile-Specific Input Types">
           <p class="m-0 mb-4">
             Mobile devices and modern browsers support additional inputType values that are particularly relevant for mobile input methods:
           </p>
@@ -449,7 +462,7 @@ view.dom.addEventListener('beforeinput', (e) => {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Testing & Debugging">
+        <DocSection id="testing-debugging" title="Testing & Debugging">
           <p class="m-0 mb-4">
             To test these edge cases, use the playground and monitor both <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">input</code> events:
           </p>
@@ -492,5 +505,6 @@ view.dom.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

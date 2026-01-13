@@ -5,7 +5,19 @@ import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'edge-cases', text: 'Edge Cases' },
+  { depth: 2, slug: 'browser-specific-differences', text: 'Browser-Specific Differences' },
+  { depth: 2, slug: 'ime-composition-insertparagraph', text: 'IME Composition + insertParagraph' },
+  { depth: 2, slug: 'editor-internal-model-dom-synchronization', text: 'Editor Internal Model & DOM Synchronization' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -13,13 +25,13 @@ import '../../../styles/global.css';
   description="How insertParagraph inputType creates new paragraphs and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code> inputType is triggered when the user presses Enter to create a new paragraph. The DOM structure created varies significantly between browsers.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <p class="m-0 mb-4">
             When Enter is pressed in a contenteditable element, the browser splits the current paragraph and creates a new one. However, the exact DOM structure depends on the browser and the current selection state.
           </p>
@@ -71,7 +83,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Edge Cases">
+        <DocSection id="edge-cases" title="Edge Cases">
           <DocInfoBox title="Scenario 2: Cursor at end of paragraph">
             <div class="space-y-4">
               <div>
@@ -135,7 +147,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Differences">
+        <DocSection id="browser-specific-differences" title="Browser-Specific Differences">
           <DocInfoBox title="DOM Element Used for Paragraphs">
             <div class="space-y-3 text-sm">
               <div>
@@ -174,7 +186,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="IME Composition + insertParagraph">
+        <DocSection id="ime-composition-insertparagraph" title="IME Composition + insertParagraph">
           <DocAlert type="error" title="⚠️ Critical Issue">
             <p class="m-0 mb-2 text-sm">
               When IME composition is active and the user presses Enter, the behavior becomes unpredictable:
@@ -190,7 +202,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor Internal Model & DOM Synchronization">
+        <DocSection id="editor-internal-model-dom-synchronization" title="Editor Internal Model & DOM Synchronization">
           <DocAlert type="warning" title="⚠️ Exception: preventDefault() and Block Splitting">
             <p class="m-0 mb-2 text-sm">
               <strong>When editors use preventDefault() and split blocks in their model:</strong>
@@ -208,7 +220,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <EditorExample
             editor="slate"
             title="Handling insertParagraph"
@@ -315,5 +327,6 @@ function myKeyBindingFn(e) {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

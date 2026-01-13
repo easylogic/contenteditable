@@ -4,7 +4,16 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'ime-composition-insertunorderedlist', text: 'IME Composition + insertUnorderedList' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +21,13 @@ import '../../../styles/global.css';
   description="How insertUnorderedList inputType creates unordered lists and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertUnorderedList</code> inputType is triggered when the user creates an unordered list (typically via toolbar or programmatically). The browser wraps selected paragraphs in a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;ul&gt;</code> with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;li&gt;</code> items.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Multiple paragraphs selected">
             <div class="space-y-4">
               <div>
@@ -47,7 +56,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="IME Composition + insertUnorderedList">
+        <DocSection id="ime-composition-insertunorderedlist" title="IME Composition + insertUnorderedList">
           <DocAlert type="error" title="⚠️ Critical Issue">
             <p class="m-0 mb-2 text-sm">
               During IME composition, creating an unordered list may cancel the composition or commit it partially. The composition text may be lost or inserted incorrectly into list items.
@@ -58,7 +67,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle unordered list creation similarly to ordered lists. Here's how major editors implement insertUnorderedList:
           </p>
@@ -166,5 +175,6 @@ element.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

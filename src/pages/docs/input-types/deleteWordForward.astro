@@ -4,7 +4,17 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'difference-from-deletewordbackward', text: 'Difference from deleteWordBackward' },
+  { depth: 2, slug: 'ime-composition-deletewordforward', text: 'IME Composition + deleteWordForward' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +22,13 @@ import '../../../styles/global.css';
   description="How deleteWordForward inputType deletes words forward (Ctrl+Delete) and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteWordForward</code> inputType is triggered when the user presses <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + Delete</kbd>. The browser deletes the word after the cursor position (forward word deletion).
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Cursor in middle of word">
             <div class="space-y-4">
               <div>
@@ -41,7 +51,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Difference from deleteWordBackward">
+        <DocSection id="difference-from-deletewordbackward" title="Difference from deleteWordBackward">
           <DocInfoBox>
             <div class="space-y-3 text-sm">
               <div>
@@ -63,7 +73,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="IME Composition + deleteWordForward">
+        <DocSection id="ime-composition-deletewordforward" title="IME Composition + deleteWordForward">
           <DocAlert type="error" title="⚠️ Critical Issue">
             <p class="m-0 mb-2 text-sm">
               During IME composition, pressing <kbd class="px-1.5 py-0.5 bg-white/50 dark:bg-black/20 rounded text-xs">Ctrl/Cmd + Delete</kbd> may cancel the composition or delete more than expected. The behavior varies significantly between browsers and IME implementations.
@@ -74,7 +84,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle word-level forward deletion similarly to backward deletion. Here's how major editors implement deleteWordForward:
           </p>
@@ -193,5 +203,6 @@ function handleDeleteWordForward(editorState) {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

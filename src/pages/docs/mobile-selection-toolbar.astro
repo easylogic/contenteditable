@@ -4,7 +4,27 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'ios-safari-toolbar', text: 'iOS Safari Toolbar' },
+  { depth: 2, slug: 'android-chrome-toolbar', text: 'Android Chrome Toolbar' },
+  { depth: 2, slug: 'browser-specific-differences', text: 'Browser-Specific Differences' },
+  { depth: 2, slug: 'formatting-menu-items', text: 'Formatting Menu Items' },
+  { depth: 2, slug: 'select-all-behavior', text: 'Select All Behavior' },
+  { depth: 2, slug: 'os-device-specific-differences', text: 'OS & Device-Specific Differences' },
+  { depth: 3, slug: 'ios', text: 'iOS' },
+  { depth: 3, slug: 'android', text: 'Android' },
+  { depth: 2, slug: 'implementing-custom-toolbars', text: 'Implementing Custom Toolbars' },
+  { depth: 2, slug: 'disabling-default-toolbar-limited', text: 'Disabling Default Toolbar (Limited)' },
+  { depth: 2, slug: 'mobile-detection', text: 'Mobile Detection' },
+  { depth: 2, slug: 'selection-handle-issues', text: 'Selection Handle Issues' },
+  { depth: 2, slug: 'virtual-keyboard-interference', text: 'Virtual Keyboard Interference' },
+  { depth: 2, slug: 'testing-recommendations', text: 'Testing Recommendations' },
+];
 
 const disableDefaultToolbarCode = `// Disable default selection toolbar (may not work in all browsers)
 element.style.userSelect = 'none'; // Prevents selection entirely
@@ -85,7 +105,7 @@ if (isMobile() || isTouchDevice()) {
   description="Understanding mobile browser selection toolbars, their differences across platforms, and how to implement custom toolbars."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             When users select text on mobile devices, browsers display a context menu or toolbar with actions like Copy, Paste, and Share. These toolbars vary significantly across browsers, operating systems, and devices. Understanding these differences is crucial for building rich text editors that work well on mobile.
           </p>
@@ -96,7 +116,7 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="iOS Safari Toolbar">
+        <DocSection id="ios-safari-toolbar" title="iOS Safari Toolbar">
           <p class="m-0 mb-4">
             iOS Safari displays a toolbar above the selected text with standard actions.
           </p>
@@ -150,7 +170,7 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Android Chrome Toolbar">
+        <DocSection id="android-chrome-toolbar" title="Android Chrome Toolbar">
           <p class="m-0 mb-4">
             Android Chrome displays a toolbar with actions that may vary by Android version and device manufacturer.
           </p>
@@ -205,7 +225,7 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Browser-Specific Differences">
+        <DocSection id="browser-specific-differences" title="Browser-Specific Differences">
           <DocInfoBox title="Toolbar Comparison">
             <div class="overflow-x-auto">
               <table class="w-full text-sm border-collapse">
@@ -260,7 +280,7 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Formatting Menu Items">
+        <DocSection id="formatting-menu-items" title="Formatting Menu Items">
           <p class="m-0 mb-4">
             In <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> elements, mobile browsers may show formatting options (Bold, Italic, Underline) in the selection toolbar. These options vary by browser and OS version.
           </p>
@@ -325,7 +345,7 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Select All Behavior">
+        <DocSection id="select-all-behavior" title="Select All Behavior">
           <p class="m-0 mb-4">
             The "Select All" option in mobile toolbars selects all content within the contenteditable element, not just the visible text.
           </p>
@@ -346,8 +366,8 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="OS & Device-Specific Differences">
-          <DocSection title="iOS">
+        <DocSection id="os-device-specific-differences" title="OS & Device-Specific Differences">
+          <DocSection id="ios" title="iOS">
             <DocInfoBox>
               <ul class="m-0 pl-6 text-sm text-text-secondary">
                 <li class="mb-1"><strong>iOS Version:</strong> Menu items and formatting options may differ between iOS versions</li>
@@ -359,7 +379,7 @@ if (isMobile() || isTouchDevice()) {
             </DocInfoBox>
           </DocSection>
 
-          <DocSection title="Android">
+          <DocSection id="android" title="Android">
             <DocInfoBox>
               <ul class="m-0 pl-6 text-text-secondary">
                 <li class="mb-1"><strong>Android Version:</strong> Menu items and formatting options vary by Android version (e.g., Android 10 vs Android 13)</li>
@@ -372,7 +392,7 @@ if (isMobile() || isTouchDevice()) {
           </DocSection>
         </DocSection>
 
-        <DocSection title="Implementing Custom Toolbars">
+        <DocSection id="implementing-custom-toolbars" title="Implementing Custom Toolbars">
           <p class="m-0 mb-4">
             While you cannot fully replace the system toolbar, you can detect selection changes and show your own custom toolbar. Here are common approaches:
           </p>
@@ -403,7 +423,7 @@ if (isMobile() || isTouchDevice()) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Disabling Default Toolbar (Limited)">
+        <DocSection id="disabling-default-toolbar-limited" title="Disabling Default Toolbar (Limited)">
           <p class="m-0 mb-4">
             Attempting to disable the default toolbar has limited success. Here are approaches that may work in some browsers:
           </p>
@@ -422,14 +442,14 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Mobile Detection">
+        <DocSection id="mobile-detection" title="Mobile Detection">
           <p class="m-0 mb-4">
             Detect mobile devices to conditionally show custom toolbars or handle mobile-specific behavior:
           </p>
           <DocCodeBlock code={detectMobileCode} />
         </DocSection>
 
-        <DocSection title="Selection Handle Issues">
+        <DocSection id="selection-handle-issues" title="Selection Handle Issues">
           <DocAlert type="error" title="⚠️ Mobile Selection Handles" class="mb-4">
             <p class="m-0 mb-2 text-sm">
               <strong>Selection handles are problematic on mobile:</strong>
@@ -450,7 +470,7 @@ if (isMobile() || isTouchDevice()) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Virtual Keyboard Interference">
+        <DocSection id="virtual-keyboard-interference" title="Virtual Keyboard Interference">
           <DocAlert type="warning" title="⚠️ Keyboard and Toolbar Conflicts" class="mb-4">
             <p class="m-0 mb-2 text-sm">
               <strong>Virtual keyboard may interfere with toolbars:</strong>
@@ -465,7 +485,7 @@ if (isMobile() || isTouchDevice()) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Testing Recommendations">
+        <DocSection id="testing-recommendations" title="Testing Recommendations">
           <DocInfoBox>
             <ul class="m-0 pl-6 text-sm text-text-secondary">
               <li class="mb-2"><strong>Test on real devices:</strong> Emulators may not accurately show toolbar behavior</li>
@@ -503,5 +523,6 @@ if (isMobile() || isTouchDevice()) {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

@@ -4,7 +4,20 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'caret-styling', text: 'Caret Styling' },
+  { depth: 2, slug: 'text-selection', text: 'Text Selection Control' },
+  { depth: 2, slug: 'selection-styling', text: 'Selection Styling' },
+  { depth: 2, slug: 'focus-styling', text: 'Focus Styling' },
+  { depth: 2, slug: 'problematic-properties', text: 'Problematic CSS Properties' },
+  { depth: 2, slug: 'platform-specific-issues', text: 'Platform-Specific Issues & Edge Cases' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
 
 const caretColorCode = `// Custom caret color
 [contenteditable] {
@@ -487,5 +500,6 @@ const willChangeCode = `// will-change (may improve or degrade performance)
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

@@ -5,7 +5,20 @@ import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../components/EditorExample.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'arrow-keys', text: 'Arrow Keys' },
+  { depth: 2, slug: 'special-keys', text: 'Special Navigation Keys' },
+  { depth: 2, slug: 'tab-navigation', text: 'Tab Navigation' },
+  { depth: 2, slug: 'ime-composition', text: 'IME Composition & Keyboard Navigation' },
+  { depth: 2, slug: 'mobile-navigation', text: 'Mobile Keyboard Navigation' },
+  { depth: 2, slug: 'browser-differences', text: 'Browser-Specific Differences' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
 ---
 
 <DocLayout
@@ -499,5 +512,6 @@ element.addEventListener('keydown', (e) => {
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

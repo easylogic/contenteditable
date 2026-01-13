@@ -4,7 +4,26 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'writing-text-to-clipboard', text: 'Writing Text to Clipboard' },
+  { depth: 2, slug: 'reading-text-from-clipboard', text: 'Reading Text from Clipboard' },
+  { depth: 2, slug: 'writing-html-to-clipboard', text: 'Writing HTML to Clipboard' },
+  { depth: 2, slug: 'reading-html-from-clipboard', text: 'Reading HTML from Clipboard' },
+  { depth: 2, slug: 'handling-paste-events', text: 'Handling Paste Events' },
+  { depth: 2, slug: 'handling-copy-events', text: 'Handling Copy Events' },
+  { depth: 2, slug: 'handling-cut-events', text: 'Handling Cut Events' },
+  { depth: 2, slug: 'checking-permissions', text: 'Checking Permissions' },
+  { depth: 2, slug: 'platform-specific-issues-edge-cases', text: 'Platform-Specific Issues & Edge Cases' },
+  { depth: 3, slug: 'browser-specific-issues', text: 'Browser-Specific Issues' },
+  { depth: 3, slug: 'os-keyboard-specific-issues', text: 'OS & Keyboard-Specific Issues' },
+  { depth: 3, slug: 'device-specific-issues', text: 'Device-Specific Issues' },
+  { depth: 3, slug: 'general-browser-differences', text: 'General Browser Differences' },
+];
 
 const writeTextCode = `// Copy text to clipboard
 async function copyText(text) {
@@ -181,7 +200,7 @@ async function checkClipboardPermission() {
   description="Using the Clipboard API and paste events to handle copy, cut, and paste operations in contenteditable elements."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The Clipboard API provides programmatic access to the system clipboard. In contenteditable elements, you can use it alongside paste/copy/cut events to control how content is copied and pasted.
           </p>
@@ -200,14 +219,14 @@ async function checkClipboardPermission() {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Writing Text to Clipboard">
+        <DocSection id="writing-text-to-clipboard" title="Writing Text to Clipboard">
           <p class="m-0 mb-4">
             Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">navigator.clipboard.writeText()</code> to copy plain text to the clipboard.
           </p>
           <DocCodeBlock code={writeTextCode} />
         </DocSection>
 
-        <DocSection title="Reading Text from Clipboard">
+        <DocSection id="reading-text-from-clipboard" title="Reading Text from Clipboard">
           <p class="m-0 mb-4">
             Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">navigator.clipboard.readText()</code> to read plain text from the clipboard.
           </p>
@@ -220,21 +239,21 @@ async function checkClipboardPermission() {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Writing HTML to Clipboard">
+        <DocSection id="writing-html-to-clipboard" title="Writing HTML to Clipboard">
           <p class="m-0 mb-4">
             To copy HTML content, use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">ClipboardItem</code> with a Blob containing the HTML.
           </p>
           <DocCodeBlock code={writeHTMLCode} />
         </DocSection>
 
-        <DocSection title="Reading HTML from Clipboard">
+        <DocSection id="reading-html-from-clipboard" title="Reading HTML from Clipboard">
           <p class="m-0 mb-4">
             Read HTML from clipboard by checking for <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">text/html</code> type in clipboard items.
           </p>
           <DocCodeBlock code={readHTMLCode} />
         </DocSection>
 
-        <DocSection title="Handling Paste Events">
+        <DocSection id="handling-paste-events" title="Handling Paste Events">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">paste</code> event fires when the user pastes content. You can intercept it and customize how content is inserted.
           </p>
@@ -248,21 +267,21 @@ async function checkClipboardPermission() {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Handling Copy Events">
+        <DocSection id="handling-copy-events" title="Handling Copy Events">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">copy</code> event fires when the user copies content. You can customize what gets copied.
           </p>
           <DocCodeBlock code={copyEventCode} />
         </DocSection>
 
-        <DocSection title="Handling Cut Events">
+        <DocSection id="handling-cut-events" title="Handling Cut Events">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">cut</code> event fires when the user cuts content. Similar to copy, but also removes the content.
           </p>
           <DocCodeBlock code={cutEventCode} />
         </DocSection>
 
-        <DocSection title="Checking Permissions">
+        <DocSection id="checking-permissions" title="Checking Permissions">
           <p class="m-0 mb-4">
             Use the Permissions API to check clipboard access permissions before attempting to read from clipboard.
           </p>
@@ -280,12 +299,12 @@ async function checkClipboardPermission() {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Platform-Specific Issues & Edge Cases">
+        <DocSection id="platform-specific-issues-edge-cases" title="Platform-Specific Issues & Edge Cases">
           <p class="m-0 mb-4">
             Clipboard API behavior and paste events can vary significantly depending on browser, OS, device, and keyboard type. These variations can affect how content is copied and pasted.
           </p>
 
-          <DocSection title="Browser-Specific Issues">
+          <DocSection id="browser-specific-issues" title="Browser-Specific Issues">
             <DocAlert type="error" title="⚠️ Safari: Clipboard API Limitations" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Safari:</strong> Clipboard API has limitations and differences:
@@ -321,7 +340,7 @@ async function checkClipboardPermission() {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="OS & Keyboard-Specific Issues">
+          <DocSection id="os-keyboard-specific-issues" title="OS & Keyboard-Specific Issues">
             <DocAlert type="error" title="⚠️ macOS: Permission Prompts" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>macOS:</strong> Clipboard access may trigger system-level permission prompts:
@@ -356,7 +375,7 @@ async function checkClipboardPermission() {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="Device-Specific Issues">
+          <DocSection id="device-specific-issues" title="Device-Specific Issues">
             <DocAlert type="error" title="⚠️ Mobile: Clipboard API Restrictions" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Mobile devices (Android/iOS):</strong> Clipboard API has additional restrictions:
@@ -419,7 +438,7 @@ async function checkClipboardPermission() {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="General Browser Differences">
+          <DocSection id="general-browser-differences" title="General Browser Differences">
             <DocAlert type="warning" class="mb-4">
               <p class="m-0 text-sm">
                 <strong>Clipboard API support:</strong> The modern Clipboard API is supported in Chrome, Edge, Firefox, and Safari (Safari 13.1+). Older browsers require the event-based approach with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">clipboardData</code>.
@@ -457,5 +476,6 @@ async function checkClipboardPermission() {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

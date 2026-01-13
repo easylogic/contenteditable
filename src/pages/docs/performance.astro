@@ -4,7 +4,21 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'large-content', text: 'Large Content Performance' },
+  { depth: 2, slug: 'mutation-observer', text: 'MutationObserver Performance' },
+  { depth: 2, slug: 'css-performance', text: 'CSS Performance Impact' },
+  { depth: 2, slug: 'virtual-scrolling', text: 'Virtual Scrolling' },
+  { depth: 2, slug: 'optimization', text: 'Optimization Strategies' },
+  { depth: 2, slug: 'platform-issues', text: 'Platform-Specific Issues' },
+  { depth: 3, slug: 'browser-specific-issues', text: 'Browser-Specific Issues' },
+  { depth: 3, slug: 'device-specific-issues', text: 'Device-Specific Issues' },
+];
 ---
 
 <DocLayout
@@ -330,7 +344,7 @@ requestAnimationFrame(() => {
   </DocSection>
 
   <DocSection id="platform-issues" title="Platform-Specific Issues">
-    <DocSection title="Browser-Specific Issues">
+    <DocSection id="browser-specific-issues" title="Browser-Specific Issues">
       <DocAlert type="warning" title="⚠️ Chrome: Large DOM Performance" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>Chrome:</strong> Performance degrades more noticeably with large DOM trees compared to Firefox. Consider virtual scrolling or pagination for Chrome users.
@@ -350,7 +364,7 @@ requestAnimationFrame(() => {
       </DocAlert>
     </DocSection>
 
-    <DocSection title="Device-Specific Issues">
+    <DocSection id="device-specific-issues" title="Device-Specific Issues">
       <DocAlert type="error" title="⚠️ Mobile: Limited Performance" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>Mobile devices:</strong> Performance is more limited on mobile. Consider:
@@ -379,5 +393,6 @@ requestAnimationFrame(() => {
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

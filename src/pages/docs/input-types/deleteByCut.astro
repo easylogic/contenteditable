@@ -4,7 +4,18 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'difference-from-deletecontent', text: 'Difference from deleteContent' },
+  { depth: 2, slug: 'clipboard-interaction', text: 'Clipboard Interaction' },
+  { depth: 2, slug: 'browser-specific-behavior', text: 'Browser-Specific Behavior' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +23,13 @@ import '../../../styles/global.css';
   description="How deleteByCut inputType handles cut operations (Ctrl/Cmd+X) and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteByCut</code> inputType is triggered when the user cuts selected content (typically via <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + X</kbd>). The browser removes the selected content and places it in the clipboard.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Text selected and cut">
             <div class="space-y-4">
               <div>
@@ -41,7 +52,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Difference from deleteContent">
+        <DocSection id="difference-from-deletecontent" title="Difference from deleteContent">
           <DocInfoBox>
             <div class="space-y-3 text-sm">
               <div>
@@ -65,7 +76,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Clipboard Interaction">
+        <DocSection id="clipboard-interaction" title="Clipboard Interaction">
           <DocInfoBox>
             <p class="m-0 mb-2 text-sm text-text-secondary">
               When <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">deleteByCut</code> is triggered:
@@ -79,7 +90,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Behavior">
+        <DocSection id="browser-specific-behavior" title="Browser-Specific Behavior">
           <DocInfoBox>
             <div class="space-y-3 text-sm">
               <div>
@@ -109,7 +120,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle cut operations similarly to delete operations, but also need to handle clipboard copying. Here's how major editors implement deleteByCut:
           </p>
@@ -243,5 +254,6 @@ function handleCut(editorState) {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

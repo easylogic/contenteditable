@@ -4,7 +4,25 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'inheritance', text: 'Inheritance Behavior' },
+  { depth: 2, slug: 'browser-differences', text: 'Browser Differences' },
+  { depth: 3, slug: 'chrome-edge', text: 'Chrome/Edge' },
+  { depth: 3, slug: 'firefox', text: 'Firefox' },
+  { depth: 3, slug: 'safari', text: 'Safari' },
+  { depth: 2, slug: 'selection-behavior', text: 'Selection Behavior' },
+  { depth: 2, slug: 'keyboard-navigation', text: 'Keyboard Navigation' },
+  { depth: 2, slug: 'use-cases', text: 'Use Cases' },
+  { depth: 2, slug: 'workarounds', text: 'Workarounds' },
+  { depth: 2, slug: 'platform-issues', text: 'Platform-Specific Issues' },
+  { depth: 3, slug: 'browser-specific-issues', text: 'Browser-Specific Issues' },
+  { depth: 3, slug: 'mobile-specific-issues', text: 'Mobile-Specific Issues' },
+];
 ---
 
 <DocLayout
@@ -91,7 +109,7 @@ import '../../styles/global.css';
   </DocSection>
 
   <DocSection id="browser-differences" title="Browser Differences">
-    <DocSection title="Chrome/Edge">
+    <DocSection id="chrome-edge" title="Chrome/Edge">
       <DocAlert type="error" title="⚠️ contenteditable=&quot;false&quot; Not Always Respected" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>Chrome/Edge:</strong> Child elements with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> may still be editable. The attribute is not consistently respected.
@@ -103,7 +121,7 @@ import '../../styles/global.css';
       </DocAlert>
     </DocSection>
 
-    <DocSection title="Firefox">
+    <DocSection id="firefox" title="Firefox">
       <DocAlert type="warning" title="⚠️ Inheritance Inconsistencies" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>Firefox:</strong> Inheritance behavior is inconsistent. Children with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> may still be editable, and children with <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="inherit"</code> may not inherit correctly.
@@ -111,7 +129,7 @@ import '../../styles/global.css';
       </DocAlert>
     </DocSection>
 
-    <DocSection title="Safari">
+    <DocSection id="safari" title="Safari">
       <DocInfoBox>
         <p class="m-0 mb-2 text-sm">
           <strong>Safari:</strong> Generally better support for <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code>, but still test thoroughly.
@@ -478,7 +496,7 @@ protectNonEditable(document.getElementById('editor'));`} />
   </DocSection>
 
   <DocSection id="platform-issues" title="Platform-Specific Issues">
-    <DocSection title="Browser-Specific Issues">
+    <DocSection id="browser-specific-issues" title="Browser-Specific Issues">
       <DocAlert type="error" title="⚠️ Chrome: Editing Allowed" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>Chrome:</strong> May allow editing within <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements. Use programmatic event prevention as workaround.
@@ -498,7 +516,7 @@ protectNonEditable(document.getElementById('editor'));`} />
       </DocAlert>
     </DocSection>
 
-    <DocSection title="Mobile-Specific Issues">
+    <DocSection id="mobile-specific-issues" title="Mobile-Specific Issues">
       <DocAlert type="warning" title="⚠️ Mobile: Touch Selection" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>Mobile devices:</strong> Touch selection may behave differently with non-editable elements. Test on actual devices.
@@ -531,5 +549,6 @@ protectNonEditable(document.getElementById('editor'));`} />
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

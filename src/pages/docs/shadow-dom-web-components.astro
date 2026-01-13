@@ -4,7 +4,21 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-usage', text: 'Basic Usage' },
+  { depth: 2, slug: 'event-bubbling', text: 'Event Bubbling Issues' },
+  { depth: 2, slug: 'selection-issues', text: 'Selection API Issues' },
+  { depth: 2, slug: 'focus-management', text: 'Focus Management Issues' },
+  { depth: 2, slug: 'slots-and-contenteditable', text: 'Slots & contenteditable' },
+  { depth: 2, slug: 'workarounds', text: 'Workarounds & Best Practices' },
+  { depth: 2, slug: 'platform-specific-issues', text: 'Platform-Specific Issues & Edge Cases' },
+  { depth: 2, slug: 'alternative-approaches', text: 'Alternative Approaches' },
+];
 
 const shadowDOMBasicCode = `// Basic Shadow DOM with contenteditable
 class EditableComponent extends HTMLElement {
@@ -422,5 +436,6 @@ class EditableComponent extends HTMLElement {
       Keep contenteditable in light DOM but wrap it in a Web Component that handles styling and behavior through the component's API rather than shadow DOM.
     </p>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

@@ -4,7 +4,18 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'mobile-specific-behavior', text: 'Mobile-Specific Behavior' },
+  { depth: 2, slug: 'browser-support', text: 'Browser Support' },
+  { depth: 2, slug: 'handling-insertreplacementtext', text: 'Handling insertReplacementText' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +23,13 @@ import '../../../styles/global.css';
   description="How insertReplacementText inputType handles auto-complete and text replacement operations, especially on mobile devices."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertReplacementText</code> inputType is triggered when text is replaced by auto-complete, predictive text, or suggestion features. This is particularly common on mobile devices with smart keyboards that offer word suggestions and auto-complete.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Auto-complete suggestion selected">
             <div class="space-y-4">
               <div>
@@ -42,7 +53,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Mobile-Specific Behavior">
+        <DocSection id="mobile-specific-behavior" title="Mobile-Specific Behavior">
           <DocAlert type="error" title="⚠️ Android Samsung Keyboard">
             <p class="m-0 mb-2 text-sm">
               <strong>Android + Samsung Keyboard:</strong> When text prediction/suggestion features are enabled, selecting suggested text may cause unexpected behavior:
@@ -91,7 +102,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Handling insertReplacementText">
+        <DocSection id="handling-insertreplacementtext" title="Handling insertReplacementText">
           <DocInfoBox title="Best Practices">
             <ul class="m-0 pl-6 text-sm text-text-secondary">
               <li class="mb-2">Monitor both <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> and <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">input</code> events to catch all text replacements</li>
@@ -103,7 +114,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle text replacement similarly to text insertion. Here's how major editors implement insertReplacementText:
           </p>
@@ -215,5 +226,6 @@ element.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

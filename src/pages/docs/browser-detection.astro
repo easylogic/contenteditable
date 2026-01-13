@@ -1,0 +1,483 @@
+---
+import DocLayout from '../../components/docs/DocLayout.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'why-browser-detection', text: 'Why browser detection matters' },
+  { depth: 2, slug: 'user-agent-strings', text: 'Understanding User-Agent strings' },
+  { depth: 3, slug: 'safari-ios', text: 'Safari (iOS)' },
+  { depth: 3, slug: 'chrome-ios', text: 'Chrome (iOS)' },
+  { depth: 2, slug: 'detection-patterns', text: 'Browser detection patterns' },
+  { depth: 3, slug: 'flag-based', text: 'Flag-based detection' },
+  { depth: 3, slug: 'behavior-based', text: 'Behavior-based detection' },
+  { depth: 3, slug: 'hybrid', text: 'Hybrid approach' },
+  { depth: 2, slug: 'best-practices', text: 'Best practices' },
+  { depth: 2, slug: 'useragent-reference', text: 'User-Agent reference' },
+  { depth: 3, slug: 'macos', text: 'macOS' },
+  { depth: 3, slug: 'windows', text: 'Windows' },
+  { depth: 3, slug: 'linux', text: 'Linux' },
+  { depth: 3, slug: 'mobile', text: 'Mobile (iOS & Android)' },
+  { depth: 2, slug: 'related-resources', text: 'Related resources' },
+];
+
+const safariUA = `Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1`;
+
+const chromeUA = `Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/115.0.5790.130 Mobile/15E148 Safari/604.1`;
+
+const flagBasedCode = `function getBrowserFlags(ua: string) {
+  return {
+    isSafari: /Safari\\//.test(ua) && !/CriOS/.test(ua),
+    isChrome: /CriOS/.test(ua),
+    isFirefox: /FxiOS/.test(ua),
+    engine: 'webkit' as const // iOS uses WebKit
+  };
+}`;
+
+const behaviorBasedCode = `function getBrowserFeatures() {
+  return {
+    supportsBeforeInput: 'onbeforeinput' in document,
+    supportsComposition: 'oncompositionstart' in document,
+    supportsSelectionAPI: !!window.getSelection
+  };
+}`;
+
+const hybridCode = `function getBrowserInfo() {
+  const ua = navigator.userAgent;
+
+  return {
+    os: /iPhone|iPad|iPod/.test(ua) ? 'ios' : 'android',
+    browser: /CriOS/.test(ua) ? 'chrome-ios' :
+             /Safari\\//.test(ua) ? 'safari' : 'unknown',
+    engine: 'webkit', // iOS always uses WebKit
+    needsSpecialHandling: /CriOS/.test(ua)
+  };
+}`;
+
+const firefoxCompositionCode = `let lastCompositionType = '';
+let lastCompositionData = '';
+let isComposing = false;
+
+function handleCompositionUpdate(e: CompositionEvent) {
+  // Filter out duplicate events
+  if (e.data === lastCompositionData && e.type === lastCompositionType) {
+    return;
+  }
+
+  lastCompositionData = e.data;
+  lastCompositionType = e.type;
+  // Process the event
+}`;
+
+// UserAgent strings for reference
+const userAgentDatabase = [
+  // macOS
+  {
+    os: 'macOS',
+    browser: 'Safari 17',
+    ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+    engine: 'WebKit',
+    notes: 'No Chrome/Edg/Firefox identifiers'
+  },
+  {
+    os: 'macOS',
+    browser: 'Chrome 120',
+    ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    engine: 'Blink',
+    notes: 'Contains "Chrome/" and "Safari/" (Safari string is for compatibility)'
+  },
+  {
+    os: 'macOS',
+    browser: 'Firefox 121',
+    ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14.0; rv:121.0) Gecko/20100101 Firefox/121.0',
+    engine: 'Gecko',
+    notes: 'Contains "Firefox/" and "Gecko/"'
+  },
+  // Windows
+  {
+    os: 'Windows',
+    browser: 'Chrome 120',
+    ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    engine: 'Blink',
+    notes: '"Windows NT 10.0" = Windows 10/11'
+  },
+  {
+    os: 'Windows',
+    browser: 'Edge 120',
+    ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0',
+    engine: 'Blink',
+    notes: 'Contains "Edg/" (Chrome-based Edge)'
+  },
+  {
+    os: 'Windows',
+    browser: 'Firefox 121',
+    ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    engine: 'Gecko',
+    notes: '"Windows NT 10.0" for both Windows 10/11'
+  },
+  // Linux
+  {
+    os: 'Linux',
+    browser: 'Chrome 120',
+    ua: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    engine: 'Blink',
+    notes: '"X11" for desktop Linux'
+  },
+  {
+    os: 'Linux',
+    browser: 'Firefox 121',
+    ua: 'Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0',
+    engine: 'Gecko',
+    notes: 'Uses "X11" instead of specific Linux distribution'
+  },
+  // iOS
+  {
+    os: 'iOS',
+    browser: 'Safari 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    engine: 'WebKit',
+    notes: 'iOS browsers must use WebKit'
+  },
+  {
+    os: 'iOS',
+    browser: 'Chrome 120',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0.6099.119 Mobile/15E148 Safari/604.1',
+    engine: 'WebKit',
+    notes: '"CriOS/" identifies Chrome on iOS'
+  },
+  {
+    os: 'iOS',
+    browser: 'Firefox 121',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/121.0 Mobile/15E148 Safari/604.1',
+    engine: 'WebKit',
+    notes: '"FxiOS/" identifies Firefox on iOS'
+  },
+  // Android
+  {
+    os: 'Android',
+    browser: 'Chrome 120',
+    ua: 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+    engine: 'Blink',
+    notes: '"Mobile Safari/" is legacy, Android Chrome uses Blink'
+  },
+  {
+    os: 'Android',
+    browser: 'Samsung Internet 23',
+    ua: 'Mozilla/5.0 (Linux; Android 14; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/23.0 Chrome/120.0.0.0 Mobile Safari/537.36',
+    engine: 'Blink',
+    notes: '"SamsungBrowser/" + Chrome version'
+  },
+  {
+    os: 'Android',
+    browser: 'Firefox 121',
+    ua: 'Mozilla/5.0 (Android 14; Mobile; rv:121.0) Gecko/121.0 Firefox/121.0',
+    engine: 'Gecko',
+    notes: 'Firefox on Android uses Gecko'
+  },
+];
+---
+
+<DocLayout
+  title="Browser detection & User-Agent"
+  description="How to detect browsers and handle userAgent variations, especially on iOS."
+  currentPath={Astro.url.pathname}
+>
+  <DocSection id="why-browser-detection" title="Why browser detection matters">
+    <p class="m-0 mb-4">
+      When working with <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code>, browser differences are not just cosmetic—they directly affect how your code works:
+    </p>
+    <ul class="m-0 mb-4 pl-6">
+      <li class="mb-2">Event sequences differ (e.g., <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> support)</li>
+      <li class="mb-2">IME composition behavior varies</li>
+      <li class="mb-2">Selection and Range API implementation differences</li>
+      <li class="mb-2">Undo/redo stack behavior differs</li>
+    </ul>
+    <p class="m-0 mb-4">
+      Detecting the browser allows you to apply workarounds for known issues and provide consistent behavior across platforms.
+    </p>
+  </DocSection>
+
+  <DocSection id="user-agent-strings" title="Understanding User-Agent strings">
+    <p class="m-0 mb-4">
+      The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">navigator.userAgent</code> string contains information about the browser and platform. However, on iOS, things get complicated:
+    </p>
+
+    <div class="mb-6">
+      <h3 id="safari-ios" class="text-lg m-0 mb-2 text-text-primary">
+        Safari (iOS)
+      </h3>
+      <DocInfoBox>
+        <code class="text-xs block overflow-x-auto">{safariUA}</code>
+      </DocInfoBox>
+      <p class="m-0 mt-2 text-sm text-text-secondary">
+        Key identifiers: <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">Version/16.0</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">Safari/604.1</code>, NO <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">CriOS</code>
+      </p>
+    </div>
+
+    <div>
+      <h3 id="chrome-ios" class="text-lg m-0 mb-2 text-text-primary">
+        Chrome (iOS)
+      </h3>
+      <DocInfoBox>
+        <code class="text-xs block overflow-x-auto">{chromeUA}</code>
+      </DocInfoBox>
+      <p class="m-0 mt-2 text-sm text-text-secondary">
+        Key identifiers: <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">CriOS/115.0.5790.130</code>, <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">Safari/604.1</code> (still present)
+      </p>
+    </div>
+
+    <DocAlert type="warning" class="mt-4">
+      <p class="m-0 text-sm">
+        <strong>iOS uses the same rendering engine:</strong> Chrome, Firefox, and other browsers on iOS are required by Apple to use WebKit (Safari's engine). This means rendering behavior is identical, but JavaScript APIs and bugs may still differ.
+      </p>
+    </DocAlert>
+  </DocSection>
+
+  <DocSection id="detection-patterns" title="Browser detection patterns">
+    <p class="m-0 mb-4">
+      There are several approaches to browser detection. Choose based on your use case.
+    </p>
+
+    <div class="mb-6">
+      <h3 id="flag-based" class="text-lg m-0 mb-2 text-text-primary">
+        Flag-based detection
+      </h3>
+      <p class="m-0 mb-2">
+        Parse the User-Agent string and set boolean flags. Simple but fragile if user agents change.
+      </p>
+      <DocCodeBlock code={flagBasedCode} />
+    </div>
+
+    <div class="mb-6">
+      <h3 id="behavior-based" class="text-lg m-0 mb-2 text-text-primary">
+        Behavior-based detection (recommended)
+      </h3>
+      <p class="m-0 mb-2">
+        Test for the presence of APIs you need. More reliable because it detects actual capabilities.
+      </p>
+      <DocCodeBlock code={behaviorBasedCode} />
+      <p class="m-0 mt-2 text-sm text-text-secondary">
+        Use this when you care about <em>what the browser can do</em>, not <em>which browser it is</em>.
+      </p>
+    </div>
+
+    <div>
+      <h3 id="hybrid" class="text-lg m-0 mb-2 text-text-primary">
+        Hybrid approach
+      </h3>
+      <p class="m-0 mb-2">
+        Combine both: detect the browser for known workarounds, but use feature detection for core functionality.
+      </p>
+      <DocCodeBlock code={hybridCode} />
+    </div>
+  </DocSection>
+
+  <DocSection id="best-practices" title="Best practices">
+    <DocAlert type="warning">
+      <p class="m-0 text-sm mb-2">
+        <strong>Avoid over-detection:</strong> Only detect browsers when you have a specific, known issue to work around. Don't add "just in case" browser checks.
+      </p>
+    </DocAlert>
+
+    <DocAlert type="warning">
+      <p class="m-0 text-sm mb-2">
+        <strong>Prefer feature detection:</strong> If you need to know if <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> is supported, check <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'onbeforeinput' in document</code>, not the browser name.
+      </p>
+    </DocAlert>
+
+    <DocAlert type="warning">
+      <p class="m-0 text-sm mb-2">
+        <strong>Handle iOS carefully:</strong> Remember that Chrome and Safari on iOS share the same engine. Test behaviors, not just names.
+      </p>
+    </DocAlert>
+
+    <DocAlert type="warning">
+      <p class="m-0 text-sm">
+        <strong>Document your workarounds:</strong> When you add a browser-specific workaround, add comments explaining <em>why</em> it's needed. This helps when browsers fix issues or behavior changes.
+      </p>
+    </DocAlert>
+
+    <div class="mt-4">
+      <h3 class="text-lg m-0 mb-2 text-text-primary">
+        Firefox IME duplication example
+      </h3>
+      <p class="m-0 mb-2">
+        Firefox can fire duplicate <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code> events for Korean IME input. Filter them by tracking the last event:
+      </p>
+      <DocCodeBlock code={firefoxCompositionCode} />
+    </div>
+  </DocSection>
+
+  <DocSection id="useragent-reference" title="User-Agent reference">
+    <p class="m-0 mb-4">
+      Common User-Agent strings from various browsers and operating systems. These are examples from recent versions; actual strings will vary by version number and build.
+    </p>
+
+    <div class="mb-6">
+      <h3 id="macos" class="text-lg m-0 mb-3 text-text-primary">
+        macOS
+      </h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Browser</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Engine</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Key Identifiers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {userAgentDatabase.filter((ua) => ua.os === 'macOS').map((item) => (
+              <tr>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top;">
+                  <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">{item.browser}</div>
+                  <div class="text-xs text-text-secondary">{item.ua}</div>
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--accent-primary);">
+                  {item.engine}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text-secondary);">
+                  {item.notes}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h3 id="windows" class="text-lg m-0 mb-3 text-text-primary">
+        Windows
+      </h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Browser</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Engine</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Key Identifiers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {userAgentDatabase.filter((ua) => ua.os === 'Windows').map((item) => (
+              <tr>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top;">
+                  <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">{item.browser}</div>
+                  <div class="text-xs text-text-secondary" style="word-break: break-all;">{item.ua}</div>
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--accent-primary);">
+                  {item.engine}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text-secondary);">
+                  {item.notes}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h3 id="linux" class="text-lg m-0 mb-3 text-text-primary">
+        Linux
+      </h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Browser</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Engine</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Key Identifiers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {userAgentDatabase.filter((ua) => ua.os === 'Linux').map((item) => (
+              <tr>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top;">
+                  <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">{item.browser}</div>
+                  <div class="text-xs text-text-secondary" style="word-break: break-all;">{item.ua}</div>
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--accent-primary);">
+                  {item.engine}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text-secondary);">
+                  {item.notes}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <h3 id="mobile" class="text-lg m-0 mb-3 text-text-primary">
+        Mobile (iOS & Android)
+      </h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Platform</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Browser</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Engine</th>
+              <th style="text-align: left; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border-light); background: var(--bg-muted); font-weight: 600;">Key Identifiers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {userAgentDatabase.filter((ua) => ua.os === 'iOS' || ua.os === 'Android').map((item) => (
+              <tr>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; font-weight: 600; color: var(--text-primary);">
+                  {item.os}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top;">
+                  <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">{item.browser}</div>
+                  <div class="text-xs text-text-secondary" style="word-break: break-all;">{item.ua}</div>
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--accent-primary);">
+                  {item.engine}
+                </td>
+                <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text-secondary);">
+                  {item.notes}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </DocSection>
+
+  <DocSection id="related-resources" title="Related resources">
+    <ul class="m-0 pl-6">
+      <li class="mb-2">
+        <a href="/docs/browser-compatibility" class="text-accent-primary no-underline">
+          Browser compatibility overview →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/events" class="text-accent-primary no-underline">
+          Event lifecycle documentation →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/docs/ime-composition" class="text-accent-primary no-underline">
+          IME & Composition guide →
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="/cases" class="text-accent-primary no-underline">
+          Browse cases by browser and OS →
+        </a>
+      </li>
+    </ul>
+  </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
+</DocLayout>

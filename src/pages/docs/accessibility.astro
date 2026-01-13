@@ -4,7 +4,21 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'screen-readers', text: 'Screen Reader Support' },
+  { depth: 2, slug: 'aria-attributes', text: 'ARIA Attributes' },
+  { depth: 2, slug: 'keyboard-navigation', text: 'Keyboard Navigation' },
+  { depth: 2, slug: 'focus-management', text: 'Focus Management' },
+  { depth: 2, slug: 'announcements', text: 'Live Announcements' },
+  { depth: 2, slug: 'platform-issues', text: 'Platform-Specific Issues' },
+  { depth: 3, slug: 'browser-specific-issues', text: 'Browser-Specific Issues' },
+  { depth: 3, slug: 'screen-reader-specific-issues', text: 'Screen Reader-Specific Issues' },
+];
 ---
 
 <DocLayout
@@ -317,7 +331,7 @@ document.addEventListener('selectionchange', debounce(() => {
   </DocSection>
 
   <DocSection id="platform-issues" title="Platform-Specific Issues">
-    <DocSection title="Browser-Specific Issues">
+    <DocSection id="browser-specific-issues" title="Browser-Specific Issues">
       <DocAlert type="error" title="⚠️ Safari: ARIA Attributes Not Announced" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>Safari:</strong> ARIA attributes on contenteditable elements may not be properly announced by screen readers (VoiceOver). Use live regions as a workaround.
@@ -337,7 +351,7 @@ document.addEventListener('selectionchange', debounce(() => {
       </DocAlert>
     </DocSection>
 
-    <DocSection title="Screen Reader-Specific Issues">
+    <DocSection id="screen-reader-specific-issues" title="Screen Reader-Specific Issues">
       <DocAlert type="error" title="⚠️ VoiceOver: Limited Announcements" class="mb-4">
         <p class="m-0 mb-2 text-sm">
           <strong>VoiceOver (macOS/iOS):</strong> May not announce content changes automatically. Use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">aria-live</code> regions for all important changes.
@@ -372,5 +386,6 @@ document.addEventListener('selectionchange', debounce(() => {
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

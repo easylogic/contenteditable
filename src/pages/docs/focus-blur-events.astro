@@ -4,7 +4,22 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'focus-blur-events', text: 'Focus & Blur Events' },
+  { depth: 2, slug: 'autofocus-limitation', text: 'autofocus Limitation' },
+  { depth: 2, slug: 'focus-loss-issues', text: 'Focus Loss Issues' },
+  { depth: 2, slug: 'checking-focus-state', text: 'Checking Focus State' },
+  { depth: 2, slug: 'tabindex-management', text: 'tabindex Management' },
+  { depth: 2, slug: 'programmatic-focus', text: 'Programmatic Focus Management' },
+  { depth: 2, slug: 'page-visibility', text: 'Page Visibility & Focus' },
+  { depth: 2, slug: 'platform-specific-issues', text: 'Platform-Specific Issues & Edge Cases' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
 
 const focusEventsCode = `// Focus and blur event handling
 const editor = document.querySelector('[contenteditable]');
@@ -426,5 +441,6 @@ document.addEventListener('visibilitychange', () => {
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

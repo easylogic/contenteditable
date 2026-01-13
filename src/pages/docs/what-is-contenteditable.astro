@@ -2,7 +2,17 @@
 import SiteNav from '../../components/SiteNav.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
 import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'basic-usage', text: 'Basic usage' },
+  { depth: 2, slug: 'key-characteristics', text: 'Key characteristics' },
+  { depth: 2, slug: 'common-use-cases', text: 'Common use cases' },
+  { depth: 2, slug: 'important-considerations', text: 'Important considerations' },
+  { depth: 2, slug: 'related-resources', text: 'Related resources' },
+];
 ---
 
 <html lang="en">
@@ -24,12 +34,15 @@ import '../../styles/global.css';
       <section
         style="
           flex: 1;
+          display: flex;
           max-width: 1120px;
           margin: 0 auto;
           padding: 1.75rem 1.25rem 2.5rem;
           width: 100%;
+          gap: 1.5rem;
         "
       >
+      <div style="flex: 1;">
       <header style="margin-bottom: 2rem;">
         <nav style="margin-bottom: 1rem; font-size: 0.85rem;">
           <a href="/docs" style="color: var(--text-muted); text-decoration: none;">Documentation</a>
@@ -62,6 +75,7 @@ import '../../styles/global.css';
       >
         <section style="margin-bottom: 2rem;">
           <h2
+            id="basic-usage"
             style="
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
@@ -91,6 +105,7 @@ import '../../styles/global.css';
 
         <section style="margin-bottom: 2rem;">
           <h2
+            id="key-characteristics"
             style="
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
@@ -118,6 +133,7 @@ import '../../styles/global.css';
 
         <section style="margin-bottom: 2rem;">
           <h2
+            id="common-use-cases"
             style="
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
@@ -138,6 +154,7 @@ import '../../styles/global.css';
 
         <section style="margin-bottom: 2rem;">
           <h2
+            id="important-considerations"
             style="
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
@@ -169,6 +186,7 @@ import '../../styles/global.css';
 
         <section>
           <h2
+            id="related-resources"
             style="
               font-size: 1.3rem;
               margin: 0 0 0.75rem 0;
@@ -216,6 +234,8 @@ import '../../styles/global.css';
           </ul>
         </section>
       </article>
+      </div>
+      <TableOfContents headings={headings} />
       </section>
     </main>
   </body>

@@ -4,7 +4,17 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'browser-specific-differences', text: 'Browser-Specific Differences' },
+  { depth: 2, slug: 'ime-composition-formatstrikethrough', text: 'IME Composition + formatStrikeThrough' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +22,13 @@ import '../../../styles/global.css';
   description="How formatStrikeThrough inputType applies strikethrough formatting and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatStrikeThrough</code> inputType is triggered when the user applies strikethrough formatting (typically via context menu or programmatically). The browser wraps selected text in a <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;s&gt;</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strike&gt;</code> element.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Text selected within paragraph">
             <div class="space-y-4">
               <div>
@@ -50,7 +60,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Differences">
+        <DocSection id="browser-specific-differences" title="Browser-Specific Differences">
           <DocInfoBox title="Element Used for Strikethrough">
             <div class="space-y-3 text-sm">
               <div>
@@ -70,7 +80,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="IME Composition + formatStrikeThrough">
+        <DocSection id="ime-composition-formatstrikethrough" title="IME Composition + formatStrikeThrough">
           <DocAlert type="error" title="⚠️ Critical Issue">
             <p class="m-0 mb-2 text-sm">
               During IME composition, formatStrikeThrough may not work as expected. On macOS with Korean IME, the event may not fire; <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertCompositionText</code> may fire instead.
@@ -81,7 +91,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle strikethrough formatting similarly to other text formatting. Here's how major editors implement formatStrikeThrough:
           </p>
@@ -178,5 +188,6 @@ function handleKeyCommand(command) {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

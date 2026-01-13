@@ -4,7 +4,21 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'what-is-an-ime', text: 'What is an IME?' },
+  { depth: 2, slug: 'korean-ime-variations', text: 'Korean IME Variations' },
+  { depth: 2, slug: 'composition-events', text: 'Composition events' },
+  { depth: 2, slug: 'composition-event-timing-variations', text: 'Composition Event Timing Variations' },
+  { depth: 2, slug: 'selection-during-composition', text: 'Selection During Composition' },
+  { depth: 2, slug: 'common-issues', text: 'Common issues' },
+  { depth: 2, slug: 'mobile-keyboards-text-prediction', text: 'Mobile Keyboards & Text Prediction' },
+  { depth: 2, slug: 'browser-differences', text: 'Browser differences' },
+  { depth: 2, slug: 'composition-selection-range-management', text: 'Composition Selection & Range Management' },
+];
 
 const compositionCode = `element.addEventListener('compositionstart', () => {
   console.log('Composition started');
@@ -24,7 +38,7 @@ element.addEventListener('compositionend', (e) => {
   description="How Input Method Editors (IME) work with contenteditable and the challenges they present."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="What is an IME?">
+        <DocSection id="what-is-an-ime" title="What is an IME?">
           <p class="m-0 mb-4">
             An Input Method Editor (IME) is a software component that allows users to enter characters that are not directly available on their keyboard. Common examples include:
           </p>
@@ -44,7 +58,7 @@ element.addEventListener('compositionend', (e) => {
           </ul>
         </DocSection>
 
-        <DocSection title="Korean IME Variations">
+        <DocSection id="korean-ime-variations" title="Korean IME Variations">
           <p class="m-0 mb-4">
             Korean IMEs can use different keyboard layouts and composition methods, which can affect how composition events fire and how text is composed:
           </p>
@@ -121,7 +135,7 @@ element.addEventListener('compositionend', (e) => {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Composition events">
+        <DocSection id="composition-events" title="Composition events">
           <p class="m-0 mb-4">
             When using an IME, the input process involves multiple stages tracked by composition events:
           </p>
@@ -141,7 +155,7 @@ element.addEventListener('compositionend', (e) => {
           <DocCodeBlock code={compositionCode} />
         </DocSection>
 
-        <DocSection title="Composition Event Timing Variations">
+        <DocSection id="composition-event-timing-variations" title="Composition Event Timing Variations">
           <p class="m-0 mb-4">
             The exact timing and occurrence of <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionstart</code>, <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code>, and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionend</code> events can vary significantly depending on multiple factors:
           </p>
@@ -296,7 +310,7 @@ element.addEventListener('input', (e) => {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Selection During Composition">
+        <DocSection id="selection-during-composition" title="Selection During Composition">
           <p class="m-0 mb-4">
             During IME composition, the selection behavior is unique: the selection range changes with each <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compositionupdate</code>, but visually, only a single cursor is shown.
           </p>
@@ -430,7 +444,7 @@ element.addEventListener('input', (e) => {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Common issues">
+        <DocSection id="common-issues" title="Common issues">
           <div class="mb-6">
             <h3 class="text-lg m-0 mb-2 text-text-primary">
               Enter key during composition
@@ -504,7 +518,7 @@ element.addEventListener('input', (e) => {
           </div>
         </DocSection>
 
-        <DocSection title="Mobile Keyboards & Text Prediction">
+        <DocSection id="mobile-keyboards-text-prediction" title="Mobile Keyboards & Text Prediction">
           <p class="m-0 mb-4">
             Mobile keyboards differ significantly from desktop keyboards, especially when text prediction/suggestion features are enabled. Different keyboard apps (Gboard, Samsung Keyboard, iOS QuickType, etc.) may behave differently.
           </p>
@@ -639,7 +653,7 @@ element.addEventListener('input', (e) => {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser differences">
+        <DocSection id="browser-differences" title="Browser differences">
           <DocAlert type="warning" class="mb-4">
             <p class="m-0 text-sm">
               <strong>Event timing:</strong> The timing and order of composition events varies significantly between browsers, especially when special keys (Enter, Backspace) are pressed during composition.
@@ -662,7 +676,7 @@ element.addEventListener('input', (e) => {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Composition Selection & Range Management">
+        <DocSection id="composition-selection-range-management" title="Composition Selection & Range Management">
           <DocInfoBox title="Technical Details: How Composition Selection Works">
             <div class="space-y-4 text-sm">
               <div>
@@ -756,8 +770,9 @@ element.addEventListener('compositionend', (e) => {
               <a href="/cases?tag=composition" class="text-accent-primary no-underline">
                 Browse composition-related cases →
               </a>
-            </li>
-          </ul>
-        </DocSection>
+      </li>
+    </ul>
+  </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

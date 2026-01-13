@@ -5,7 +5,29 @@ import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../components/EditorExample.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'format-toggle-pattern', text: 'Format Toggle Pattern' },
+  { depth: 2, slug: 'insert-text-pattern', text: 'Insert Text Pattern' },
+  { depth: 2, slug: 'wrap-selection-pattern', text: 'Wrap Selection Pattern' },
+  { depth: 2, slug: 'normalize-selection-pattern', text: 'Normalize Selection Pattern' },
+  { depth: 2, slug: 'ime-composition-handling', text: 'IME Composition Handling' },
+  { depth: 2, slug: 'undo-redo-implementation', text: 'Undo/Redo Implementation' },
+  { depth: 2, slug: 'paste-handler-with-sanitization', text: 'Paste Handler with Sanitization' },
+  { depth: 2, slug: 'selection-change-tracking', text: 'Selection Change Tracking' },
+  { depth: 2, slug: 'cross-browser-compatibility', text: 'Cross-Browser Compatibility' },
+  { depth: 2, slug: 'platform-specific-considerations', text: 'Platform-Specific Considerations' },
+  { depth: 3, slug: 'format-toggle-pattern-platform', text: 'Format Toggle Pattern' },
+  { depth: 3, slug: 'ime-composition-handling-platform', text: 'IME Composition Handling' },
+  { depth: 3, slug: 'undo-redo-implementation-platform', text: 'Undo/Redo Implementation' },
+  { depth: 3, slug: 'paste-handler-platform', text: 'Paste Handler' },
+  { depth: 3, slug: 'selection-change-tracking-platform', text: 'Selection Change Tracking' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
 
 const formatToggleCode = `// Toggle formatting (bold, italic, etc.)
 function toggleFormat(inputType) {
@@ -324,7 +346,7 @@ function handleFormattingLegacy(inputType) {
   description="Common patterns and code examples for implementing rich text editing features in contenteditable elements."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             This guide provides practical code patterns for common rich text editing operations. These patterns handle edge cases, browser differences, and IME composition issues that you'll encounter when building contenteditable-based editors.
           </p>
@@ -349,14 +371,14 @@ function handleFormattingLegacy(inputType) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Insert Text Pattern">
+        <DocSection id="insert-text-pattern" title="Insert Text Pattern">
           <p class="m-0 mb-4">
             Insert text at the current selection, replacing any selected content.
           </p>
           <DocCodeBlock code={insertTextCode} />
         </DocSection>
 
-        <DocSection title="Wrap Selection Pattern">
+        <DocSection id="wrap-selection-pattern" title="Wrap Selection Pattern">
           <p class="m-0 mb-4">
             Wrap selected text in an element (e.g., wrap in <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;</code> or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;a&gt;</code>).
           </p>
@@ -369,7 +391,7 @@ function handleFormattingLegacy(inputType) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Normalize Selection Pattern">
+        <DocSection id="normalize-selection-pattern" title="Normalize Selection Pattern">
           <p class="m-0 mb-4">
             Normalize selection to avoid partial node selections that can cause issues.
           </p>
@@ -414,7 +436,7 @@ function handleFormattingLegacy(inputType) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Paste Handler with Sanitization">
+        <DocSection id="paste-handler-with-sanitization" title="Paste Handler with Sanitization">
           <p class="m-0 mb-4">
             Handle paste events with HTML sanitization to prevent XSS attacks.
           </p>
@@ -427,7 +449,7 @@ function handleFormattingLegacy(inputType) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Selection Change Tracking">
+        <DocSection id="selection-change-tracking" title="Selection Change Tracking">
           <p class="m-0 mb-4">
             Track selection changes to update UI (e.g., formatting toolbar) based on current selection.
           </p>
@@ -440,19 +462,19 @@ function handleFormattingLegacy(inputType) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Cross-Browser Compatibility">
+        <DocSection id="cross-browser-compatibility" title="Cross-Browser Compatibility">
           <p class="m-0 mb-4">
             Handle browser differences and provide fallbacks for older browsers.
           </p>
           <DocCodeBlock code={crossBrowserCode} />
         </DocSection>
 
-        <DocSection title="Platform-Specific Considerations">
+        <DocSection id="platform-specific-considerations" title="Platform-Specific Considerations">
           <p class="m-0 mb-4">
             The patterns described above may behave differently depending on browser, OS, device, and keyboard type. Here are platform-specific considerations for each pattern.
           </p>
 
-          <DocSection title="Format Toggle Pattern">
+          <DocSection id="format-toggle-pattern-platform" title="Format Toggle Pattern">
             <DocAlert type="error" title="⚠️ macOS + Korean IME: Formatting During Composition" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>macOS + Korean IME:</strong> Format toggle may not work during IME composition:
@@ -486,7 +508,7 @@ function handleFormattingLegacy(inputType) {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="IME Composition Handling">
+          <DocSection id="ime-composition-handling-platform" title="IME Composition Handling">
             <DocAlert type="error" title="⚠️ Browser Differences in Composition Events" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Composition event timing varies:</strong>
@@ -512,7 +534,7 @@ function handleFormattingLegacy(inputType) {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="Undo/Redo Implementation">
+          <DocSection id="undo-redo-implementation-platform" title="Undo/Redo Implementation">
             <DocAlert type="warning" title="⚠️ Browser Undo Stack Differences" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Browser undo behavior varies:</strong>
@@ -537,7 +559,7 @@ function handleFormattingLegacy(inputType) {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="Paste Handler">
+          <DocSection id="paste-handler-platform" title="Paste Handler">
             <DocAlert type="error" title="⚠️ Mobile Keyboards: Paste Interference" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Mobile keyboards with text prediction:</strong>
@@ -574,7 +596,7 @@ function handleFormattingLegacy(inputType) {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="Selection Change Tracking">
+          <DocSection id="selection-change-tracking-platform" title="Selection Change Tracking">
             <DocAlert type="warning" title="⚠️ Mobile: Touch Selection Changes" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Mobile devices:</strong> Selection change tracking may differ:
@@ -600,7 +622,7 @@ function handleFormattingLegacy(inputType) {
           </DocSection>
         </DocSection>
 
-        <DocSection title="Best Practices">
+        <DocSection id="best-practices" title="Best Practices">
           <DocInfoBox>
             <ul class="m-0 pl-6 text-sm text-text-secondary">
               <li class="mb-2"><strong>Always use try-catch:</strong> Range operations can throw errors. Always wrap them in try-catch blocks.</li>
@@ -638,5 +660,6 @@ function handleFormattingLegacy(inputType) {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

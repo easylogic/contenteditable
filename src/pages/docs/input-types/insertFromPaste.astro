@@ -4,7 +4,21 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'clipboard-data-access', text: 'Clipboard Data Access' },
+  { depth: 2, slug: 'browser-specific-behavior', text: 'Browser-Specific Behavior' },
+  { depth: 2, slug: 'mobile-specific-behavior', text: 'Mobile-Specific Behavior' },
+  { depth: 2, slug: 'security-considerations', text: 'Security Considerations' },
+  { depth: 2, slug: 'ime-composition-paste', text: 'IME Composition + Paste' },
+  { depth: 2, slug: 'editor-internal-model-dom-synchronization', text: 'Editor Internal Model & DOM Synchronization' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +26,13 @@ import '../../../styles/global.css';
   description="How insertFromPaste inputType handles paste operations and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromPaste</code> inputType is triggered when the user pastes content from the clipboard (typically via <kbd class="px-1.5 py-0.5 bg-bg-muted rounded text-xs">Ctrl/Cmd + V</kbd>). The browser inserts the pasted content at the current selection position.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Text pasted at cursor">
             <div class="space-y-4">
               <div>
@@ -62,7 +76,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Clipboard Data Access">
+        <DocSection id="clipboard-data-access" title="Clipboard Data Access">
           <DocInfoBox>
             <p class="m-0 mb-2 text-sm text-text-secondary">
               The <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event provides access to clipboard data via <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer</code>:
@@ -75,7 +89,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Behavior">
+        <DocSection id="browser-specific-behavior" title="Browser-Specific Behavior">
           <DocInfoBox>
             <div class="space-y-3 text-sm">
               <div>
@@ -106,7 +120,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Mobile-Specific Behavior">
+        <DocSection id="mobile-specific-behavior" title="Mobile-Specific Behavior">
           <DocAlert type="error" title="⚠️ Samsung Keyboard: Clipboard History & Saved Text" class="mb-4">
             <p class="m-0 mb-2 text-sm">
               <strong>Android + Samsung Keyboard:</strong> Samsung Keyboard's clipboard history and saved text features may cause unexpected behavior:
@@ -132,7 +146,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Security Considerations">
+        <DocSection id="security-considerations" title="Security Considerations">
           <DocAlert type="warning" title="⚠️ XSS Risk">
             <p class="m-0 mb-2 text-sm">
               <strong>Warning:</strong> Pasting HTML content can introduce XSS vulnerabilities. Always sanitize pasted HTML before inserting it into the DOM.
@@ -143,7 +157,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="IME Composition + Paste">
+        <DocSection id="ime-composition-paste" title="IME Composition + Paste">
           <DocAlert type="error" title="⚠️ Critical Issue">
             <p class="m-0 mb-2 text-sm">
               Pasting during IME composition may cancel the active composition. The composition text may be lost or the paste may occur in an unexpected location.
@@ -154,7 +168,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor Internal Model & DOM Synchronization">
+        <DocSection id="editor-internal-model-dom-synchronization" title="Editor Internal Model & DOM Synchronization">
           <DocAlert type="warning" title="⚠️ Exception: Programmatic DOM Updates Clear Undo Stack">
             <p class="m-0 mb-2 text-sm">
               <strong>When editors programmatically update DOM after paste:</strong>
@@ -171,7 +185,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle paste operations differently, often converting pasted HTML to their internal model format. Here's how major editors implement insertFromPaste:
           </p>
@@ -301,5 +315,6 @@ element.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

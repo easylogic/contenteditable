@@ -4,7 +4,29 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'creating-ranges', text: 'Creating Ranges' },
+  { depth: 2, slug: 'setting-range-boundaries', text: 'Setting Range Boundaries' },
+  { depth: 2, slug: 'selecting-nodes', text: 'Selecting Nodes' },
+  { depth: 2, slug: 'extracting-content', text: 'Extracting Content' },
+  { depth: 2, slug: 'cloning-content', text: 'Cloning Content' },
+  { depth: 2, slug: 'inserting-nodes', text: 'Inserting Nodes' },
+  { depth: 2, slug: 'deleting-content', text: 'Deleting Content' },
+  { depth: 2, slug: 'collapsing-ranges', text: 'Collapsing Ranges' },
+  { depth: 2, slug: 'comparing-ranges', text: 'Comparing Ranges' },
+  { depth: 2, slug: 'getting-visual-positions', text: 'Getting Visual Positions' },
+  { depth: 2, slug: 'common-patterns', text: 'Common Patterns' },
+  { depth: 2, slug: 'platform-specific-issues-edge-cases', text: 'Platform-Specific Issues & Edge Cases' },
+  { depth: 3, slug: 'browser-specific-issues', text: 'Browser-Specific Issues' },
+  { depth: 3, slug: 'os-keyboard-specific-issues', text: 'OS & Keyboard-Specific Issues' },
+  { depth: 3, slug: 'device-specific-issues', text: 'Device-Specific Issues' },
+  { depth: 3, slug: 'general-edge-cases', text: 'General Edge Cases' },
+];
 
 const createRangeCode = `// Create a new Range object
 const range = document.createRange();
@@ -117,7 +139,7 @@ function wrapSelection(tagName) {
   description="Comprehensive guide to the Range API for manipulating document content in contenteditable elements."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Range</code> API provides methods to select, extract, insert, and manipulate content in the DOM. Unlike the Selection API (which represents the user's current selection), Range objects are programmatic and can be created, modified, and applied to selections.
           </p>
@@ -135,14 +157,14 @@ function wrapSelection(tagName) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Creating Ranges">
+        <DocSection id="creating-ranges" title="Creating Ranges">
           <p class="m-0 mb-4">
             Create a new Range object using <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">document.createRange()</code>. The range is initially empty and collapsed.
           </p>
           <DocCodeBlock code={createRangeCode} />
         </DocSection>
 
-        <DocSection title="Setting Range Boundaries">
+        <DocSection id="setting-range-boundaries" title="Setting Range Boundaries">
           <p class="m-0 mb-4">
             Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">setStart()</code> and <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">setEnd()</code> to define the range boundaries. Both methods take a node and an offset within that node.
           </p>
@@ -162,7 +184,7 @@ function wrapSelection(tagName) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Selecting Nodes">
+        <DocSection id="selecting-nodes" title="Selecting Nodes">
           <p class="m-0 mb-4">
             Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">selectNode()</code> to select an entire element, or <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">selectNodeContents()</code> to select only its children.
           </p>
@@ -197,7 +219,7 @@ function wrapSelection(tagName) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Extracting Content">
+        <DocSection id="extracting-content" title="Extracting Content">
           <p class="m-0 mb-4">
             <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">extractContents()</code> removes the range's content from the DOM and returns it as a DocumentFragment.
           </p>
@@ -210,7 +232,7 @@ function wrapSelection(tagName) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Cloning Content">
+        <DocSection id="cloning-content" title="Cloning Content">
           <p class="m-0 mb-4">
             <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">cloneContents()</code> creates a copy of the range's content without removing it from the DOM.
           </p>
@@ -223,7 +245,7 @@ function wrapSelection(tagName) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Inserting Nodes">
+        <DocSection id="inserting-nodes" title="Inserting Nodes">
           <p class="m-0 mb-4">
             <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertNode()</code> inserts a node at the start of the range. The range expands to include the inserted node.
           </p>
@@ -236,21 +258,21 @@ function wrapSelection(tagName) {
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Deleting Content">
+        <DocSection id="deleting-content" title="Deleting Content">
           <p class="m-0 mb-4">
             <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">deleteContents()</code> removes all content within the range. The range becomes collapsed at the deletion point.
           </p>
           <DocCodeBlock code={deleteContentsCode} />
         </DocSection>
 
-        <DocSection title="Collapsing Ranges">
+        <DocSection id="collapsing-ranges" title="Collapsing Ranges">
           <p class="m-0 mb-4">
             <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">collapse()</code> collapses the range to a single point (like a cursor position).
           </p>
           <DocCodeBlock code={collapseCode} />
         </DocSection>
 
-        <DocSection title="Comparing Ranges">
+        <DocSection id="comparing-ranges" title="Comparing Ranges">
           <p class="m-0 mb-4">
             <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">compareBoundaryPoints()</code> compares the boundaries of two ranges.
           </p>
@@ -266,7 +288,7 @@ function wrapSelection(tagName) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Getting Visual Positions">
+        <DocSection id="getting-visual-positions" title="Getting Visual Positions">
           <p class="m-0 mb-4">
             <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">getClientRects()</code> returns a list of rectangles representing the visual position of the range. Useful for positioning UI elements relative to selections.
           </p>
@@ -279,19 +301,19 @@ function wrapSelection(tagName) {
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Common Patterns">
+        <DocSection id="common-patterns" title="Common Patterns">
           <p class="m-0 mb-4">
             Here's a common pattern for wrapping selected text in a formatting element:
           </p>
           <DocCodeBlock code={commonPatternCode} />
         </DocSection>
 
-        <DocSection title="Platform-Specific Issues & Edge Cases">
+        <DocSection id="platform-specific-issues-edge-cases" title="Platform-Specific Issues & Edge Cases">
           <p class="m-0 mb-4">
             Range API behavior can vary significantly depending on browser, OS, device, and keyboard type. These variations can cause unexpected behavior when manipulating ranges.
           </p>
 
-          <DocSection title="Browser-Specific Issues">
+          <DocSection id="browser-specific-issues" title="Browser-Specific Issues">
             <DocAlert type="error" title="⚠️ Safari: Range Boundary Issues" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Safari:</strong> Range boundaries may be reported incorrectly when selecting across multiple elements or complex DOM structures.
@@ -325,7 +347,7 @@ function wrapSelection(tagName) {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="OS & Keyboard-Specific Issues">
+          <DocSection id="os-keyboard-specific-issues" title="OS & Keyboard-Specific Issues">
             <DocAlert type="error" title="⚠️ macOS + Korean IME: Range Operations During Composition" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>macOS + Korean IME:</strong> Range operations during active IME composition may fail or produce incorrect results:
@@ -358,7 +380,7 @@ function wrapSelection(tagName) {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="Device-Specific Issues">
+          <DocSection id="device-specific-issues" title="Device-Specific Issues">
             <DocAlert type="error" title="⚠️ Mobile: Touch Selection Ranges" class="mb-4">
               <p class="m-0 mb-2 text-sm">
                 <strong>Mobile devices:</strong> Touch-based selection creates Ranges differently than mouse selection:
@@ -383,7 +405,7 @@ function wrapSelection(tagName) {
             </DocAlert>
           </DocSection>
 
-          <DocSection title="General Edge Cases">
+          <DocSection id="general-edge-cases" title="General Edge Cases">
             <DocAlert type="warning" class="mb-4">
               <p class="m-0 text-sm">
                 <strong>Range behavior varies:</strong> Some Range methods may behave differently across browsers, especially when dealing with complex DOM structures, IME composition, or edge cases (empty nodes, collapsed ranges, etc.).
@@ -421,5 +443,6 @@ function wrapSelection(tagName) {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

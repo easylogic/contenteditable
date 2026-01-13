@@ -5,7 +5,18 @@ import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../components/EditorExample.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'getting-the-selection', text: 'Getting the selection' },
+  { depth: 2, slug: 'range-api', text: 'Range API' },
+  { depth: 2, slug: 'node-selection', text: 'Node Selection' },
+  { depth: 2, slug: 'native-selection-visualization', text: 'Native Selection Visualization' },
+  { depth: 2, slug: 'selection-synchronization-with-internal-models', text: 'Selection Synchronization with Internal Models' },
+  { depth: 2, slug: 'common-issues', text: 'Common issues' },
+];
 
 const getSelectionCode = `const selection = window.getSelection();
 
@@ -46,21 +57,21 @@ selection.addRange(range);`;
   description="Working with text selection, ranges, and the Selection API in contenteditable elements."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Getting the selection">
+        <DocSection id="getting-the-selection" title="Getting the selection">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">window.getSelection()</code> method returns a Selection object representing the current text selection.
           </p>
           <DocCodeBlock code={getSelectionCode} />
         </DocSection>
 
-        <DocSection title="Range API">
+        <DocSection id="range-api" title="Range API">
           <p class="m-0 mb-4">
             A Range represents a contiguous portion of the document. You can create, modify, and manipulate ranges programmatically.
           </p>
           <DocCodeBlock code={rangeCode} />
         </DocSection>
 
-        <DocSection title="Node Selection">
+        <DocSection id="node-selection" title="Node Selection">
           <p class="m-0 mb-4">
             Unlike text selection, which selects characters within text nodes, <strong>node selection</strong> selects entire element nodes (like images, divs, or other HTML elements). This is useful when you want to select non-text content or entire blocks of content.
           </p>
@@ -220,7 +231,7 @@ if (selection && selection.rangeCount > 0) {
           </div>
         </section>
 
-        <DocSection title="Native Selection Visualization">
+        <DocSection id="native-selection-visualization" title="Native Selection Visualization">
           <p class="m-0 mb-4">
             Browsers render text selections using their native styling. The visual appearance of selections varies by browser and operating system. Try selecting text in the contenteditable area below to see how your browser displays selections:
           </p>
@@ -275,7 +286,7 @@ if (selection && selection.rangeCount > 0) {
           </div>
         </section>
 
-        <DocSection title="Selection Synchronization with Internal Models">
+        <DocSection id="selection-synchronization-with-internal-models" title="Selection Synchronization with Internal Models">
           <p class="m-0 mb-4">
             One of the most challenging aspects of building contenteditable editors is maintaining synchronization between the browser's DOM-based Selection API and your editor's internal data model (like Slate, ProseMirror, or custom models).
           </p>
@@ -543,7 +554,7 @@ if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
           </div>
         </section>
 
-        <DocSection title="Common issues">
+        <DocSection id="common-issues" title="Common issues">
           <div class="mb-6">
             <h3 class="text-lg m-0 mb-2 text-text-primary">
               Selection lost on focus change
@@ -613,9 +624,8 @@ if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
             </li>
           </ul>
         </section>
-      </article>
-      </section>
-    </main>
+  <TableOfContents slot="toc" headings={headings} />
+</DocLayout>
 
     <script>
       // Selection visualization script

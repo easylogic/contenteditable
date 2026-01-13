@@ -4,7 +4,18 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'datatransfer-access', text: 'DataTransfer Access' },
+  { depth: 2, slug: 'browser-specific-behavior', text: 'Browser-Specific Behavior' },
+  { depth: 2, slug: 'mobile-considerations', text: 'Mobile Considerations' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +23,13 @@ import '../../../styles/global.css';
   description="How insertFromDrop inputType handles drag-and-drop operations and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">insertFromDrop</code> inputType is triggered when the user drops content into a contenteditable element via drag-and-drop. The browser inserts the dropped content at the drop position.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Text dropped at cursor">
             <div class="space-y-4">
               <div>
@@ -41,7 +52,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="DataTransfer Access">
+        <DocSection id="datatransfer-access" title="DataTransfer Access">
           <DocInfoBox>
             <p class="m-0 mb-2 text-sm text-text-secondary">
               The <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event provides access to dropped data via <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">e.dataTransfer</code>:
@@ -55,7 +66,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Behavior">
+        <DocSection id="browser-specific-behavior" title="Browser-Specific Behavior">
           <DocInfoBox>
             <div class="space-y-3 text-sm">
               <div>
@@ -86,7 +97,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Mobile Considerations">
+        <DocSection id="mobile-considerations" title="Mobile Considerations">
           <DocAlert type="info" title="ℹ️ Mobile Drag-and-Drop">
             <p class="m-0 mb-2 text-sm">
               On mobile devices, drag-and-drop behavior may differ significantly:
@@ -99,7 +110,7 @@ import '../../../styles/global.css';
           </DocAlert>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle drop operations similarly to paste operations. Here's how major editors implement insertFromDrop:
           </p>
@@ -224,5 +235,6 @@ element.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

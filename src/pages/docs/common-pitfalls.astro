@@ -4,7 +4,20 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'selection-pitfalls', text: 'Selection & Range Pitfalls' },
+  { depth: 2, slug: 'event-pitfalls', text: 'Event Handling Pitfalls' },
+  { depth: 2, slug: 'dom-pitfalls', text: 'DOM Manipulation Pitfalls' },
+  { depth: 2, slug: 'ime-pitfalls', text: 'IME & Composition Pitfalls' },
+  { depth: 2, slug: 'browser-pitfalls', text: 'Browser-Specific Pitfalls' },
+  { depth: 2, slug: 'debugging', text: 'Debugging Strategies' },
+  { depth: 2, slug: 'checklist', text: 'Common Issues Checklist' },
+];
 ---
 
 <DocLayout
@@ -558,5 +571,6 @@ logEnvironment();`} />
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

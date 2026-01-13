@@ -4,7 +4,20 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-drag-drop', text: 'Basic Drag & Drop' },
+  { depth: 2, slug: 'dragging-within-contenteditable', text: 'Dragging Within contenteditable' },
+  { depth: 2, slug: 'dropping-into-contenteditable', text: 'Dropping Into contenteditable' },
+  { depth: 2, slug: 'file-drag-drop', text: 'File Drag & Drop' },
+  { depth: 2, slug: 'datatransfer-api', text: 'DataTransfer API' },
+  { depth: 2, slug: 'platform-specific-issues', text: 'Platform-Specific Issues & Edge Cases' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
 
 const basicDragDropCode = `// Basic drag and drop setup
 const editor = document.querySelector('[contenteditable]');
@@ -402,5 +415,6 @@ editor.addEventListener('drop', (e) => {
       </li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

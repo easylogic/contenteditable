@@ -4,7 +4,18 @@ import DocSection from '../../components/docs/DocSection.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../components/docs/DocInfoBox.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 import '../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'supported-attributes', text: 'Supported Attributes' },
+  { depth: 2, slug: 'unsupported-attributes', text: 'Unsupported Attributes' },
+  { depth: 2, slug: 'partially-supported-attributes', text: 'Partially Supported Attributes' },
+  { depth: 2, slug: 'platform-specific-issues', text: 'Platform-Specific Issues & Edge Cases' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
 
 const placeholderCode = `// CSS-based placeholder implementation
 [contenteditable]:empty::before {
@@ -489,5 +500,6 @@ editor.addEventListener('beforeinput', (e) => {
       <li class="mb-2"><strong>Save/Restore Selection:</strong> When changing attributes dynamically (like <code class="bg-bg-muted px-1 py-0.5 rounded text-xs">dir</code>), save and restore selection to maintain caret position</li>
     </ul>
   </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 

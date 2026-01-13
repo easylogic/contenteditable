@@ -4,7 +4,17 @@ import DocSection from '../../../components/docs/DocSection.astro';
 import DocAlert from '../../../components/docs/DocAlert.astro';
 import DocInfoBox from '../../../components/docs/DocInfoBox.astro';
 import EditorExample from '../../../components/EditorExample.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
 import '../../../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-behavior', text: 'Basic Behavior' },
+  { depth: 2, slug: 'what-formatting-is-removed', text: 'What Formatting is Removed' },
+  { depth: 2, slug: 'browser-specific-behavior', text: 'Browser-Specific Behavior' },
+  { depth: 2, slug: 'editor-specific-handling', text: 'Editor-Specific Handling' },
+];
 ---
 
 <DocLayout
@@ -12,13 +22,13 @@ import '../../../styles/global.css';
   description="How formatRemove inputType removes formatting from selected text and varies across browsers."
   currentPath={Astro.url.pathname}
 >
-        <DocSection title="Overview">
+        <DocSection id="overview" title="Overview">
           <p class="m-0 mb-4">
             The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">formatRemove</code> inputType is triggered when the user removes formatting from selected text (typically via a "Remove Formatting" command or toolbar button). The browser removes formatting elements (bold, italic, underline, etc.) from the selected content.
           </p>
         </DocSection>
 
-        <DocSection title="Basic Behavior">
+        <DocSection id="basic-behavior" title="Basic Behavior">
           <DocInfoBox title="Scenario: Formatted text selected">
             <div class="space-y-4">
               <div>
@@ -41,7 +51,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="What Formatting is Removed">
+        <DocSection id="what-formatting-is-removed" title="What Formatting is Removed">
           <DocInfoBox>
             <p class="m-0 mb-2 text-sm text-text-secondary">
               <code class="bg-bg-surface px-1.5 py-0.5 rounded text-[0.85em]">formatRemove</code> typically removes:
@@ -55,7 +65,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Browser-Specific Behavior">
+        <DocSection id="browser-specific-behavior" title="Browser-Specific Behavior">
           <DocInfoBox>
             <div class="space-y-3 text-sm">
               <div>
@@ -86,7 +96,7 @@ import '../../../styles/global.css';
           </DocInfoBox>
         </DocSection>
 
-        <DocSection title="Editor-Specific Handling">
+        <DocSection id="editor-specific-handling" title="Editor-Specific Handling">
           <p class="m-0 mb-4">
             Different editor frameworks handle format removal differently. Here's how major editors implement formatRemove:
           </p>
@@ -203,5 +213,6 @@ element.addEventListener('beforeinput', (e) => {
             </li>
           </ul>
         </DocSection>
+  <TableOfContents slot="toc" headings={headings} />
 </DocLayout>
 
