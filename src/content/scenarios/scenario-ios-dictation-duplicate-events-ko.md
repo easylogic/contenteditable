@@ -334,6 +334,47 @@ iOS Safari에서 "만나서 반갑습니다"를 음성 인식으로 입력할 �
 | `keyup` | ❌ | ❌ | 발생하지 않음 |
 | `keypress` | ❌ | ❌ | 발생하지 않음 |
 
+## 다른 에디터: ProseMirror
+
+ProseMirror가 iOS Safari에서 입력 이벤트를 처리하는 방식:
+
+### iOS Dictation에 대한 특별한 처리 없음
+
+- **ProseMirror는 dictation을 구분하지 않음**: iOS dictation은 composition 이벤트를 발생시키지 않으므로, ProseMirror는 이를 일반 `insertText` 입력으로 처리합니다.
+- **동일한 문제 발생**: 이 시나리오에서 관찰한 것처럼, dictation 입력 시 `beforeinput`/`input` 이벤트만 발생하고 composition 이벤트는 발생하지 않습니다.
+- **별도 우회 로직 없음**: ProseMirror 코드베이스에는 dictation 입력을 특별히 처리하는 전용 로직이 없습니다.
+
+### IME Composition 처리 개선
+
+ProseMirror는 iOS Safari에서 IME composition 관련 문제를 해결하기 위해 다음과 같은 수정을 적용했습니다:
+
+**문제**: Safari에서 IME composition 중에 selection을 재설정하면 `compositionend` 이벤트가 발생하지 않고, 중복 `compositionstart`/`compositionupdate` 이벤트가 발생하여 문자가 중복 입력되는 문제
+
+**해결 방법**: `prosemirror-view`에서 composition 중에는 selection을 재설정하지 않도록 수정:
+
+```javascript
+// ProseMirror의 setSelection 수정 예시
+if (!view.composing) {
+  view.docView.setSelection(anchor, head, view.root, force);
+}
+```
+
+이 수정은 composition 중에 selection을 변경하지 않아 IME lifecycle을 유지합니다.
+
+### iOS Safari의 제약사항
+
+- **`isComposing` 상태 동기화 문제**: iOS Safari에서 `isComposing`가 항상 `false`이거나 composition 이벤트가 발생하지 않아, ProseMirror의 `view.composing` 상태가 정확하게 추적되지 않을 수 있습니다.
+- **IME 입력 중 포맷팅 문제**: iOS Safari에서 IME composition 중에 포맷팅(예: bold)을 적용하면 `isComposing`가 잘못된 상태로 설정되어 후속 입력이 제대로 표시되지 않을 수 있습니다.
+
+### 관련 이슈 및 토론
+
+- **GitHub Issue #944**: Safari에서 IME 입력 시 중복 문자 문제 ([github.com/ProseMirror/prosemirror/issues/944](https://github.com/ProseMirror/prosemirror/issues/944))
+- **ProseMirror Discuss**: iOS Safari에서 `isComposing` 상태 동기화 문제 ([discuss.prosemirror.net](https://discuss.prosemirror.net/t/iscomposing-gets-out-of-sync-on-ios/4067))
+
+### 결론
+
+ProseMirror도 iOS dictation의 제약사항(composition 이벤트 부재, `isComposing` 부정확)을 그대로 겪고 있으며, dictation에 대한 특별한 해결책은 없습니다. 대신 IME composition 관련 문제는 composition 중 selection 재설정을 피하는 방식으로 해결하고 있습니다.
+
 ## 추가 고려사항
 
 ### 선택/커서 관점
@@ -394,3 +435,42 @@ iOS 설정에서 Voice Control과 Dictation을 동시에 활성화한 경우:
 - 모든 iOS 버전에서 동일한 문제가 발생할 가능성이 높음 (WebKit 엔진 공유)
 - 언어에 관계없이 문제가 발생하는 것으로 보임
 - macOS Safari에서는 composition 이벤트가 발생하므로 문제가 발생하지 않음
+
+## WebKit 버그 리포트
+
+이 문제는 WebKit 버그 트래커에 공식적으로 보고되어 있습니다:
+
+- **WebKit Bug 261764**: "iOS/iPadOS dictation doesn't trigger composition events"
+  - URL: https://bugs.webkit.org/show_bug.cgi?id=261764
+  - 상태: 아직 해결되지 않음
+  - 설명: iOS/iPadOS에서 dictation 사용 시 `compositionstart`, `compositionupdate`, `compositionend` 이벤트가 발생하지 않음
+
+이 버그 리포트는 iOS dictation이 composition 이벤트를 발생시키지 않는 문제를 문서화하고 있으며, macOS Safari에서는 정상적으로 동작한다는 점을 확인하고 있습니다.
+
+## 다른 에디터 프레임워크
+
+### Slate, Lexical, Quill
+
+다른 주요 에디터 프레임워크들도 iOS dictation의 제약사항을 겪고 있습니다:
+
+- **Slate**: iOS dictation에 대한 특별한 처리가 문서화되어 있지 않음
+- **Lexical**: iOS dictation 입력을 식별하지만 Speech Kit의 전사 결과를 표시하지 못하는 문제가 보고됨
+- **Quill**: iOS dictation과의 호환성을 개선하기 위한 업데이트가 있지만, 근본적인 문제(composition 이벤트 부재)는 해결되지 않음
+
+### 공통 제약사항
+
+모든 에디터 프레임워크가 공통으로 겪는 문제:
+
+- iOS dictation은 composition 이벤트를 발생시키지 않음
+- `isComposing` 플래그가 정확하지 않음
+- 웹 API로 dictation 입력을 구분할 수 없음
+- 이벤트 시퀀스가 예상과 다를 수 있음
+
+### React Native에서의 유사 문제
+
+React Native 애플리케이션에서도 iOS dictation과 관련된 유사한 문제가 보고되었습니다:
+
+- **단어 간 dictation 세션 종료**: 컴포넌트 재렌더링 중에 dictation 세션이 예기치 않게 종료될 수 있음
+- **해결 방법**: dictation 중 재렌더링을 방지하기 위한 디바운싱 메커니즘 구현
+
+이는 웹 애플리케이션에서도 유사한 문제가 발생할 수 있음을 시사합니다.

@@ -334,6 +334,47 @@ The following events do **NOT** fire during iOS dictation:
 | `keyup` | ❌ | ❌ | No |
 | `keypress` | ❌ | ❌ | No |
 
+## Other Editors: ProseMirror
+
+How ProseMirror handles input events on iOS Safari:
+
+### No Special Handling for iOS Dictation
+
+- **ProseMirror does not distinguish dictation**: Since iOS dictation does not fire composition events, ProseMirror treats it as regular `insertText` input.
+- **Same issues occur**: As observed in this scenario, dictation input only fires `beforeinput`/`input` events without composition events.
+- **No dedicated workaround**: The ProseMirror codebase does not have special logic to handle dictation input.
+
+### IME Composition Handling Improvements
+
+ProseMirror has applied the following fix to address IME composition issues on iOS Safari:
+
+**Problem**: In Safari, re-selecting text during IME composition prevents `compositionend` from firing and causes duplicate `compositionstart`/`compositionupdate` events, leading to character duplication.
+
+**Solution**: Modified `prosemirror-view` to avoid re-selection during composition:
+
+```javascript
+// Example modification in ProseMirror's setSelection
+if (!view.composing) {
+  view.docView.setSelection(anchor, head, view.root, force);
+}
+```
+
+This change prevents selection updates during composition, maintaining the IME lifecycle.
+
+### iOS Safari Limitations
+
+- **`isComposing` state synchronization issues**: On iOS Safari, `isComposing` is always `false` or composition events don't fire, so ProseMirror's `view.composing` state may not be accurately tracked.
+- **Formatting during IME input**: Applying formatting (e.g., bold) during IME composition on iOS Safari may set `isComposing` to an incorrect state, causing subsequent input to not display properly.
+
+### Related Issues and Discussions
+
+- **GitHub Issue #944**: Duplicate character issue with IME input in Safari ([github.com/ProseMirror/prosemirror/issues/944](https://github.com/ProseMirror/prosemirror/issues/944))
+- **ProseMirror Discuss**: `isComposing` state synchronization issues on iOS Safari ([discuss.prosemirror.net](https://discuss.prosemirror.net/t/iscomposing-gets-out-of-sync-on-ios/4067))
+
+### Conclusion
+
+ProseMirror also experiences the same limitations of iOS dictation (no composition events, inaccurate `isComposing`) and has no special solution for dictation. Instead, it addresses IME composition issues by avoiding selection re-setting during composition.
+
 ## Additional Considerations
 
 ### Selection/Cursor Perspective
@@ -394,3 +435,42 @@ Reproduction status across different environments:
 - The same issue likely occurs across all iOS versions (shared WebKit engine)
 - Issue appears to occur regardless of language
 - macOS Safari fires composition events, so the issue doesn't occur there
+
+## WebKit Bug Report
+
+This issue has been officially reported in the WebKit bug tracker:
+
+- **WebKit Bug 261764**: "iOS/iPadOS dictation doesn't trigger composition events"
+  - URL: https://bugs.webkit.org/show_bug.cgi?id=261764
+  - Status: Not yet resolved
+  - Description: `compositionstart`, `compositionupdate`, `compositionend` events do not fire when using dictation on iOS/iPadOS
+
+This bug report documents that iOS dictation does not fire composition events, and confirms that macOS Safari works correctly.
+
+## Other Editor Frameworks
+
+### Slate, Lexical, Quill
+
+Other major editor frameworks also experience the limitations of iOS dictation:
+
+- **Slate**: No special handling for iOS dictation documented
+- **Lexical**: Issues reported where dictation input is identified but transcriptions from Speech Kit are not displayed
+- **Quill**: Updates to improve compatibility with iOS dictation, but the fundamental issue (no composition events) remains unresolved
+
+### Common Limitations
+
+All editor frameworks share these common issues:
+
+- iOS dictation does not fire composition events
+- `isComposing` flag is inaccurate
+- Cannot distinguish dictation input through web APIs
+- Event sequence may differ from expectations
+
+### Similar Issues in React Native
+
+Similar issues related to iOS dictation have been reported in React Native applications:
+
+- **Dictation session termination between words**: Dictation sessions may terminate unexpectedly during component re-renders
+- **Workaround**: Implement debouncing mechanism to prevent re-renders during dictation
+
+This suggests similar issues may occur in web applications.
