@@ -39,6 +39,7 @@ export const translations = {
       docs: 'Docs',
       cases: 'Cases',
       scenarios: 'Scenarios',
+      tips: 'Tips',
       playground: 'Playground',
     },
     hero: {
@@ -140,6 +141,7 @@ export const translations = {
       docs: '문서',
       cases: '케이스',
       scenarios: '시나리오',
+      tips: '해결 팁',
       playground: '플레이그라운드',
     },
     hero: {

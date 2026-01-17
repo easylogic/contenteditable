@@ -45,8 +45,11 @@ const availableLocales = supportedLocales.map((code) => ({
 // Default navigation items if not provided
 const defaultItems: NavItem[] = [
   { label: 'Docs', href: localePath('/docs'), active: pathWithoutLocale.startsWith('/docs') },
+  { label: 'Editor', href: localePath('/editor'), active: pathWithoutLocale.startsWith('/editor') },
+  { label: 'Model/Schema', href: localePath('/model-schema'), active: pathWithoutLocale.startsWith('/model-schema') },
   { label: 'Cases', href: localePath('/cases'), active: pathWithoutLocale.startsWith('/cases') },
   { label: 'Scenarios', href: localePath('/scenarios'), active: pathWithoutLocale.startsWith('/scenarios') },
+  { label: 'Tips', href: localePath('/tips'), active: pathWithoutLocale.startsWith('/tips') },
   { label: 'Playground', href: localePath('/playground'), active: pathWithoutLocale.startsWith('/playground') },
   { label: 'Coverage', href: localePath('/coverage'), active: pathWithoutLocale.startsWith('/coverage') },
 ];

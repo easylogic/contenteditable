@@ -1,0 +1,203 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'schema', text: '스키마 정의' },
+  { depth: 2, slug: 'model', text: '모델 표현' },
+  { depth: 2, slug: 'serialization', text: 'HTML 직렬화' },
+  { depth: 2, slug: 'deserialization', text: 'HTML 역직렬화' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="임베드 노드 타입 – contenteditable.lab"
+      description="임베드 노드 타입에 대한 상세 가이드: 스키마, 모델, HTML 매핑, 뷰 연동, 일반적인 문제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema/node-types')} class="text-text-muted no-underline">노드 타입</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">임베드</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              임베드 노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              카테고리: 커스텀 • 뷰 연동 노트를 포함한 상세 구현 가이드
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="스키마 정의">
+              <p class="m-0 mb-3">
+                <strong>임베드</strong> 노드 타입의 스키마 정의:
+              </p>
+              <DocCodeBlock code={`{
+  embed: {
+    group: 'block',
+    attrs: {
+      url: { default: '' },
+      type: { default: 'unknown' }
+    },
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="모델 표현">
+              <p class="m-0 mb-3">
+                모델 표현 예제:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'embed',
+  attrs: {
+    url: 'https://example.com/embed',
+    type: 'youtube'
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML 직렬화">
+              <p class="m-0 mb-3">
+                모델을 HTML로 변환:
+              </p>
+              <DocCodeBlock code={`function serializeEmbed(node) {
+  return '<div data-type="embed" data-embed-type="' + node.attrs.type + 
+         '" data-url="' + escapeHtml(node.attrs.url) + '"></div>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML 역직렬화">
+              <p class="m-0 mb-3">
+                HTML을 모델로 파싱:
+              </p>
+              <DocCodeBlock code={`function parseEmbed(domNode) {
+  return {
+    type: 'embed',
+    attrs: {
+      url: domNode.getAttribute('data-url') || '',
+      type: domNode.getAttribute('data-embed-type') || 'unknown'
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <DocAlert type="info">
+                <strong>뷰 연동 노트:</strong> 이 노드 타입을 뷰 레이어에서 구현할 때 contenteditable 동작, 선택 처리, 이벤트 관리에 특히 주의하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                뷰 연동 코드:
+              </p>
+              <DocCodeBlock code={`// 임베드 렌더링
+const embed = document.createElement('div');
+embed.setAttribute('data-type', 'embed');
+embed.setAttribute('data-embed-type', node.attrs.type);
+embed.setAttribute('data-url', node.attrs.url);
+embed.contentEditable = 'false'; // 임베드는 일반적으로 렌더링됨`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <DocAlert type="warning">
+                <strong>일반적인 함정:</strong> 이 노드 타입을 구현할 때 자주 발생하는 문제들입니다. 구현 전에 주의 깊게 검토하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                일반적인 문제 및 해결 방법:
+              </p>
+              <DocCodeBlock code={`// 문제: 임베드 URL 검증
+// 해결: 임베드 URL 검증
+function validateEmbedUrl(url, type) {
+  const patterns = {
+    youtube: /youtube\.com|youtu\.be/,
+    vimeo: /vimeo\.com/,
+    twitter: /twitter\.com|tweet/
+  };
+  return patterns[type]?.test(url) || false;
+}
+
+// 문제: 임베드 타입 감지
+// 해결: URL에서 임베드 타입 자동 감지
+function detectEmbedType(url) {
+  if (/youtube|youtu\.be/.test(url)) return 'youtube';
+  if (/vimeo/.test(url)) return 'vimeo';
+  if (/twitter|tweet/.test(url)) return 'twitter';
+  return 'unknown';
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-3">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock code={`class EmbedNode {
+  constructor(attrs) {
+    this.type = 'embed';
+    this.attrs = {
+      url: attrs?.url || '',
+      type: attrs?.type || 'unknown'
+    };
+  }
+  
+  toDOM() {
+    const embed = document.createElement('div');
+    embed.setAttribute('data-type', 'embed');
+    embed.setAttribute('data-embed-type', this.attrs.type);
+    embed.setAttribute('data-url', this.attrs.url);
+    return embed;
+  }
+  
+  static fromDOM(domNode) {
+    return new EmbedNode({
+      url: domNode.getAttribute('data-url') || '',
+      type: domNode.getAttribute('data-embed-type') || 'unknown'
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

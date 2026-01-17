@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 export const GET: APIRoute = async () => {
   const cases = await getCollection('cases');
   const scenarios = await getCollection('scenarios');
+  const tips = await getCollection('tips');
   
   const docsPages = [
     { id: 'doc-what-is', title: 'What is contenteditable?', description: 'Introduction to the contenteditable attribute', url: '/docs/what-is-contenteditable' },
@@ -56,6 +57,17 @@ export const GET: APIRoute = async () => {
     ...docsPages.map((d) => ({
       ...d,
       type: 'doc' as const,
+    })),
+    // Tips
+    ...tips.map((t) => ({
+      id: t.data.id,
+      title: t.data.title,
+      description: t.data.description || t.data.title,
+      type: 'tip' as const,
+      url: `/tips/${t.data.id}`,
+      tags: t.data.tags || [],
+      category: t.data.category,
+      difficulty: t.data.difficulty,
     })),
   ];
 

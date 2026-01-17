@@ -5,11 +5,13 @@ type SearchItem = {
   id: string;
   title: string;
   description: string;
-  type: 'case' | 'scenario' | 'doc';
+  type: 'case' | 'scenario' | 'doc' | 'tip';
   url: string;
   tags?: string[];
   os?: string;
   browser?: string;
+  category?: string;
+  difficulty?: string;
 };
 
 export function SearchIsland() {

@@ -1,6 +1,6 @@
 ---
 id: ce-0225-memory-leak-large-docs-ko
-scenarioId: scenario-performance-memory-leak
+scenarioId: scenario-memory-leak-prevention
 locale: ko
 os: Any
 osVersion: "Any"

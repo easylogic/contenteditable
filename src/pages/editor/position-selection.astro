@@ -1,0 +1,676 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'position-representation', text: 'Position Representation' },
+  { depth: 3, slug: 'path-based-positions', text: 'Path-Based Positions' },
+  { depth: 3, slug: 'offset-in-position', text: 'Offset in Position' },
+  { depth: 3, slug: 'position-stability', text: 'Position Stability' },
+  { depth: 2, slug: 'selection-representation', text: 'Selection Representation' },
+  { depth: 3, slug: 'anchor-focus', text: 'Anchor and Focus' },
+  { depth: 3, slug: 'collapsed-selection', text: 'Collapsed Selection' },
+  { depth: 2, slug: 'dom-to-model', text: 'DOM to Model Conversion' },
+  { depth: 3, slug: 'dom-position-to-path', text: 'DOM Position to Path' },
+  { depth: 3, slug: 'dom-range-to-selection', text: 'DOM Range to Selection' },
+  { depth: 2, slug: 'model-to-dom', text: 'Model to DOM Conversion' },
+  { depth: 3, slug: 'path-to-dom-position', text: 'Path to DOM Position' },
+  { depth: 3, slug: 'selection-to-dom-range', text: 'Selection to DOM Range' },
+  { depth: 2, slug: 'selection-normalization', text: 'Selection Normalization' },
+  { depth: 3, slug: 'normalize-invalid', text: 'Normalize Invalid Selections' },
+  { depth: 3, slug: 'expand-selection', text: 'Expand Selection' },
+  { depth: 2, slug: 'position-updates', text: 'Position Updates' },
+  { depth: 3, slug: 'tracking-positions', text: 'Tracking Positions' },
+  { depth: 3, slug: 'updating-positions', text: 'Updating Positions After Edits' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Position & Selection Management – contenteditable.lab"
+      description="Managing positions and selections in your model: path-based positions, selection representation, and DOM conversion"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Position & Selection</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Position & Selection Management
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Managing positions and selections in your model: path-based positions, selection representation, DOM conversion, and normalization.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <section id="overview" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Overview
+              </h2>
+              <p class="m-0 mb-4">
+                Positions and selections in your model are represented differently than in the DOM. Understanding this difference and how to convert between them is crucial for building a reliable editor.
+              </p>
+              <div class="my-6 p-6 bg-bg-muted rounded-lg border border-border-light">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">DOM Position</h4>
+                    <pre class="text-xs bg-bg-surface p-3 rounded m-0 mb-3"><code>{`{
+  node: TextNode,
+  offset: 5
+}`}</code></pre>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">References actual DOM nodes</li>
+                      <li class="mb-2">Breaks when DOM changes</li>
+                      <li class="mb-2">Browser-specific</li>
+                      <li class="mb-2">Hard to serialize</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">Model Position</h4>
+                    <pre class="text-xs bg-bg-surface p-3 rounded m-0 mb-3"><code>{`{
+  path: [0, 1, 2],
+  offset: 5
+}`}</code></pre>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">References model structure</li>
+                      <li class="mb-2">Stable across DOM updates</li>
+                      <li class="mb-2">Framework-agnostic</li>
+                      <li class="mb-2">Easy to serialize</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section id="position-representation" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Position Representation
+              </h2>
+
+              <section id="path-based-positions" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Path-Based Positions</h3>
+                <p class="m-0 mb-3">
+                  Positions in the model use paths (array of indices) to navigate the document tree:
+                </p>
+                <DocCodeBlock code={`// Path structure: [blockIndex, inlineIndex, textOffset]
+// Example document:
+{
+  type: 'document',
+  children: [
+    { type: 'paragraph', children: [...] },  // Index 0
+    { type: 'heading', children: [...] },     // Index 1
+    { type: 'paragraph', children: [...] }    // Index 2
+  ]
+}
+
+// Position examples:
+{ path: [0], offset: 0 }           // Start of first paragraph
+{ path: [0, 0], offset: 5 }        // 5th character in first inline of first paragraph
+{ path: [1, 0, 1], offset: 3 }     // 3rd character in 2nd text node of first inline of heading`} />
+                <p class="m-0 mb-3">
+                  <strong>Path interpretation:</strong>
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Each number is an index into the parent's children array</li>
+                  <li>Last number is the character offset within a text node</li>
+                  <li>Paths are stable even when DOM is re-rendered</li>
+                </ul>
+              </section>
+
+              <section id="offset-in-position" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Offset in Position</h3>
+                <p class="m-0 mb-3">
+                  The offset represents the character position within the target node:
+                </p>
+                <DocCodeBlock code={`// For text nodes, offset is character position
+{
+  path: [0, 0],  // First paragraph, first inline
+  offset: 5      // 5th character in the text node
+}
+
+// For element nodes, offset is child index
+{
+  path: [0],     // First paragraph
+  offset: 2      // After 2nd child of paragraph
+}
+
+// Finding position in model
+function findPosition(path, offset) {
+  let node = document;
+  
+  // Navigate using path
+  for (let i = 0; i < path.length - 1; i++) {
+    node = node.children[path[i]];
+  }
+  
+  // Last path index points to target node
+  const targetNode = node.children[path[path.length - 1]];
+  
+  return {
+    node: targetNode,
+    offset: offset
+  };
+}`} />
+              </section>
+
+              <section id="position-stability" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Position Stability</h3>
+                <p class="m-0 mb-3">
+                  Path-based positions remain valid even when DOM changes:
+                </p>
+                <DocCodeBlock code={`// Position before edit
+const position = { path: [0, 0], offset: 10 };
+
+// User inserts text at position [0, 0], offset: 5
+// Model updates, but position path structure remains
+
+// Position after edit (offset adjusted)
+const newPosition = { path: [0, 0], offset: 15 };  // 10 + 5 inserted chars
+
+// If text is deleted, offset decreases
+// If node is split, path might change
+// But path structure is always valid`} />
+              </section>
+            </section>
+
+            <section id="selection-representation" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Selection Representation
+              </h2>
+
+              <section id="anchor-focus" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Anchor and Focus</h3>
+                <p class="m-0 mb-3">
+                  Selection is represented by two positions: anchor (where selection started) and focus (where selection ended):
+                </p>
+                <DocCodeBlock code={`// Model selection
+{
+  anchor: { path: [0, 0], offset: 5 },
+  focus: { path: [0, 2], offset: 3 },
+  isBackward: false
+}
+
+// Collapsed selection (cursor)
+{
+  anchor: { path: [0, 1], offset: 10 },
+  focus: { path: [0, 1], offset: 10 },
+  isBackward: false
+}
+
+// Backward selection (selected from right to left)
+{
+  anchor: { path: [0, 2], offset: 10 },
+  focus: { path: [0, 0], offset: 5 },
+  isBackward: true
+}`} />
+                <p class="m-0 mb-3">
+                  <strong>Why anchor and focus?</strong>
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Anchor is where user started selecting (mouse down or Shift+Arrow start)</li>
+                  <li>Focus is where selection currently ends (mouse position or cursor)</li>
+                  <li>isBackward indicates selection direction</li>
+                  <li>Allows proper handling of selection expansion/contraction</li>
+                </ul>
+              </section>
+
+              <section id="collapsed-selection" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Collapsed Selection</h3>
+                <p class="m-0 mb-3">
+                  A collapsed selection represents a cursor (no text selected):
+                </p>
+                <DocCodeBlock code={`// Collapsed selection
+{
+  anchor: { path: [0, 1], offset: 10 },
+  focus: { path: [0, 1], offset: 10 },
+  isBackward: false
+}
+
+// Check if collapsed
+function isCollapsed(selection) {
+  return (
+    selection.anchor.path.join(',') === selection.focus.path.join(',') &&
+    selection.anchor.offset === selection.focus.offset
+  );
+}
+
+// Get cursor position
+function getCursorPosition(selection) {
+  if (isCollapsed(selection)) {
+    return selection.anchor;  // or focus, they're the same
+  }
+  return null;
+}`} />
+              </section>
+            </section>
+
+            <section id="dom-to-model" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                DOM to Model Conversion
+              </h2>
+              <p class="m-0 mb-4">
+                Convert browser's DOM selection to your model selection:
+              </p>
+
+              <section id="dom-position-to-path" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">DOM Position to Path</h3>
+                <DocCodeBlock code={`function domPositionToPath(domNode, domOffset, model) {
+  // Find the model node that corresponds to DOM node
+  const modelNode = findModelNodeForDOM(domNode, model);
+  
+  if (!modelNode) {
+    return null;
+  }
+  
+  // Calculate path by walking up the model tree
+  const path = [];
+  let current = modelNode;
+  
+  while (current && current !== model) {
+    const parent = findParent(current, model);
+    if (parent) {
+      const index = parent.children.indexOf(current);
+      path.unshift(index);
+    }
+    current = parent;
+  }
+  
+  // Add offset
+  if (domNode.nodeType === Node.TEXT_NODE) {
+    // Offset is character position in text node
+    return { path, offset: domOffset };
+  } else {
+    // Offset is child index in element
+    return { path: [...path, domOffset], offset: 0 };
+  }
+}
+
+function findModelNodeForDOM(domNode, model) {
+  // Walk up DOM tree to find element with data-model-id
+  let current = domNode;
+  while (current) {
+    if (current.nodeType === Node.ELEMENT_NODE) {
+      const modelId = current.getAttribute('data-model-id');
+      if (modelId) {
+        return findNodeById(model, modelId);
+      }
+    }
+    current = current.parentElement;
+  }
+  return null;
+}`} />
+              </section>
+
+              <section id="dom-range-to-selection" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">DOM Range to Selection</h3>
+                <DocCodeBlock code={`function domSelectionToModel(domSelection) {
+  if (domSelection.rangeCount === 0) {
+    return null;
+  }
+  
+  const range = domSelection.getRangeAt(0);
+  
+  // Convert start position
+  const anchor = domPositionToPath(
+    range.startContainer,
+    range.startOffset,
+    model
+  );
+  
+  // Convert end position
+  const focus = domPositionToPath(
+    range.endContainer,
+    range.endOffset,
+    model
+  );
+  
+  if (!anchor || !focus) {
+    return null;
+  }
+  
+  // Determine if backward
+  const isBackward = comparePositions(anchor, focus) > 0;
+  
+  return {
+    anchor: isBackward ? focus : anchor,
+    focus: isBackward ? anchor : focus,
+    isBackward
+  };
+}
+
+function comparePositions(pos1, pos2) {
+  // Compare paths lexicographically
+  for (let i = 0; i < Math.max(pos1.path.length, pos2.path.length); i++) {
+    const idx1 = pos1.path[i] || 0;
+    const idx2 = pos2.path[i] || 0;
+    if (idx1 !== idx2) {
+      return idx1 - idx2;
+    }
+  }
+  // Paths are equal, compare offsets
+  return pos1.offset - pos2.offset;
+}`} />
+              </section>
+            </section>
+
+            <section id="model-to-dom" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Model to DOM Conversion
+              </h2>
+              <p class="m-0 mb-4">
+                Convert your model selection to DOM selection:
+              </p>
+
+              <section id="path-to-dom-position" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Path to DOM Position</h3>
+                <DocCodeBlock code={`function pathToDOMPosition(path, offset, model) {
+  // Navigate model tree using path
+  let node = model;
+  for (let i = 0; i < path.length; i++) {
+    if (!node.children || node.children.length <= path[i]) {
+      return null;  // Invalid path
+    }
+    node = node.children[path[i]];
+  }
+  
+  // Find corresponding DOM node
+  const domNode = findDOMNodeForModel(node);
+  if (!domNode) {
+    return null;
+  }
+  
+  // Handle offset
+  if (node.type === 'text') {
+    // For text nodes, offset is character position
+    return {
+      node: domNode,
+      offset: offset
+    };
+  } else {
+    // For element nodes, offset is child index
+    if (domNode.childNodes.length > offset) {
+      return {
+        node: domNode,
+        offset: offset
+      };
+    }
+    // Offset beyond children, use last child
+    return {
+      node: domNode,
+      offset: domNode.childNodes.length
+    };
+  }
+}
+
+function findDOMNodeForModel(modelNode) {
+  // Find DOM element with matching data-model-id
+  const modelId = getModelId(modelNode);
+  return editor.querySelector(\`[data-model-id="\${modelId}"]\`);
+}`} />
+              </section>
+
+              <section id="selection-to-dom-range" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Selection to DOM Range</h3>
+                <DocCodeBlock code={`function modelSelectionToDOM(modelSelection) {
+  // Convert anchor position
+  const anchorDOM = pathToDOMPosition(
+    modelSelection.anchor.path,
+    modelSelection.anchor.offset,
+    model
+  );
+  
+  // Convert focus position
+  const focusDOM = pathToDOMPosition(
+    modelSelection.focus.path,
+    modelSelection.focus.offset,
+    model
+  );
+  
+  if (!anchorDOM || !focusDOM) {
+    return null;
+  }
+  
+  // Create DOM range
+  const range = document.createRange();
+  
+  if (modelSelection.isBackward) {
+    range.setStart(focusDOM.node, focusDOM.offset);
+    range.setEnd(anchorDOM.node, anchorDOM.offset);
+  } else {
+    range.setStart(anchorDOM.node, anchorDOM.offset);
+    range.setEnd(focusDOM.node, focusDOM.offset);
+  }
+  
+  // Apply to selection
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+  
+  return range;
+}`} />
+              </section>
+            </section>
+
+            <section id="selection-normalization" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Selection Normalization
+              </h2>
+              <p class="m-0 mb-4">
+                Selections can become invalid after model changes. Normalize them:
+              </p>
+
+              <section id="normalize-invalid" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Normalize Invalid Selections</h3>
+                <DocCodeBlock code={`function normalizeSelection(selection, model) {
+  // Check if anchor is valid
+  const anchorValid = isValidPosition(selection.anchor, model);
+  if (!anchorValid) {
+    selection.anchor = findNearestValidPosition(selection.anchor, model);
+  }
+  
+  // Check if focus is valid
+  const focusValid = isValidPosition(selection.focus, model);
+  if (!focusValid) {
+    selection.focus = findNearestValidPosition(selection.focus, model);
+  }
+  
+  // If both positions are now the same, collapse
+  if (isSamePosition(selection.anchor, selection.focus)) {
+    selection.focus = { ...selection.anchor };
+    selection.isBackward = false;
+  }
+  
+  return selection;
+}
+
+function isValidPosition(position, model) {
+  try {
+    const node = getNodeAtPath(model, position.path);
+    if (!node) return false;
+    
+    if (node.type === 'text') {
+      return position.offset <= node.text.length;
+    } else {
+      return position.offset <= node.children.length;
+    }
+  } catch (e) {
+    return false;
+  }
+}
+
+function findNearestValidPosition(position, model) {
+  // Try to find valid position near the invalid one
+  // Walk up the path until finding a valid node
+  // Then set offset to end of that node
+  let path = [...position.path];
+  
+  while (path.length > 0) {
+    const node = getNodeAtPath(model, path);
+    if (node) {
+      if (node.type === 'text') {
+        return { path, offset: node.text.length };
+      } else {
+        return { path, offset: node.children.length };
+      }
+    }
+    path.pop();
+  }
+  
+  // Fallback to document start
+  return { path: [0], offset: 0 };
+}`} />
+              </section>
+
+              <section id="expand-selection" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Expand Selection</h3>
+                <p class="m-0 mb-3">
+                  Sometimes you need to expand selection to include full nodes:
+                </p>
+                <DocCodeBlock code={`function expandSelectionToNodes(selection, model) {
+  // Expand anchor to start of node
+  const anchorNode = getNodeAtPath(model, selection.anchor.path);
+  if (anchorNode && selection.anchor.offset > 0) {
+    selection.anchor = {
+      path: selection.anchor.path,
+      offset: 0
+    };
+  }
+  
+  // Expand focus to end of node
+  const focusNode = getNodeAtPath(model, selection.focus.path);
+  if (focusNode) {
+    const endOffset = focusNode.type === 'text' 
+      ? focusNode.text.length 
+      : focusNode.children.length;
+    
+    selection.focus = {
+      path: selection.focus.path,
+      offset: endOffset
+    };
+  }
+  
+  return selection;
+}`} />
+              </section>
+            </section>
+
+            <section id="position-updates" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Position Updates
+              </h2>
+              <p class="m-0 mb-4">
+                When the model changes, positions need to be updated:
+              </p>
+
+              <section id="tracking-positions" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Tracking Positions</h3>
+                <p class="m-0 mb-3">
+                  Track positions that need updating after operations:
+                </p>
+                <DocCodeBlock code={`class PositionTracker {
+  constructor() {
+    this.positions = new Map();
+  }
+  
+  track(position, id) {
+    this.positions.set(id, position);
+  }
+  
+  updateAfterOperation(operation) {
+    // Update all tracked positions based on operation
+    for (const [id, position] of this.positions.entries()) {
+      const updated = this.updatePosition(position, operation);
+      this.positions.set(id, updated);
+    }
+  }
+  
+  updatePosition(position, operation) {
+    // If operation is before position, position stays same
+    // If operation is at position, position moves forward
+    // If operation is after position, position unchanged
+    
+    if (operation.type === 'insertText') {
+      if (isBefore(operation.position, position)) {
+        // Text inserted before, position moves forward
+        return {
+          ...position,
+          offset: position.offset + operation.text.length
+        };
+      }
+    }
+    
+    if (operation.type === 'deleteRange') {
+      if (overlaps(operation.range, position)) {
+        // Position is in deleted range, move to range start
+        return { ...operation.range.anchor };
+      } else if (isAfter(operation.range, position)) {
+        // Deletion after position, position unchanged
+        return position;
+      } else {
+        // Deletion before position, adjust offset
+        const deletedLength = getRangeLength(operation.range);
+        return {
+          ...position,
+          offset: position.offset - deletedLength
+        };
+      }
+    }
+    
+    return position;
+  }
+}`} />
+              </section>
+
+              <section id="updating-positions" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Updating Positions After Edits</h3>
+                <DocCodeBlock code={`function updateSelectionAfterEdit(selection, operation) {
+  // Update anchor
+  selection.anchor = updatePosition(selection.anchor, operation);
+  
+  // Update focus
+  selection.focus = updatePosition(selection.focus, operation);
+  
+  // Normalize if needed
+  return normalizeSelection(selection, model);
+}
+
+function updatePosition(position, operation) {
+  switch (operation.type) {
+    case 'insertText':
+      return updatePositionForInsert(position, operation);
+    case 'deleteRange':
+      return updatePositionForDelete(position, operation);
+    case 'splitNode':
+      return updatePositionForSplit(position, operation);
+    case 'mergeNodes':
+      return updatePositionForMerge(position, operation);
+    default:
+      return position;
+  }
+}`} />
+              </section>
+            </section>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

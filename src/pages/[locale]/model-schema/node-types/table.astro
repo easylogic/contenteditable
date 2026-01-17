@@ -1,0 +1,327 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'schema', text: '스키마 정의' },
+  { depth: 2, slug: 'model', text: '모델 표현' },
+  { depth: 2, slug: 'serialization', text: 'HTML 직렬화' },
+  { depth: 2, slug: 'deserialization', text: 'HTML 역직렬화' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="테이블 노드 타입 – contenteditable.lab"
+      description="테이블 노드 타입에 대한 상세 가이드: 스키마, 모델, HTML 매핑, 뷰 연동, 일반적인 문제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema/node-types')} class="text-text-muted no-underline">노드 타입</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">테이블</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              테이블 노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              카테고리: 복잡 • 뷰 연동 노트를 포함한 상세 구현 가이드
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="스키마 정의">
+              <p class="m-0 mb-3">
+                <strong>테이블</strong> 노드 타입의 스키마 정의:
+              </p>
+              <DocCodeBlock code={`{
+  table: {
+    content: 'tableRow+',
+    group: 'block',
+    attrs: {
+      colCount: { default: 0 }
+    }
+  },
+  tableRow: {
+    content: '(tableCell | tableHeader)+'
+  },
+  tableCell: {
+    content: 'block+',
+    attrs: {
+      colspan: { default: 1 },
+      rowspan: { default: 1 }
+    }
+  },
+  tableHeader: {
+    content: 'block+',
+    attrs: {
+      colspan: { default: 1 },
+      rowspan: { default: 1 }
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="모델 표현">
+              <p class="m-0 mb-3">
+                모델 표현 예제:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'table',
+  attrs: { colCount: 3 },
+  children: [
+    {
+      type: 'tableRow',
+      children: [
+        {
+          type: 'tableHeader',
+          attrs: { colspan: 1, rowspan: 1 },
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '헤더' }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML 직렬화">
+              <p class="m-0 mb-3">
+                모델을 HTML로 변환:
+              </p>
+              <DocCodeBlock code={`function serializeTable(node) {
+  let html = '<table><tbody>';
+  node.children.forEach(row => {
+    html += serializeTableRow(row);
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function serializeTableRow(node) {
+  let html = '<tr>';
+  node.children.forEach(cell => {
+    html += serializeTableCell(cell);
+  });
+  html += '</tr>';
+  return html;
+}
+
+function serializeTableCell(node) {
+  const tag = node.type === 'tableHeader' ? 'th' : 'td';
+  const attrs = [];
+  if (node.attrs.colspan > 1) {
+    attrs.push('colspan="' + node.attrs.colspan + '"');
+  }
+  if (node.attrs.rowspan > 1) {
+    attrs.push('rowspan="' + node.attrs.rowspan + '"');
+  }
+  return '<' + tag + (attrs.length ? ' ' + attrs.join(' ') : '') + '>' +
+         serializeChildren(node.children) +
+         '</' + tag + '>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML 역직렬화">
+              <p class="m-0 mb-3">
+                HTML을 모델로 파싱:
+              </p>
+              <DocCodeBlock code={`function parseTable(domNode) {
+  const tbody = domNode.querySelector('tbody') || domNode;
+  const rows = Array.from(tbody.querySelectorAll('tr'))
+    .map(row => parseTableRow(row));
+  
+  // 열 개수 계산
+  const colCount = Math.max(...rows.map(row => 
+    row.children.reduce((sum, cell) => sum + (cell.attrs.colspan || 1), 0)
+  ));
+  
+  return {
+    type: 'table',
+    attrs: { colCount },
+    children: rows
+  };
+}
+
+function parseTableRow(domNode) {
+  const cells = Array.from(domNode.childNodes)
+    .filter(node => node.tagName === 'TD' || node.tagName === 'TH')
+    .map(cell => parseTableCell(cell));
+  
+  return {
+    type: 'tableRow',
+    children: cells
+  };
+}
+
+function parseTableCell(domNode) {
+  const type = domNode.tagName === 'TH' ? 'tableHeader' : 'tableCell';
+  const colspan = parseInt(domNode.getAttribute('colspan')) || 1;
+  const rowspan = parseInt(domNode.getAttribute('rowspan')) || 1;
+  
+  return {
+    type,
+    attrs: { colspan, rowspan },
+    children: parseChildren(domNode.childNodes)
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <DocAlert type="info">
+                <strong>뷰 연동 노트:</strong> 이 노드 타입을 뷰 레이어에서 구현할 때 contenteditable 동작, 선택 처리, 이벤트 관리에 특히 주의하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                뷰 연동 코드:
+              </p>
+              <DocCodeBlock code={`// 렌더링
+const table = document.createElement('table');
+const tbody = document.createElement('tbody');
+node.children.forEach(row => {
+  const tr = renderTableRow(row);
+  tbody.appendChild(tr);
+});
+table.appendChild(tbody);
+
+// 셀 편집
+function makeCellEditable(cell) {
+  cell.contentEditable = 'true';
+  cell.addEventListener('input', handleCellInput);
+  cell.addEventListener('blur', handleCellBlur);
+}
+
+// 테이블 조작
+function insertRow(table, index) {
+  const rowCount = table.children[0].children.length;
+  const newRow = createEmptyRow(rowCount);
+  // 인덱스에 삽입
+}
+
+function insertColumn(table, index) {
+  // 각 행의 인덱스에 셀 추가
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <DocAlert type="warning">
+                <strong>일반적인 함정:</strong> 이 노드 타입을 구현할 때 자주 발생하는 문제들입니다. 구현 전에 주의 깊게 검토하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                일반적인 문제 및 해결 방법:
+              </p>
+              <DocCodeBlock code={`// 문제: 테이블 구조 검증
+// 해결: 일관된 열 개수 보장
+function validateTable(table) {
+  const colCount = table.attrs.colCount;
+  table.children.forEach(row => {
+    const actualCols = row.children.reduce((sum, cell) => 
+      sum + (cell.attrs.colspan || 1), 0
+    );
+    if (actualCols !== colCount) {
+      // 열 개수 불일치 수정
+    }
+  });
+}
+
+// 문제: 빈 셀
+// 해결: 항상 최소 하나의 블록 유지
+if (cell.children.length === 0) {
+  cell.children.push({
+    type: 'paragraph',
+    children: []
+  });
+}
+
+// 문제: Colspan/rowspan 계산
+// 해결: 병합된 셀 추적
+function getCellAt(table, row, col) {
+  // colspan/rowspan 고려
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-3">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock code={`class TableNode {
+  constructor(attrs, children) {
+    this.type = 'table';
+    this.attrs = { colCount: attrs?.colCount || 0 };
+    this.children = children || [];
+  }
+  
+  toDOM() {
+    const table = document.createElement('table');
+    const tbody = document.createElement('tbody');
+    
+    this.children.forEach(row => {
+      tbody.appendChild(row.toDOM());
+    });
+    
+    table.appendChild(tbody);
+    return table;
+  }
+  
+  static fromDOM(domNode) {
+    const tbody = domNode.querySelector('tbody') || domNode;
+    const rows = Array.from(tbody.querySelectorAll('tr'))
+      .map(row => TableRowNode.fromDOM(row));
+    
+    const colCount = Math.max(...rows.map(row => 
+      row.getColumnCount()
+    ));
+    
+    return new TableNode({ colCount }, rows);
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

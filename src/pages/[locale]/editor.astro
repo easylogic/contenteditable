@@ -1,0 +1,381 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import '../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const translations = {
+  en: {
+    title: 'Building a Rich Text Editor',
+    description: 'Architecture, core concepts, and technologies needed to build a robust rich text editor. Understanding model-view separation, schema design, and position management.',
+    overview: 'Overview',
+    overviewText1: 'Building a rich text editor is more than just working with contenteditable. It requires understanding document models, schema design, position management, and the separation between your internal data model and the DOM representation.',
+    overviewText2: 'Modern editors like ProseMirror, Slate, and Lexical all follow similar architectural patterns that separate concerns and make editors maintainable and extensible.',
+    keyPrinciple: 'Key Principle: Model-View Separation',
+    keyPrincipleText: 'The fundamental principle is separating the document model (your internal representation) from the view (the DOM). The model is your source of truth, and the view is just a projection.',
+    modelLabel: 'Document Model',
+    viewLabel: 'View (DOM)',
+    modelItem1: 'Abstract, schema-validated, framework-agnostic',
+    modelItem2: 'View: HTML representation, handles user input, browser-specific',
+    coreConcepts: 'Core Concepts',
+    documentModel: 'Document Model',
+    documentModelDesc: 'Your internal representation of the document. Tree structure with nodes (blocks, inlines, text) and marks (formatting).',
+    schema: 'Schema',
+    schemaDesc: 'Defines what your document can contain: node types, content rules, attributes, and marks.',
+    positionManagement: 'Position Management',
+    positionManagementDesc: 'Representing positions in your model using paths (array of indices) instead of DOM references.',
+    htmlMapping: 'HTML Mapping',
+    htmlMappingDesc: 'Converting between your model and HTML: serialization (model → HTML) and deserialization (HTML → model).',
+    detailedGuides: 'Detailed Guides',
+    architecture: 'Editor Architecture',
+    architectureDesc: 'Model-view separation, document model structure, view layer responsibilities, and how they work together.',
+    architectureItems: ['Why separate model and view', 'Document model structure', 'View layer responsibilities', 'State management patterns'],
+    modelSchema: 'Model & Schema',
+    modelSchemaDesc: 'Designing your document model and schema: node types, document structure, mark system, and validation.',
+    modelSchemaItems: ['Schema definition and validation', 'Node type design', 'Document structure patterns', 'Mark system implementation'],
+    positionSelection: 'Position & Selection Management',
+    positionSelectionDesc: 'Managing positions and selections in your model: path-based positions, selection representation, and DOM conversion.',
+    positionSelectionItems: ['Path-based position representation', 'Model selection structure', 'DOM to model conversion', 'Model to DOM conversion', 'Selection normalization'],
+    htmlMappingGuide: 'HTML Mapping',
+    htmlMappingGuideDesc: 'Converting between your model and HTML: serialization, deserialization, and incremental updates.',
+    htmlMappingItems: ['Model to HTML serialization', 'HTML to model deserialization', 'Handling edge cases', 'Incremental DOM updates', 'Preserving marks and attributes'],
+    gettingStarted: 'Getting Started',
+    gettingStartedText: 'Recommended learning path:',
+    step1: 'Start with Architecture:',
+    step1Desc: 'Understand model-view separation and why it\'s important',
+    step2: 'Learn Model & Schema:',
+    step2Desc: 'Design your document structure and validation rules',
+    step3: 'Master Position & Selection:',
+    step3Desc: 'Understand how to represent and manage positions in your model',
+    step4: 'Implement HTML Mapping:',
+    step4Desc: 'Build serialization and deserialization between model and HTML',
+    step5: 'Add contenteditable APIs:',
+    step5Desc: 'Use Selection API, Range API, and events in your view layer',
+    relatedResources: 'Related Resources',
+    practicalPatterns: 'Practical Patterns',
+    practicalPatternsDesc: 'Code examples for common patterns',
+    tips: 'Tips',
+    tipsDesc: 'Framework integration and best practices',
+    selectionApi: 'Selection API',
+    selectionApiDesc: 'Working with browser selections',
+    rangeApi: 'Range API',
+    rangeApiDesc: 'Manipulating DOM ranges',
+    learnMore: 'Learn more →',
+    readArchitecture: 'Read Editor Architecture',
+    readModelSchema: 'Read Model & Schema',
+    readPositionSelection: 'Read Position & Selection',
+    readHtmlMapping: 'Read HTML Mapping',
+    browseDocs: 'Browse Documentation',
+    home: 'Home',
+    editor: 'Editor',
+  },
+  ko: {
+    title: '리치 텍스트 에디터 만들기',
+    description: '견고한 리치 텍스트 에디터를 만들기 위해 필요한 아키텍처, 핵심 개념, 기술들. 모델-뷰 분리, 스키마 설계, 위치 관리 이해하기.',
+    overview: '개요',
+    overviewText1: '리치 텍스트 에디터를 만드는 것은 단순히 contenteditable을 사용하는 것 이상입니다. 문서 모델, 스키마 설계, 위치 관리, 그리고 내부 데이터 모델과 DOM 표현 사이의 분리를 이해해야 합니다.',
+    overviewText2: 'ProseMirror, Slate, Lexical과 같은 현대적인 에디터들은 모두 관심사를 분리하고 에디터를 유지보수 가능하고 확장 가능하게 만드는 유사한 아키텍처 패턴을 따릅니다.',
+    keyPrinciple: '핵심 원칙: 모델-뷰 분리',
+    keyPrincipleText: '근본적인 원칙은 문서 모델(내부 표현)과 뷰(DOM)를 분리하는 것입니다. 모델이 진실의 원천이고, 뷰는 단지 투영일 뿐입니다.',
+    modelLabel: '문서 모델',
+    viewLabel: '뷰 (DOM)',
+    modelItem1: '추상적, 스키마 검증, 프레임워크 독립적',
+    modelItem2: '뷰: HTML 표현, 사용자 입력 처리, 브라우저 특정',
+    coreConcepts: '핵심 개념',
+    documentModel: '문서 모델',
+    documentModelDesc: '문서의 내부 표현. 노드(블록, 인라인, 텍스트)와 마크(포맷팅)를 가진 트리 구조.',
+    schema: '스키마',
+    schemaDesc: '문서가 포함할 수 있는 것들을 정의: 노드 타입, 콘텐츠 규칙, 속성, 마크.',
+    positionManagement: '위치 관리',
+    positionManagementDesc: 'DOM 참조 대신 경로(인덱스 배열)를 사용하여 모델에서 위치를 표현.',
+    htmlMapping: 'HTML 매핑',
+    htmlMappingDesc: '모델과 HTML 간 변환: 직렬화(모델 → HTML)와 역직렬화(HTML → 모델).',
+    detailedGuides: '상세 가이드',
+    architecture: '에디터 아키텍처',
+    architectureDesc: '모델-뷰 분리, 문서 모델 구조, 뷰 레이어 책임, 그리고 이들이 함께 작동하는 방식.',
+    architectureItems: ['모델과 뷰를 분리하는 이유', '문서 모델 구조', '뷰 레이어 책임', '상태 관리 패턴'],
+    modelSchema: '모델 & 스키마',
+    modelSchemaDesc: '문서 모델과 스키마 설계: 노드 타입, 문서 구조, 마크 시스템, 검증.',
+    modelSchemaItems: ['스키마 정의 및 검증', '노드 타입 설계', '문서 구조 패턴', '마크 시스템 구현'],
+    positionSelection: '위치 & 선택 관리',
+    positionSelectionDesc: '모델에서 위치와 선택 관리: 경로 기반 위치, 선택 표현, DOM 변환.',
+    positionSelectionItems: ['경로 기반 위치 표현', '모델 선택 구조', 'DOM에서 모델로 변환', '모델에서 DOM으로 변환', '선택 정규화'],
+    htmlMappingGuide: 'HTML 매핑',
+    htmlMappingGuideDesc: '모델과 HTML 간 변환: 직렬화, 역직렬화, 증분 업데이트.',
+    htmlMappingItems: ['모델에서 HTML로 직렬화', 'HTML에서 모델로 역직렬화', '엣지 케이스 처리', '증분 DOM 업데이트', '마크 및 속성 보존'],
+    gettingStarted: '시작하기',
+    gettingStartedText: '권장 학습 경로:',
+    step1: '아키텍처부터 시작:',
+    step1Desc: '모델-뷰 분리와 그 중요성 이해',
+    step2: '모델 & 스키마 학습:',
+    step2Desc: '문서 구조와 검증 규칙 설계',
+    step3: '위치 & 선택 마스터:',
+    step3Desc: '모델에서 위치를 표현하고 관리하는 방법 이해',
+    step4: 'HTML 매핑 구현:',
+    step4Desc: '모델과 HTML 간 직렬화 및 역직렬화 구축',
+    step5: 'contenteditable API 추가:',
+    step5Desc: '뷰 레이어에서 Selection API, Range API, 이벤트 사용',
+    relatedResources: '관련 리소스',
+    practicalPatterns: '실용적인 패턴',
+    practicalPatternsDesc: '일반적인 패턴에 대한 코드 예제',
+    tips: '팁',
+    tipsDesc: '프레임워크 통합 및 모범 사례',
+    selectionApi: 'Selection API',
+    selectionApiDesc: '브라우저 선택 작업',
+    rangeApi: 'Range API',
+    rangeApiDesc: 'DOM 범위 조작',
+    learnMore: '더 알아보기 →',
+    readArchitecture: '에디터 아키텍처 읽기',
+    readModelSchema: '모델 & 스키마 읽기',
+    readPositionSelection: '위치 & 선택 읽기',
+    readHtmlMapping: 'HTML 매핑 읽기',
+    browseDocs: '문서 둘러보기',
+    home: '홈',
+    editor: '에디터',
+  },
+};
+
+// Get translations after defining the object
+const t = translations[locale] || translations.en;
+
+const headings = [
+  { depth: 2, slug: 'overview', text: t.overview },
+  { depth: 2, slug: 'core-concepts', text: t.coreConcepts },
+  { depth: 2, slug: 'detailed-guides', text: t.detailedGuides },
+  { depth: 2, slug: 'getting-started', text: t.gettingStarted },
+];
+
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`${t.title} – contenteditable.lab`}
+      description={t.description}
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">{t.home || 'Home'}</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">{t.editor || 'Editor'}</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              {t.title}
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              {t.description}
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <section id="overview" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                {t.overview}
+              </h2>
+              <p class="m-0 mb-4">
+                {t.overviewText1}
+              </p>
+              <p class="m-0 mb-4">
+                현대적인 에디터들인 <strong>ProseMirror</strong>, <strong>Slate</strong>, <strong>Lexical</strong>은 모두 관심사를 분리하고 에디터를 유지보수 가능하고 확장 가능하게 만드는 유사한 아키텍처 패턴을 따릅니다.
+              </p>
+              <div class="my-6 p-4 bg-blue-100 dark:bg-blue-900/20 border border-blue-500 dark:border-blue-700 rounded-lg">
+                <h3 class="text-lg m-0 mb-3 text-blue-800 dark:text-blue-200 font-semibold">
+                  {t.keyPrinciple}
+                </h3>
+                <p class="m-0 mb-3 text-blue-900 dark:text-blue-100">
+                  근본적인 원칙은 <strong>문서 모델</strong>(내부 표현)과 <strong>뷰</strong>(DOM)를 분리하는 것입니다. 모델이 진실의 원천이고, 뷰는 단지 투영일 뿐입니다.
+                </p>
+                <ul class="m-0 pl-6 text-blue-900 dark:text-blue-100">
+                  <li>{t.modelItem1}</li>
+                  <li>{t.modelItem2}</li>
+                </ul>
+              </div>
+            </section>
+
+            <section id="core-concepts" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                {t.coreConcepts}
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">{t.documentModel}</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.documentModelDesc}
+                  </p>
+                  <a href={localePath('/editor/architecture')} class="text-accent-primary hover:underline text-sm">{t.learnMore || 'Learn more →'}</a>
+                </div>
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">{t.schema}</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.schemaDesc}
+                  </p>
+                  <a href={localePath('/editor/model-schema')} class="text-accent-primary hover:underline text-sm">{t.learnMore}</a>
+                </div>
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">{t.positionManagement}</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.positionManagementDesc}
+                  </p>
+                  <a href={localePath('/editor/position-selection')} class="text-accent-primary hover:underline text-sm">{t.learnMore}</a>
+                </div>
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">{t.htmlMapping}</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.htmlMappingDesc}
+                  </p>
+                  <a href={localePath('/editor/html-mapping')} class="text-accent-primary hover:underline text-sm">{t.learnMore}</a>
+                </div>
+              </div>
+            </section>
+
+            <section id="detailed-guides" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                {t.detailedGuides}
+              </h2>
+              <div class="space-y-4">
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href={localePath('/editor/architecture')} class="text-accent-primary hover:underline">{t.architecture}</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.architectureDesc}
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    {t.architectureItems.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href={localePath('/editor/model-schema')} class="text-accent-primary hover:underline">{t.modelSchema}</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.modelSchemaDesc}
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    {t.modelSchemaItems.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href={localePath('/editor/position-selection')} class="text-accent-primary hover:underline">{t.positionSelection}</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.positionSelectionDesc}
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    {t.positionSelectionItems.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href={localePath('/editor/html-mapping')} class="text-accent-primary hover:underline">{t.htmlMappingGuide}</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    {t.htmlMappingGuideDesc}
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    {t.htmlMappingItems.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <section id="getting-started" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                {t.gettingStarted}
+              </h2>
+              <p class="m-0 mb-4">
+                {t.gettingStartedText}
+              </p>
+              <ol class="m-0 mb-4 pl-6">
+                <li class="mb-3">
+                  <strong>{t.step1}</strong> {t.step1Desc}
+                  <br />
+                  <a href={localePath('/editor/architecture')} class="text-accent-primary hover:underline text-sm">→ {t.readArchitecture}</a>
+                </li>
+                <li class="mb-3">
+                  <strong>{t.step2}</strong> {t.step2Desc}
+                  <br />
+                  <a href={localePath('/editor/model-schema')} class="text-accent-primary hover:underline text-sm">→ {t.readModelSchema}</a>
+                </li>
+                <li class="mb-3">
+                  <strong>{t.step3}</strong> {t.step3Desc}
+                  <br />
+                  <a href={localePath('/editor/position-selection')} class="text-accent-primary hover:underline text-sm">→ {t.readPositionSelection}</a>
+                </li>
+                <li class="mb-3">
+                  <strong>{t.step4}</strong> {t.step4Desc}
+                  <br />
+                  <a href={localePath('/editor/html-mapping')} class="text-accent-primary hover:underline text-sm">→ {t.readHtmlMapping}</a>
+                </li>
+                <li class="mb-3">
+                  <strong>{t.step5}</strong> {t.step5Desc}
+                  <br />
+                  <a href={localePath('/docs')} class="text-accent-primary hover:underline text-sm">→ {t.browseDocs}</a>
+                </li>
+              </ol>
+            </section>
+
+            <section class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                {t.relatedResources}
+              </h2>
+              <ul class="m-0 pl-6">
+                <li class="mb-2">
+                  <a href={localePath('/docs/practical-patterns')} class="text-accent-primary hover:underline">{t.practicalPatterns}</a> - {t.practicalPatternsDesc}
+                </li>
+                <li class="mb-2">
+                  <a href={localePath('/tips')} class="text-accent-primary hover:underline">{t.tips}</a> - {t.tipsDesc}
+                </li>
+                <li class="mb-2">
+                  <a href={localePath('/docs/selection-api')} class="text-accent-primary hover:underline">{t.selectionApi}</a> - {t.selectionApiDesc}
+                </li>
+                <li class="mb-2">
+                  <a href={localePath('/docs/range-api')} class="text-accent-primary hover:underline">{t.rangeApi}</a> - {t.rangeApiDesc}
+                </li>
+              </ul>
+            </section>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

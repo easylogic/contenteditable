@@ -1,0 +1,209 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'schema', text: '스키마 정의' },
+  { depth: 2, slug: 'model', text: '모델 표현' },
+  { depth: 2, slug: 'serialization', text: 'HTML 직렬화' },
+  { depth: 2, slug: 'deserialization', text: 'HTML 역직렬화' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="글꼴 크기 노드 타입 – contenteditable.lab"
+      description="글꼴 크기 노드 타입에 대한 상세 가이드: 스키마, 모델, HTML 매핑, 뷰 연동, 일반적인 문제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema/node-types')} class="text-text-muted no-underline">노드 타입</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">글꼴 크기</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              글꼴 크기 노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              카테고리: 포맷팅 • 뷰 연동 노트를 포함한 상세 구현 가이드
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="스키마 정의">
+              <p class="m-0 mb-3">
+                <strong>글꼴 크기</strong> 마크 타입의 스키마 정의:
+              </p>
+              <DocCodeBlock code={`{
+  fontSize: {
+    attrs: {
+      size: { default: 16 }
+    },
+      style: 'font-size: ' + node.attrs.size + 'px' 
+    }, 0]
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="모델 표현">
+              <p class="m-0 mb-3">
+                모델 표현 예제:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'text',
+  text: '큰 텍스트',
+  marks: [{
+    type: 'fontSize',
+    attrs: { size: 24 }
+  }]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML 직렬화">
+              <p class="m-0 mb-3">
+                모델을 HTML로 변환:
+              </p>
+              <DocCodeBlock code={`function serializeFontSizeMark(text, mark) {
+  const size = mark.attrs?.size || 16;
+  return '<span style="font-size: ' + size + 'px">' + text + '</span>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML 역직렬화">
+              <p class="m-0 mb-3">
+                HTML을 모델로 파싱:
+              </p>
+              <DocCodeBlock code={`function extractFontSizeMark(element) {
+  if (element.tagName === 'SPAN' && element.style.fontSize) {
+    const size = parseInt(element.style.fontSize) || 16;
+    return {
+      type: 'fontSize',
+      attrs: { size }
+    };
+  }
+  return null;
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <DocAlert type="info">
+                <strong>뷰 연동 노트:</strong> 이 노드 타입을 뷰 레이어에서 구현할 때 contenteditable 동작, 선택 처리, 이벤트 관리에 특히 주의하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                뷰 연동 코드:
+              </p>
+              <DocCodeBlock code={`// 글꼴 크기 설정
+function setFontSize(size) {
+  addMark({
+    type: 'fontSize',
+    attrs: { size }
+  });
+}
+
+// 글꼴 크기 선택기
+function showFontSizePicker() {
+  const sizes = [12, 14, 16, 18, 20, 24, 28, 32];
+  // 크기 선택기 표시
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <DocAlert type="warning">
+                <strong>일반적인 함정:</strong> 이 노드 타입을 구현할 때 자주 발생하는 문제들입니다. 구현 전에 주의 깊게 검토하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                일반적인 문제 및 해결 방법:
+              </p>
+              <DocCodeBlock code={`// 문제: 글꼴 크기 단위 (px, em, rem)
+// 해결: px로 정규화
+function normalizeFontSize(size) {
+  if (typeof size === 'string') {
+    if (size.endsWith('px')) {
+      return parseInt(size);
+    }
+    if (size.endsWith('em')) {
+      return parseFloat(size) * 16; // 16px 기준 가정
+    }
+  }
+  return size;
+}
+
+// 문제: 글꼴 크기 검증
+// 해결: 유효한 범위로 제한
+function validateFontSize(size) {
+  return Math.max(8, Math.min(72, size));
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-3">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock code={`class FontSizeMark {
+  constructor(attrs) {
+    this.type = 'fontSize';
+    this.attrs = { size: attrs?.size || 16 };
+  }
+  
+  toDOM() {
+    return ['span', { 
+      style: 'font-size: ' + this.attrs.size + 'px' 
+    }, 0];
+  }
+  
+  static fromDOM(element) {
+    if (element.tagName === 'SPAN' && element.style.fontSize) {
+      return new FontSizeMark({ 
+        size: parseInt(element.style.fontSize) || 16 
+      });
+    }
+    return null;
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

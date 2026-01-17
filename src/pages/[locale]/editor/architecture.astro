@@ -1,0 +1,612 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'model-view-separation', text: '모델-뷰 분리' },
+  { depth: 3, slug: 'why-separate', text: '왜 분리해야 하나?' },
+  { depth: 3, slug: 'model-characteristics', text: '모델의 특성' },
+  { depth: 3, slug: 'view-characteristics', text: '뷰의 특성' },
+  { depth: 2, slug: 'document-model', text: '문서 모델' },
+  { depth: 3, slug: 'model-structure', text: '모델 구조' },
+  { depth: 3, slug: 'immutability', text: '불변성' },
+  { depth: 3, slug: 'versioning', text: '버전 관리' },
+  { depth: 2, slug: 'view-layer', text: '뷰 레이어' },
+  { depth: 3, slug: 'rendering', text: '렌더링' },
+  { depth: 3, slug: 'input-handling', text: '입력 처리' },
+  { depth: 3, slug: 'selection-sync', text: '선택 동기화' },
+  { depth: 2, slug: 'state-management', text: '상태 관리' },
+  { depth: 2, slug: 'architecture-patterns', text: '아키텍처 패턴' },
+  { depth: 3, slug: 'plugin-system', text: '플러그인 시스템' },
+  { depth: 3, slug: 'command-system', text: '명령 시스템' },
+  { depth: 3, slug: 'transform-system', text: '변환 시스템' },
+  { depth: 2, slug: 'editor-comparison', text: '다양한 에디터의 접근 방식' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="에디터 아키텍처 – contenteditable.lab"
+      description="에디터 아키텍처 이해하기: 모델-뷰 분리, 문서 모델, 뷰 레이어, 상태 관리"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">아키텍처</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              에디터 아키텍처
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              리치 텍스트 에디터의 기본 아키텍처 이해하기: 모델-뷰 분리, 문서 모델 설계, 뷰 레이어 책임, 상태 관리.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                현대적인 리치 텍스트 에디터들은 문서 모델과 시각적 표현을 분리하는 일관된 아키텍처 패턴을 따릅니다. 이 분리는 유지보수 가능하고 확장 가능한 에디터의 기초입니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-view-separation" title="모델-뷰 분리">
+              <p class="m-0 mb-4">
+                에디터 아키텍처의 핵심 원칙은 <strong>문서 모델</strong>(내부 표현)과 <strong>뷰</strong>(DOM)를 분리하는 것입니다.
+              </p>
+
+              <div class="my-6 p-6 bg-bg-muted rounded-lg border border-border-light">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">문서 모델</h4>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">추상적 표현</li>
+                      <li class="mb-2">스키마 검증 구조</li>
+                      <li class="mb-2">불변 또는 버전 관리</li>
+                      <li class="mb-2">프레임워크 독립적</li>
+                      <li class="mb-2">독립적으로 테스트 가능</li>
+                      <li class="mb-2">위치 기반 (경로, DOM 아님)</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">뷰 (DOM)</h4>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">HTML 표현</li>
+                      <li class="mb-2">사용자에게 보이는 인터페이스</li>
+                      <li class="mb-2">변경 가능하고 상호작용 가능</li>
+                      <li class="mb-2">브라우저별 특이사항</li>
+                      <li class="mb-2">사용자 입력 처리</li>
+                      <li class="mb-2">DOM 기반 선택</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <DocSection id="why-separate" title="왜 분리해야 하나?" depth={3}>
+                <p class="m-0 mb-3">
+                  <strong>1. DOM은 신뢰할 수 없습니다:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>브라우저별 동작과 특이사항</li>
+                  <li>일관성 없는 HTML 구조</li>
+                  <li>DOM 변경 후 선택이 무효화될 수 있음</li>
+                  <li>테스트와 추론이 어려움</li>
+                </ul>
+
+                <p class="m-0 mb-3">
+                  <strong>2. 모델은 예측 가능성을 제공합니다:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>스키마 검증 구조</li>
+                  <li>일관된 표현</li>
+                  <li>프레임워크 독립적</li>
+                  <li>테스트가 더 쉬움</li>
+                </ul>
+
+                <p class="m-0 mb-3">
+                  <strong>3. 고급 기능을 가능하게 합니다:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>히스토리를 통한 실행 취소/다시 실행</li>
+                  <li>협업 편집</li>
+                  <li>다양한 형식으로 직렬화</li>
+                  <li>동일한 문서의 여러 뷰</li>
+                </ul>
+
+                <p class="m-0 mb-3">
+                  <strong>4. 작업을 조합 가능하게 만듭니다:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>변환을 결합할 수 있음</li>
+                  <li>작업이 되돌릴 수 있음</li>
+                  <li>적용 전에 검증 가능</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="model-characteristics" title="모델의 특성" depth={3}>
+                <p class="m-0 mb-3">
+                  문서 모델은 다음을 만족해야 합니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>추상적:</strong> 렌더링 방식과 독립적</li>
+                  <li><strong>검증됨:</strong> 항상 스키마를 준수</li>
+                  <li><strong>불변 또는 버전 관리:</strong> 히스토리와 실행 취소/다시 실행 가능</li>
+                  <li><strong>위치 기반:</strong> 경로/오프셋 사용, DOM 참조 아님</li>
+                  <li><strong>직렬화 가능:</strong> JSON, HTML, Markdown 등으로 변환 가능</li>
+                </ul>
+
+                <DocCodeBlock code={`// 문서 모델 예제
+{
+  type: 'document',
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Hello ' },
+        { type: 'text', text: 'world', marks: [{ type: 'bold' }] }
+      ]
+    },
+    {
+      type: 'heading',
+      level: 1,
+      children: [{ type: 'text', text: 'Title' }]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="view-characteristics" title="뷰의 특성" depth={3}>
+                <p class="m-0 mb-3">
+                  뷰 레이어는 다음을 담당합니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>렌더링:</strong> 모델을 DOM으로 변환</li>
+                  <li><strong>입력 처리:</strong> 사용자 입력을 가로채고 모델 작업으로 변환</li>
+                  <li><strong>선택 동기화:</strong> DOM 선택을 모델 선택과 동기화 유지</li>
+                  <li><strong>DOM 업데이트:</strong> 변경된 부분만 효율적으로 업데이트</li>
+                </ul>
+
+                <p class="m-0 mb-4">
+                  뷰는 모델의 <strong>투영</strong>이며, 진실의 원천이 아닙니다. 모델이 변경되면 뷰가 업데이트됩니다. 사용자가 뷰와 상호작용하면 모델 작업이 트리거됩니다.
+                </p>
+
+                <DocCodeBlock code={`// 뷰 레이어 책임
+class View {
+  // 모델을 DOM으로 렌더링
+  render(model) {
+    // 모델 노드를 DOM 요소로 변환
+  }
+  
+  // 사용자 입력 처리
+  handleInput(event) {
+    // DOM 입력을 모델 작업으로 변환
+    const operation = this.inputToOperation(event);
+    this.editor.apply(operation);
+  }
+  
+  // 선택 동기화
+  syncSelection(modelSelection) {
+    // 모델 선택을 DOM 선택으로 변환
+    const domSelection = this.modelToDOMSelection(modelSelection);
+    this.setDOMSelection(domSelection);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="document-model" title="문서 모델">
+              <p class="m-0 mb-4">
+                문서 모델은 진실의 원천입니다. 렌더링 방식과 독립적으로 문서 구조를 나타냅니다.
+              </p>
+
+              <DocSection id="model-structure" title="모델 구조" depth={3}>
+                <p class="m-0 mb-3">
+                  문서는 계층적 트리입니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>블록 노드:</strong> 단락, 제목, 목록, 코드 블록</li>
+                  <li><strong>인라인 노드:</strong> 텍스트, 링크, 이미지 (블록 내부)</li>
+                  <li><strong>텍스트 노드:</strong> 마크가 있는 실제 텍스트 콘텐츠</li>
+                </ul>
+
+                <DocCodeBlock code={`// 완전한 문서 모델 예제
+{
+  type: 'document',
+  children: [
+    {
+      type: 'heading',
+      level: 1,
+      children: [
+        { type: 'text', text: 'Introduction' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'This is a ' },
+        { type: 'text', text: 'bold', marks: [{ type: 'bold' }] },
+        { type: 'text', text: ' and ' },
+        { type: 'text', text: 'italic', marks: [{ type: 'italic' }] },
+        { type: 'text', text: ' text.' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Visit ' },
+        {
+          type: 'link',
+          attrs: { href: 'https://example.com' },
+          children: [
+            { type: 'text', text: 'example.com' }
+          ]
+        },
+        { type: 'text', text: ' for more.' }
+      ]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="immutability" title="불변성" depth={3}>
+                <p class="m-0 mb-3">
+                  많은 에디터가 불변 모델을 사용하는 이유:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>쉬운 실행 취소/다시 실행 (이전 버전만 저장)</li>
+                  <li>시간 여행 디버깅</li>
+                  <li>예측 가능한 업데이트</li>
+                  <li>프레임워크 통합 (React 등)</li>
+                </ul>
+
+                <DocCodeBlock code={`// 불변 모델 업데이트
+function insertText(model, position, text) {
+  // 변경하지 않고 새 모델 생성
+  return {
+    ...model,
+    children: model.children.map((child, index) => {
+      if (index === position.block) {
+        return insertTextInBlock(child, position, text);
+      }
+      return child;
+    })
+  };
+}`} />
+              </DocSection>
+
+              <DocSection id="versioning" title="버전 관리" depth={3}>
+                <p class="m-0 mb-3">
+                  일부 에디터는 버전 관리와 함께 변경 가능한 모델을 사용합니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>대용량 문서에 더 효율적</li>
+                  <li>버전 번호로 변경 추적</li>
+                  <li>여전히 실행 취소/다시 실행 구현 가능</li>
+                  <li>협업 편집 구현이 더 쉬움</li>
+                </ul>
+
+                <DocCodeBlock code={`// 버전 관리 모델
+class Document {
+  constructor() {
+    this.nodes = [];
+    this.version = 0;
+  }
+  
+  insertText(position, text) {
+    // 모델 변경
+    this.doInsertText(position, text);
+    this.version++;
+    return this.version;
+  }
+  
+  getVersion() {
+    return this.version;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="view-layer" title="뷰 레이어">
+              <p class="m-0 mb-4">
+                뷰 레이어는 모델을 DOM으로 렌더링하고 사용자 상호작용을 처리합니다.
+              </p>
+
+              <DocSection id="rendering" title="렌더링" depth={3}>
+                <p class="m-0 mb-3">
+                  렌더링은 모델 노드를 DOM 요소로 변환합니다:
+                </p>
+                <DocCodeBlock code={`function renderNode(node) {
+  switch (node.type) {
+    case 'paragraph':
+      return createElement('p', renderChildren(node.children));
+    case 'heading':
+      return createElement(\`h\${node.level}\`, renderChildren(node.children));
+    case 'text':
+      let element = document.createTextNode(node.text);
+      // 마크 적용
+      if (node.marks) {
+        node.marks.forEach(mark => {
+          element = wrapWithMark(element, mark);
+        });
+      }
+      return element;
+    case 'link':
+      const link = createElement('a', { href: node.attrs.href });
+      link.appendChild(renderChildren(node.children));
+      return link;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="input-handling" title="입력 처리" depth={3}>
+                <p class="m-0 mb-3">
+                  뷰는 사용자 입력을 가로채고 모델 작업으로 변환합니다:
+                </p>
+                <DocCodeBlock code={`editor.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertText') {
+    e.preventDefault();
+    
+    // 모델에서 현재 선택 가져오기
+    const selection = getModelSelection();
+    
+    // 작업 생성
+    const operation = {
+      type: 'insertText',
+      position: selection.anchor,
+      text: e.data
+    };
+    
+    // 모델에 적용
+    editor.applyOperation(operation);
+    
+    // 모델 변경이 뷰 업데이트를 트리거
+  }
+});`} />
+              </DocSection>
+
+              <DocSection id="selection-sync" title="선택 동기화" depth={3}>
+                <p class="m-0 mb-3">
+                  선택은 DOM과 모델 사이에서 동기화되어야 합니다:
+                </p>
+                <DocCodeBlock code={`// 사용자가 DOM에서 선택을 변경할 때
+editor.addEventListener('selectionchange', () => {
+  const domSelection = window.getSelection();
+  const modelSelection = domToModelSelection(domSelection);
+  editor.setSelection(modelSelection);
+});
+
+// 모델이 변경될 때
+editor.on('modelChange', () => {
+  const modelSelection = editor.getSelection();
+  const domSelection = modelToDOMSelection(modelSelection);
+  setDOMSelection(domSelection);
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="state-management" title="상태 관리">
+              <p class="m-0 mb-4">
+                에디터 상태에는 다음이 포함됩니다:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>문서:</strong> 현재 문서 모델</li>
+                <li><strong>선택:</strong> 모델 좌표의 현재 선택</li>
+                <li><strong>히스토리:</strong> 실행 취소/다시 실행 스택</li>
+                <li><strong>스키마:</strong> 문서 스키마 정의</li>
+                <li><strong>플러그인:</strong> 플러그인 상태</li>
+              </ul>
+
+              <DocCodeBlock code={`class EditorState {
+  constructor(schema) {
+    this.schema = schema;
+    this.doc = createEmptyDocument(schema);
+    this.selection = null;
+    this.history = new History();
+    this.plugins = new Map();
+  }
+  
+  apply(operation) {
+    // 작업 검증
+    if (!this.validate(operation)) {
+      return false;
+    }
+    
+    // 히스토리에 저장
+    this.history.push(this.doc, this.selection);
+    
+    // 작업 적용
+    this.doc = this.transform(this.doc, operation);
+    
+    // 선택 업데이트
+    this.selection = this.updateSelection(this.selection, operation);
+    
+    // 플러그인에 알림
+    this.notifyPlugins('operation', operation);
+    
+    return true;
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="architecture-patterns" title="아키텍처 패턴">
+              <p class="m-0 mb-4">
+                에디터 아키텍처의 일반적인 패턴:
+              </p>
+
+              <DocSection id="plugin-system" title="플러그인 시스템" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인은 에디터 기능을 확장합니다:
+                </p>
+                <DocCodeBlock code={`class Plugin {
+  constructor(editor) {
+    this.editor = editor;
+  }
+  
+  install() {
+    // 훅 등록
+    this.editor.on('operation', this.handleOperation);
+    this.editor.on('render', this.handleRender);
+  }
+  
+  uninstall() {
+    // 정리
+    this.editor.off('operation', this.handleOperation);
+  }
+  
+  handleOperation(operation) {
+    // 작업을 가로채거나 수정
+  }
+}
+
+// 사용법
+editor.use(new HistoryPlugin());
+editor.use(new LinkPlugin());
+editor.use(new ImagePlugin());`} />
+              </DocSection>
+
+              <DocSection id="command-system" title="명령 시스템" depth={3}>
+                <p class="m-0 mb-3">
+                  명령은 고수준 작업입니다:
+                </p>
+                <DocCodeBlock code={`class Command {
+  constructor(editor) {
+    this.editor = editor;
+  }
+  
+  canExecute() {
+    // 명령을 실행할 수 있는지 확인
+    return true;
+  }
+  
+  execute() {
+    // 여러 작업을 조합
+    const operations = this.getOperations();
+    operations.forEach(op => this.editor.apply(op));
+  }
+}
+
+class BoldCommand extends Command {
+  execute() {
+    const selection = this.editor.getSelection();
+    if (selection.isCollapsed) {
+      // 다음 문자에 볼드 토글
+      this.editor.setPendingMark('bold');
+    } else {
+      // 선택 영역에 볼드 적용
+      this.editor.apply({
+        type: 'applyMark',
+        range: selection,
+        mark: { type: 'bold' }
+      });
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="transform-system" title="변환 시스템" depth={3}>
+                <p class="m-0 mb-3">
+                  변환은 모델을 수정하는 저수준 작업입니다:
+                </p>
+                <DocCodeBlock code={`class Transform {
+  insertText(doc, position, text) {
+    // 위치에 텍스트 삽입
+    // 삽입 후 모든 위치 업데이트
+    return newDocument;
+  }
+  
+  deleteRange(doc, range) {
+    // 범위의 콘텐츠 삭제
+    // 삭제 후 모든 위치 업데이트
+    return newDocument;
+  }
+  
+  applyMark(doc, range, mark) {
+    // 범위의 텍스트에 마크 적용
+    return newDocument;
+  }
+  
+  splitNode(doc, position) {
+    // 위치에서 노드 분할
+    return newDocument;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="editor-comparison" title="다양한 에디터의 접근 방식">
+              <p class="m-0 mb-4">
+                다양한 에디터가 이러한 개념을 다르게 구현합니다:
+              </p>
+
+              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">ProseMirror</h3>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>엄격한 스키마 기반 검증</li>
+                  <li>불변 문서 모델</li>
+                  <li>변환 기반 작업</li>
+                  <li>별도의 상태 및 뷰 패키지</li>
+                </ul>
+              </div>
+
+              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">Slate</h3>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>React 우선 아키텍처</li>
+                  <li>React 상태와 함께 불변 모델</li>
+                  <li>작업 기반 변환</li>
+                  <li>정규화 시스템</li>
+                </ul>
+              </div>
+
+              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">Lexical</h3>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>프레임워크 독립적 코어</li>
+                  <li>조정과 함께 변경 가능한 모델</li>
+                  <li>이벤트 기반 업데이트</li>
+                  <li>UI용 데코레이터 시스템</li>
+                </ul>
+              </div>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

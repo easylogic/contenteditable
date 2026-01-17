@@ -1,0 +1,176 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Hashtag Node Type – contenteditable.lab"
+      description="Detailed guide for Hashtag node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Hashtag</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Hashtag Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Custom • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Hashtag</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  hashtag: {
+    inline: true,
+    attrs: {
+      tag: { default: '' }
+    },
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'hashtag',
+  attrs: {
+    tag: 'javascript'
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeHashtag(node) {
+  return '<span data-type="hashtag" data-tag="' + escapeHtml(node.attrs.tag) + 
+         '">#' + escapeHtml(node.attrs.tag) + '</span>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseHashtag(domNode) {
+  const text = domNode.textContent || '';
+  const tag = text.startsWith('#') ? text.slice(1) : text;
+  return {
+    type: 'hashtag',
+    attrs: {
+      tag: domNode.getAttribute('data-tag') || tag
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering hashtag
+const hashtag = document.createElement('span');
+hashtag.setAttribute('data-type', 'hashtag');
+hashtag.setAttribute('data-tag', node.attrs.tag);
+hashtag.textContent = '#' + node.attrs.tag;
+hashtag.className = 'hashtag';
+hashtag.contentEditable = 'false'; // Hashtags are typically not directly editable`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Hashtag detection
+// Solution: Detect hashtags in text
+function detectHashtags(text) {
+  return text.match(/#\w+/g) || [];
+}
+
+// Issue: Hashtag validation
+// Solution: Validate hashtag format
+function validateHashtag(tag) {
+  return /^[a-zA-Z0-9_]+$/.test(tag);
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class HashtagNode {
+  constructor(attrs) {
+    this.type = 'hashtag';
+    this.attrs = {
+      tag: attrs?.tag || ''
+    };
+  }
+  
+  toDOM() {
+    const hashtag = document.createElement('span');
+    hashtag.setAttribute('data-type', 'hashtag');
+    hashtag.setAttribute('data-tag', this.attrs.tag);
+    hashtag.textContent = '#' + this.attrs.tag;
+    hashtag.className = 'hashtag';
+    return hashtag;
+  }
+  
+  static fromDOM(domNode) {
+    const text = domNode.textContent || '';
+    const tag = text.startsWith('#') ? text.slice(1) : text;
+    return new HashtagNode({
+      tag: domNode.getAttribute('data-tag') || tag
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

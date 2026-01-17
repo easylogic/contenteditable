@@ -1,0 +1,592 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'model-view-separation', text: 'Model-View Separation' },
+  { depth: 3, slug: 'why-separate', text: 'Why Separate?' },
+  { depth: 3, slug: 'model-characteristics', text: 'Model Characteristics' },
+  { depth: 3, slug: 'view-characteristics', text: 'View Characteristics' },
+  { depth: 2, slug: 'document-model', text: 'Document Model' },
+  { depth: 3, slug: 'model-structure', text: 'Model Structure' },
+  { depth: 3, slug: 'immutability', text: 'Immutability' },
+  { depth: 3, slug: 'versioning', text: 'Versioning' },
+  { depth: 2, slug: 'view-layer', text: 'View Layer' },
+  { depth: 3, slug: 'rendering', text: 'Rendering' },
+  { depth: 3, slug: 'input-handling', text: 'Input Handling' },
+  { depth: 3, slug: 'selection-sync', text: 'Selection Synchronization' },
+  { depth: 2, slug: 'state-management', text: 'State Management' },
+  { depth: 2, slug: 'architecture-patterns', text: 'Architecture Patterns' },
+  { depth: 3, slug: 'plugin-system', text: 'Plugin System' },
+  { depth: 3, slug: 'command-system', text: 'Command System' },
+  { depth: 3, slug: 'transform-system', text: 'Transform System' },
+  { depth: 2, slug: 'editor-comparison', text: 'How Different Editors Approach This' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Editor Architecture – contenteditable.lab"
+      description="Understanding editor architecture: model-view separation, document model, view layer, and state management"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Architecture</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Editor Architecture
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Understanding the fundamental architecture of rich text editors: model-view separation, document model design, and view layer responsibilities.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Modern rich text editors follow a consistent architectural pattern that separates the document model from its visual representation. This separation is the foundation of maintainable, extensible editors.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-view-separation" title="Model-View Separation">
+              <p class="m-0 mb-4">
+                The core principle of editor architecture is separating the <strong>document model</strong> (your internal representation) from the <strong>view</strong> (the DOM).
+              </p>
+
+              <div class="my-6 p-6 bg-bg-muted rounded-lg border border-border-light">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">Document Model</h4>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">Abstract representation</li>
+                      <li class="mb-2">Schema-validated structure</li>
+                      <li class="mb-2">Immutable or versioned</li>
+                      <li class="mb-2">Framework-agnostic</li>
+                      <li class="mb-2">Testable in isolation</li>
+                      <li class="mb-2">Position-based (paths, not DOM)</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">View (DOM)</h4>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">HTML representation</li>
+                      <li class="mb-2">User-visible interface</li>
+                      <li class="mb-2">Mutable and interactive</li>
+                      <li class="mb-2">Browser-specific quirks</li>
+                      <li class="mb-2">Handles user input</li>
+                      <li class="mb-2">DOM-based selection</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <DocSection id="why-separate" title="Why Separate?" depth={3}>
+                <p class="m-0 mb-3">
+                  <strong>1. DOM is unreliable:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Browser-specific behavior and quirks</li>
+                  <li>Inconsistent HTML structures</li>
+                  <li>Selection can become invalid after DOM changes</li>
+                  <li>Hard to test and reason about</li>
+                </ul>
+
+                <p class="m-0 mb-3">
+                  <strong>2. Model provides predictability:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Schema-validated structure</li>
+                  <li>Consistent representation</li>
+                  <li>Framework-agnostic</li>
+                  <li>Easier to test</li>
+                </ul>
+
+                <p class="m-0 mb-3">
+                  <strong>3. Enables advanced features:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Undo/redo with history</li>
+                  <li>Collaborative editing</li>
+                  <li>Serialization to different formats</li>
+                  <li>Multiple views of the same document</li>
+                </ul>
+
+                <p class="m-0 mb-3">
+                  <strong>4. Makes operations composable:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Transforms can be combined</li>
+                  <li>Operations are reversible</li>
+                  <li>Can validate before applying</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="model-characteristics" title="Model Characteristics" depth={3}>
+                <p class="m-0 mb-3">
+                  The document model should be:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Abstract:</strong> Independent of how it's rendered</li>
+                  <li><strong>Validated:</strong> Always conforms to schema</li>
+                  <li><strong>Immutable or versioned:</strong> Enables history and undo/redo</li>
+                  <li><strong>Position-based:</strong> Uses paths/offsets, not DOM references</li>
+                  <li><strong>Serializable:</strong> Can be converted to JSON, HTML, Markdown, etc.</li>
+                </ul>
+
+                <DocCodeBlock code={`// Example document model
+{
+  type: 'document',
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Hello ' },
+        { type: 'text', text: 'world', marks: [{ type: 'bold' }] }
+      ]
+    },
+    {
+      type: 'heading',
+      level: 1,
+      children: [{ type: 'text', text: 'Title' }]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="view-characteristics" title="View Characteristics" depth={3}>
+                <p class="m-0 mb-3">
+                  The view layer is responsible for:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Rendering:</strong> Converting model to DOM</li>
+                  <li><strong>Input handling:</strong> Intercepting user input and converting to model operations</li>
+                  <li><strong>Selection sync:</strong> Keeping DOM selection in sync with model selection</li>
+                  <li><strong>DOM updates:</strong> Efficiently updating only changed parts</li>
+                </ul>
+
+                <p class="m-0 mb-4">
+                  The view is a <strong>projection</strong> of the model, not the source of truth. When the model changes, the view updates. When the user interacts with the view, it triggers model operations.
+                </p>
+
+                <DocCodeBlock code={`// View layer responsibilities
+class View {
+  // Render model to DOM
+  render(model) {
+    // Convert model nodes to DOM elements
+  }
+  
+  // Handle user input
+  handleInput(event) {
+    // Convert DOM input to model operation
+    const operation = this.inputToOperation(event);
+    this.editor.apply(operation);
+  }
+  
+  // Sync selection
+  syncSelection(modelSelection) {
+    // Convert model selection to DOM selection
+    const domSelection = this.modelToDOMSelection(modelSelection);
+    this.setDOMSelection(domSelection);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="document-model" title="Document Model">
+              <p class="m-0 mb-4">
+                The document model is your source of truth. It represents the document structure independently of how it's rendered.
+              </p>
+
+              <DocSection id="model-structure" title="Model Structure" depth={3}>
+                <p class="m-0 mb-3">
+                  Documents are hierarchical trees:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Block nodes:</strong> Paragraphs, headings, lists, code blocks</li>
+                  <li><strong>Inline nodes:</strong> Text, links, images (within blocks)</li>
+                  <li><strong>Text nodes:</strong> Actual text content with marks</li>
+                </ul>
+
+                <DocCodeBlock code={`// Complete document model example
+{
+  type: 'document',
+  children: [
+    {
+      type: 'heading',
+      level: 1,
+      children: [
+        { type: 'text', text: 'Introduction' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'This is a ' },
+        { type: 'text', text: 'bold', marks: [{ type: 'bold' }] },
+        { type: 'text', text: ' and ' },
+        { type: 'text', text: 'italic', marks: [{ type: 'italic' }] },
+        { type: 'text', text: ' text.' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Visit ' },
+        {
+          type: 'link',
+          attrs: { href: 'https://example.com' },
+          children: [
+            { type: 'text', text: 'example.com' }
+          ]
+        },
+        { type: 'text', text: ' for more.' }
+      ]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="immutability" title="Immutability" depth={3}>
+                <p class="m-0 mb-3">
+                  Many editors use immutable models for:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Easy undo/redo (just store previous versions)</li>
+                  <li>Time-travel debugging</li>
+                  <li>Predictable updates</li>
+                  <li>Framework integration (React, etc.)</li>
+                </ul>
+
+                <DocCodeBlock code={`// Immutable model update
+function insertText(model, position, text) {
+  // Create new model instead of mutating
+  return {
+    ...model,
+    children: model.children.map((child, index) => {
+      if (index === position.block) {
+        return insertTextInBlock(child, position, text);
+      }
+      return child;
+    })
+  };
+}`} />
+              </DocSection>
+
+              <DocSection id="versioning" title="Versioning" depth={3}>
+                <p class="m-0 mb-3">
+                  Some editors use mutable models with versioning:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>More efficient for large documents</li>
+                  <li>Version numbers track changes</li>
+                  <li>Can still implement undo/redo</li>
+                  <li>Easier to implement collaborative editing</li>
+                </ul>
+
+                <DocCodeBlock code={`// Versioned model
+class Document {
+  constructor() {
+    this.nodes = [];
+    this.version = 0;
+  }
+  
+  insertText(position, text) {
+    // Mutate model
+    this.doInsertText(position, text);
+    this.version++;
+    return this.version;
+  }
+  
+  getVersion() {
+    return this.version;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="view-layer" title="View Layer">
+              <p class="m-0 mb-4">
+                The view layer renders the model to DOM and handles user interactions.
+              </p>
+
+              <DocSection id="rendering" title="Rendering" depth={3}>
+                <p class="m-0 mb-3">
+                  Rendering converts model nodes to DOM elements:
+                </p>
+                <DocCodeBlock code={`function renderNode(node) {
+  switch (node.type) {
+    case 'paragraph':
+      return createElement('p', renderChildren(node.children));
+    case 'heading':
+      return createElement(\`h\${node.level}\`, renderChildren(node.children));
+    case 'text':
+      let element = document.createTextNode(node.text);
+      // Apply marks
+      if (node.marks) {
+        node.marks.forEach(mark => {
+          element = wrapWithMark(element, mark);
+        });
+      }
+      return element;
+    case 'link':
+      const link = createElement('a', { href: node.attrs.href });
+      link.appendChild(renderChildren(node.children));
+      return link;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="input-handling" title="Input Handling" depth={3}>
+                <p class="m-0 mb-3">
+                  The view intercepts user input and converts it to model operations:
+                </p>
+                <DocCodeBlock code={`editor.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertText') {
+    e.preventDefault();
+    
+    // Get current selection in model
+    const selection = getModelSelection();
+    
+    // Create operation
+    const operation = {
+      type: 'insertText',
+      position: selection.anchor,
+      text: e.data
+    };
+    
+    // Apply to model
+    editor.applyOperation(operation);
+    
+    // Model change triggers view update
+  }
+});`} />
+              </DocSection>
+
+              <DocSection id="selection-sync" title="Selection Synchronization" depth={3}>
+                <p class="m-0 mb-3">
+                  Selection must be kept in sync between DOM and model:
+                </p>
+                <DocCodeBlock code={`// When user changes selection in DOM
+editor.addEventListener('selectionchange', () => {
+  const domSelection = window.getSelection();
+  const modelSelection = domToModelSelection(domSelection);
+  editor.setSelection(modelSelection);
+});
+
+// When model changes
+editor.on('modelChange', () => {
+  const modelSelection = editor.getSelection();
+  const domSelection = modelToDOMSelection(modelSelection);
+  setDOMSelection(domSelection);
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="state-management" title="State Management">
+              <p class="m-0 mb-4">
+                Editor state includes:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Document:</strong> The current document model</li>
+                <li><strong>Selection:</strong> Current selection in model coordinates</li>
+                <li><strong>History:</strong> Undo/redo stack</li>
+                <li><strong>Schema:</strong> Document schema definition</li>
+                <li><strong>Plugins:</strong> Plugin state</li>
+              </ul>
+
+              <DocCodeBlock code={`class EditorState {
+  constructor(schema) {
+    this.schema = schema;
+    this.doc = createEmptyDocument(schema);
+    this.selection = null;
+    this.history = new History();
+    this.plugins = new Map();
+  }
+  
+  apply(operation) {
+    // Validate operation
+    if (!this.validate(operation)) {
+      return false;
+    }
+    
+    // Save to history
+    this.history.push(this.doc, this.selection);
+    
+    // Apply operation
+    this.doc = this.transform(this.doc, operation);
+    
+    // Update selection
+    this.selection = this.updateSelection(this.selection, operation);
+    
+    // Notify plugins
+    this.notifyPlugins('operation', operation);
+    
+    return true;
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="architecture-patterns" title="Architecture Patterns">
+              <p class="m-0 mb-4">
+                Common patterns in editor architecture:
+              </p>
+
+              <DocSection id="plugin-system" title="Plugin System" depth={3}>
+                <p class="m-0 mb-3">
+                  Plugins extend editor functionality:
+                </p>
+                <DocCodeBlock code={`class Plugin {
+  constructor(editor) {
+    this.editor = editor;
+  }
+  
+  install() {
+    // Register hooks
+    this.editor.on('operation', this.handleOperation);
+    this.editor.on('render', this.handleRender);
+  }
+  
+  uninstall() {
+    // Cleanup
+    this.editor.off('operation', this.handleOperation);
+  }
+  
+  handleOperation(operation) {
+    // Intercept or modify operations
+  }
+}
+
+// Usage
+editor.use(new HistoryPlugin());
+editor.use(new LinkPlugin());
+editor.use(new ImagePlugin());`} />
+              </DocSection>
+
+              <DocSection id="command-system" title="Command System" depth={3}>
+                <p class="m-0 mb-3">
+                  Commands are high-level operations:
+                </p>
+                <DocCodeBlock code={`class Command {
+  constructor(editor) {
+    this.editor = editor;
+  }
+  
+  canExecute() {
+    // Check if command can run
+    return true;
+  }
+  
+  execute() {
+    // Compose multiple operations
+    const operations = this.getOperations();
+    operations.forEach(op => this.editor.apply(op));
+  }
+}
+
+class BoldCommand extends Command {
+  execute() {
+    const selection = this.editor.getSelection();
+    if (selection.isCollapsed) {
+      // Toggle bold for next character
+      this.editor.setPendingMark('bold');
+    } else {
+      // Apply bold to selection
+      this.editor.apply({
+        type: 'applyMark',
+        range: selection,
+        mark: { type: 'bold' }
+      });
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="transform-system" title="Transform System" depth={3}>
+                <p class="m-0 mb-3">
+                  Transforms are low-level operations that modify the model:
+                </p>
+                <DocCodeBlock code={`class Transform {
+  insertText(doc, position, text) {
+    // Insert text at position
+    // Update all positions after insertion
+    return newDocument;
+  }
+  
+  deleteRange(doc, range) {
+    // Delete content in range
+    // Update all positions after deletion
+    return newDocument;
+  }
+  
+  applyMark(doc, range, mark) {
+    // Apply mark to text in range
+    return newDocument;
+  }
+  
+  splitNode(doc, position) {
+    // Split node at position
+    return newDocument;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="editor-comparison" title="How Different Editors Approach This">
+              <p class="m-0 mb-4">
+                Different editors implement these concepts differently:
+              </p>
+
+              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">ProseMirror</h3>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Strict schema-based validation</li>
+                  <li>Immutable document model</li>
+                  <li>Transform-based operations</li>
+                  <li>Separate state and view packages</li>
+                </ul>
+              </div>
+
+              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">Slate</h3>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>React-first architecture</li>
+                  <li>Immutable model with React state</li>
+                  <li>Operation-based transforms</li>
+                  <li>Normalization system</li>
+                </ul>
+              </div>
+
+              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">Lexical</h3>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Framework-agnostic core</li>
+                  <li>Mutable model with reconciliation</li>
+                  <li>Event-driven updates</li>
+                  <li>Decorator system for UI</li>
+                </ul>
+              </div>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

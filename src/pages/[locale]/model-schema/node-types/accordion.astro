@@ -1,0 +1,214 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'schema', text: '스키마 정의' },
+  { depth: 2, slug: 'model', text: '모델 표현' },
+  { depth: 2, slug: 'serialization', text: 'HTML 직렬화' },
+  { depth: 2, slug: 'deserialization', text: 'HTML 역직렬화' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="아코디언 노드 타입 – contenteditable.lab"
+      description="아코디언 노드 타입에 대한 상세 가이드: 스키마, 모델, HTML 매핑, 뷰 연동, 일반적인 문제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema/node-types')} class="text-text-muted no-underline">노드 타입</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">아코디언</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              아코디언 노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              카테고리: 복잡한 • 뷰 연동 노트를 포함한 상세 구현 가이드
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="스키마 정의">
+              <p class="m-0 mb-3">
+                <strong>아코디언</strong> 노드 타입의 스키마 정의:
+              </p>
+              <DocCodeBlock code={`{
+  accordion: {
+    content: 'block+',
+    group: 'block',
+    attrs: {
+      open: { default: false }
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="모델 표현">
+              <p class="m-0 mb-3">
+                모델 표현 예제:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'accordion',
+  attrs: { open: false },
+  children: [
+    {
+      type: 'heading',
+      level: 3,
+      children: [{ type: 'text', text: '아코디언 제목' }]
+    },
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '아코디언 콘텐츠' }]
+    }
+  ]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML 직렬화">
+              <p class="m-0 mb-3">
+                모델을 HTML로 변환:
+              </p>
+              <DocCodeBlock code={`function serializeAccordion(node) {
+  return '<div data-type="accordion" data-open="' + node.attrs.open + '">' + 
+         serializeChildren(node.children) + '</div>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML 역직렬화">
+              <p class="m-0 mb-3">
+                HTML을 모델로 파싱:
+              </p>
+              <DocCodeBlock code={`function parseAccordion(domNode) {
+  return {
+    type: 'accordion',
+    attrs: { open: domNode.getAttribute('data-open') === 'true' },
+    children: Array.from(domNode.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean)
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <DocAlert type="info">
+                <strong>뷰 연동 노트:</strong> 이 노드 타입을 뷰 레이어에서 구현할 때 contenteditable 동작, 선택 처리, 이벤트 관리에 특히 주의하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                뷰 연동 코드:
+              </p>
+              <DocCodeBlock code={`// 아코디언 렌더링
+const accordion = document.createElement('div');
+accordion.setAttribute('data-type', 'accordion');
+accordion.setAttribute('data-open', node.attrs.open);
+accordion.contentEditable = 'true';
+node.children.forEach(child => {
+  accordion.appendChild(renderNode(child));
+});
+
+// 아코디언 토글
+function toggleAccordion(accordion) {
+  const isOpen = accordion.getAttribute('data-open') === 'true';
+  accordion.setAttribute('data-open', !isOpen);
+  updateAccordionContent(accordion, !isOpen);
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <DocAlert type="warning">
+                <strong>일반적인 함정:</strong> 이 노드 타입을 구현할 때 자주 발생하는 문제들입니다. 구현 전에 주의 깊게 검토하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                일반적인 문제 및 해결 방법:
+              </p>
+              <DocCodeBlock code={`// 문제: 아코디언 상태 관리
+// 해결: 모델과 뷰 간 상태 동기화
+function syncAccordionState(accordion, model) {
+  accordion.setAttribute('data-open', model.attrs.open);
+}
+
+// 문제: 중첩된 아코디언
+// 해결: 중첩된 아코디언 동작 처리
+function handleNestedAccordion(parent, child) {
+  // 자식이 토글될 때 부모가 닫히지 않도록 방지
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-3">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock code={`class AccordionNode {
+  constructor(attrs, children) {
+    this.type = 'accordion';
+    this.attrs = { open: attrs?.open || false };
+    this.children = children || [];
+  }
+  
+  toDOM() {
+    const accordion = document.createElement('div');
+    accordion.setAttribute('data-type', 'accordion');
+    accordion.setAttribute('data-open', this.attrs.open);
+    this.children.forEach(child => {
+      accordion.appendChild(child.toDOM());
+    });
+    return accordion;
+  }
+  
+  static fromDOM(domNode) {
+    return new AccordionNode(
+      { open: domNode.getAttribute('data-open') === 'true' },
+      Array.from(domNode.childNodes)
+        .map(node => parseNode(node))
+        .filter(Boolean)
+    );
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

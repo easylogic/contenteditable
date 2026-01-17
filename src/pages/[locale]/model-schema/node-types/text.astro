@@ -1,0 +1,267 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'schema', text: '스키마 정의' },
+  { depth: 2, slug: 'model', text: '모델 표현' },
+  { depth: 2, slug: 'serialization', text: 'HTML 직렬화' },
+  { depth: 2, slug: 'deserialization', text: 'HTML 역직렬화' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="텍스트 노드 타입 – contenteditable.lab"
+      description="텍스트 노드 타입에 대한 상세 가이드: 스키마, 모델, HTML 매핑, 뷰 연동, 일반적인 문제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema/node-types')} class="text-text-muted no-underline">노드 타입</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">텍스트</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              텍스트 노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              카테고리: 기본 • 뷰 연동 노트를 포함한 상세 구현 가이드
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="스키마 정의">
+              <p class="m-0 mb-3">
+                <strong>텍스트</strong> 노드 타입의 스키마 정의:
+              </p>
+              <DocCodeBlock code={`{
+  text: {
+    group: 'inline',
+    // 텍스트 노드는 리프 노드, 자식 없음
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="모델 표현">
+              <p class="m-0 mb-3">
+                모델 표현 예제:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'text',
+  text: '안녕하세요',
+  marks: [
+    { type: 'bold' },
+    { type: 'italic' }
+  ]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML 직렬화">
+              <p class="m-0 mb-3">
+                모델을 HTML로 변환:
+              </p>
+              <DocCodeBlock code={`function serializeText(node) {
+  let html = escapeHtml(node.text);
+  
+  // 순서대로 마크 적용
+  if (node.marks && node.marks.length > 0) {
+    node.marks.forEach(mark => {
+      html = wrapWithMark(html, mark);
+    });
+  }
+  
+  return html;
+}
+
+function wrapWithMark(html, mark) {
+  const tagMap = {
+    bold: 'strong',
+    italic: 'em',
+    underline: 'u',
+    code: 'code'
+  };
+  const tag = tagMap[mark.type];
+  return tag ? '<' + tag + '>' + html + '</' + tag + '>' : html;
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML 역직렬화">
+              <p class="m-0 mb-3">
+                HTML을 모델로 파싱:
+              </p>
+              <DocCodeBlock code={`function parseText(domNode) {
+  return {
+    type: 'text',
+    text: domNode.textContent,
+    marks: extractMarks(domNode)
+  };
+}
+
+function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) marks.push(mark);
+    current = current.parentElement;
+  }
+  
+  return marks;
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <DocAlert type="info">
+                <strong>뷰 연동 노트:</strong> 이 노드 타입을 뷰 레이어에서 구현할 때 contenteditable 동작, 선택 처리, 이벤트 관리에 특히 주의하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                뷰 연동 코드:
+              </p>
+              <DocCodeBlock code={`// 렌더링
+const textNode = document.createTextNode(node.text);
+// 마크는 직렬화 중 부모 요소로 래핑하여 적용됨
+
+// 텍스트 노드 편집
+textNode.addEventListener('input', (e) => {
+  // 텍스트 콘텐츠 업데이트
+  const newText = textNode.textContent;
+  updateTextNode(node, newText);
+});
+
+// 텍스트 노드의 선택
+function getTextPosition(textNode, offset) {
+  return {
+    path: getPathToNode(textNode),
+    offset: offset
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <DocAlert type="warning">
+                <strong>일반적인 함정:</strong> 이 노드 타입을 구현할 때 자주 발생하는 문제들입니다. 구현 전에 주의 깊게 검토하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                일반적인 문제 및 해결 방법:
+              </p>
+              <DocCodeBlock code={`// 문제: 텍스트 노드는 블록 또는 인라인 노드 내부에 있어야 함
+// 해결: 부모 노드 타입 검증
+function validateTextNode(textNode) {
+  const parent = textNode.parentNode;
+  if (!isBlockNode(parent) && !isInlineNode(parent)) {
+    // 단락으로 래핑
+    wrapInParagraph(textNode);
+  }
+}
+
+// 문제: 빈 텍스트 노드
+// 해결: 빈 텍스트 노드 제거 또는 병합
+function normalizeTextNodes(element) {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT
+  );
+  const toRemove = [];
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (node.textContent.trim() === '') {
+      toRemove.push(node);
+    }
+  }
+  
+  toRemove.forEach(n => n.remove());
+}
+
+// 문제: 인접한 텍스트 노드
+// 해결: 인접한 텍스트 노드 병합
+function mergeAdjacentTextNodes(element) {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT
+  );
+  let prevNode = null;
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (prevNode && prevNode.parentNode === node.parentNode) {
+      prevNode.textContent += node.textContent;
+      node.remove();
+    } else {
+      prevNode = node;
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-3">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock code={`class TextNode {
+  constructor(text, marks = []) {
+    this.type = 'text';
+    this.text = text;
+    this.marks = marks;
+  }
+  
+  toDOM() {
+    const textNode = document.createTextNode(this.text);
+    // 마크는 직렬화 중 부모에 의해 적용됨
+    return textNode;
+  }
+  
+  static fromDOM(domNode) {
+    const text = domNode.textContent;
+    const marks = extractMarks(domNode);
+    return new TextNode(text, marks);
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,428 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TipsSidebar from '../../../components/TipsSidebar.astro';
+import EditOnGitHub from '../../../components/EditOnGitHub.astro';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocaleFromPath,
+  getLocalizedPath,
+  type Locale,
+} from '../../../i18n/translations';
+
+export const getStaticPaths = (async () => {
+  const paths = [];
+  
+  // Get all tips
+  const allTips = await getCollection('tips');
+  
+  // Group tips by base ID (without locale suffix)
+  const tipsByBaseId = new Map<string, typeof allTips>();
+  
+  for (const tip of allTips) {
+    const baseId = tip.data.id.replace(/-ko$/, '');
+    if (!tipsByBaseId.has(baseId)) {
+      tipsByBaseId.set(baseId, []);
+    }
+    tipsByBaseId.get(baseId)!.push(tip);
+  }
+  
+  // Generate paths for each locale
+  for (const locale of supportedLocales.filter((l) => l !== defaultLocale)) {
+    for (const [baseId, tips] of tipsByBaseId.entries()) {
+      // Try to find locale-specific version
+      const localeTip = tips.find((t) => t.data.locale === locale);
+      // Fallback to English version
+      const enTip = tips.find((t) => t.data.locale === 'en');
+      const tipToUse = localeTip || enTip;
+      
+      if (tipToUse) {
+        paths.push({
+          params: { locale, id: tipToUse.data.id },
+        });
+      }
+    }
+  }
+  
+  return paths;
+}) satisfies GetStaticPaths;
+
+const tipId = Astro.params.id;
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+
+if (!tipId) {
+  throw new Error('Tip id is missing in route params.');
+}
+
+// Get tip entry - try to find locale-specific first, then English (default)
+const allTips = await getCollection('tips');
+const allTipsAllLocales = await getCollection('tips'); // For sidebar
+
+// Try to find tip by exact ID match first
+let tipEntry = allTips.find((t) => t.data.id === tipId && t.data.locale === locale);
+
+// If not found, try to find by base ID (without locale suffix)
+if (!tipEntry) {
+  const baseId = tipId.replace(/-ko$/, '');
+  tipEntry = allTips.find((t) => {
+    const tBaseId = t.data.id.replace(/-ko$/, '');
+    return tBaseId === baseId && t.data.locale === locale;
+  });
+}
+
+// Fallback to English version (default locale)
+if (!tipEntry) {
+  const baseId = tipId.replace(/-ko$/, '');
+  tipEntry = allTips.find((t) => {
+    const tBaseId = t.data.id.replace(/-ko$/, '');
+    return tBaseId === baseId && t.data.locale === 'en';
+  });
+}
+
+if (!tipEntry) {
+  throw new Error(`Tip "${tipId}" not found.`);
+}
+
+// Get related scenarios and cases
+const allScenarios = await getCollection('scenarios');
+const allCases = await getCollection('cases');
+
+const relatedScenarios = tipEntry.data.relatedScenarios
+  .map((id) => allScenarios.find((s) => s.data.id === id))
+  .filter(Boolean);
+
+const relatedCases = tipEntry.data.relatedCases
+  .map((id) => allCases.find((c) => c.data.id === id))
+  .filter(Boolean);
+
+// Render tip content
+const { Content: TipContent } = await tipEntry.render();
+
+const pageTitle = tipEntry.data.title;
+const pageDescription = tipEntry.data.description || '';
+
+---
+
+<html lang={locale} dir={locales[locale].dir}>
+<head>
+  <BaseHead 
+    title={pageTitle}
+    description={pageDescription}
+  />
+</head>
+<body>
+<SiteNav />
+
+<div class="tips-layout">
+  <TipsSidebar 
+    allTips={allTipsAllLocales}
+    currentPath={Astro.url.pathname}
+    locale={locale}
+  />
+
+  <main class="tips-content">
+    <article class="tip-article">
+      <div class="tip-breadcrumb">
+        <a href={localePath('/tips')}>{locale === 'ko' ? '해결 팁' : 'Tips'}</a>
+        <span> / </span>
+        <span>{tipEntry.data.title}</span>
+      </div>
+      
+      <div class="tip-header-section">
+        <div class="tip-title-section">
+          <h1>{tipEntry.data.title}</h1>
+          {tipEntry.data.description && (
+            <p class="tip-description">{tipEntry.data.description}</p>
+          )}
+        </div>
+        <div class="tip-meta-section">
+          {tipEntry.data.difficulty && (
+            <div class="meta-item">
+              <span class="meta-label">{locale === 'ko' ? '난이도' : 'Difficulty'}:</span>
+              <span class={`difficulty-badge difficulty-${tipEntry.data.difficulty}`}>
+                {tipEntry.data.difficulty === 'beginner' ? (locale === 'ko' ? '초급' : 'Beginner') : 
+                 tipEntry.data.difficulty === 'intermediate' ? (locale === 'ko' ? '중급' : 'Intermediate') : 
+                 (locale === 'ko' ? '고급' : 'Advanced')}
+              </span>
+            </div>
+          )}
+          {tipEntry.data.category && (
+            <div class="meta-item">
+              <span class="meta-label">{locale === 'ko' ? '카테고리' : 'Category'}:</span>
+              <span class="category-tag">{tipEntry.data.category}</span>
+            </div>
+          )}
+        </div>
+        {tipEntry.data.tags && tipEntry.data.tags.length > 0 && (
+          <div class="tip-tags-section">
+            {tipEntry.data.tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div class="tip-content">
+        <TipContent />
+      </div>
+
+      {(relatedScenarios.length > 0 || relatedCases.length > 0) && (
+        <div class="related-section">
+          <h2>{locale === 'ko' ? '관련 자료' : 'Related Resources'}</h2>
+          {relatedScenarios.length > 0 && (
+            <div class="related-group">
+              <h3>{locale === 'ko' ? '관련 시나리오' : 'Related Scenarios'}</h3>
+              <ul>
+                {relatedScenarios.map((scenario) => (
+                  <li>
+                    <a href={localePath(`/scenarios/${scenario.data.id}`)}>
+                      {scenario.data.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {relatedCases.length > 0 && (
+            <div class="related-group">
+              <h3>{locale === 'ko' ? '관련 케이스' : 'Related Cases'}</h3>
+              <ul>
+                {relatedCases.map((case_) => (
+                  <li>
+                    <a href={localePath(`/cases/${case_.data.id}`)}>
+                      {case_.data.caseTitle}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      <EditOnGitHub 
+        filePath={`src/content/tips/${tipEntry.id}.md`}
+      />
+    </article>
+  </main>
+</div>
+</body>
+</html>
+
+<style>
+  .tips-layout {
+    display: flex;
+    min-height: calc(100vh - 52px);
+  }
+
+  .tips-content {
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 2.5rem 3rem;
+    overflow-x: auto;
+  }
+
+  .tip-article {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .tip-breadcrumb {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .tip-breadcrumb a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .tip-breadcrumb a:hover {
+    color: var(--accent-primary-dark);
+    text-decoration: underline;
+  }
+
+  .tip-header-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--border-light);
+  }
+
+  .tip-title-section h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .tip-description {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .tip-meta-section {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .meta-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .difficulty-badge {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 12px;
+  }
+
+  .difficulty-beginner {
+    background: var(--accent-success-light);
+    color: var(--accent-success);
+  }
+
+  .difficulty-intermediate {
+    background: var(--accent-warning-light);
+    color: var(--accent-warning);
+  }
+
+  .difficulty-advanced {
+    background: var(--accent-error-light);
+    color: var(--accent-error);
+  }
+
+  .category-tag {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.875rem;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .tip-tags-section {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .tag {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border-radius: 6px;
+  }
+
+  .tip-content {
+    margin: 2rem 0;
+  }
+
+  .tip-content :global(h2) {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 2rem 0 1rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .tip-content :global(h3) {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 1.5rem 0 0.75rem 0;
+  }
+
+  .tip-content :global(p) {
+    line-height: 1.8;
+    margin: 1rem 0;
+  }
+
+  .tip-content :global(code) {
+    background: var(--bg-muted);
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .tip-content :global(pre) {
+    background: var(--bg-muted);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  .tip-content :global(pre code) {
+    background: none;
+    padding: 0;
+  }
+
+  .related-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-light);
+  }
+
+  .related-section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 1.5rem 0;
+  }
+
+  .related-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .related-group h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .related-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .related-group li {
+    margin: 0.5rem 0;
+  }
+
+  .related-group a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .related-group a:hover {
+    color: var(--accent-primary-dark);
+    text-decoration: underline;
+  }
+</style>

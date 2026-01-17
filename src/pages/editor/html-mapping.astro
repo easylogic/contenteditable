@@ -1,0 +1,712 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'serialization', text: 'Serialization (Model → HTML)' },
+  { depth: 3, slug: 'node-serialization', text: 'Node Serialization' },
+  { depth: 3, slug: 'mark-serialization', text: 'Mark Serialization' },
+  { depth: 3, slug: 'attribute-serialization', text: 'Attribute Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'Deserialization (HTML → Model)' },
+  { depth: 3, slug: 'html-parsing', text: 'HTML Parsing' },
+  { depth: 3, slug: 'node-parsing', text: 'Node Parsing' },
+  { depth: 3, slug: 'mark-extraction', text: 'Mark Extraction' },
+  { depth: 2, slug: 'normalization', text: 'HTML Normalization' },
+  { depth: 3, slug: 'element-normalization', text: 'Element Normalization' },
+  { depth: 3, slug: 'structure-normalization', text: 'Structure Normalization' },
+  { depth: 2, slug: 'incremental-updates', text: 'Incremental Updates' },
+  { depth: 3, slug: 'diff-algorithm', text: 'Diff Algorithm' },
+  { depth: 3, slug: 'dom-patching', text: 'DOM Patching' },
+  { depth: 2, slug: 'edge-cases', text: 'Edge Cases' },
+  { depth: 3, slug: 'nested-marks', text: 'Nested Marks' },
+  { depth: 3, slug: 'empty-nodes', text: 'Empty Nodes' },
+  { depth: 3, slug: 'whitespace-handling', text: 'Whitespace Handling' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="HTML Mapping – contenteditable.lab"
+      description="Converting between your model and HTML: serialization, deserialization, normalization, and incremental updates"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">HTML Mapping</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              HTML Mapping
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Converting between your model and HTML: serialization (model → HTML), deserialization (HTML → model), normalization, and incremental updates.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <section id="overview" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Overview
+              </h2>
+              <p class="m-0 mb-4">
+                HTML mapping is the bridge between your abstract document model and the DOM. You need bidirectional conversion: model to HTML for rendering, and HTML to model for parsing pasted content or loading saved documents.
+              </p>
+              <p class="m-0 mb-4">
+                The challenge is that HTML is messy and inconsistent, while your model is clean and validated. Normalization and careful parsing are essential.
+              </p>
+            </section>
+
+            <section id="serialization" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Serialization (Model → HTML)
+              </h2>
+              <p class="m-0 mb-4">
+                Convert your model to HTML for rendering:
+              </p>
+
+              <section id="node-serialization" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Node Serialization</h3>
+                <DocCodeBlock code={`function serializeNode(node) {
+  switch (node.type) {
+    case 'document':
+      return serializeChildren(node.children);
+      
+    case 'paragraph':
+      return '<p>' + serializeChildren(node.children) + '</p>';
+      
+    case 'heading':
+      const level = node.attrs?.level || 1;
+      return '<h' + level + '>' + serializeChildren(node.children) + '</h' + level + '>';
+      
+    case 'text':
+      return serializeText(node);
+      
+    case 'link':
+      const href = escapeHtml(node.attrs?.href || '');
+      return '<a href="' + href + '">' + serializeChildren(node.children) + '</a>';
+      
+    case 'image':
+      const src = escapeHtml(node.attrs?.src || '');
+      const alt = escapeHtml(node.attrs?.alt || '');
+      return '<img src="' + src + '" alt="' + alt + '">';
+      
+    default:
+      return serializeChildren(node.children);
+  }
+}
+
+function serializeChildren(children) {
+  return children
+    .map(child => serializeNode(child))
+    .join('');
+}`} />
+              </section>
+
+              <section id="mark-serialization" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Mark Serialization</h3>
+                <p class="m-0 mb-3">
+                  Apply marks to text nodes:
+                </p>
+                <DocCodeBlock code={`function serializeText(node) {
+  let html = escapeHtml(node.text);
+  
+  // Apply marks in order
+  if (node.marks && node.marks.length > 0) {
+    // Sort marks by priority if needed
+    const sortedMarks = sortMarks(node.marks);
+    
+    sortedMarks.forEach(mark => {
+      html = wrapWithMark(html, mark);
+    });
+  }
+  
+  return html;
+}
+
+function wrapWithMark(html, mark) {
+  const tagMap = {
+    bold: 'strong',
+    italic: 'em',
+    underline: 'u',
+    strikethrough: 's',
+    code: 'code'
+  };
+  
+  const tag = tagMap[mark.type];
+  if (!tag) return html;
+  
+  const attrs = mark.attrs ? serializeAttrs(mark.attrs) : '';
+  return '<' + tag + attrs + '>' + html + '</' + tag + '>';
+}
+
+// Example: text with multiple marks
+// Input: { type: 'text', text: 'Bold italic', marks: [{ type: 'bold' }, { type: 'italic' }] }
+// Output: '<strong><em>Bold italic</em></strong>'
+// Or: '<em><strong>Bold italic</strong></em>' (order matters for some marks)`} />
+              </section>
+
+              <section id="attribute-serialization" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Attribute Serialization</h3>
+                <DocCodeBlock code={`function serializeAttrs(attrs) {
+  const parts = [];
+  
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value !== null && value !== undefined) {
+      const escaped = escapeHtml(String(value));
+      parts.push(key + '="' + escaped + '"');
+    }
+  }
+  
+  return parts.length > 0 ? ' ' + parts.join(' ') : '';
+}
+
+// Example
+serializeAttrs({ href: 'https://example.com', title: 'Example' })
+// Returns: ' href="https://example.com" title="Example"'
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}`} />
+              </section>
+            </section>
+
+            <section id="deserialization" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Deserialization (HTML → Model)
+              </h2>
+              <p class="m-0 mb-4">
+                Parse HTML into your model:
+              </p>
+
+              <section id="html-parsing" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">HTML Parsing</h3>
+                <DocCodeBlock code={`function parseHTML(html) {
+  // Parse HTML string to DOM
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  // Convert DOM to model
+  return {
+    type: 'document',
+    children: Array.from(doc.body.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean)
+  };
+}
+
+function parseNode(domNode) {
+  if (domNode.nodeType === Node.TEXT_NODE) {
+    // Text node
+    return {
+      type: 'text',
+      text: domNode.textContent,
+      marks: extractMarks(domNode)
+    };
+  }
+  
+  if (domNode.nodeType === Node.ELEMENT_NODE) {
+    // Element node
+    const nodeType = getNodeType(domNode.tagName);
+    
+    if (!nodeType) {
+      // Unknown element, unwrap and parse children
+      return parseChildren(domNode.childNodes);
+    }
+    
+    return {
+      type: nodeType,
+      attrs: extractAttributes(domNode, nodeType),
+      children: parseChildren(domNode.childNodes)
+    };
+  }
+  
+  // Ignore other node types
+  return null;
+}
+
+function parseChildren(domNodes) {
+  return Array.from(domNodes)
+    .map(node => parseNode(node))
+    .filter(Boolean);
+}`} />
+              </section>
+
+              <section id="node-parsing" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Node Parsing</h3>
+                <DocCodeBlock code={`function getNodeType(tagName) {
+  const tagMap = {
+    'P': 'paragraph',
+    'H1': 'heading',
+    'H2': 'heading',
+    'H3': 'heading',
+    'H4': 'heading',
+    'H5': 'heading',
+    'H6': 'heading',
+    'A': 'link',
+    'IMG': 'image',
+    'STRONG': null,  // Handled as mark
+    'B': null,       // Handled as mark
+    'EM': null,      // Handled as mark
+    'I': null,       // Handled as mark
+    'U': null,       // Handled as mark
+    'CODE': null,    // Handled as mark
+  };
+  
+  return tagMap[tagName.toUpperCase()] || null;
+}
+
+function extractAttributes(domElement, nodeType) {
+  const attrs = {};
+  
+  if (nodeType === 'heading') {
+    const level = parseInt(domElement.tagName[1]) || 1;
+    attrs.level = level;
+  }
+  
+  if (nodeType === 'link') {
+    attrs.href = domElement.getAttribute('href') || '';
+    attrs.title = domElement.getAttribute('title') || '';
+  }
+  
+  if (nodeType === 'image') {
+    attrs.src = domElement.getAttribute('src') || '';
+    attrs.alt = domElement.getAttribute('alt') || '';
+  }
+  
+  return attrs;
+}`} />
+              </section>
+
+              <section id="mark-extraction" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Mark Extraction</h3>
+                <DocCodeBlock code={`function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  // Walk up the DOM tree to find formatting elements
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) {
+      marks.push(mark);
+    }
+    current = current.parentElement;
+  }
+  
+  return marks;
+}
+
+function getMarkFromElement(element) {
+  const markMap = {
+    'STRONG': { type: 'bold' },
+    'B': { type: 'bold' },
+    'EM': { type: 'italic' },
+    'I': { type: 'italic' },
+    'U': { type: 'underline' },
+    'S': { type: 'strikethrough' },
+    'CODE': { type: 'code' },
+    'A': {
+      type: 'link',
+      attrs: {
+        href: element.getAttribute('href') || '',
+        title: element.getAttribute('title') || ''
+      }
+    }
+  };
+  
+  const tagName = element.tagName.toUpperCase();
+  return markMap[tagName] || null;
+}
+
+// Example: <strong><em>Text</em></strong>
+// Text node has marks: [{ type: 'bold' }, { type: 'italic' }]`} />
+              </section>
+            </section>
+
+            <section id="normalization" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                HTML Normalization
+              </h2>
+              <p class="m-0 mb-4">
+                Normalize inconsistent HTML to match your schema:
+              </p>
+
+              <section id="element-normalization" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Element Normalization</h3>
+                <DocCodeBlock code={`function normalizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  // Normalize elements
+  normalizeElements(doc.body);
+  
+  // Fix structure
+  fixStructure(doc.body);
+  
+  return doc.body.innerHTML;
+}
+
+function normalizeElements(element) {
+  // Convert b to strong
+  element.querySelectorAll('b').forEach(b => {
+    const strong = document.createElement('strong');
+    strong.innerHTML = b.innerHTML;
+    b.parentNode.replaceChild(strong, b);
+  });
+  
+  // Convert i to em
+  element.querySelectorAll('i').forEach(i => {
+    const em = document.createElement('em');
+    em.innerHTML = i.innerHTML;
+    i.parentNode.replaceChild(em, i);
+  });
+  
+  // Convert div to p (if appropriate)
+  element.querySelectorAll('div').forEach(div => {
+    if (!div.querySelector('p, ul, ol, h1, h2, h3, h4, h5, h6, table')) {
+      const p = document.createElement('p');
+      p.innerHTML = div.innerHTML;
+      div.parentNode.replaceChild(p, div);
+    }
+  });
+  
+  // Remove style and class attributes
+  element.querySelectorAll('[style]').forEach(el => {
+    el.removeAttribute('style');
+  });
+  element.querySelectorAll('[class]').forEach(el => {
+    el.removeAttribute('class');
+  });
+}`} />
+              </section>
+
+              <section id="structure-normalization" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Structure Normalization</h3>
+                <DocCodeBlock code={`function fixStructure(element) {
+  // Ensure blocks are direct children of body/document
+  const blocks = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'BLOCKQUOTE'];
+  
+  // Unwrap blocks that are nested in other blocks
+  element.querySelectorAll(blocks.join(',')).forEach(block => {
+    const parent = block.parentElement;
+    if (parent && blocks.includes(parent.tagName)) {
+      // Block inside block, unwrap
+      const grandparent = parent.parentElement;
+      if (grandparent) {
+        grandparent.insertBefore(block, parent);
+        if (!parent.hasChildNodes()) {
+          parent.remove();
+        }
+      }
+    }
+  });
+  
+  // Merge adjacent text nodes
+  mergeTextNodes(element);
+  
+  // Remove empty nodes (except br)
+  removeEmptyNodes(element);
+}
+
+function mergeTextNodes(element) {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+  
+  let prevNode = null;
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (prevNode && prevNode.parentNode === node.parentNode) {
+      prevNode.textContent += node.textContent;
+      node.remove();
+    } else {
+      prevNode = node;
+    }
+  }
+}
+
+function removeEmptyNodes(element) {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_ELEMENT,
+    null
+  );
+  
+  const toRemove = [];
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (node.tagName === 'BR') continue;
+    
+    if (!node.hasChildNodes() || 
+        (node.textContent.trim() === '' && !node.querySelector('br, img'))) {
+      toRemove.push(node);
+    }
+  }
+  
+  toRemove.forEach(node => node.remove());
+}`} />
+              </section>
+            </section>
+
+            <section id="incremental-updates" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Incremental Updates
+              </h2>
+              <p class="m-0 mb-4">
+                Instead of re-rendering the entire document, update only changed parts:
+              </p>
+
+              <section id="diff-algorithm" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Diff Algorithm</h3>
+                <DocCodeBlock code={`function updateDOM(oldModel, newModel, domRoot) {
+  // Compare models and find differences
+  const diff = diffModels(oldModel, newModel);
+  
+  // Apply changes to DOM
+  diff.forEach(change => {
+    applyChange(change, domRoot);
+  });
+}
+
+function diffModels(oldModel, newModel) {
+  const changes = [];
+  
+  // Compare children
+  const oldChildren = oldModel.children || [];
+  const newChildren = newModel.children || [];
+  
+  // Simple diff: find added, removed, modified nodes
+  const maxLen = Math.max(oldChildren.length, newChildren.length);
+  
+  for (let i = 0; i < maxLen; i++) {
+    const oldChild = oldChildren[i];
+    const newChild = newChildren[i];
+    
+    if (!oldChild && newChild) {
+      // Added
+      changes.push({
+        type: 'insert',
+        index: i,
+        node: newChild
+      });
+    } else if (oldChild && !newChild) {
+      // Removed
+      changes.push({
+        type: 'remove',
+        index: i
+      });
+    } else if (oldChild && newChild) {
+      // Check if modified
+      if (!nodesEqual(oldChild, newChild)) {
+        changes.push({
+          type: 'update',
+          index: i,
+          oldNode: oldChild,
+          newNode: newChild
+        });
+      }
+    }
+  }
+  
+  return changes;
+}
+
+function nodesEqual(node1, node2) {
+  if (node1.type !== node2.type) return false;
+  if (node1.type === 'text') {
+    return node1.text === node2.text &&
+           marksEqual(node1.marks, node2.marks);
+  }
+  // Compare other properties...
+  return true;
+}`} />
+              </section>
+
+              <section id="dom-patching" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">DOM Patching</h3>
+                <DocCodeBlock code={`function applyChange(change, domRoot) {
+  const domNode = findDOMNode(change.index, domRoot);
+  
+  switch (change.type) {
+    case 'insert':
+      const newElement = renderNode(change.node);
+      if (domNode) {
+        domNode.parentNode.insertBefore(newElement, domNode);
+      } else {
+        domRoot.appendChild(newElement);
+      }
+      break;
+      
+    case 'remove':
+      if (domNode) {
+        domNode.remove();
+      }
+      break;
+      
+    case 'update':
+      if (domNode) {
+        // Update in place
+        updateDOMNode(domNode, change.oldNode, change.newNode);
+      }
+      break;
+  }
+}
+
+function updateDOMNode(domNode, oldNode, newNode) {
+  if (newNode.type === 'text') {
+    // Update text content
+    if (domNode.nodeType === Node.TEXT_NODE) {
+      domNode.textContent = newNode.text;
+    } else {
+      // Replace element with text node
+      const textNode = document.createTextNode(newNode.text);
+      domNode.parentNode.replaceChild(textNode, domNode);
+    }
+    
+    // Update marks
+    updateMarks(domNode, oldNode.marks, newNode.marks);
+  } else {
+    // Update element
+    updateElement(domNode, oldNode, newNode);
+  }
+}`} />
+              </section>
+            </section>
+
+            <section id="edge-cases" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Edge Cases
+              </h2>
+
+              <section id="nested-marks" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Nested Marks</h3>
+                <p class="m-0 mb-3">
+                  HTML can have nested formatting: <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;&lt;em&gt;text&lt;/em&gt;&lt;/strong&gt;</code>
+                </p>
+                <DocCodeBlock code={`// HTML: <strong><em>Bold italic</em></strong>
+// Model: Single text node with both marks
+{
+  type: 'text',
+  text: 'Bold italic',
+  marks: [
+    { type: 'bold' },
+    { type: 'italic' }
+  ]
+}
+
+// When parsing, collect all marks from parent chain
+function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) {
+      marks.push(mark);
+    }
+    current = current.parentElement;
+  }
+  
+  return marks;
+}
+
+// When serializing, apply marks in order
+function serializeText(node) {
+  let html = escapeHtml(node.text);
+  node.marks.forEach(mark => {
+    html = wrapWithMark(html, mark);
+  });
+  return html;
+}`} />
+              </section>
+
+              <section id="empty-nodes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Empty Nodes</h3>
+                <p class="m-0 mb-3">
+                  Handle empty paragraphs, empty lists, etc.:
+                </p>
+                <DocCodeBlock code={`// Empty paragraph
+{
+  type: 'paragraph',
+  children: []
+}
+
+// Serialize to: <p><br></p> or <p>&nbsp;</p>
+function serializeNode(node) {
+  if (node.type === 'paragraph' && node.children.length === 0) {
+    return '<p><br></p>';
+  }
+  // ...
+}
+
+// Parse empty paragraph
+function parseNode(domNode) {
+  if (domNode.tagName === 'P' && domNode.textContent.trim() === '') {
+    return {
+      type: 'paragraph',
+      children: []
+    };
+  }
+  // ...
+}`} />
+              </section>
+
+              <section id="whitespace-handling" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Whitespace Handling</h3>
+                <p class="m-0 mb-3">
+                  HTML collapses whitespace, but you might want to preserve it:
+                </p>
+                <DocCodeBlock code={`// Preserve whitespace in code blocks
+{
+  type: 'codeBlock',
+  children: [
+    { type: 'text', text: '  const x = 1;\n  const y = 2;' }
+  ]
+}
+
+// Serialize with <pre><code>
+function serializeNode(node) {
+  if (node.type === 'codeBlock') {
+    return '<pre><code>' + escapeHtml(node.children[0].text) + '</code></pre>';
+  }
+}
+
+// Parse preserving whitespace
+function parseNode(domNode) {
+  if (domNode.tagName === 'PRE' || domNode.tagName === 'CODE') {
+    return {
+      type: 'text',
+      text: domNode.textContent,  // Preserves whitespace
+      marks: domNode.tagName === 'CODE' ? [{ type: 'code' }] : []
+    };
+  }
+}`} />
+              </section>
+            </section>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

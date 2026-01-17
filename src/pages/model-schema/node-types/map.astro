@@ -1,0 +1,194 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Map Node Type – contenteditable.lab"
+      description="Detailed guide for Map node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Map</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Map Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Custom • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Map</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  map: {
+    group: 'block',
+    attrs: {
+      lat: { default: 0 },
+      lng: { default: 0 },
+      zoom: { default: 10 }
+    },
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'map',
+  attrs: {
+    lat: 37.5665,
+    lng: 126.9780,
+    zoom: 10
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeMap(node) {
+  return '<div data-type="map" data-lat="' + node.attrs.lat + 
+         '" data-lng="' + node.attrs.lng + '" data-zoom="' + node.attrs.zoom + '"></div>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseMap(domNode) {
+  return {
+    type: 'map',
+    attrs: {
+      lat: parseFloat(domNode.getAttribute('data-lat')) || 0,
+      lng: parseFloat(domNode.getAttribute('data-lng')) || 0,
+      zoom: parseInt(domNode.getAttribute('data-zoom')) || 10
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering map
+const map = document.createElement('div');
+map.setAttribute('data-type', 'map');
+map.setAttribute('data-lat', node.attrs.lat);
+map.setAttribute('data-lng', node.attrs.lng);
+map.setAttribute('data-zoom', node.attrs.zoom);
+map.contentEditable = 'false'; // Maps are typically rendered
+
+// Render with Leaflet or Google Maps
+function renderMap(element) {
+  const lat = parseFloat(element.getAttribute('data-lat'));
+  const lng = parseFloat(element.getAttribute('data-lng'));
+  const zoom = parseInt(element.getAttribute('data-zoom'));
+  if (window.L) {
+    L.map(element).setView([lat, lng], zoom);
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Map library initialization
+// Solution: Initialize map library
+function initMapLibrary() {
+  if (window.L) {
+    // Leaflet is ready
+  }
+}
+
+// Issue: Map coordinates validation
+// Solution: Validate coordinates
+function validateCoordinates(lat, lng) {
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class MapNode {
+  constructor(attrs) {
+    this.type = 'map';
+    this.attrs = {
+      lat: attrs?.lat || 0,
+      lng: attrs?.lng || 0,
+      zoom: attrs?.zoom || 10
+    };
+  }
+  
+  toDOM() {
+    const map = document.createElement('div');
+    map.setAttribute('data-type', 'map');
+    map.setAttribute('data-lat', this.attrs.lat);
+    map.setAttribute('data-lng', this.attrs.lng);
+    map.setAttribute('data-zoom', this.attrs.zoom);
+    return map;
+  }
+  
+  static fromDOM(domNode) {
+    return new MapNode({
+      lat: parseFloat(domNode.getAttribute('data-lat')) || 0,
+      lng: parseFloat(domNode.getAttribute('data-lng')) || 0,
+      zoom: parseInt(domNode.getAttribute('data-zoom')) || 10
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,222 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Image Node Type – contenteditable.lab"
+      description="Detailed guide for Image node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Image</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Image Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Media • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Image</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  image: {
+    inline: true,
+    attrs: {
+      src: { default: '' },
+      alt: { default: '' },
+      title: { default: null },
+      width: { default: null },
+      height: { default: null }
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'image',
+  attrs: {
+    src: 'https://example.com/image.jpg',
+    alt: 'Description',
+    width: 800,
+    height: 600
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeImage(node) {
+  const attrs = {};
+  if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
+  if (node.attrs.alt) attrs.alt = escapeHtml(node.attrs.alt);
+  if (node.attrs.title) attrs.title = escapeHtml(node.attrs.title);
+  if (node.attrs.width) attrs.width = node.attrs.width;
+  if (node.attrs.height) attrs.height = node.attrs.height;
+  return '<img' + serializeAttrs(attrs) + '>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseImage(domNode) {
+  return {
+    type: 'image',
+    attrs: {
+      src: domNode.getAttribute('src') || '',
+      alt: domNode.getAttribute('alt') || '',
+      title: domNode.getAttribute('title') || null,
+      width: parseInt(domNode.getAttribute('width')) || null,
+      height: parseInt(domNode.getAttribute('height')) || null
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering image
+const img = document.createElement('img');
+img.src = node.attrs.src;
+img.alt = node.attrs.alt || '';
+if (node.attrs.title) img.title = node.attrs.title;
+if (node.attrs.width) img.width = node.attrs.width;
+if (node.attrs.height) img.height = node.attrs.height;
+img.contentEditable = 'false'; // Images are typically not editable
+
+// Image upload handler
+function handleImageUpload(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    insertNode({
+      type: 'image',
+      attrs: {
+        src: e.target.result,
+        alt: file.name
+      }
+    });
+  };
+  reader.readAsDataURL(file);
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Image loading errors
+// Solution: Handle broken images
+img.onerror = function() {
+  this.src = 'placeholder.jpg';
+  this.alt = 'Image failed to load';
+};
+
+// Issue: Image resizing
+// Solution: Maintain aspect ratio
+function resizeImage(img, maxWidth, maxHeight) {
+  const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
+  img.width = img.width * ratio;
+  img.height = img.height * ratio;
+}
+
+// Issue: Image selection
+// Solution: Handle image selection in contenteditable
+function selectImage(img) {
+  const range = document.createRange();
+  range.selectNode(img);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class ImageNode {
+  constructor(attrs) {
+    this.type = 'image';
+    this.attrs = {
+      src: attrs?.src || '',
+      alt: attrs?.alt || '',
+      title: attrs?.title || null,
+      width: attrs?.width || null,
+      height: attrs?.height || null
+    };
+  }
+  
+  toDOM() {
+    const img = document.createElement('img');
+    Object.assign(img, this.attrs);
+    return img;
+  }
+  
+  static fromDOM(domNode) {
+    return new ImageNode({
+      src: domNode.getAttribute('src') || '',
+      alt: domNode.getAttribute('alt') || '',
+      title: domNode.getAttribute('title') || null,
+      width: parseInt(domNode.getAttribute('width')) || null,
+      height: parseInt(domNode.getAttribute('height')) || null
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

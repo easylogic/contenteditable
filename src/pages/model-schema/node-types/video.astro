@@ -1,0 +1,221 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Video Node Type – contenteditable.lab"
+      description="Detailed guide for Video node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Video</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Video Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Media • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Video</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  video: {
+    group: 'block',
+    attrs: {
+      src: { default: '' },
+      poster: { default: null },
+      width: { default: null },
+      height: { default: null },
+      controls: { default: true },
+      autoplay: { default: false },
+      loop: { default: false }
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'video',
+  attrs: {
+    src: 'https://example.com/video.mp4',
+    poster: 'https://example.com/poster.jpg',
+    width: 800,
+    height: 450,
+    controls: true
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeVideo(node) {
+  const attrs = {};
+  if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
+  if (node.attrs.poster) attrs.poster = escapeHtml(node.attrs.poster);
+  if (node.attrs.width) attrs.width = node.attrs.width;
+  if (node.attrs.height) attrs.height = node.attrs.height;
+  if (node.attrs.controls) attrs.controls = true;
+  if (node.attrs.autoplay) attrs.autoplay = true;
+  if (node.attrs.loop) attrs.loop = true;
+  return '<video' + serializeAttrs(attrs) + '></video>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseVideo(domNode) {
+  return {
+    type: 'video',
+    attrs: {
+      src: domNode.getAttribute('src') || '',
+      poster: domNode.getAttribute('poster') || null,
+      width: parseInt(domNode.getAttribute('width')) || null,
+      height: parseInt(domNode.getAttribute('height')) || null,
+      controls: domNode.hasAttribute('controls'),
+      autoplay: domNode.hasAttribute('autoplay'),
+      loop: domNode.hasAttribute('loop')
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering video
+const video = document.createElement('video');
+video.src = node.attrs.src;
+if (node.attrs.poster) video.poster = node.attrs.poster;
+if (node.attrs.width) video.width = node.attrs.width;
+if (node.attrs.height) video.height = node.attrs.height;
+video.controls = node.attrs.controls !== false;
+video.autoplay = node.attrs.autoplay === true;
+video.loop = node.attrs.loop === true;
+video.contentEditable = 'false'; // Videos are not editable`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Video format support
+// Solution: Check format support
+function checkVideoSupport(format) {
+  const video = document.createElement('video');
+  return video.canPlayType('video/' + format) !== '';
+}
+
+// Issue: Video loading
+// Solution: Handle loading states
+video.addEventListener('loadstart', () => {
+  // Show loading indicator
+});
+video.addEventListener('canplay', () => {
+  // Hide loading indicator
+});
+
+// Issue: Video selection
+// Solution: Handle video selection in contenteditable
+function selectVideo(video) {
+  const range = document.createRange();
+  range.selectNode(video);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class VideoNode {
+  constructor(attrs) {
+    this.type = 'video';
+    this.attrs = {
+      src: attrs?.src || '',
+      poster: attrs?.poster || null,
+      width: attrs?.width || null,
+      height: attrs?.height || null,
+      controls: attrs?.controls !== false,
+      autoplay: attrs?.autoplay === false,
+      loop: attrs?.loop === false
+    };
+  }
+  
+  toDOM() {
+    const video = document.createElement('video');
+    Object.assign(video, this.attrs);
+    return video;
+  }
+  
+  static fromDOM(domNode) {
+    return new VideoNode({
+      src: domNode.getAttribute('src') || '',
+      poster: domNode.getAttribute('poster') || null,
+      width: parseInt(domNode.getAttribute('width')) || null,
+      height: parseInt(domNode.getAttribute('height')) || null,
+      controls: domNode.hasAttribute('controls'),
+      autoplay: domNode.hasAttribute('autoplay'),
+      loop: domNode.hasAttribute('loop')
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

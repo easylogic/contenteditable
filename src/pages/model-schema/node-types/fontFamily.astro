@@ -1,0 +1,198 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Font Family Node Type – contenteditable.lab"
+      description="Detailed guide for Font Family node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Font Family</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Font Family Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Formatting • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Font Family</strong> mark type:
+              </p>
+              <DocCodeBlock code={`{
+  fontFamily: {
+    attrs: {
+      family: { default: 'Arial' }
+    },
+      style: 'font-family: ' + node.attrs.family 
+    }, 0]
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'text',
+  text: 'Monospace text',
+  marks: [{
+    type: 'fontFamily',
+    attrs: { family: 'monospace' }
+  }]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeFontFamilyMark(text, mark) {
+  const family = mark.attrs?.family || 'Arial';
+  return '<span style="font-family: ' + escapeHtml(family) + '">' + 
+         text + '</span>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function extractFontFamilyMark(element) {
+  if (element.tagName === 'SPAN' && element.style.fontFamily) {
+    const family = extractFontFamily(element.style.fontFamily);
+    return {
+      type: 'fontFamily',
+      attrs: { family }
+    };
+  }
+  return null;
+}
+
+function extractFontFamily(fontFamilyString) {
+  // Extract first font from font-family string
+  // e.g., "Arial, sans-serif" -> "Arial"
+  return fontFamilyString.split(',')[0].trim().replace(/['"]/g, '');
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Setting font family
+function setFontFamily(family) {
+  addMark({
+    type: 'fontFamily',
+    attrs: { family }
+  });
+}
+
+// Font family selector
+function showFontFamilyPicker() {
+  const families = ['Arial', 'Times New Roman', 'Courier New', 'monospace'];
+  // Show font selector
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Font family with quotes
+// Solution: Handle quoted font names
+function normalizeFontFamily(family) {
+  return family.replace(/['"]/g, '');
+}
+
+// Issue: Font fallback chain
+// Solution: Extract primary font from fallback chain
+function extractPrimaryFont(fontFamily) {
+  return fontFamily.split(',')[0].trim();
+}
+
+// Issue: Web-safe fonts
+// Solution: Validate font availability
+function validateFontFamily(family) {
+  const webSafeFonts = [
+    'Arial', 'Times New Roman', 'Courier New', 
+    'Verdana', 'Georgia', 'Palatino'
+  ];
+  return webSafeFonts.includes(family) || family === 'monospace';
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class FontFamilyMark {
+  constructor(attrs) {
+    this.type = 'fontFamily';
+    this.attrs = { family: attrs?.family || 'Arial' };
+  }
+  
+  toDOM() {
+    return ['span', { 
+      style: 'font-family: ' + this.attrs.family 
+    }, 0];
+  }
+  
+  static fromDOM(element) {
+    if (element.tagName === 'SPAN' && element.style.fontFamily) {
+      return new FontFamilyMark({ 
+        family: extractFontFamily(element.style.fontFamily) 
+      });
+    }
+    return null;
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

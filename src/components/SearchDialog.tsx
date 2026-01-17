@@ -4,11 +4,13 @@ type SearchItem = {
   id: string;
   title: string;
   description: string;
-  type: 'case' | 'scenario' | 'doc';
+  type: 'case' | 'scenario' | 'doc' | 'tip';
   url: string;
   tags?: string[];
   os?: string;
   browser?: string;
+  category?: string;
+  difficulty?: string;
 };
 
 type SearchDialogProps = {
@@ -30,7 +32,7 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
     const lowerQuery = query.toLowerCase();
     return items
       .filter((item) => {
-        const searchText = `${item.title} ${item.description} ${item.tags?.join(' ') || ''} ${item.os || ''} ${item.browser || ''}`.toLowerCase();
+        const searchText = `${item.title} ${item.description} ${item.tags?.join(' ') || ''} ${item.os || ''} ${item.browser || ''} ${item.category || ''} ${item.difficulty || ''}`.toLowerCase();
         return searchText.includes(lowerQuery);
       })
       .slice(0, 20);
@@ -85,6 +87,7 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
     case: { label: 'Case', color: 'var(--category-ime)' },
     scenario: { label: 'Scenario', color: 'var(--category-formatting)' },
     doc: { label: 'Doc', color: 'var(--category-events)' },
+    tip: { label: 'Tip', color: 'var(--accent-primary)' },
   };
 
   return (
@@ -115,7 +118,7 @@ export function SearchDialog({ isOpen, onClose, items, locale = 'en' }: SearchDi
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search cases, scenarios, docs..."
+            placeholder="Search cases, scenarios, docs, tips..."
             className="flex-1 border-none outline-none text-base bg-transparent text-text-primary"
           />
           <kbd className="px-2 py-1 text-xs bg-bg-muted rounded text-text-muted">

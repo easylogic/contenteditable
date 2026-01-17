@@ -1,0 +1,796 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocaleFromPath,
+  getLocalizedPath,
+  type Locale,
+} from '../../i18n/translations';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+
+// Get all tips for the current locale
+const tips = await getCollection('tips', ({ data }) => data.locale === locale);
+
+// Group by category
+const tipsByCategory = tips.reduce((acc, tip) => {
+  const category = tip.data.category || 'other';
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(tip);
+  return acc;
+}, {} as Record<string, typeof tips>);
+
+// Sort tips within each category
+Object.keys(tipsByCategory).forEach((category) => {
+  tipsByCategory[category].sort((a, b) => a.data.id.localeCompare(b.data.id));
+});
+
+// Category metadata with priority for display order
+const categoryMetadata: Record<string, { label: { en: string; ko: string }; description: { en: string; ko: string }; priority: number; icon: string }> = {
+  'getting-started': {
+    label: { en: 'Getting Started', ko: '시작하기' },
+    description: { en: 'Essential tips for beginners', ko: '초보자를 위한 필수 팁' },
+    priority: 1,
+    icon: '🚀'
+  },
+  'common-patterns': {
+    label: { en: 'Common Patterns', ko: '일반 패턴' },
+    description: { en: 'Reusable patterns for everyday tasks', ko: '일상 작업을 위한 재사용 가능한 패턴' },
+    priority: 2,
+    icon: '📋'
+  },
+  framework: {
+    label: { en: 'Framework Integration', ko: '프레임워크 통합' },
+    description: { en: 'Tips for React, Vue, and other frameworks', ko: 'React, Vue 및 기타 프레임워크 팁' },
+    priority: 3,
+    icon: '⚛️'
+  },
+  formatting: {
+    label: { en: 'Formatting', ko: '포맷팅' },
+    description: { en: 'Text formatting and styling', ko: '텍스트 포맷팅 및 스타일링' },
+    priority: 4,
+    icon: '🎨'
+  },
+  selection: {
+    label: { en: 'Selection & Caret', ko: '선택 & 캐럿' },
+    description: { en: 'Selection and cursor handling', ko: '선택 및 커서 처리' },
+    priority: 5,
+    icon: '📍'
+  },
+  'browser-feature': {
+    label: { en: 'Browser Features', ko: '브라우저 기능' },
+    description: { en: 'Handling browser-specific behaviors', ko: '브라우저별 동작 처리' },
+    priority: 6,
+    icon: '🌐'
+  },
+  performance: {
+    label: { en: 'Performance', ko: '성능' },
+    description: { en: 'Optimization and best practices', ko: '최적화 및 모범 사례' },
+    priority: 7,
+    icon: '⚡'
+  },
+  accessibility: {
+    label: { en: 'Accessibility', ko: '접근성' },
+    description: { en: 'WCAG compliance and keyboard navigation', ko: 'WCAG 준수 및 키보드 네비게이션' },
+    priority: 8,
+    icon: '♿'
+  },
+  ime: {
+    label: { en: 'IME & Composition', ko: 'IME & 컴포지션' },
+    description: { en: 'Input method editor handling', ko: '입력기 처리' },
+    priority: 9,
+    icon: '⌨️'
+  },
+  paste: {
+    label: { en: 'Paste & Clipboard', ko: '붙여넣기 & 클립보드' },
+    description: { en: 'Clipboard operations', ko: '클립보드 작업' },
+    priority: 10,
+    icon: '📋'
+  },
+  mobile: {
+    label: { en: 'Mobile', ko: '모바일' },
+    description: { en: 'Mobile-specific considerations', ko: '모바일 특정 고려사항' },
+    priority: 11,
+    icon: '📱'
+  },
+  other: {
+    label: { en: 'Other', ko: '기타' },
+    description: { en: 'Miscellaneous tips', ko: '기타 팁' },
+    priority: 12,
+    icon: '📚'
+  },
+};
+
+// Sort categories by priority
+const sortedCategories = Object.keys(tipsByCategory).sort((a, b) => {
+  const priorityA = categoryMetadata[a]?.priority || 999;
+  const priorityB = categoryMetadata[b]?.priority || 999;
+  return priorityA - priorityB;
+});
+
+const pageTitle = locale === 'ko' ? '해결 팁' : 'Tips';
+const pageDescription = locale === 'ko' 
+  ? 'contenteditable 문제 해결을 위한 실용적인 팁과 해결 방법'
+  : 'Practical tips and solutions for contenteditable issues';
+
+// Get translation helper
+const t = locale === 'ko' ? {
+  tips: '해결 팁',
+  description: 'contenteditable 문제 해결을 위한 실용적인 팁과 해결 방법',
+  searchPlaceholder: '팁 검색...',
+  category: '카테고리',
+  difficulty: '난이도',
+  all: '전체',
+  beginner: '초급',
+  intermediate: '중급',
+  advanced: '고급',
+  readMore: '자세히 보기',
+  totalTips: '전체 팁',
+  noResults: '검색 결과가 없습니다',
+  clearFilters: '필터 초기화',
+} : {
+  tips: 'Tips',
+  description: 'Practical tips and solutions for contenteditable issues',
+  searchPlaceholder: 'Search tips...',
+  category: 'Category',
+  difficulty: 'Difficulty',
+  all: 'All',
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+  readMore: 'Read more',
+  totalTips: 'Total Tips',
+  noResults: 'No tips found',
+  clearFilters: 'Clear filters',
+};
+
+// Count tips by difficulty
+const tipsByDifficulty = tips.reduce((acc, tip) => {
+  const difficulty = tip.data.difficulty || 'unknown';
+  acc[difficulty] = (acc[difficulty] || 0) + 1;
+  return acc;
+}, {} as Record<string, number>);
+
+
+---
+
+<html lang={locale} dir={locales[locale].dir}>
+<head>
+  <BaseHead 
+    title={pageTitle}
+    description={pageDescription}
+  />
+</head>
+<body>
+<SiteNav />
+
+<div class="tips-layout">
+  <main class="tips-content">
+    <div class="content-header">
+      <div class="header-top">
+        <div>
+          <h1>{pageTitle}</h1>
+          <p class="text-text-muted">{pageDescription}</p>
+        </div>
+        <div class="stats">
+          <div class="stat-item">
+            <span class="stat-value">{tips.length}</span>
+            <span class="stat-label">{t.totalTips}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tips-filters">
+      <div class="search-box">
+        <input 
+          type="text" 
+          id="search-input" 
+          class="search-input" 
+          placeholder={t.searchPlaceholder}
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="filter-group">
+        <label>{t.category}:</label>
+        <select id="category-filter" class="filter-select">
+          <option value="all">{t.all}</option>
+          {sortedCategories.map((cat) => {
+            const meta = categoryMetadata[cat];
+            const label = meta ? (locale === 'ko' ? meta.label.ko : meta.label.en) : cat;
+            return (
+              <option value={cat}>{meta?.icon || ''} {label}</option>
+            );
+          })}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>{t.difficulty}:</label>
+        <select id="difficulty-filter" class="filter-select">
+          <option value="all">{t.all}</option>
+          <option value="beginner">{t.beginner} ({tipsByDifficulty.beginner || 0})</option>
+          <option value="intermediate">{t.intermediate} ({tipsByDifficulty.intermediate || 0})</option>
+          <option value="advanced">{t.advanced} ({tipsByDifficulty.advanced || 0})</option>
+        </select>
+      </div>
+      <button id="clear-filters" class="clear-filters-btn">{t.clearFilters}</button>
+    </div>
+
+    <div id="no-results" class="no-results" style="display: none;">
+      <p>{t.noResults}</p>
+    </div>
+
+    <div class="tips-grid" id="tips-grid">
+      {sortedCategories.map((category) => {
+        const categoryTips = tipsByCategory[category];
+        const meta = categoryMetadata[category];
+        const categoryLabel = meta ? (locale === 'ko' ? meta.label.ko : meta.label.en) : category;
+        const categoryDesc = meta ? (locale === 'ko' ? meta.description.ko : meta.description.en) : '';
+        
+        return (
+          <section 
+            class="tips-category" 
+            data-category={category}
+            data-tip-count={categoryTips.length}
+          >
+            <div class="category-header">
+              <div class="category-title-wrapper">
+                <span class="category-icon">{meta?.icon || '📚'}</span>
+                <div>
+                  <h2 class="category-title">{categoryLabel}</h2>
+                  {categoryDesc && (
+                    <p class="category-description">{categoryDesc}</p>
+                  )}
+                </div>
+              </div>
+              <span class="category-count">{categoryTips.length} {locale === 'ko' ? '개' : 'tip'}{categoryTips.length !== 1 ? (locale === 'ko' ? '' : 's') : ''}</span>
+            </div>
+          <div class="tips-list">
+            {categoryTips.map((tip) => (
+              <article 
+                class="tip-card" 
+                data-category={tip.data.category || 'other'}
+                data-difficulty={tip.data.difficulty || ''}
+                data-title={tip.data.title.toLowerCase()}
+                data-description={(tip.data.description || '').toLowerCase()}
+                data-tags={(tip.data.tags || []).join(' ').toLowerCase()}
+              >
+                <div class="tip-header">
+                  <h3>
+                    <a href={localePath(`/tips/${tip.data.id}`)} class="tip-link">
+                      {tip.data.title}
+                    </a>
+                  </h3>
+                  {tip.data.difficulty && (
+                    <span class={`difficulty-badge difficulty-${tip.data.difficulty}`}>
+                      {tip.data.difficulty === 'beginner' ? t.beginner : 
+                       tip.data.difficulty === 'intermediate' ? t.intermediate : 
+                       t.advanced}
+                    </span>
+                  )}
+                </div>
+                {tip.data.description && (
+                  <p class="tip-description">{tip.data.description}</p>
+                )}
+                <div class="tip-meta">
+                  {tip.data.tags && tip.data.tags.length > 0 && (
+                    <div class="tip-tags">
+                      {tip.data.tags.slice(0, 4).map((tag) => (
+                        <span class="tag">{tag}</span>
+                      ))}
+                      {tip.data.tags.length > 4 && (
+                        <span class="tag tag-more">+{tip.data.tags.length - 4}</span>
+                      )}
+                    </div>
+                  )}
+                  <a href={localePath(`/tips/${tip.data.id}`)} class="tip-read-more">
+                    {t.readMore} →
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )})}
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
+
+<style>
+  .tips-layout {
+    min-height: calc(100vh - 52px);
+  }
+
+  .tips-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 2.5rem 3rem;
+    overflow-x: auto;
+  }
+
+  .content-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .content-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+  }
+
+  .content-header p {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .stats {
+    display: flex;
+    gap: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 1rem 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    min-width: 120px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+  }
+
+  .tips-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+
+  .tips-category {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-light);
+  }
+
+  .category-title-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  .category-icon {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .category-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+  }
+
+  .category-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .category-count {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    background: var(--bg-muted);
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .tips-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tip-card {
+    padding: 1.75rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .tip-card:hover {
+    border-color: var(--border-medium);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+  }
+
+  .tip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  .tip-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .tip-link:hover {
+    color: var(--accent-primary);
+  }
+
+  .difficulty-badge {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .difficulty-beginner {
+    background: rgba(34, 197, 94, 0.1);
+    color: rgb(34, 197, 94);
+  }
+
+  .difficulty-intermediate {
+    background: rgba(251, 191, 36, 0.1);
+    color: rgb(251, 191, 36);
+  }
+
+  .difficulty-advanced {
+    background: rgba(239, 68, 68, 0.1);
+    color: rgb(239, 68, 68);
+  }
+
+  .tip-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 1.25rem 0;
+    flex: 1;
+  }
+
+  .tip-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .tip-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .tag {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .tag-more {
+    background: var(--accent-primary-light);
+    color: var(--accent-primary);
+  }
+
+  .tip-read-more {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.15s;
+  }
+
+  .tip-read-more:hover {
+    color: var(--accent-primary-dark);
+  }
+
+  .tips-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    font-size: 0.875rem;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    color: var(--text-primary);
+    transition: all 0.2s;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.1);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    pointer-events: none;
+  }
+
+  .clear-filters-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .clear-filters-btn:hover {
+    border-color: var(--border-medium);
+    color: var(--text-primary);
+    background: var(--bg-muted);
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .filter-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .filter-select {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 180px;
+  }
+
+  .filter-select:hover {
+    border-color: var(--border-medium);
+    background: var(--bg-surface);
+  }
+
+  .filter-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.1);
+  }
+
+  @media (max-width: 1024px) {
+    .tips-list {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .tips-content {
+      padding: 1.5rem 1rem 2rem;
+    }
+
+    .header-top {
+      flex-direction: column;
+    }
+
+    .stats {
+      width: 100%;
+    }
+
+    .tips-filters {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .search-box {
+      min-width: 100%;
+    }
+
+    .filter-group {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .filter-select {
+      width: 100%;
+      min-width: auto;
+    }
+
+    .tips-list {
+      grid-template-columns: 1fr;
+    }
+
+    .category-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input');
+    const categoryFilter = document.getElementById('category-filter');
+    const difficultyFilter = document.getElementById('difficulty-filter');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+    const tipsGrid = document.getElementById('tips-grid');
+    const noResults = document.getElementById('no-results');
+
+    function filterTips() {
+      const searchTerm = (searchInput?.value || '').toLowerCase().trim();
+      const selectedCategory = categoryFilter?.value || 'all';
+      const selectedDifficulty = difficultyFilter?.value || 'all';
+
+      const categories = tipsGrid?.querySelectorAll('.tips-category') || [];
+      let totalVisible = 0;
+
+      categories.forEach((category) => {
+        const categoryValue = category.getAttribute('data-category');
+        const tips = category.querySelectorAll('.tip-card');
+        let visibleCount = 0;
+
+        tips.forEach((tip) => {
+          const tipCategory = tip.getAttribute('data-category') || 'other';
+          const tipDifficulty = tip.getAttribute('data-difficulty') || '';
+          const tipTitle = tip.getAttribute('data-title') || '';
+          const tipDescription = tip.getAttribute('data-description') || '';
+          const tipTags = tip.getAttribute('data-tags') || '';
+
+          const categoryMatch = selectedCategory === 'all' || categoryValue === selectedCategory;
+          const difficultyMatch = selectedDifficulty === 'all' || tipDifficulty === selectedDifficulty;
+          const searchMatch = !searchTerm || 
+            tipTitle.includes(searchTerm) || 
+            tipDescription.includes(searchTerm) || 
+            tipTags.includes(searchTerm);
+
+          if (categoryMatch && difficultyMatch && searchMatch) {
+            tip.style.display = '';
+            visibleCount++;
+            totalVisible++;
+          } else {
+            tip.style.display = 'none';
+          }
+        });
+
+        // Hide category if no visible tips
+        if (visibleCount === 0) {
+          category.style.display = 'none';
+        } else {
+          category.style.display = '';
+        }
+      });
+
+      // Show/hide no results message
+      if (totalVisible === 0) {
+        noResults.style.display = 'block';
+        tipsGrid.style.display = 'none';
+      } else {
+        noResults.style.display = 'none';
+        tipsGrid.style.display = '';
+      }
+    }
+
+    function clearFilters() {
+      if (searchInput) searchInput.value = '';
+      if (categoryFilter) categoryFilter.value = 'all';
+      if (difficultyFilter) difficultyFilter.value = 'all';
+      filterTips();
+    }
+
+    searchInput?.addEventListener('input', filterTips);
+    categoryFilter?.addEventListener('change', filterTips);
+    difficultyFilter?.addEventListener('change', filterTips);
+    clearFiltersBtn?.addEventListener('click', clearFilters);
+  });
+</script>

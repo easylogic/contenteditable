@@ -1,0 +1,700 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'serialization', text: '직렬화 (모델 → HTML)' },
+  { depth: 3, slug: 'node-serialization', text: '노드 직렬화' },
+  { depth: 3, slug: 'mark-serialization', text: '마크 직렬화' },
+  { depth: 3, slug: 'attribute-serialization', text: '속성 직렬화' },
+  { depth: 2, slug: 'deserialization', text: '역직렬화 (HTML → 모델)' },
+  { depth: 3, slug: 'html-parsing', text: 'HTML 파싱' },
+  { depth: 3, slug: 'node-parsing', text: '노드 파싱' },
+  { depth: 3, slug: 'mark-extraction', text: '마크 추출' },
+  { depth: 2, slug: 'normalization', text: 'HTML 정규화' },
+  { depth: 3, slug: 'element-normalization', text: '요소 정규화' },
+  { depth: 3, slug: 'structure-normalization', text: '구조 정규화' },
+  { depth: 2, slug: 'incremental-updates', text: '증분 업데이트' },
+  { depth: 3, slug: 'diff-algorithm', text: 'Diff 알고리즘' },
+  { depth: 3, slug: 'dom-patching', text: 'DOM 패칭' },
+  { depth: 2, slug: 'edge-cases', text: '엣지 케이스' },
+  { depth: 3, slug: 'nested-marks', text: '중첩된 마크' },
+  { depth: 3, slug: 'empty-nodes', text: '빈 노드' },
+  { depth: 3, slug: 'whitespace-handling', text: '공백 처리' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="HTML 매핑 – contenteditable.lab"
+      description="모델과 HTML 간 변환: 직렬화, 역직렬화, 정규화, 증분 업데이트"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">HTML 매핑</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              HTML 매핑
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델과 HTML 간 변환: 직렬화 (모델 → HTML), 역직렬화 (HTML → 모델), 정규화, 증분 업데이트.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                HTML 매핑은 추상 문서 모델과 DOM 사이의 다리입니다. 양방향 변환이 필요합니다: 렌더링을 위해 모델을 HTML로, 붙여넣은 콘텐츠를 파싱하거나 저장된 문서를 로드하기 위해 HTML을 모델로.
+              </p>
+              <p class="m-0 mb-4">
+                문제는 HTML이 지저분하고 일관성이 없는 반면, 모델은 깨끗하고 검증된다는 것입니다. 정규화와 신중한 파싱이 필수적입니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="serialization" title="직렬화 (모델 → HTML)">
+              <p class="m-0 mb-4">
+                렌더링을 위해 모델을 HTML로 변환합니다:
+              </p>
+
+              <DocSection id="node-serialization" title="노드 직렬화" depth={3}>
+                <DocCodeBlock code={`function serializeNode(node) {
+  switch (node.type) {
+    case 'document':
+      return serializeChildren(node.children);
+      
+    case 'paragraph':
+      return '<p>' + serializeChildren(node.children) + '</p>';
+      
+    case 'heading':
+      const level = node.attrs?.level || 1;
+      return '<h' + level + '>' + serializeChildren(node.children) + '</h' + level + '>';
+      
+    case 'text':
+      return serializeText(node);
+      
+    case 'link':
+      const href = escapeHtml(node.attrs?.href || '');
+      return '<a href="' + href + '">' + serializeChildren(node.children) + '</a>';
+      
+    case 'image':
+      const src = escapeHtml(node.attrs?.src || '');
+      const alt = escapeHtml(node.attrs?.alt || '');
+      return '<img src="' + src + '" alt="' + alt + '">';
+      
+    default:
+      return serializeChildren(node.children);
+  }
+}
+
+function serializeChildren(children) {
+  return children
+    .map(child => serializeNode(child))
+    .join('');
+}`} />
+              </DocSection>
+
+              <DocSection id="mark-serialization" title="마크 직렬화" depth={3}>
+                <p class="m-0 mb-3">
+                  텍스트 노드에 마크를 적용합니다:
+                </p>
+                <DocCodeBlock code={`function serializeText(node) {
+  let html = escapeHtml(node.text);
+  
+  // 순서대로 마크 적용
+  if (node.marks && node.marks.length > 0) {
+    // 필요시 우선순위로 마크 정렬
+    const sortedMarks = sortMarks(node.marks);
+    
+    sortedMarks.forEach(mark => {
+      html = wrapWithMark(html, mark);
+    });
+  }
+  
+  return html;
+}
+
+function wrapWithMark(html, mark) {
+  const tagMap = {
+    bold: 'strong',
+    italic: 'em',
+    underline: 'u',
+    strikethrough: 's',
+    code: 'code'
+  };
+  
+  const tag = tagMap[mark.type];
+  if (!tag) return html;
+  
+  const attrs = mark.attrs ? serializeAttrs(mark.attrs) : '';
+  return '<' + tag + attrs + '>' + html + '</' + tag + '>';
+}
+
+// 예제: 여러 마크가 있는 텍스트
+// 입력: { type: 'text', text: '볼드 이탤릭', marks: [{ type: 'bold' }, { type: 'italic' }] }
+// 출력: '<strong><em>볼드 이탤릭</em></strong>'
+// 또는: '<em><strong>볼드 이탤릭</strong></em>' (일부 마크의 경우 순서가 중요함)`} />
+              </DocSection>
+
+              <DocSection id="attribute-serialization" title="속성 직렬화" depth={3}>
+                <DocCodeBlock code={`function serializeAttrs(attrs) {
+  const parts = [];
+  
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value !== null && value !== undefined) {
+      const escaped = escapeHtml(String(value));
+      parts.push(key + '="' + escaped + '"');
+    }
+  }
+  
+  return parts.length > 0 ? ' ' + parts.join(' ') : '';
+}
+
+// 예제
+serializeAttrs({ href: 'https://example.com', title: '예제' })
+// 반환: ' href="https://example.com" title="예제"'
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="deserialization" title="역직렬화 (HTML → 모델)">
+              <p class="m-0 mb-4">
+                HTML을 모델로 파싱합니다:
+              </p>
+
+              <DocSection id="html-parsing" title="HTML 파싱" depth={3}>
+                <DocCodeBlock code={`function parseHTML(html) {
+  // HTML 문자열을 DOM으로 파싱
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  // DOM을 모델로 변환
+  return {
+    type: 'document',
+    children: Array.from(doc.body.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean)
+  };
+}
+
+function parseNode(domNode) {
+  if (domNode.nodeType === Node.TEXT_NODE) {
+    // 텍스트 노드
+    return {
+      type: 'text',
+      text: domNode.textContent,
+      marks: extractMarks(domNode)
+    };
+  }
+  
+  if (domNode.nodeType === Node.ELEMENT_NODE) {
+    // 요소 노드
+    const nodeType = getNodeType(domNode.tagName);
+    
+    if (!nodeType) {
+      // 알 수 없는 요소, 언래핑하고 자식 파싱
+      return parseChildren(domNode.childNodes);
+    }
+    
+    return {
+      type: nodeType,
+      attrs: extractAttributes(domNode, nodeType),
+      children: parseChildren(domNode.childNodes)
+    };
+  }
+  
+  // 다른 노드 타입 무시
+  return null;
+}
+
+function parseChildren(domNodes) {
+  return Array.from(domNodes)
+    .map(node => parseNode(node))
+    .filter(Boolean);
+}`} />
+              </DocSection>
+
+              <DocSection id="node-parsing" title="노드 파싱" depth={3}>
+                <DocCodeBlock code={`function getNodeType(tagName) {
+  const tagMap = {
+    'P': 'paragraph',
+    'H1': 'heading',
+    'H2': 'heading',
+    'H3': 'heading',
+    'H4': 'heading',
+    'H5': 'heading',
+    'H6': 'heading',
+    'A': 'link',
+    'IMG': 'image',
+    'STRONG': null,  // 마크로 처리
+    'B': null,       // 마크로 처리
+    'EM': null,      // 마크로 처리
+    'I': null,       // 마크로 처리
+    'U': null,       // 마크로 처리
+    'CODE': null,    // 마크로 처리
+  };
+  
+  return tagMap[tagName.toUpperCase()] || null;
+}
+
+function extractAttributes(domElement, nodeType) {
+  const attrs = {};
+  
+  if (nodeType === 'heading') {
+    const level = parseInt(domElement.tagName[1]) || 1;
+    attrs.level = level;
+  }
+  
+  if (nodeType === 'link') {
+    attrs.href = domElement.getAttribute('href') || '';
+    attrs.title = domElement.getAttribute('title') || '';
+  }
+  
+  if (nodeType === 'image') {
+    attrs.src = domElement.getAttribute('src') || '';
+    attrs.alt = domElement.getAttribute('alt') || '';
+  }
+  
+  return attrs;
+}`} />
+              </DocSection>
+
+              <DocSection id="mark-extraction" title="마크 추출" depth={3}>
+                <DocCodeBlock code={`function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  // 포맷팅 요소를 찾기 위해 DOM 트리를 따라 올라가기
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) {
+      marks.push(mark);
+    }
+    current = current.parentElement;
+  }
+  
+  return marks;
+}
+
+function getMarkFromElement(element) {
+  const markMap = {
+    'STRONG': { type: 'bold' },
+    'B': { type: 'bold' },
+    'EM': { type: 'italic' },
+    'I': { type: 'italic' },
+    'U': { type: 'underline' },
+    'S': { type: 'strikethrough' },
+    'CODE': { type: 'code' },
+    'A': {
+      type: 'link',
+      attrs: {
+        href: element.getAttribute('href') || '',
+        title: element.getAttribute('title') || ''
+      }
+    }
+  };
+  
+  const tagName = element.tagName.toUpperCase();
+  return markMap[tagName] || null;
+}
+
+// 예제: <strong><em>텍스트</em></strong>
+// 텍스트 노드의 마크: [{ type: 'bold' }, { type: 'italic' }]`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="normalization" title="HTML 정규화">
+              <p class="m-0 mb-4">
+                일관성 없는 HTML을 스키마에 맞게 정규화합니다:
+              </p>
+
+              <DocSection id="element-normalization" title="요소 정규화" depth={3}>
+                <DocCodeBlock code={`function normalizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  // 요소 정규화
+  normalizeElements(doc.body);
+  
+  // 구조 수정
+  fixStructure(doc.body);
+  
+  return doc.body.innerHTML;
+}
+
+function normalizeElements(element) {
+  // b를 strong으로 변환
+  element.querySelectorAll('b').forEach(b => {
+    const strong = document.createElement('strong');
+    strong.innerHTML = b.innerHTML;
+    b.parentNode.replaceChild(strong, b);
+  });
+  
+  // i를 em으로 변환
+  element.querySelectorAll('i').forEach(i => {
+    const em = document.createElement('em');
+    em.innerHTML = i.innerHTML;
+    i.parentNode.replaceChild(em, i);
+  });
+  
+  // div를 p로 변환 (적절한 경우)
+  element.querySelectorAll('div').forEach(div => {
+    if (!div.querySelector('p, ul, ol, h1, h2, h3, h4, h5, h6, table')) {
+      const p = document.createElement('p');
+      p.innerHTML = div.innerHTML;
+      div.parentNode.replaceChild(p, div);
+    }
+  });
+  
+  // style과 class 속성 제거
+  element.querySelectorAll('[style]').forEach(el => {
+    el.removeAttribute('style');
+  });
+  element.querySelectorAll('[class]').forEach(el => {
+    el.removeAttribute('class');
+  });
+}`} />
+              </DocSection>
+
+              <DocSection id="structure-normalization" title="구조 정규화" depth={3}>
+                <DocCodeBlock code={`function fixStructure(element) {
+  // 블록이 body/document의 직접 자식인지 확인
+  const blocks = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'BLOCKQUOTE'];
+  
+  // 다른 블록 내부에 중첩된 블록 언래핑
+  element.querySelectorAll(blocks.join(',')).forEach(block => {
+    const parent = block.parentElement;
+    if (parent && blocks.includes(parent.tagName)) {
+      // 블록 내부의 블록, 언래핑
+      const grandparent = parent.parentElement;
+      if (grandparent) {
+        grandparent.insertBefore(block, parent);
+        if (!parent.hasChildNodes()) {
+          parent.remove();
+        }
+      }
+    }
+  });
+  
+  // 인접한 텍스트 노드 병합
+  mergeTextNodes(element);
+  
+  // 빈 노드 제거 (br 제외)
+  removeEmptyNodes(element);
+}
+
+function mergeTextNodes(element) {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+  
+  let prevNode = null;
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (prevNode && prevNode.parentNode === node.parentNode) {
+      prevNode.textContent += node.textContent;
+      node.remove();
+    } else {
+      prevNode = node;
+    }
+  }
+}
+
+function removeEmptyNodes(element) {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_ELEMENT,
+    null
+  );
+  
+  const toRemove = [];
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (node.tagName === 'BR') continue;
+    
+    if (!node.hasChildNodes() || 
+        (node.textContent.trim() === '' && !node.querySelector('br, img'))) {
+      toRemove.push(node);
+    }
+  }
+  
+  toRemove.forEach(node => node.remove());
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="incremental-updates" title="증분 업데이트">
+              <p class="m-0 mb-4">
+                전체 문서를 다시 렌더링하는 대신, 변경된 부분만 업데이트합니다:
+              </p>
+
+              <DocSection id="diff-algorithm" title="Diff 알고리즘" depth={3}>
+                <DocCodeBlock code={`function updateDOM(oldModel, newModel, domRoot) {
+  // 모델을 비교하고 차이점 찾기
+  const diff = diffModels(oldModel, newModel);
+  
+  // DOM에 변경사항 적용
+  diff.forEach(change => {
+    applyChange(change, domRoot);
+  });
+}
+
+function diffModels(oldModel, newModel) {
+  const changes = [];
+  
+  // 자식 비교
+  const oldChildren = oldModel.children || [];
+  const newChildren = newModel.children || [];
+  
+  // 간단한 diff: 추가, 제거, 수정된 노드 찾기
+  const maxLen = Math.max(oldChildren.length, newChildren.length);
+  
+  for (let i = 0; i < maxLen; i++) {
+    const oldChild = oldChildren[i];
+    const newChild = newChildren[i];
+    
+    if (!oldChild && newChild) {
+      // 추가됨
+      changes.push({
+        type: 'insert',
+        index: i,
+        node: newChild
+      });
+    } else if (oldChild && !newChild) {
+      // 제거됨
+      changes.push({
+        type: 'remove',
+        index: i
+      });
+    } else if (oldChild && newChild) {
+      // 수정되었는지 확인
+      if (!nodesEqual(oldChild, newChild)) {
+        changes.push({
+          type: 'update',
+          index: i,
+          oldNode: oldChild,
+          newNode: newChild
+        });
+      }
+    }
+  }
+  
+  return changes;
+}
+
+function nodesEqual(node1, node2) {
+  if (node1.type !== node2.type) return false;
+  if (node1.type === 'text') {
+    return node1.text === node2.text &&
+           marksEqual(node1.marks, node2.marks);
+  }
+  // 다른 속성 비교...
+  return true;
+}`} />
+              </DocSection>
+
+              <DocSection id="dom-patching" title="DOM 패칭" depth={3}>
+                <DocCodeBlock code={`function applyChange(change, domRoot) {
+  const domNode = findDOMNode(change.index, domRoot);
+  
+  switch (change.type) {
+    case 'insert':
+      const newElement = renderNode(change.node);
+      if (domNode) {
+        domNode.parentNode.insertBefore(newElement, domNode);
+      } else {
+        domRoot.appendChild(newElement);
+      }
+      break;
+      
+    case 'remove':
+      if (domNode) {
+        domNode.remove();
+      }
+      break;
+      
+    case 'update':
+      if (domNode) {
+        // 제자리에서 업데이트
+        updateDOMNode(domNode, change.oldNode, change.newNode);
+      }
+      break;
+  }
+}
+
+function updateDOMNode(domNode, oldNode, newNode) {
+  if (newNode.type === 'text') {
+    // 텍스트 콘텐츠 업데이트
+    if (domNode.nodeType === Node.TEXT_NODE) {
+      domNode.textContent = newNode.text;
+    } else {
+      // 텍스트 노드로 요소 교체
+      const textNode = document.createTextNode(newNode.text);
+      domNode.parentNode.replaceChild(textNode, domNode);
+    }
+    
+    // 마크 업데이트
+    updateMarks(domNode, oldNode.marks, newNode.marks);
+  } else {
+    // 요소 업데이트
+    updateElement(domNode, oldNode, newNode);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="edge-cases" title="엣지 케이스">
+              <DocSection id="nested-marks" title="중첩된 마크" depth={3}>
+                <p class="m-0 mb-3">
+                  HTML은 중첩된 포맷팅을 가질 수 있습니다: <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;&lt;em&gt;텍스트&lt;/em&gt;&lt;/strong&gt;</code>
+                </p>
+                <DocCodeBlock code={`// HTML: <strong><em>볼드 이탤릭</em></strong>
+// 모델: 두 마크를 모두 가진 단일 텍스트 노드
+{
+  type: 'text',
+  text: '볼드 이탤릭',
+  marks: [
+    { type: 'bold' },
+    { type: 'italic' }
+  ]
+}
+
+// 파싱할 때, 부모 체인에서 모든 마크 수집
+function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) {
+      marks.push(mark);
+    }
+    current = current.parentElement;
+  }
+  
+  return marks;
+}
+
+// 직렬화할 때, 순서대로 마크 적용
+function serializeText(node) {
+  let html = escapeHtml(node.text);
+  node.marks.forEach(mark => {
+    html = wrapWithMark(html, mark);
+  });
+  return html;
+}`} />
+              </DocSection>
+
+              <DocSection id="empty-nodes" title="빈 노드" depth={3}>
+                <p class="m-0 mb-3">
+                  빈 단락, 빈 목록 등을 처리합니다:
+                </p>
+                <DocCodeBlock code={`// 빈 단락
+{
+  type: 'paragraph',
+  children: []
+}
+
+// 직렬화: <p><br></p> 또는 <p>&nbsp;</p>
+function serializeNode(node) {
+  if (node.type === 'paragraph' && node.children.length === 0) {
+    return '<p><br></p>';
+  }
+  // ...
+}
+
+// 빈 단락 파싱
+function parseNode(domNode) {
+  if (domNode.tagName === 'P' && domNode.textContent.trim() === '') {
+    return {
+      type: 'paragraph',
+      children: []
+    };
+  }
+  // ...
+}`} />
+              </DocSection>
+
+              <DocSection id="whitespace-handling" title="공백 처리" depth={3}>
+                <p class="m-0 mb-3">
+                  HTML은 공백을 축소하지만, 보존하고 싶을 수 있습니다:
+                </p>
+                <DocCodeBlock code={`// 코드 블록에서 공백 보존
+{
+  type: 'codeBlock',
+  children: [
+    { type: 'text', text: '  const x = 1;\n  const y = 2;' }
+  ]
+}
+
+// <pre><code>로 직렬화
+function serializeNode(node) {
+  if (node.type === 'codeBlock') {
+    return '<pre><code>' + escapeHtml(node.children[0].text) + '</code></pre>';
+  }
+}
+
+// 공백을 보존하며 파싱
+function parseNode(domNode) {
+  if (domNode.tagName === 'PRE' || domNode.tagName === 'CODE') {
+    return {
+      type: 'text',
+      text: domNode.textContent,  // 공백 보존
+      marks: domNode.tagName === 'CODE' ? [{ type: 'code' }] : []
+    };
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

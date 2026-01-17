@@ -1,0 +1,224 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Bold Node Type – contenteditable.lab"
+      description="Detailed guide for Bold node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Bold</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Bold Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Formatting • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Bold</strong> mark type:
+              </p>
+              <DocCodeBlock code={`{
+  bold: {
+    // Marks don't have content, they wrap text nodes
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'text',
+  text: 'Bold text',
+  marks: [{ type: 'bold' }]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeBoldMark(text, mark) {
+  return '<strong>' + text + '</strong>';
+}
+
+// When multiple marks, apply in order
+function applyMarks(text, marks) {
+  let html = text;
+  marks.forEach(mark => {
+    if (mark.type === 'bold') {
+      html = '<strong>' + html + '</strong>';
+    }
+  });
+  return html;
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function extractBoldMark(element) {
+  if (element.tagName === 'STRONG' || element.tagName === 'B') {
+    return { type: 'bold' };
+  }
+  return null;
+}
+
+// Extract all marks from parent chain
+function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) marks.push(mark);
+    current = current.parentElement;
+  }
+  
+  return marks;
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Toggling bold
+function toggleBold() {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+  
+  const range = selection.getRangeAt(0);
+  const hasBold = hasMarkInSelection(range, 'bold');
+  
+  if (hasBold) {
+    removeMark('bold');
+  } else {
+    addMark({ type: 'bold' });
+  }
+}
+
+// Checking if selection has bold
+function hasBoldMark(selection) {
+  const range = selection.getRangeAt(0);
+  const commonAncestor = range.commonAncestorContainer;
+  
+  if (commonAncestor.nodeType === Node.TEXT_NODE) {
+    return commonAncestor.parentElement?.tagName === 'STRONG';
+  }
+  
+  return range.commonAncestorContainer.querySelector('strong');
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: <b> vs <strong> normalization
+// Solution: Always convert <b> to <strong>
+function normalizeBold(element) {
+  element.querySelectorAll('b').forEach(b => {
+    const strong = document.createElement('strong');
+    strong.innerHTML = b.innerHTML;
+    b.parentNode.replaceChild(strong, b);
+  });
+}
+
+// Issue: Nested bold tags
+// Solution: Remove nested bold
+function removeNestedBold(element) {
+  const strongs = element.querySelectorAll('strong');
+  strongs.forEach(strong => {
+    if (strong.closest('strong') !== strong) {
+      // Nested, unwrap inner
+      unwrapElement(strong);
+    }
+  });
+}
+
+// Issue: Bold mark with other marks
+// Solution: Handle mark ordering
+function applyMarksInOrder(text, marks) {
+  // Apply bold first, then other marks
+  const sortedMarks = sortMarks(marks);
+  let html = text;
+  sortedMarks.forEach(mark => {
+    html = wrapWithMark(html, mark);
+  });
+  return html;
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class BoldMark {
+  constructor() {
+    this.type = 'bold';
+  }
+  
+  toDOM() {
+    return ['strong', 0];
+  }
+  
+  static fromDOM(element) {
+    if (element.tagName === 'STRONG' || element.tagName === 'B') {
+      return new BoldMark();
+    }
+    return null;
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

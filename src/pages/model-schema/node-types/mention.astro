@@ -1,0 +1,181 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Mention Node Type – contenteditable.lab"
+      description="Detailed guide for Mention node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Mention</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Mention Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Custom • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Mention</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  mention: {
+    inline: true,
+    attrs: {
+      id: { default: '' },
+      label: { default: '' }
+    },
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'mention',
+  attrs: {
+    id: 'user123',
+    label: '@username'
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeMention(node) {
+  return '<span data-type="mention" data-id="' + escapeHtml(node.attrs.id) + 
+         '">' + escapeHtml(node.attrs.label) + '</span>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseMention(domNode) {
+  return {
+    type: 'mention',
+    attrs: {
+      id: domNode.getAttribute('data-id') || '',
+      label: domNode.textContent || ''
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering mention
+const mention = document.createElement('span');
+mention.setAttribute('data-type', 'mention');
+mention.setAttribute('data-id', node.attrs.id);
+mention.textContent = node.attrs.label;
+mention.className = 'mention';
+mention.contentEditable = 'false'; // Mentions are typically not directly editable`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Mention autocomplete
+// Solution: Implement mention autocomplete
+function handleMentionInput(e) {
+  const query = e.target.value;
+  if (query.startsWith('@')) {
+    showMentionSuggestions(query.slice(1));
+  }
+}
+
+// Issue: Mention deletion
+// Solution: Handle mention deletion as a unit
+function handleMentionDeletion(mention) {
+  // Delete entire mention, not just part of it
+  mention.remove();
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class MentionNode {
+  constructor(attrs) {
+    this.type = 'mention';
+    this.attrs = {
+      id: attrs?.id || '',
+      label: attrs?.label || ''
+    };
+  }
+  
+  toDOM() {
+    const mention = document.createElement('span');
+    mention.setAttribute('data-type', 'mention');
+    mention.setAttribute('data-id', this.attrs.id);
+    mention.textContent = this.attrs.label;
+    mention.className = 'mention';
+    return mention;
+  }
+  
+  static fromDOM(domNode) {
+    return new MentionNode({
+      id: domNode.getAttribute('data-id') || '',
+      label: domNode.textContent || ''
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,237 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'basic-nodes', text: '기본 노드' },
+  { depth: 2, slug: 'formatting-nodes', text: '포맷팅 노드' },
+  { depth: 2, slug: 'structural-nodes', text: '구조적 노드' },
+  { depth: 2, slug: 'media-nodes', text: '미디어 노드' },
+  { depth: 2, slug: 'complex-nodes', text: '복잡한 노드' },
+  { depth: 2, slug: 'custom-nodes', text: '커스텀 노드' },
+];
+
+const nodeTypes = {
+  basic: [
+    { id: 'document', name: '문서', description: '문서의 루트 노드' },
+    { id: 'paragraph', name: '단락', description: '기본 텍스트 컨테이너' },
+    { id: 'text', name: '텍스트', description: '일반 텍스트 콘텐츠' },
+    { id: 'heading', name: '제목', description: '제목 레벨 h1-h6' },
+    { id: 'hardBreak', name: '줄바꿈', description: '줄바꿈' },
+    { id: 'horizontalRule', name: '수평선', description: '수평 구분선' },
+  ],
+  formatting: [
+    { id: 'bold', name: '볼드', description: '볼드 텍스트 포맷팅' },
+    { id: 'italic', name: '이탤릭', description: '이탤릭 텍스트 포맷팅' },
+    { id: 'underline', name: '밑줄', description: '밑줄 텍스트' },
+    { id: 'strikethrough', name: '취소선', description: '취소선 텍스트' },
+    { id: 'code', name: '코드', description: '인라인 코드' },
+    { id: 'link', name: '링크', description: '하이퍼링크' },
+    { id: 'color', name: '색상', description: '텍스트 색상' },
+    { id: 'highlight', name: '하이라이트', description: '텍스트 하이라이트' },
+    { id: 'fontSize', name: '글꼴 크기', description: '글꼴 크기 제어' },
+    { id: 'fontFamily', name: '글꼴 패밀리', description: '글꼴 패밀리 제어' },
+  ],
+  structural: [
+    { id: 'blockquote', name: '인용구', description: '인용된 텍스트 블록' },
+    { id: 'codeBlock', name: '코드 블록', description: '구문 강조가 있는 코드 블록' },
+    { id: 'orderedList', name: '순서 있는 목록', description: '번호가 있는 목록' },
+    { id: 'bulletList', name: '순서 없는 목록', description: '순서 없는 목록' },
+    { id: 'listItem', name: '목록 항목', description: '목록 항목 컨테이너' },
+  ],
+  media: [
+    { id: 'image', name: '이미지', description: '이미지 임베딩' },
+    { id: 'video', name: '비디오', description: '비디오 임베딩' },
+    { id: 'audio', name: '오디오', description: '오디오 임베딩' },
+    { id: 'iframe', name: 'Iframe', description: 'Iframe 임베딩' },
+  ],
+  complex: [
+    { id: 'table', name: '테이블', description: '테이블 구조' },
+    { id: 'tableRow', name: '테이블 행', description: '테이블 행' },
+    { id: 'tableCell', name: '테이블 셀', description: '테이블 셀' },
+    { id: 'tableHeader', name: '테이블 헤더', description: '테이블 헤더 셀' },
+    { id: 'card', name: '카드', description: '카드 컨테이너' },
+    { id: 'cardHeader', name: '카드 헤더', description: '카드 헤더 섹션' },
+    { id: 'cardBody', name: '카드 본문', description: '카드 본문 섹션' },
+    { id: 'accordion', name: '아코디언', description: '접을 수 있는 아코디언' },
+    { id: 'tabs', name: '탭', description: '탭 인터페이스' },
+    { id: 'columns', name: '컬럼', description: '다중 컬럼 레이아웃' },
+    { id: 'divider', name: '구분선', description: '시각적 구분선' },
+    { id: 'callout', name: '콜아웃', description: '콜아웃 박스' },
+  ],
+  custom: [
+    { id: 'math', name: '수식', description: '수학 공식' },
+    { id: 'diagram', name: '다이어그램', description: '다이어그램 시각화' },
+    { id: 'chart', name: '차트', description: '데이터 차트' },
+    { id: 'map', name: '지도', description: '지도 임베딩' },
+    { id: 'calendar', name: '캘린더', description: '캘린더 위젯' },
+    { id: 'poll', name: '투표', description: '투표 위젯' },
+    { id: 'quiz', name: '퀴즈', description: '퀴즈 위젯' },
+    { id: 'embed', name: '임베드', description: '외부 콘텐츠 임베드' },
+    { id: 'mention', name: '멘션', description: '사용자 멘션' },
+    { id: 'hashtag', name: '해시태그', description: '해시태그' },
+    { id: 'bookmark', name: '북마크', description: '링크 북마크' },
+    { id: 'annotation', name: '주석', description: '주석/댓글' },
+    { id: 'customBlock', name: '커스텀 블록', description: '사용자 정의 커스텀 블록' },
+    { id: 'section', name: '섹션', description: '문서 섹션' },
+  ],
+};
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="노드 타입 – contenteditable.lab"
+      description="리치 텍스트 에디터를 위한 52개 이상의 노드 타입에 대한 포괄적인 가이드, 기본부터 복잡한 커스텀 스키마까지"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">노드 타입</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              상세한 구현 예제, 뷰 연동 노트, 일반적인 함정을 포함한 52개 이상의 노드 타입에 대한 포괄적인 가이드.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                아래의 각 노드 타입에는 다음을 포함한 상세한 문서가 포함되어 있습니다:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li>스키마 정의 및 검증 규칙</li>
+                <li>모델 표현 예제</li>
+                <li>HTML 직렬화 및 역직렬화</li>
+                <li>뷰 연동 고려사항</li>
+                <li>일반적인 문제 및 해결 방법</li>
+                <li>구현 예제</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="basic-nodes" title="기본 노드">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.basic.map((node) => (
+                  <a
+                    href={localePath(`/model-schema/node-types/${node.id}`)}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="formatting-nodes" title="포맷팅 노드">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.formatting.map((node) => (
+                  <a
+                    href={localePath(`/model-schema/node-types/${node.id}`)}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="structural-nodes" title="구조적 노드">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.structural.map((node) => (
+                  <a
+                    href={localePath(`/model-schema/node-types/${node.id}`)}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="media-nodes" title="미디어 노드">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.media.map((node) => (
+                  <a
+                    href={localePath(`/model-schema/node-types/${node.id}`)}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="complex-nodes" title="복잡한 노드">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.complex.map((node) => (
+                  <a
+                    href={localePath(`/model-schema/node-types/${node.id}`)}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="custom-nodes" title="커스텀 노드">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.custom.map((node) => (
+                  <a
+                    href={localePath(`/model-schema/node-types/${node.id}`)}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

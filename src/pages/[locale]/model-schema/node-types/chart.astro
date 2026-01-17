@@ -1,0 +1,213 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'schema', text: '스키마 정의' },
+  { depth: 2, slug: 'model', text: '모델 표현' },
+  { depth: 2, slug: 'serialization', text: 'HTML 직렬화' },
+  { depth: 2, slug: 'deserialization', text: 'HTML 역직렬화' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="차트 노드 타입 – contenteditable.lab"
+      description="차트 노드 타입에 대한 상세 가이드: 스키마, 모델, HTML 매핑, 뷰 연동, 일반적인 문제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema/node-types')} class="text-text-muted no-underline">노드 타입</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">차트</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              차트 노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              카테고리: 커스텀 • 뷰 연동 노트를 포함한 상세 구현 가이드
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="스키마 정의">
+              <p class="m-0 mb-3">
+                <strong>차트</strong> 노드 타입의 스키마 정의:
+              </p>
+              <DocCodeBlock code={`{
+  chart: {
+    group: 'block',
+    attrs: {
+      type: { default: 'bar' },
+      data: { default: '{}' }
+    },
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="모델 표현">
+              <p class="m-0 mb-3">
+                모델 표현 예제:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'chart',
+  attrs: {
+    type: 'bar',
+    data: JSON.stringify({ labels: ['A', 'B'], values: [1, 2] })
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML 직렬화">
+              <p class="m-0 mb-3">
+                모델을 HTML로 변환:
+              </p>
+              <DocCodeBlock code={`function serializeChart(node) {
+  return '<div data-type="chart" data-chart-type="' + node.attrs.type + '">' + 
+         escapeHtml(node.attrs.data) + '</div>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML 역직렬화">
+              <p class="m-0 mb-3">
+                HTML을 모델로 파싱:
+              </p>
+              <DocCodeBlock code={`function parseChart(domNode) {
+  return {
+    type: 'chart',
+    attrs: {
+      type: domNode.getAttribute('data-chart-type') || 'bar',
+      data: domNode.textContent || '{}'
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <DocAlert type="info">
+                <strong>뷰 연동 노트:</strong> 이 노드 타입을 뷰 레이어에서 구현할 때 contenteditable 동작, 선택 처리, 이벤트 관리에 특히 주의하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                뷰 연동 코드:
+              </p>
+              <DocCodeBlock code={`// 차트 렌더링
+const chart = document.createElement('div');
+chart.setAttribute('data-type', 'chart');
+chart.setAttribute('data-chart-type', node.attrs.type);
+chart.contentEditable = 'false'; // 차트는 일반적으로 렌더링됨
+
+// Chart.js 또는 다른 차트 라이브러리로 렌더링
+function renderChart(element) {
+  const type = element.getAttribute('data-chart-type');
+  const data = JSON.parse(element.textContent || '{}');
+  if (window.Chart) {
+    new Chart(element, {
+      type: type,
+      data: data
+    });
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <DocAlert type="warning">
+                <strong>일반적인 함정:</strong> 이 노드 타입을 구현할 때 자주 발생하는 문제들입니다. 구현 전에 주의 깊게 검토하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                일반적인 문제 및 해결 방법:
+              </p>
+              <DocCodeBlock code={`// 문제: 차트 데이터 검증
+// 해결: 차트 데이터 구조 검증
+function validateChartData(data, type) {
+  try {
+    const parsed = JSON.parse(data);
+    // 차트 타입에 따라 검증
+    return parsed.labels && parsed.values;
+  } catch {
+    return false;
+  }
+}
+
+// 문제: 차트 크기 조정
+// 해결: 반응형 차트 처리
+function makeChartResponsive(chart) {
+  chart.style.width = '100%';
+  chart.style.height = 'auto';
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-3">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock code={`class ChartNode {
+  constructor(attrs) {
+    this.type = 'chart';
+    this.attrs = {
+      type: attrs?.type || 'bar',
+      data: attrs?.data || '{}'
+    };
+  }
+  
+  toDOM() {
+    const chart = document.createElement('div');
+    chart.setAttribute('data-type', 'chart');
+    chart.setAttribute('data-chart-type', this.attrs.type);
+    chart.textContent = this.attrs.data;
+    return chart;
+  }
+  
+  static fromDOM(domNode) {
+    return new ChartNode({
+      type: domNode.getAttribute('data-chart-type') || 'bar',
+      data: domNode.textContent || '{}'
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

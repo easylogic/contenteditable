@@ -1,0 +1,750 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'schema-definition', text: '스키마 정의' },
+  { depth: 3, slug: 'node-specs', text: '노드 스펙' },
+  { depth: 3, slug: 'mark-specs', text: '마크 스펙' },
+  { depth: 3, slug: 'content-rules', text: '콘텐츠 규칙' },
+  { depth: 2, slug: 'node-types', text: '노드 타입' },
+  { depth: 3, slug: 'block-nodes', text: '블록 노드' },
+  { depth: 3, slug: 'inline-nodes', text: '인라인 노드' },
+  { depth: 3, slug: 'text-nodes', text: '텍스트 노드' },
+  { depth: 2, slug: 'document-structure', text: '문서 구조' },
+  { depth: 3, slug: 'hierarchical-structure', text: '계층적 구조' },
+  { depth: 3, slug: 'nesting-rules', text: '중첩 규칙' },
+  { depth: 2, slug: 'mark-system', text: '마크 시스템' },
+  { depth: 3, slug: 'mark-types', text: '마크 타입' },
+  { depth: 3, slug: 'mark-attributes', text: '마크 속성' },
+  { depth: 3, slug: 'mark-exclusivity', text: '마크 배타성' },
+  { depth: 2, slug: 'validation', text: '스키마 검증' },
+  { depth: 3, slug: 'structure-validation', text: '구조 검증' },
+  { depth: 3, slug: 'content-validation', text: '콘텐츠 검증' },
+  { depth: 2, slug: 'html-mapping', text: 'HTML 매핑' },
+  { depth: 3, slug: 'model-to-html', text: '모델에서 HTML로' },
+  { depth: 3, slug: 'html-to-model', text: 'HTML에서 모델로' },
+  { depth: 3, slug: 'normalization', text: 'HTML 정규화' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="모델 & 스키마 – contenteditable.lab"
+      description="문서 모델과 스키마 설계: 노드 타입, 문서 구조, 마크 시스템, HTML 매핑"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">모델 & 스키마</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              모델 & 스키마
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              문서 모델과 스키마 설계: 노드 타입, 문서 구조, 마크 시스템, 검증, HTML 매핑.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <section id="overview" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                개요
+              </h2>
+              <p class="m-0 mb-4">
+                스키마는 문서 구조가 포함할 수 있는 것을 정의합니다. 모델과 이를 수정하는 작업 사이의 계약입니다. 잘 설계된 스키마는 문서가 항상 유효하고 예측 가능하도록 보장합니다.
+              </p>
+              <p class="m-0 mb-4">
+                모델은 스키마를 준수하는 실제 문서 인스턴스입니다. 구조화되고 검증된 형식으로 문서의 현재 상태를 나타냅니다.
+              </p>
+            </section>
+
+            <section id="schema-definition" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                스키마 정의
+              </h2>
+              <p class="m-0 mb-4">
+                스키마는 문서의 구조와 규칙을 정의합니다:
+              </p>
+
+              <section id="node-specs" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">노드 스펙</h3>
+                <p class="m-0 mb-3">
+                  각 노드 타입은 해당 속성을 정의하는 스펙을 가집니다:
+                </p>
+                <DocCodeBlock code={`const schema = {
+  nodes: {
+    document: {
+      content: 'block+',  // 하나 이상의 블록을 포함해야 함
+    },
+    paragraph: {
+      content: 'inline*',  // 0개 이상의 인라인을 포함할 수 있음
+      group: 'block',      // 블록 그룹에 속함
+    },
+    heading: {
+      content: 'inline*',
+      group: 'block',
+      attrs: {
+        level: { default: 1 }  // 기본값이 있는 속성
+      }
+    },
+    text: {
+      group: 'inline',
+      // 텍스트 노드는 자식을 가지지 않음
+    },
+    link: {
+      content: 'inline*',
+      group: 'inline',
+      attrs: {
+        href: { default: '' }
+      }
+    }
+  }
+};`} />
+              </section>
+
+              <section id="mark-specs" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">마크 스펙</h3>
+                <p class="m-0 mb-3">
+                  마크는 텍스트에 적용할 수 있는 포맷팅을 정의합니다:
+                </p>
+                <DocCodeBlock code={`const schema = {
+  marks: {
+    bold: {
+      // 속성이 없는 단순 마크
+    },
+    italic: {},
+    underline: {},
+    link: {
+      attrs: {
+        href: { default: '' },
+        title: { default: '' }
+      }
+    },
+    code: {
+      // 코드 마크는 다른 마크를 배제할 수 있음
+      excludes: 'bold italic underline'
+    }
+  }
+};`} />
+              </section>
+
+              <section id="content-rules" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">콘텐츠 규칙</h3>
+                <p class="m-0 mb-3">
+                  콘텐츠 규칙은 각 노드 내부에 중첩될 수 있는 것을 정의합니다:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'block+'</code> - 하나 이상의 블록</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'block*'</code> - 0개 이상의 블록</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'inline*'</code> - 0개 이상의 인라인</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'paragraph | heading'</code> - 단락 또는 제목</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'(paragraph | heading)+'</code> - 하나 이상의 단락 또는 제목</li>
+                </ul>
+                <DocCodeBlock code={`// 콘텐츠 규칙 예제
+{
+  document: {
+    content: 'block+'  // 문서는 최소 하나의 블록을 가져야 함
+  },
+  paragraph: {
+    content: 'inline*'  // 단락은 모든 인라인을 가질 수 있음
+  },
+  list: {
+    content: 'listItem+',  // 목록은 최소 하나의 항목을 가져야 함
+    group: 'block'
+  },
+  listItem: {
+    content: 'paragraph block*',  // 항목은 단락으로 시작하고, 그 다음 선택적 블록
+    group: 'block'
+  }
+}`} />
+              </section>
+            </section>
+
+            <section id="node-types" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                노드 타입
+              </h2>
+
+              <section id="block-nodes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">블록 노드</h3>
+                <p class="m-0 mb-3">
+                  블록 노드는 일반적으로 새 줄에서 시작하는 구조적 요소입니다:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>단락</li>
+                  <li>제목 (h1-h6)</li>
+                  <li>목록 (순서 있는, 순서 없는)</li>
+                  <li>코드 블록</li>
+                  <li>인용구</li>
+                  <li>테이블</li>
+                </ul>
+                <DocCodeBlock code={`// 블록 노드 예제
+{
+  type: 'paragraph',
+  children: [
+    { type: 'text', text: '이것은 단락입니다.' }
+  ]
+}
+
+{
+  type: 'heading',
+  level: 2,
+  children: [
+    { type: 'text', text: '제목' }
+  ]
+}
+
+{
+  type: 'codeBlock',
+  language: 'javascript',
+  children: [
+    { type: 'text', text: 'const x = 1;' }
+  ]
+}`} />
+              </section>
+
+              <section id="inline-nodes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">인라인 노드</h3>
+                <p class="m-0 mb-3">
+                  인라인 노드는 블록 내부에 존재하며 줄을 끊지 않습니다:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>링크</li>
+                  <li>이미지</li>
+                  <li>멘션</li>
+                  <li>사용자 정의 인라인 요소</li>
+                </ul>
+                <DocCodeBlock code={`// 인라인 노드 예제
+{
+  type: 'link',
+  attrs: { href: 'https://example.com' },
+  children: [
+    { type: 'text', text: '예제' }
+  ]
+}
+
+{
+  type: 'image',
+  attrs: {
+    src: 'image.jpg',
+    alt: '설명'
+  }
+  // 이미지는 일반적으로 자식을 가지지 않음
+}`} />
+              </section>
+
+              <section id="text-nodes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">텍스트 노드</h3>
+                <p class="m-0 mb-3">
+                  텍스트 노드는 실제 텍스트 콘텐츠를 포함하며 마크를 가질 수 있습니다:
+                </p>
+                <DocCodeBlock code={`// 마크가 있는 텍스트 노드
+{
+  type: 'text',
+  text: '볼드와 이탤릭',
+  marks: [
+    { type: 'bold' },
+    { type: 'italic' }
+  ]
+}
+
+// 일반 텍스트 노드
+{
+  type: 'text',
+  text: '일반 텍스트',
+  marks: []
+}`} />
+              </section>
+            </section>
+
+            <section id="document-structure" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                문서 구조
+              </h2>
+
+              <section id="hierarchical-structure" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">계층적 구조</h3>
+                <p class="m-0 mb-3">
+                  문서는 루트 문서 노드를 가진 트리입니다:
+                </p>
+                <DocCodeBlock code={`// 완전한 문서 구조
+{
+  type: 'document',
+  children: [
+    {
+      type: 'heading',
+      level: 1,
+      children: [
+        { type: 'text', text: '제목' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '첫 번째 단락.' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '두 번째 ' },
+        { type: 'text', text: '단락', marks: [{ type: 'bold' }] },
+        { type: 'text', text: '.' }
+      ]
+    }
+  ]
+}`} />
+              </section>
+
+              <section id="nesting-rules" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">중첩 규칙</h3>
+                <p class="m-0 mb-3">
+                  스키마는 유효하지 않은 구조를 방지하기 위해 중첩 규칙을 강제합니다:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>블록은 인라인 내부에 중첩될 수 없음</li>
+                  <li>텍스트 노드는 인라인 또는 블록 내부에만 존재할 수 있음</li>
+                  <li>일부 노드는 특정 콘텐츠 요구사항을 가짐</li>
+                </ul>
+                <DocCodeBlock code={`// 유효한 구조
+{
+  type: 'paragraph',
+  children: [
+    { type: 'text', text: '텍스트' }
+  ]
+}
+
+// 유효하지 않은 구조 (인라인 내부의 블록)
+{
+  type: 'link',
+  children: [
+    {
+      type: 'paragraph',  // ❌ 유효하지 않음: 인라인 내부의 블록
+      children: [...]
+    }
+  ]
+}
+
+// 유효함: 블록 내부의 인라인
+{
+  type: 'paragraph',
+  children: [
+    {
+      type: 'link',  // ✅ 유효함: 블록 내부의 인라인
+      children: [
+        { type: 'text', text: '링크' }
+      ]
+    }
+  ]
+}`} />
+              </section>
+            </section>
+
+            <section id="mark-system" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                마크 시스템
+              </h2>
+
+              <section id="mark-types" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">마크 타입</h3>
+                <p class="m-0 mb-3">
+                  마크는 텍스트 노드에 적용되는 포맷팅입니다:
+                </p>
+                <DocCodeBlock code={`// 단일 마크가 있는 텍스트
+{
+  type: 'text',
+  text: '볼드 텍스트',
+  marks: [{ type: 'bold' }]
+}
+
+// 여러 마크가 있는 텍스트
+{
+  type: 'text',
+  text: '볼드와 이탤릭',
+  marks: [
+    { type: 'bold' },
+    { type: 'italic' }
+  ]
+}
+
+// 속성이 있는 마크가 있는 텍스트
+{
+  type: 'text',
+  text: '링크 텍스트',
+  marks: [
+    {
+      type: 'link',
+      attrs: { href: 'https://example.com' }
+    }
+  ]
+}`} />
+              </section>
+
+              <section id="mark-attributes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">마크 속성</h3>
+                <p class="m-0 mb-3">
+                  일부 마크는 속성을 가집니다:
+                </p>
+                <DocCodeBlock code={`// 속성이 있는 링크 마크
+{
+  type: 'text',
+  text: '예제',
+  marks: [
+    {
+      type: 'link',
+      attrs: {
+        href: 'https://example.com',
+        title: '예제 웹사이트'
+      }
+    }
+  ]
+}
+
+// 속성이 있는 색상 마크
+{
+  type: 'text',
+  text: '빨간 텍스트',
+  marks: [
+    {
+      type: 'color',
+      attrs: { color: '#ff0000' }
+    }
+  ]
+}`} />
+              </section>
+
+              <section id="mark-exclusivity" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">마크 배타성</h3>
+                <p class="m-0 mb-3">
+                  일부 마크는 다른 마크를 배제합니다 (예: 코드 마크는 포맷팅을 배제):
+                </p>
+                <DocCodeBlock code={`const schema = {
+  marks: {
+    code: {
+      excludes: 'bold italic underline link'  // 코드는 다른 마크를 가질 수 없음
+    },
+    link: {
+      // 링크는 볼드, 이탤릭 등과 공존할 수 있음
+    }
+  }
+};
+
+// 유효함: 볼드와 이탤릭 함께
+{
+  type: 'text',
+  text: '볼드 이탤릭',
+  marks: [{ type: 'bold' }, { type: 'italic' }]
+}
+
+// 유효하지 않음: 코드와 볼드
+{
+  type: 'text',
+  text: '코드 볼드',
+  marks: [
+    { type: 'code' },
+    { type: 'bold' }  // ❌ 코드는 볼드를 배제함
+  ]
+}`} />
+              </section>
+            </section>
+
+            <section id="validation" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                스키마 검증
+              </h2>
+
+              <section id="structure-validation" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">구조 검증</h3>
+                <p class="m-0 mb-3">
+                  문서 구조가 스키마와 일치하는지 검증합니다:
+                </p>
+                <DocCodeBlock code={`function validateDocument(doc, schema) {
+  // 루트 노드 타입 확인
+  if (doc.type !== schema.topNode) {
+    return { valid: false, error: '유효하지 않은 루트 노드' };
+  }
+  
+  // 각 자식 검증
+  for (const child of doc.children) {
+    const result = validateNode(child, schema);
+    if (!result.valid) {
+      return result;
+    }
+  }
+  
+  return { valid: true };
+}
+
+function validateNode(node, schema) {
+  const spec = schema.nodes[node.type];
+  if (!spec) {
+    return { valid: false, error: '알 수 없는 노드 타입: ' + node.type };
+  }
+  
+  // 콘텐츠가 스펙과 일치하는지 검증
+  if (!matchesContentRule(node.children, spec.content)) {
+    return { valid: false, error: '콘텐츠가 스펙과 일치하지 않음' };
+  }
+  
+  // 속성 검증
+  if (!validateAttributes(node.attrs, spec.attrs)) {
+    return { valid: false, error: '유효하지 않은 속성' };
+  }
+  
+  // 재귀적으로 자식 검증
+  for (const child of node.children) {
+    const result = validateNode(child, schema);
+    if (!result.valid) {
+      return result;
+    }
+  }
+  
+  return { valid: true };
+}`} />
+              </section>
+
+              <section id="content-validation" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">콘텐츠 검증</h3>
+                <p class="m-0 mb-3">
+                  노드 콘텐츠가 콘텐츠 규칙과 일치하는지 검증합니다:
+                </p>
+                <DocCodeBlock code={`function matchesContentRule(children, rule) {
+  // 콘텐츠 규칙 파싱 (예: 'block+', 'inline*')
+  const parsed = parseContentRule(rule);
+  
+  // 자식이 일치하는지 확인
+  if (parsed.type === 'group') {
+    // 모든 자식이 그룹에 속하는지 확인
+    return children.every(child => 
+      isInGroup(child, parsed.group)
+    );
+  }
+  
+  // 다른 규칙 타입 처리...
+  return true;
+}
+
+function isInGroup(node, group) {
+  const spec = schema.nodes[node.type];
+  return spec?.group === group;
+}`} />
+              </section>
+            </section>
+
+            <section id="html-mapping" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                HTML 매핑
+              </h2>
+              <p class="m-0 mb-4">
+                모델과 HTML 간의 매핑은 렌더링과 파싱에 필수적입니다:
+              </p>
+
+              <section id="model-to-html" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">모델에서 HTML로</h3>
+                <p class="m-0 mb-3">
+                  모델을 HTML로 직렬화합니다:
+                </p>
+                <DocCodeBlock code={`function serializeNode(node) {
+  switch (node.type) {
+    case 'document':
+      return serializeChildren(node.children);
+      
+    case 'paragraph':
+      return '<p>' + serializeChildren(node.children) + '</p>';
+      
+    case 'heading':
+      return '<h' + node.level + '>' + serializeChildren(node.children) + '</h' + node.level + '>';
+      
+    case 'text':
+      let html = escapeHtml(node.text);
+      // 마크 적용
+      if (node.marks) {
+        node.marks.forEach(mark => {
+          html = wrapWithMark(html, mark);
+        });
+      }
+      return html;
+      
+    case 'link':
+      const href = node.attrs?.href || '';
+      return '<a href="' + escapeHtml(href) + '">' + serializeChildren(node.children) + '</a>';
+      
+    default:
+      return serializeChildren(node.children);
+  }
+}
+
+function wrapWithMark(html, mark) {
+  const tagMap = {
+    bold: 'strong',
+    italic: 'em',
+    underline: 'u',
+    code: 'code'
+  };
+  
+  const tag = tagMap[mark.type];
+  if (!tag) return html;
+  
+  const attrs = mark.attrs ? serializeAttrs(mark.attrs) : '';
+  return '<' + tag + attrs + '>' + html + '</' + tag + '>';
+}`} />
+              </section>
+
+              <section id="html-to-model" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">HTML에서 모델로</h3>
+                <p class="m-0 mb-3">
+                  HTML을 모델로 파싱합니다:
+                </p>
+                <DocCodeBlock code={`function parseHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  return {
+    type: 'document',
+    children: Array.from(doc.body.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean)
+  };
+}
+
+function parseNode(domNode) {
+  if (domNode.nodeType === Node.TEXT_NODE) {
+    return {
+      type: 'text',
+      text: domNode.textContent,
+      marks: extractMarks(domNode)
+    };
+  }
+  
+  if (domNode.nodeType === Node.ELEMENT_NODE) {
+    const nodeType = getNodeType(domNode.tagName);
+    if (!nodeType) {
+      // 알 수 없는 요소, 언래핑하고 자식 파싱
+      return parseChildren(domNode.childNodes);
+    }
+    
+    return {
+      type: nodeType,
+      attrs: extractAttributes(domNode, nodeType),
+      children: parseChildren(domNode.childNodes)
+    };
+  }
+  
+  return null;
+}
+
+function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) {
+      marks.push(mark);
+    }
+    current = current.parentElement;
+  }
+  
+  return marks;
+}`} />
+              </section>
+
+              <section id="normalization" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">HTML 정규화</h3>
+                <p class="m-0 mb-3">
+                  일관성 없는 HTML을 스키마에 맞게 정규화합니다:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;b&gt;</code>를 <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;</code>로 변환</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;i&gt;</code>를 <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;em&gt;</code>로 변환</li>
+                  <li>적절한 경우 <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;div&gt;</code>를 <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;p&gt;</code>로 변환</li>
+                  <li>유효하지 않은 속성 제거</li>
+                  <li>중첩 위반 수정</li>
+                </ul>
+                <DocCodeBlock code={`function normalizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  // 요소 정규화
+  normalizeElements(doc.body);
+  
+  // 중첩 수정
+  fixNesting(doc.body);
+  
+  // 유효하지 않은 속성 제거
+  removeInvalidAttributes(doc.body);
+  
+  return doc.body.innerHTML;
+}
+
+function normalizeElements(element) {
+  // b를 strong으로 변환
+  element.querySelectorAll('b').forEach(b => {
+    const strong = document.createElement('strong');
+    strong.innerHTML = b.innerHTML;
+    b.parentNode.replaceChild(strong, b);
+  });
+  
+  // i를 em으로 변환
+  element.querySelectorAll('i').forEach(i => {
+    const em = document.createElement('em');
+    em.innerHTML = i.innerHTML;
+    i.parentNode.replaceChild(em, i);
+  });
+  
+  // div를 p로 변환 (적절한 경우)
+  element.querySelectorAll('div').forEach(div => {
+    if (!div.querySelector('p, ul, ol, h1, h2, h3, h4, h5, h6')) {
+      const p = document.createElement('p');
+      p.innerHTML = div.innerHTML;
+      div.parentNode.replaceChild(p, div);
+    }
+  });
+}`} />
+              </section>
+            </section>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>
+

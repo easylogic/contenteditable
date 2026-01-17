@@ -1,0 +1,218 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Table Cell Node Type – contenteditable.lab"
+      description="Detailed guide for Table Cell node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Table Cell</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Table Cell Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Structural • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Table Cell</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  tableCell: {
+    content: 'block+',
+    tableRole: 'cell',
+    isolating: true,
+    attrs: {
+      colspan: { default: 1 },
+      rowspan: { default: 1 }
+    },
+                      node.attrs.rowspan > 1 ? { rowspan: node.attrs.rowspan } : {}, 0]
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'tableCell',
+  attrs: { colspan: 1, rowspan: 1 },
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Cell content' }]
+    }
+  ]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeTableCell(node) {
+  const attrs = {};
+  if (node.attrs.colspan > 1) attrs.colspan = node.attrs.colspan;
+  if (node.attrs.rowspan > 1) attrs.rowspan = node.attrs.rowspan;
+  return '<td' + serializeAttrs(attrs) + '>' + 
+         serializeChildren(node.children) + '</td>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseTableCell(domNode) {
+  return {
+    type: 'tableCell',
+    attrs: {
+      colspan: parseInt(domNode.getAttribute('colspan')) || 1,
+      rowspan: parseInt(domNode.getAttribute('rowspan')) || 1
+    },
+    children: Array.from(domNode.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean)
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering table cell
+const td = document.createElement('td');
+td.contentEditable = 'true';
+if (node.attrs.colspan > 1) td.colSpan = node.attrs.colspan;
+if (node.attrs.rowspan > 1) td.rowSpan = node.attrs.rowspan;
+node.children.forEach(child => {
+  td.appendChild(renderNode(child));
+});
+
+// Handling Enter in table cell
+function handleEnterInTableCell(e) {
+  e.preventDefault();
+  // Create new paragraph in cell
+  const p = document.createElement('p');
+  insertNode({ type: 'paragraph', children: [] });
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Empty cells
+// Solution: Ensure at least one block
+function validateTableCell(cell) {
+  if (!cell.querySelector('p, ul, ol, h1, h2, h3, h4, h5, h6')) {
+    const p = document.createElement('p');
+    cell.appendChild(p);
+  }
+}
+
+// Issue: Cell selection
+// Solution: Handle cell selection
+function selectCell(td) {
+  const range = document.createRange();
+  range.selectNodeContents(td);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+// Issue: Colspan/rowspan validation
+// Solution: Validate span attributes
+function validateCellSpan(cell, table) {
+  // Ensure colspan/rowspan don't exceed table dimensions
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class TableCellNode {
+  constructor(attrs, children) {
+    this.type = 'tableCell';
+    this.attrs = {
+      colspan: attrs?.colspan || 1,
+      rowspan: attrs?.rowspan || 1
+    };
+    this.children = children || [];
+  }
+  
+  toDOM() {
+    const td = document.createElement('td');
+    if (this.attrs.colspan > 1) td.colSpan = this.attrs.colspan;
+    if (this.attrs.rowspan > 1) td.rowSpan = this.attrs.rowspan;
+    this.children.forEach(child => {
+      td.appendChild(child.toDOM());
+    });
+    return td;
+  }
+  
+  static fromDOM(domNode) {
+    return new TableCellNode(
+      {
+        colspan: parseInt(domNode.getAttribute('colspan')) || 1,
+        rowspan: parseInt(domNode.getAttribute('rowspan')) || 1
+      },
+      Array.from(domNode.childNodes)
+        .map(node => parseNode(node))
+        .filter(Boolean)
+    );
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

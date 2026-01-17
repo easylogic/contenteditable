@@ -1,0 +1,218 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'schema', text: '스키마 정의' },
+  { depth: 2, slug: 'model', text: '모델 표현' },
+  { depth: 2, slug: 'serialization', text: 'HTML 직렬화' },
+  { depth: 2, slug: 'deserialization', text: 'HTML 역직렬화' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="글꼴 패밀리 노드 타입 – contenteditable.lab"
+      description="글꼴 패밀리 노드 타입에 대한 상세 가이드: 스키마, 모델, HTML 매핑, 뷰 연동, 일반적인 문제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema')} class="text-text-muted no-underline">모델/스키마</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/model-schema/node-types')} class="text-text-muted no-underline">노드 타입</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">글꼴 패밀리</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              글꼴 패밀리 노드 타입
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              카테고리: 포맷팅 • 뷰 연동 노트를 포함한 상세 구현 가이드
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="스키마 정의">
+              <p class="m-0 mb-3">
+                <strong>글꼴 패밀리</strong> 마크 타입의 스키마 정의:
+              </p>
+              <DocCodeBlock code={`{
+  fontFamily: {
+    attrs: {
+      family: { default: 'Arial' }
+    },
+      style: 'font-family: ' + node.attrs.family 
+    }, 0]
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="모델 표현">
+              <p class="m-0 mb-3">
+                모델 표현 예제:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'text',
+  text: '고정폭 텍스트',
+  marks: [{
+    type: 'fontFamily',
+    attrs: { family: 'monospace' }
+  }]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML 직렬화">
+              <p class="m-0 mb-3">
+                모델을 HTML로 변환:
+              </p>
+              <DocCodeBlock code={`function serializeFontFamilyMark(text, mark) {
+  const family = mark.attrs?.family || 'Arial';
+  return '<span style="font-family: ' + escapeHtml(family) + '">' + 
+         text + '</span>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML 역직렬화">
+              <p class="m-0 mb-3">
+                HTML을 모델로 파싱:
+              </p>
+              <DocCodeBlock code={`function extractFontFamilyMark(element) {
+  if (element.tagName === 'SPAN' && element.style.fontFamily) {
+    const family = extractFontFamily(element.style.fontFamily);
+    return {
+      type: 'fontFamily',
+      attrs: { family }
+    };
+  }
+  return null;
+}
+
+function extractFontFamily(fontFamilyString) {
+  // font-family 문자열에서 첫 번째 글꼴 추출
+  // 예: "Arial, sans-serif" -> "Arial"
+  return fontFamilyString.split(',')[0].trim().replace(/['"]/g, '');
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <DocAlert type="info">
+                <strong>뷰 연동 노트:</strong> 이 노드 타입을 뷰 레이어에서 구현할 때 contenteditable 동작, 선택 처리, 이벤트 관리에 특히 주의하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                뷰 연동 코드:
+              </p>
+              <DocCodeBlock code={`// 글꼴 패밀리 설정
+function setFontFamily(family) {
+  addMark({
+    type: 'fontFamily',
+    attrs: { family }
+  });
+}
+
+// 글꼴 패밀리 선택기
+function showFontFamilyPicker() {
+  const families = ['Arial', 'Times New Roman', 'Courier New', 'monospace'];
+  // 글꼴 선택기 표시
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <DocAlert type="warning">
+                <strong>일반적인 함정:</strong> 이 노드 타입을 구현할 때 자주 발생하는 문제들입니다. 구현 전에 주의 깊게 검토하세요.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                일반적인 문제 및 해결 방법:
+              </p>
+              <DocCodeBlock code={`// 문제: 따옴표가 있는 글꼴 패밀리
+// 해결: 따옴표가 있는 글꼴 이름 처리
+function normalizeFontFamily(family) {
+  return family.replace(/['"]/g, '');
+}
+
+// 문제: 글꼴 폴백 체인
+// 해결: 폴백 체인에서 기본 글꼴 추출
+function extractPrimaryFont(fontFamily) {
+  return fontFamily.split(',')[0].trim();
+}
+
+// 문제: 웹 안전 글꼴
+// 해결: 글꼴 가용성 검증
+function validateFontFamily(family) {
+  const webSafeFonts = [
+    'Arial', 'Times New Roman', 'Courier New', 
+    'Verdana', 'Georgia', 'Palatino'
+  ];
+  return webSafeFonts.includes(family) || family === 'monospace';
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-3">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock code={`class FontFamilyMark {
+  constructor(attrs) {
+    this.type = 'fontFamily';
+    this.attrs = { family: attrs?.family || 'Arial' };
+  }
+  
+  toDOM() {
+    return ['span', { 
+      style: 'font-family: ' + this.attrs.family 
+    }, 0];
+  }
+  
+  static fromDOM(element) {
+    if (element.tagName === 'SPAN' && element.style.fontFamily) {
+      return new FontFamilyMark({ 
+        family: extractFontFamily(element.style.fontFamily) 
+      });
+    }
+    return null;
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

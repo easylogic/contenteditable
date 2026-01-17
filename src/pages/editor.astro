@@ -1,0 +1,233 @@
+---
+import SiteNav from '../components/SiteNav.astro';
+import BaseHead from '../components/BaseHead.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import '../styles/global.css';
+
+// Define headings for TOC
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'core-concepts', text: 'Core Concepts' },
+  { depth: 2, slug: 'detailed-guides', text: 'Detailed Guides' },
+  { depth: 2, slug: 'getting-started', text: 'Getting Started' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Building a Rich Text Editor – contenteditable.lab"
+      description="Architecture and core concepts for building a rich text editor: model-view separation, schema design, position management, and HTML mapping"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Editor</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Building a Rich Text Editor
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Architecture, core concepts, and technologies needed to build a robust rich text editor. Understanding model-view separation, schema design, and position management.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <section id="overview" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Overview
+              </h2>
+              <p class="m-0 mb-4">
+                Building a rich text editor is more than just working with contenteditable. It requires understanding document models, schema design, position management, and the separation between your internal data model and the DOM representation.
+              </p>
+              <p class="m-0 mb-4">
+                Modern editors like <strong>ProseMirror</strong>, <strong>Slate</strong>, and <strong>Lexical</strong> all follow similar architectural patterns that separate concerns and make editors maintainable and extensible.
+              </p>
+              <div class="my-6 p-4 bg-blue-100 dark:bg-blue-900/20 border border-blue-500 dark:border-blue-700 rounded-lg">
+                <h3 class="text-lg m-0 mb-3 text-blue-800 dark:text-blue-200 font-semibold">
+                  Key Principle: Model-View Separation
+                </h3>
+                <p class="m-0 mb-3 text-blue-900 dark:text-blue-100">
+                  The fundamental principle is separating the <strong>document model</strong> (your internal representation) from the <strong>view</strong> (the DOM). The model is your source of truth, and the view is just a projection.
+                </p>
+                <ul class="m-0 pl-6 text-blue-900 dark:text-blue-100">
+                  <li>Model: Abstract, schema-validated, framework-agnostic</li>
+                  <li>View: HTML representation, handles user input, browser-specific</li>
+                </ul>
+              </div>
+            </section>
+
+            <section id="core-concepts" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Core Concepts
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">Document Model</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Your internal representation of the document. Tree structure with nodes (blocks, inlines, text) and marks (formatting).
+                  </p>
+                  <a href="/editor/architecture" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                </div>
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">Schema</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Defines what your document can contain: node types, content rules, attributes, and marks.
+                  </p>
+                  <a href="/editor/model-schema" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                </div>
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">Position Management</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Representing positions in your model using paths (array of indices) instead of DOM references.
+                  </p>
+                  <a href="/editor/position-selection" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                </div>
+                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">HTML Mapping</h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Converting between your model and HTML: serialization (model → HTML) and deserialization (HTML → model).
+                  </p>
+                  <a href="/editor/html-mapping" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                </div>
+              </div>
+            </section>
+
+            <section id="detailed-guides" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Detailed Guides
+              </h2>
+              <div class="space-y-4">
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/architecture" class="text-accent-primary hover:underline">Editor Architecture</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Model-view separation, document model structure, view layer responsibilities, and how they work together.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Why separate model and view</li>
+                    <li>Document model structure</li>
+                    <li>View layer responsibilities</li>
+                    <li>State management patterns</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/model-schema" class="text-accent-primary hover:underline">Model & Schema</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Designing your document model and schema: node types, document structure, mark system, and validation.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Schema definition and validation</li>
+                    <li>Node type design</li>
+                    <li>Document structure patterns</li>
+                    <li>Mark system implementation</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/position-selection" class="text-accent-primary hover:underline">Position & Selection Management</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Managing positions and selections in your model: path-based positions, selection representation, and DOM conversion.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Path-based position representation</li>
+                    <li>Model selection structure</li>
+                    <li>DOM to model conversion</li>
+                    <li>Model to DOM conversion</li>
+                    <li>Selection normalization</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/html-mapping" class="text-accent-primary hover:underline">HTML Mapping</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Converting between your model and HTML: serialization, deserialization, and incremental updates.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Model to HTML serialization</li>
+                    <li>HTML to model deserialization</li>
+                    <li>Handling edge cases</li>
+                    <li>Incremental DOM updates</li>
+                    <li>Preserving marks and attributes</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <section id="getting-started" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Getting Started
+              </h2>
+              <p class="m-0 mb-4">
+                Recommended learning path:
+              </p>
+              <ol class="m-0 mb-4 pl-6">
+                <li class="mb-3">
+                  <strong>Start with Architecture:</strong> Understand model-view separation and why it's important
+                  <br>
+                  <a href="/editor/architecture" class="text-accent-primary hover:underline text-sm">→ Read Editor Architecture</a>
+                </li>
+                <li class="mb-3">
+                  <strong>Learn Model & Schema:</strong> Design your document structure and validation rules
+                  <br>
+                  <a href="/editor/model-schema" class="text-accent-primary hover:underline text-sm">→ Read Model & Schema</a>
+                </li>
+                <li class="mb-3">
+                  <strong>Master Position & Selection:</strong> Understand how to represent and manage positions in your model
+                  <br>
+                  <a href="/editor/position-selection" class="text-accent-primary hover:underline text-sm">→ Read Position & Selection</a>
+                </li>
+                <li class="mb-3">
+                  <strong>Implement HTML Mapping:</strong> Build serialization and deserialization between model and HTML
+                  <br>
+                  <a href="/editor/html-mapping" class="text-accent-primary hover:underline text-sm">→ Read HTML Mapping</a>
+                </li>
+                <li class="mb-3">
+                  <strong>Add contenteditable APIs:</strong> Use Selection API, Range API, and events in your view layer
+                  <br>
+                  <a href="/docs" class="text-accent-primary hover:underline text-sm">→ Browse Documentation</a>
+                </li>
+              </ol>
+            </section>
+
+            <section class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Related Resources
+              </h2>
+              <ul class="m-0 pl-6">
+                <li class="mb-2">
+                  <a href="/docs/practical-patterns" class="text-accent-primary hover:underline">Practical Patterns</a> - Code examples for common patterns
+                </li>
+                <li class="mb-2">
+                  <a href="/tips" class="text-accent-primary hover:underline">Tips</a> - Framework integration and best practices
+                </li>
+                <li class="mb-2">
+                  <a href="/docs/selection-api" class="text-accent-primary hover:underline">Selection API</a> - Working with browser selections
+                </li>
+                <li class="mb-2">
+                  <a href="/docs/range-api" class="text-accent-primary hover:underline">Range API</a> - Manipulating DOM ranges
+                </li>
+              </ul>
+            </section>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

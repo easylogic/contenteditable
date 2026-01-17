@@ -1,0 +1,187 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Math Node Type – contenteditable.lab"
+      description="Detailed guide for Math node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Math</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Math Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Custom • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Math</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  math: {
+    group: 'block',
+    attrs: {
+      formula: { default: '' },
+      display: { default: false }
+    },
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'math',
+  attrs: {
+    formula: 'E = mc^2',
+    display: true
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeMath(node) {
+  return '<div data-type="math" data-display="' + node.attrs.display + '">' + 
+         escapeHtml(node.attrs.formula) + '</div>';
+}`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseMath(domNode) {
+  return {
+    type: 'math',
+    attrs: {
+      formula: domNode.textContent || '',
+      display: domNode.getAttribute('data-display') === 'true'
+    }
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering math
+const math = document.createElement('div');
+math.setAttribute('data-type', 'math');
+math.setAttribute('data-display', node.attrs.display);
+math.textContent = node.attrs.formula;
+math.contentEditable = 'false'; // Math is typically rendered, not edited directly
+
+// Render with MathJax or KaTeX
+function renderMath(element) {
+  if (window.MathJax) {
+    MathJax.typesetPromise([element]);
+  } else if (window.katex) {
+    katex.render(element.textContent, element, { displayMode: element.getAttribute('data-display') === 'true' });
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Math rendering library
+// Solution: Use MathJax or KaTeX
+function initMathRenderer() {
+  if (window.MathJax) {
+    MathJax.startup.defaultReady();
+  }
+}
+
+// Issue: Math formula validation
+// Solution: Validate LaTeX syntax
+function validateMathFormula(formula) {
+  // Basic validation or use a LaTeX parser
+  return formula.length > 0;
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class MathNode {
+  constructor(attrs) {
+    this.type = 'math';
+    this.attrs = {
+      formula: attrs?.formula || '',
+      display: attrs?.display || false
+    };
+  }
+  
+  toDOM() {
+    const math = document.createElement('div');
+    math.setAttribute('data-type', 'math');
+    math.setAttribute('data-display', this.attrs.display);
+    math.textContent = this.attrs.formula;
+    return math;
+  }
+  
+  static fromDOM(domNode) {
+    return new MathNode({
+      formula: domNode.textContent || '',
+      display: domNode.getAttribute('data-display') === 'true'
+    });
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

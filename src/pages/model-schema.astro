@@ -1,0 +1,992 @@
+---
+import SiteNav from '../components/SiteNav.astro';
+import BaseHead from '../components/BaseHead.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import DocCodeBlock from '../components/docs/DocCodeBlock.astro';
+import DocSection from '../components/docs/DocSection.astro';
+import '../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'model-schema-relationship', text: 'Model & Schema Relationship' },
+  { depth: 2, slug: 'data-transformation', text: 'Data Transformation' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'collaborative-editing', text: 'Collaborative Editing' },
+  { depth: 2, slug: 'node-types', text: 'Node Types' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Model & Schema – contenteditable.lab"
+      description="Understanding the relationship between Model and Schema, data transformation, view integration, collaborative editing, and comprehensive node type examples"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Model/Schema</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Model & Schema
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Deep dive into the relationship between Model and Schema, data transformation, view integration, collaborative editing, and comprehensive node type examples from basic to complex custom schemas.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The Model represents the actual document data, while the Schema defines what structures are valid. Understanding their relationship is crucial for building robust editors that can transform data, integrate with views, and support collaborative editing.
+              </p>
+              <p class="m-0 mb-4">
+                This guide covers the fundamental concepts and provides 50+ node type examples ranging from basic text nodes to complex custom schemas like cards, tables, and interactive components.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-schema-relationship" title="Model & Schema Relationship">
+              <p class="m-0 mb-4">
+                The <strong>Schema</strong> is the contract that defines what your document can contain. It specifies:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li>What node types exist</li>
+                <li>What attributes each node can have</li>
+                <li>What content each node can contain</li>
+                <li>What marks can be applied</li>
+                <li>Validation rules and constraints</li>
+              </ul>
+              <p class="m-0 mb-4">
+                The <strong>Model</strong> is an instance of a document that conforms to the schema. It's the actual data structure representing the current state of the document.
+              </p>
+              <DocCodeBlock code={`// Schema defines the rules
+const schema = {
+  nodes: {
+    paragraph: {
+      content: 'inline*',
+      group: 'block'
+    },
+    heading: {
+      content: 'inline*',
+      group: 'block',
+      attrs: {
+        level: { default: 1 }
+      }
+    }
+  }
+};
+
+// Model is an instance conforming to the schema
+const model = {
+  type: 'document',
+  children: [
+    {
+      type: 'heading',
+      attrs: { level: 1 },
+      children: [
+        { type: 'text', text: 'Hello World' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'This is a paragraph.' }
+      ]
+    }
+  ]
+};`} />
+            </DocSection>
+
+            <DocSection id="data-transformation" title="Data Transformation">
+              <p class="m-0 mb-4">
+                Data transformation is the process of converting between different representations of your document:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Serialization</strong>: Model → JSON, HTML, Markdown, etc.</li>
+                <li><strong>Deserialization</strong>: JSON, HTML, Markdown → Model</li>
+                <li><strong>Migration</strong>: Updating model structure when schema changes</li>
+                <li><strong>Normalization</strong>: Ensuring model conforms to schema</li>
+              </ul>
+              <DocCodeBlock code={`// Serialize model to JSON
+function serializeToJSON(model) {
+  return JSON.stringify(model, null, 2);
+}
+
+// Deserialize JSON to model
+function deserializeFromJSON(json) {
+  const data = JSON.parse(json);
+  return normalizeModel(data); // Ensure it conforms to schema
+}
+
+// Normalize model to ensure schema compliance
+function normalizeModel(model) {
+  // Validate structure
+  // Fix invalid nesting
+  // Add missing required attributes
+  // Remove invalid attributes
+  return validatedModel;
+}
+
+// Migrate old model to new schema version
+function migrateModel(oldModel, oldSchema, newSchema) {
+  // Transform nodes that changed
+  // Update attributes
+  // Handle removed node types
+  return migratedModel;
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <p class="m-0 mb-4">
+                The view layer renders the model and handles user interactions. Integration requires:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Rendering</strong>: Converting model to DOM</li>
+                <li><strong>Input Handling</strong>: Converting DOM changes back to model updates</li>
+                <li><strong>Selection Mapping</strong>: Converting between DOM selection and model positions</li>
+                <li><strong>Change Detection</strong>: Detecting when model changes and updating view</li>
+              </ul>
+              <DocCodeBlock code={`// Render model to DOM
+function renderModel(model, container) {
+  container.innerHTML = '';
+  model.children.forEach(child => {
+    const element = renderNode(child);
+    container.appendChild(element);
+  });
+}
+
+function renderNode(node) {
+  switch (node.type) {
+    case 'paragraph':
+      const p = document.createElement('p');
+      node.children.forEach(child => {
+        p.appendChild(renderNode(child));
+      });
+      return p;
+    case 'text':
+      const text = document.createTextNode(node.text);
+      // Apply marks
+      if (node.marks && node.marks.length > 0) {
+        return wrapWithMarks(text, node.marks);
+      }
+      return text;
+    // ... other node types
+  }
+}
+
+// Handle DOM changes and update model
+function handleInput(domElement, model) {
+  // Convert DOM changes to model operations
+  const operations = diffDOMToModel(domElement, model);
+  operations.forEach(op => {
+    applyOperation(model, op);
+  });
+  return model;
+}
+
+// Map DOM selection to model position
+function getModelPosition(domSelection) {
+  const range = domSelection.getRangeAt(0);
+  const path = getPathFromDOMNode(range.startContainer);
+  return {
+    path: path,
+    offset: range.startOffset
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="collaborative-editing" title="Collaborative Editing">
+              <p class="m-0 mb-4">
+                Collaborative editing requires transforming operations to handle concurrent edits:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Operational Transformation (OT)</strong>: Transform operations to account for concurrent changes</li>
+                <li><strong>CRDTs</strong>: Conflict-free replicated data types for eventual consistency</li>
+                <li><strong>Position Mapping</strong>: Converting positions across different document versions</li>
+                <li><strong>Conflict Resolution</strong>: Handling when operations conflict</li>
+              </ul>
+              <DocCodeBlock code={`// Transform operation to account for concurrent changes
+function transformOperation(op1, op2) {
+  // If op1 and op2 don't conflict, return op1 as-is
+  if (!operationsConflict(op1, op2)) {
+    return op1;
+  }
+  
+  // Otherwise, transform op1 to account for op2
+  if (op1.type === 'insert' && op2.type === 'insert') {
+    // Both inserting at same position
+    if (op1.path === op2.path && op1.offset === op2.offset) {
+      // Move op1 after op2
+      return {
+        ...op1,
+        offset: op1.offset + op2.content.length
+      };
+    }
+  }
+  
+  // More complex transformations...
+  return transformedOp1;
+}
+
+// Apply operation to model
+function applyOperation(model, operation) {
+  switch (operation.type) {
+    case 'insert':
+      insertNode(model, operation.path, operation.node);
+      break;
+    case 'delete':
+      deleteNode(model, operation.path);
+      break;
+    case 'update':
+      updateNode(model, operation.path, operation.attrs);
+      break;
+  }
+  return model;
+}
+
+// Map position across document versions
+function mapPosition(position, operations) {
+  let mappedPosition = position;
+  operations.forEach(op => {
+    mappedPosition = transformPosition(mappedPosition, op);
+  });
+  return mappedPosition;
+}`} />
+            </DocSection>
+
+            <DocSection id="node-types" title="Node Types">
+              <p class="m-0 mb-4">
+                Comprehensive guide to 52+ node types with detailed implementation examples, view integration notes, and common pitfalls. Each node type has its own detailed page covering schema, model representation, HTML mapping, view integration, and common issues.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/model-schema/node-types" class="text-accent-primary hover:underline font-semibold">
+                  Browse all node types →
+                </a>
+              </p>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>
+                <DocCodeBlock code={`// 1. Document (root node)
+{
+  type: 'document',
+  children: [...]
+}
+
+// 2. Paragraph
+{
+  type: 'paragraph',
+  children: [
+    { type: 'text', text: 'Hello world' }
+  ]
+}
+
+// 3. Text
+{
+  type: 'text',
+  text: 'Plain text content',
+  marks: []
+}
+
+// 4. Heading (h1-h6)
+{
+  type: 'heading',
+  attrs: { level: 1 },
+  children: [
+    { type: 'text', text: 'Main Title' }
+  ]
+}
+
+// 5. Line Break
+{
+  type: 'hardBreak'
+}
+
+// 6. Horizontal Rule
+{
+  type: 'horizontalRule'
+}`} />
+              </DocSection>
+
+              <DocSection id="formatting-nodes" title="Formatting Nodes" depth={3}>
+                <p class="m-0 mb-3">Text formatting and marks:</p>
+                <DocCodeBlock code={`// 7. Bold (as mark)
+{
+  type: 'text',
+  text: 'Bold text',
+  marks: [{ type: 'bold' }]
+}
+
+// 8. Italic (as mark)
+{
+  type: 'text',
+  text: 'Italic text',
+  marks: [{ type: 'italic' }]
+}
+
+// 9. Underline (as mark)
+{
+  type: 'text',
+  text: 'Underlined',
+  marks: [{ type: 'underline' }]
+}
+
+// 10. Strikethrough (as mark)
+{
+  type: 'text',
+  text: 'Deleted',
+  marks: [{ type: 'strikethrough' }]
+}
+
+// 11. Code (as mark)
+{
+  type: 'text',
+  text: 'inline code',
+  marks: [{ type: 'code' }]
+}
+
+// 12. Link (as mark)
+{
+  type: 'text',
+  text: 'Click here',
+  marks: [{
+    type: 'link',
+    attrs: { href: 'https://example.com' }
+  }]
+}
+
+// 13. Color (as mark)
+{
+  type: 'text',
+  text: 'Colored text',
+  marks: [{
+    type: 'color',
+    attrs: { color: '#ff0000' }
+  }]
+}
+
+// 14. Highlight (as mark)
+{
+  type: 'text',
+  text: 'Highlighted',
+  marks: [{
+    type: 'highlight',
+    attrs: { color: '#ffff00' }
+  }]
+}
+
+// 15. Font Size (as mark)
+{
+  type: 'text',
+  text: 'Large text',
+  marks: [{
+    type: 'fontSize',
+    attrs: { size: 24 }
+  }]
+}
+
+// 16. Font Family (as mark)
+{
+  type: 'text',
+  text: 'Monospace',
+  marks: [{
+    type: 'fontFamily',
+    attrs: { family: 'monospace' }
+  }]
+}`} />
+              </DocSection>
+
+              <DocSection id="structural-nodes" title="Structural Nodes" depth={3}>
+                <p class="m-0 mb-3">Document structure and organization:</p>
+                <DocCodeBlock code={`// 17. Blockquote
+{
+  type: 'blockquote',
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Quoted text' }
+      ]
+    }
+  ]
+}
+
+// 18. Code Block
+{
+  type: 'codeBlock',
+  attrs: { language: 'javascript' },
+  children: [
+    { type: 'text', text: 'const x = 1;' }
+  ]
+}
+
+// 19. Ordered List
+{
+  type: 'orderedList',
+  attrs: { start: 1 },
+  children: [
+    {
+      type: 'listItem',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'First item' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 20. Unordered List
+{
+  type: 'bulletList',
+  children: [
+    {
+      type: 'listItem',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Item' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 21. List Item
+{
+  type: 'listItem',
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'List content' }]
+    }
+  ]
+}
+
+// 22. Nested List
+{
+  type: 'bulletList',
+  children: [
+    {
+      type: 'listItem',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Parent' }]
+        },
+        {
+          type: 'bulletList',
+          children: [
+            {
+              type: 'listItem',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [{ type: 'text', text: 'Child' }]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="media-nodes" title="Media Nodes" depth={3}>
+                <p class="m-0 mb-3">Images, videos, and other media:</p>
+                <DocCodeBlock code={`// 23. Image
+{
+  type: 'image',
+  attrs: {
+    src: 'https://example.com/image.jpg',
+    alt: 'Description',
+    width: 800,
+    height: 600
+  }
+}
+
+// 24. Video
+{
+  type: 'video',
+  attrs: {
+    src: 'https://example.com/video.mp4',
+    width: 640,
+    height: 360,
+    controls: true
+  }
+}
+
+// 25. Audio
+{
+  type: 'audio',
+  attrs: {
+    src: 'https://example.com/audio.mp3',
+    controls: true
+  }
+}
+
+// 26. Iframe
+{
+  type: 'iframe',
+  attrs: {
+    src: 'https://example.com',
+    width: 800,
+    height: 600
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="complex-nodes" title="Complex Nodes" depth={3}>
+                <p class="m-0 mb-3">Advanced structures like tables, cards, and interactive components:</p>
+                <DocCodeBlock code={`// 27. Table
+{
+  type: 'table',
+  attrs: { colCount: 3 },
+  children: [
+    {
+      type: 'tableRow',
+      children: [
+        {
+          type: 'tableHeader',
+          attrs: { colspan: 1, rowspan: 1 },
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Header 1' }]
+            }
+          ]
+        },
+        {
+          type: 'tableHeader',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Header 2' }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      type: 'tableRow',
+      children: [
+        {
+          type: 'tableCell',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Cell 1' }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+// 28. Table Row
+{
+  type: 'tableRow',
+  children: [
+    { type: 'tableCell', children: [...] },
+    { type: 'tableCell', children: [...] }
+  ]
+}
+
+// 29. Table Cell
+{
+  type: 'tableCell',
+  attrs: { colspan: 1, rowspan: 1 },
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Cell content' }]
+    }
+  ]
+}
+
+// 30. Table Header
+{
+  type: 'tableHeader',
+  attrs: { colspan: 1, rowspan: 1 },
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Header' }]
+    }
+  ]
+}
+
+// 31. Card
+{
+  type: 'card',
+  attrs: {
+    type: 'default',
+    backgroundColor: '#ffffff'
+  },
+  children: [
+    {
+      type: 'cardHeader',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Card Title' }]
+        }
+      ]
+    },
+    {
+      type: 'cardBody',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Card content' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 32. Card Header
+{
+  type: 'cardHeader',
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Header' }]
+    }
+  ]
+}
+
+// 33. Card Body
+{
+  type: 'cardBody',
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Body' }]
+    }
+  ]
+}
+
+// 34. Accordion
+{
+  type: 'accordion',
+  children: [
+    {
+      type: 'accordionItem',
+      attrs: { open: false },
+      children: [
+        {
+          type: 'accordionHeader',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Question' }]
+            }
+          ]
+        },
+        {
+          type: 'accordionContent',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Answer' }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+// 35. Tabs
+{
+  type: 'tabs',
+  attrs: { activeTab: 0 },
+  children: [
+    {
+      type: 'tabList',
+      children: [
+        {
+          type: 'tab',
+          attrs: { id: 'tab1', label: 'Tab 1' }
+        },
+        {
+          type: 'tab',
+          attrs: { id: 'tab2', label: 'Tab 2' }
+        }
+      ]
+    },
+    {
+      type: 'tabPanel',
+      attrs: { tabId: 'tab1' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Tab 1 content' }]
+        }
+      ]
+    },
+    {
+      type: 'tabPanel',
+      attrs: { tabId: 'tab2' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Tab 2 content' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 36. Columns
+{
+  type: 'columns',
+  attrs: { count: 2 },
+  children: [
+    {
+      type: 'column',
+      attrs: { width: '50%' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Column 1' }]
+        }
+      ]
+    },
+    {
+      type: 'column',
+      attrs: { width: '50%' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Column 2' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 37. Divider
+{
+  type: 'divider',
+  attrs: { style: 'solid' }
+}
+
+// 38. Callout
+{
+  type: 'callout',
+  attrs: {
+    type: 'info',
+    icon: 'ℹ️'
+  },
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Important information' }
+      ]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="custom-nodes" title="Custom Nodes" depth={3}>
+                <p class="m-0 mb-3">Highly customized and domain-specific node types:</p>
+                <DocCodeBlock code={`// 39. Math Formula
+{
+  type: 'math',
+  attrs: {
+    formula: 'E = mc^2',
+    display: 'block'
+  }
+}
+
+// 40. Diagram
+{
+  type: 'diagram',
+  attrs: {
+    type: 'flowchart',
+    content: 'graph TD; A-->B;'
+  }
+}
+
+// 41. Chart
+{
+  type: 'chart',
+  attrs: {
+    type: 'bar',
+    data: { labels: ['A', 'B'], values: [1, 2] }
+  }
+}
+
+// 42. Map
+{
+  type: 'map',
+  attrs: {
+    lat: 37.7749,
+    lng: -122.4194,
+    zoom: 10
+  }
+}
+
+// 43. Calendar
+{
+  type: 'calendar',
+  attrs: {
+    view: 'month',
+    date: '2024-01-15'
+  }
+}
+
+// 44. Poll
+{
+  type: 'poll',
+  attrs: {
+    question: 'What is your favorite?',
+    options: ['Option 1', 'Option 2'],
+    allowMultiple: false
+  }
+}
+
+// 45. Quiz
+{
+  type: 'quiz',
+  children: [
+    {
+      type: 'quizQuestion',
+      attrs: { type: 'multiple-choice' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: 'Question text' }]
+        },
+        {
+          type: 'quizOption',
+          attrs: { correct: true },
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Correct answer' }]
+            }
+          ]
+        },
+        {
+          type: 'quizOption',
+          attrs: { correct: false },
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Wrong answer' }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+// 46. Embed (Twitter, YouTube, etc.)
+{
+  type: 'embed',
+  attrs: {
+    provider: 'youtube',
+    id: 'dQw4w9WgXcQ',
+    url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
+  }
+}
+
+// 47. Mention
+{
+  type: 'mention',
+  attrs: {
+    id: 'user123',
+    label: '@username'
+  }
+}
+
+// 48. Hashtag
+{
+  type: 'hashtag',
+  attrs: {
+    tag: 'javascript'
+  }
+}
+
+// 49. Bookmark
+{
+  type: 'bookmark',
+  attrs: {
+    url: 'https://example.com',
+    title: 'Example',
+    description: 'An example website',
+    image: 'https://example.com/image.jpg'
+  }
+}
+
+// 50. Annotation
+{
+  type: 'annotation',
+  attrs: {
+    id: 'ann1',
+    type: 'comment',
+    author: 'user123'
+  },
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Annotation content' }
+      ]
+    }
+  ]
+}
+
+// 51. Custom Block (user-defined)
+{
+  type: 'customBlock',
+  attrs: {
+    type: 'product-card',
+    data: {
+      name: 'Product Name',
+      price: 99.99,
+      image: 'product.jpg'
+    }
+  }
+}
+
+// 52. Section
+{
+  type: 'section',
+  attrs: { id: 'section1' },
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Section content' }]
+    }
+  ]
+}`} />
+              </DocSection>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

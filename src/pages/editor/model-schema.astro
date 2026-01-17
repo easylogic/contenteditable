@@ -1,0 +1,729 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'schema-definition', text: 'Schema Definition' },
+  { depth: 3, slug: 'node-specs', text: 'Node Specs' },
+  { depth: 3, slug: 'mark-specs', text: 'Mark Specs' },
+  { depth: 3, slug: 'content-rules', text: 'Content Rules' },
+  { depth: 2, slug: 'node-types', text: 'Node Types' },
+  { depth: 3, slug: 'block-nodes', text: 'Block Nodes' },
+  { depth: 3, slug: 'inline-nodes', text: 'Inline Nodes' },
+  { depth: 3, slug: 'text-nodes', text: 'Text Nodes' },
+  { depth: 2, slug: 'document-structure', text: 'Document Structure' },
+  { depth: 3, slug: 'hierarchical-structure', text: 'Hierarchical Structure' },
+  { depth: 3, slug: 'nesting-rules', text: 'Nesting Rules' },
+  { depth: 2, slug: 'mark-system', text: 'Mark System' },
+  { depth: 3, slug: 'mark-types', text: 'Mark Types' },
+  { depth: 3, slug: 'mark-attributes', text: 'Mark Attributes' },
+  { depth: 3, slug: 'mark-exclusivity', text: 'Mark Exclusivity' },
+  { depth: 2, slug: 'validation', text: 'Schema Validation' },
+  { depth: 3, slug: 'structure-validation', text: 'Structure Validation' },
+  { depth: 3, slug: 'content-validation', text: 'Content Validation' },
+  { depth: 2, slug: 'html-mapping', text: 'HTML Mapping' },
+  { depth: 3, slug: 'model-to-html', text: 'Model to HTML' },
+  { depth: 3, slug: 'html-to-model', text: 'HTML to Model' },
+  { depth: 3, slug: 'normalization', text: 'HTML Normalization' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Model & Schema – contenteditable.lab"
+      description="Designing document models and schemas: node types, document structure, mark system, and HTML mapping"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Model & Schema</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Model & Schema
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Designing your document model and schema: node types, document structure, mark system, validation, and HTML mapping.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <section id="overview" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Overview
+              </h2>
+              <p class="m-0 mb-4">
+                The schema defines what your document structure can contain. It's the contract between your model and the operations that modify it. A well-designed schema ensures your document is always valid and predictable.
+              </p>
+              <p class="m-0 mb-4">
+                The model is the actual document instance that conforms to the schema. It represents the current state of the document in a structured, validated format.
+              </p>
+            </section>
+
+            <section id="schema-definition" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Schema Definition
+              </h2>
+              <p class="m-0 mb-4">
+                A schema defines the structure and rules for your document:
+              </p>
+
+              <section id="node-specs" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Node Specs</h3>
+                <p class="m-0 mb-3">
+                  Each node type has a spec that defines its properties:
+                </p>
+                <DocCodeBlock code={`const schema = {
+  nodes: {
+    document: {
+      content: 'block+',  // Must contain one or more blocks
+    },
+    paragraph: {
+      content: 'inline*',  // Can contain zero or more inlines
+      group: 'block',      // Belongs to block group
+    },
+    heading: {
+      content: 'inline*',
+      group: 'block',
+      attrs: {
+        level: { default: 1 }  // Attribute with default
+      }
+    },
+    text: {
+      group: 'inline',
+      // Text nodes don't have children
+    },
+    link: {
+      content: 'inline*',
+      group: 'inline',
+      attrs: {
+        href: { default: '' }
+      }
+    }
+  }
+};`} />
+              </section>
+
+              <section id="mark-specs" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Mark Specs</h3>
+                <p class="m-0 mb-3">
+                  Marks define formatting that can be applied to text:
+                </p>
+                <DocCodeBlock code={`const schema = {
+  marks: {
+    bold: {
+      // Simple mark with no attributes
+    },
+    italic: {},
+    underline: {},
+    link: {
+      attrs: {
+        href: { default: '' },
+        title: { default: '' }
+      }
+    },
+    code: {
+      // Code mark might exclude other marks
+      excludes: 'bold italic underline'
+    }
+  }
+};`} />
+              </section>
+
+              <section id="content-rules" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Content Rules</h3>
+                <p class="m-0 mb-3">
+                  Content rules define what can be nested inside each node:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'block+'</code> - One or more blocks</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'block*'</code> - Zero or more blocks</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'inline*'</code> - Zero or more inlines</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'paragraph | heading'</code> - Paragraph or heading</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'(paragraph | heading)+'</code> - One or more paragraphs or headings</li>
+                </ul>
+                <DocCodeBlock code={`// Example content rules
+{
+  document: {
+    content: 'block+'  // Document must have at least one block
+  },
+  paragraph: {
+    content: 'inline*'  // Paragraph can have any inlines
+  },
+  list: {
+    content: 'listItem+',  // List must have at least one item
+    group: 'block'
+  },
+  listItem: {
+    content: 'paragraph block*',  // Item starts with paragraph, then optional blocks
+    group: 'block'
+  }
+}`} />
+              </section>
+            </section>
+
+            <section id="node-types" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Node Types
+              </h2>
+
+              <section id="block-nodes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Block Nodes</h3>
+                <p class="m-0 mb-3">
+                  Block nodes are structural elements that typically start on a new line:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Paragraphs</li>
+                  <li>Headings (h1-h6)</li>
+                  <li>Lists (ordered, unordered)</li>
+                  <li>Code blocks</li>
+                  <li>Blockquotes</li>
+                  <li>Tables</li>
+                </ul>
+                <DocCodeBlock code={`// Block node examples
+{
+  type: 'paragraph',
+  children: [
+    { type: 'text', text: 'This is a paragraph.' }
+  ]
+}
+
+{
+  type: 'heading',
+  level: 2,
+  children: [
+    { type: 'text', text: 'Heading' }
+  ]
+}
+
+{
+  type: 'codeBlock',
+  language: 'javascript',
+  children: [
+    { type: 'text', text: 'const x = 1;' }
+  ]
+}`} />
+              </section>
+
+              <section id="inline-nodes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Inline Nodes</h3>
+                <p class="m-0 mb-3">
+                  Inline nodes exist within blocks and don't break the line:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Links</li>
+                  <li>Images</li>
+                  <li>Mentions</li>
+                  <li>Custom inline elements</li>
+                </ul>
+                <DocCodeBlock code={`// Inline node examples
+{
+  type: 'link',
+  attrs: { href: 'https://example.com' },
+  children: [
+    { type: 'text', text: 'Example' }
+  ]
+}
+
+{
+  type: 'image',
+  attrs: {
+    src: 'image.jpg',
+    alt: 'Description'
+  }
+  // Images typically don't have children
+}`} />
+              </section>
+
+              <section id="text-nodes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Text Nodes</h3>
+                <p class="m-0 mb-3">
+                  Text nodes contain the actual text content and can have marks:
+                </p>
+                <DocCodeBlock code={`// Text node with marks
+{
+  type: 'text',
+  text: 'Bold and italic',
+  marks: [
+    { type: 'bold' },
+    { type: 'italic' }
+  ]
+}
+
+// Plain text node
+{
+  type: 'text',
+  text: 'Plain text',
+  marks: []
+}`} />
+              </section>
+            </section>
+
+            <section id="document-structure" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Document Structure
+              </h2>
+
+              <section id="hierarchical-structure" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Hierarchical Structure</h3>
+                <p class="m-0 mb-3">
+                  Documents are trees with a root document node:
+                </p>
+                <DocCodeBlock code={`// Complete document structure
+{
+  type: 'document',
+  children: [
+    {
+      type: 'heading',
+      level: 1,
+      children: [
+        { type: 'text', text: 'Title' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'First paragraph.' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: 'Second ' },
+        { type: 'text', text: 'paragraph', marks: [{ type: 'bold' }] },
+        { type: 'text', text: '.' }
+      ]
+    }
+  ]
+}`} />
+              </section>
+
+              <section id="nesting-rules" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Nesting Rules</h3>
+                <p class="m-0 mb-3">
+                  Schema enforces nesting rules to prevent invalid structures:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Blocks cannot be nested inside inlines</li>
+                  <li>Text nodes can only be inside inlines or blocks</li>
+                  <li>Some nodes have specific content requirements</li>
+                </ul>
+                <DocCodeBlock code={`// Valid structure
+{
+  type: 'paragraph',
+  children: [
+    { type: 'text', text: 'Text' }
+  ]
+}
+
+// Invalid structure (block inside inline)
+{
+  type: 'link',
+  children: [
+    {
+      type: 'paragraph',  // ❌ Invalid: block inside inline
+      children: [...]
+    }
+  ]
+}
+
+// Valid: inline inside block
+{
+  type: 'paragraph',
+  children: [
+    {
+      type: 'link',  // ✅ Valid: inline inside block
+      children: [
+        { type: 'text', text: 'Link' }
+      ]
+    }
+  ]
+}`} />
+              </section>
+            </section>
+
+            <section id="mark-system" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Mark System
+              </h2>
+
+              <section id="mark-types" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Mark Types</h3>
+                <p class="m-0 mb-3">
+                  Marks are formatting applied to text nodes:
+                </p>
+                <DocCodeBlock code={`// Text with single mark
+{
+  type: 'text',
+  text: 'Bold text',
+  marks: [{ type: 'bold' }]
+}
+
+// Text with multiple marks
+{
+  type: 'text',
+  text: 'Bold and italic',
+  marks: [
+    { type: 'bold' },
+    { type: 'italic' }
+  ]
+}
+
+// Text with mark that has attributes
+{
+  type: 'text',
+  text: 'Link text',
+  marks: [
+    {
+      type: 'link',
+      attrs: { href: 'https://example.com' }
+    }
+  ]
+}`} />
+              </section>
+
+              <section id="mark-attributes" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Mark Attributes</h3>
+                <p class="m-0 mb-3">
+                  Some marks have attributes:
+                </p>
+                <DocCodeBlock code={`// Link mark with attributes
+{
+  type: 'text',
+  text: 'Example',
+  marks: [
+    {
+      type: 'link',
+      attrs: {
+        href: 'https://example.com',
+        title: 'Example website'
+      }
+    }
+  ]
+}
+
+// Color mark with attributes
+{
+  type: 'text',
+  text: 'Red text',
+  marks: [
+    {
+      type: 'color',
+      attrs: { color: '#ff0000' }
+    }
+  ]
+}`} />
+              </section>
+
+              <section id="mark-exclusivity" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Mark Exclusivity</h3>
+                <p class="m-0 mb-3">
+                  Some marks exclude others (e.g., code mark excludes formatting):
+                </p>
+                <DocCodeBlock code={`const schema = {
+  marks: {
+    code: {
+      excludes: 'bold italic underline link'  // Code can't have other marks
+    },
+    link: {
+      // Link can coexist with bold, italic, etc.
+    }
+  }
+};
+
+// Valid: bold and italic together
+{
+  type: 'text',
+  text: 'Bold italic',
+  marks: [{ type: 'bold' }, { type: 'italic' }]
+}
+
+// Invalid: code with bold
+{
+  type: 'text',
+  text: 'Code bold',
+  marks: [
+    { type: 'code' },
+    { type: 'bold' }  // ❌ Code excludes bold
+  ]
+}`} />
+              </section>
+            </section>
+
+            <section id="validation" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                Schema Validation
+              </h2>
+
+              <section id="structure-validation" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Structure Validation</h3>
+                <p class="m-0 mb-3">
+                  Validate that document structure matches schema:
+                </p>
+                <DocCodeBlock code={`function validateDocument(doc, schema) {
+  // Check root node type
+  if (doc.type !== schema.topNode) {
+    return { valid: false, error: 'Invalid root node' };
+  }
+  
+  // Validate each child
+  for (const child of doc.children) {
+    const result = validateNode(child, schema);
+    if (!result.valid) {
+      return result;
+    }
+  }
+  
+  return { valid: true };
+}
+
+function validateNode(node, schema) {
+  const spec = schema.nodes[node.type];
+  if (!spec) {
+    return { valid: false, error: 'Unknown node type: ' + node.type };
+  }
+  
+  // Validate content matches spec
+  if (!matchesContentRule(node.children, spec.content)) {
+    return { valid: false, error: 'Content does not match spec' };
+  }
+  
+  // Validate attributes
+  if (!validateAttributes(node.attrs, spec.attrs)) {
+    return { valid: false, error: 'Invalid attributes' };
+  }
+  
+  // Recursively validate children
+  for (const child of node.children) {
+    const result = validateNode(child, schema);
+    if (!result.valid) {
+      return result;
+    }
+  }
+  
+  return { valid: true };
+}`} />
+              </section>
+
+              <section id="content-validation" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Content Validation</h3>
+                <p class="m-0 mb-3">
+                  Validate that node content matches content rules:
+                </p>
+                <DocCodeBlock code={`function matchesContentRule(children, rule) {
+  // Parse content rule (e.g., 'block+', 'inline*')
+  const parsed = parseContentRule(rule);
+  
+  // Check if children match
+  if (parsed.type === 'group') {
+    // Check if all children are in the group
+    return children.every(child => 
+      isInGroup(child, parsed.group)
+    );
+  }
+  
+  // Handle other rule types...
+  return true;
+}
+
+function isInGroup(node, group) {
+  const spec = schema.nodes[node.type];
+  return spec?.group === group;
+}`} />
+              </section>
+            </section>
+
+            <section id="html-mapping" class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                HTML Mapping
+              </h2>
+              <p class="m-0 mb-4">
+                Mapping between your model and HTML is essential for rendering and parsing:
+              </p>
+
+              <section id="model-to-html" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">Model to HTML</h3>
+                <p class="m-0 mb-3">
+                  Serialize your model to HTML:
+                </p>
+                <DocCodeBlock code={`function serializeNode(node) {
+  switch (node.type) {
+    case 'document':
+      return serializeChildren(node.children);
+      
+    case 'paragraph':
+      return '<p>' + serializeChildren(node.children) + '</p>';
+      
+    case 'heading':
+      return '<h' + node.level + '>' + serializeChildren(node.children) + '</h' + node.level + '>';
+      
+    case 'text':
+      let html = escapeHtml(node.text);
+      // Apply marks
+      if (node.marks) {
+        node.marks.forEach(mark => {
+          html = wrapWithMark(html, mark);
+        });
+      }
+      return html;
+      
+    case 'link':
+      const href = node.attrs?.href || '';
+      return '<a href="' + escapeHtml(href) + '">' + serializeChildren(node.children) + '</a>';
+      
+    default:
+      return serializeChildren(node.children);
+  }
+}
+
+function wrapWithMark(html, mark) {
+  const tagMap = {
+    bold: 'strong',
+    italic: 'em',
+    underline: 'u',
+    code: 'code'
+  };
+  
+  const tag = tagMap[mark.type];
+  if (!tag) return html;
+  
+  const attrs = mark.attrs ? serializeAttrs(mark.attrs) : '';
+  return '<' + tag + attrs + '>' + html + '</' + tag + '>';
+}`} />
+              </section>
+
+              <section id="html-to-model" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">HTML to Model</h3>
+                <p class="m-0 mb-3">
+                  Parse HTML into your model:
+                </p>
+                <DocCodeBlock code={`function parseHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  return {
+    type: 'document',
+    children: Array.from(doc.body.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean)
+  };
+}
+
+function parseNode(domNode) {
+  if (domNode.nodeType === Node.TEXT_NODE) {
+    return {
+      type: 'text',
+      text: domNode.textContent,
+      marks: extractMarks(domNode)
+    };
+  }
+  
+  if (domNode.nodeType === Node.ELEMENT_NODE) {
+    const nodeType = getNodeType(domNode.tagName);
+    if (!nodeType) {
+      // Unknown element, unwrap and parse children
+      return parseChildren(domNode.childNodes);
+    }
+    
+    return {
+      type: nodeType,
+      attrs: extractAttributes(domNode, nodeType),
+      children: parseChildren(domNode.childNodes)
+    };
+  }
+  
+  return null;
+}
+
+function extractMarks(textNode) {
+  const marks = [];
+  let current = textNode.parentElement;
+  
+  while (current && current !== editor) {
+    const mark = getMarkFromElement(current);
+    if (mark) {
+      marks.push(mark);
+    }
+    current = current.parentElement;
+  }
+  
+  return marks;
+}`} />
+              </section>
+
+              <section id="normalization" class="mb-6">
+                <h3 class="text-xl font-semibold mb-3">HTML Normalization</h3>
+                <p class="m-0 mb-3">
+                  Normalize inconsistent HTML to match your schema:
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>Convert <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;b&gt;</code> to <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;</code></li>
+                  <li>Convert <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;i&gt;</code> to <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;em&gt;</code></li>
+                  <li>Convert <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;div&gt;</code> to <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;p&gt;</code> when appropriate</li>
+                  <li>Remove invalid attributes</li>
+                  <li>Fix nesting violations</li>
+                </ul>
+                <DocCodeBlock code={`function normalizeHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  // Normalize elements
+  normalizeElements(doc.body);
+  
+  // Fix nesting
+  fixNesting(doc.body);
+  
+  // Remove invalid attributes
+  removeInvalidAttributes(doc.body);
+  
+  return doc.body.innerHTML;
+}
+
+function normalizeElements(element) {
+  // Convert b to strong
+  element.querySelectorAll('b').forEach(b => {
+    const strong = document.createElement('strong');
+    strong.innerHTML = b.innerHTML;
+    b.parentNode.replaceChild(strong, b);
+  });
+  
+  // Convert i to em
+  element.querySelectorAll('i').forEach(i => {
+    const em = document.createElement('em');
+    em.innerHTML = i.innerHTML;
+    i.parentNode.replaceChild(em, i);
+  });
+  
+  // Convert div to p (if appropriate)
+  element.querySelectorAll('div').forEach(div => {
+    if (!div.querySelector('p, ul, ol, h1, h2, h3, h4, h5, h6')) {
+      const p = document.createElement('p');
+      p.innerHTML = div.innerHTML;
+      div.parentNode.replaceChild(p, div);
+    }
+  });
+}`} />
+              </section>
+            </section>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

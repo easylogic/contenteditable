@@ -44,9 +44,25 @@ const scenarios = defineCollection({
   }),
 });
 
+const tips = defineCollection({
+  type: 'content',
+  schema: z.object({
+    id: z.string(), // tip ID (e.g., "tip-001-caret-preservation-react")
+    title: z.string(), // Human-readable title
+    description: z.string().optional(), // Brief description
+    category: z.string().optional(), // Category (framework, browser-feature, performance, etc.)
+    tags: z.array(z.string()).default([]), // Additional tags
+    difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+    relatedScenarios: z.array(z.string()).default([]), // Related scenario IDs
+    relatedCases: z.array(z.string()).default([]), // Related case IDs
+    locale: z.string().default('en'), // Locale for the tip content
+  }),
+});
+
 export const collections = {
   cases,
   scenarios,
+  tips,
 };
 
 

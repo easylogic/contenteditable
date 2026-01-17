@@ -1,0 +1,200 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'schema', text: 'Schema Definition' },
+  { depth: 2, slug: 'model', text: 'Model Representation' },
+  { depth: 2, slug: 'serialization', text: 'HTML Serialization' },
+  { depth: 2, slug: 'deserialization', text: 'HTML Deserialization' },
+  { depth: 2, slug: 'view-integration', text: 'View Integration' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Document Node Type – contenteditable.lab"
+      description="Detailed guide for Document node type: schema, model, HTML mapping, view integration, and common issues"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema/node-types" class="text-text-muted no-underline">Node Types</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Document</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Document Node Type
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Category: Basic • Detailed implementation guide with view integration notes
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="schema" title="Schema Definition">
+              <p class="m-0 mb-3">
+                Schema definition for the <strong>Document</strong> node type:
+              </p>
+              <DocCodeBlock code={`{
+  document: {
+    content: 'block+',
+    // Document is the root node, always present
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="model" title="Model Representation">
+              <p class="m-0 mb-3">
+                Example model representation:
+              </p>
+              <DocCodeBlock code={`{
+  type: 'document',
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: 'Hello' }]
+    }
+  ]
+}`} />
+            </DocSection>
+
+            <DocSection id="serialization" title="HTML Serialization">
+              <p class="m-0 mb-3">
+                Converting model to HTML:
+              </p>
+              <DocCodeBlock code={`function serializeDocument(node) {
+  return serializeChildren(node.children);
+}
+
+// Document itself doesn't create a wrapper element
+// It's the container for all top-level blocks`} />
+            </DocSection>
+
+            <DocSection id="deserialization" title="HTML Deserialization">
+              <p class="m-0 mb-3">
+                Parsing HTML to model:
+              </p>
+              <DocCodeBlock code={`function parseDocument(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  
+  return {
+    type: 'document',
+    children: Array.from(doc.body.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean)
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="View Integration">
+              <DocAlert type="info">
+                <strong>View Integration Notes:</strong> Pay special attention to contenteditable behavior, selection handling, and event management when implementing this node type in your view layer.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                View integration code:
+              </p>
+              <DocCodeBlock code={`// Rendering
+const container = document.createElement('div');
+container.contentEditable = 'true';
+node.children.forEach(child => {
+  container.appendChild(renderNode(child));
+});
+
+// Document-level event handling
+container.addEventListener('input', handleDocumentInput);
+container.addEventListener('paste', handleDocumentPaste);
+container.addEventListener('keydown', handleDocumentKeydown);
+
+// Selection management
+function getDocumentSelection() {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return null;
+  return getModelPosition(selection);
+}`} />
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <DocAlert type="warning">
+                <strong>Common Pitfalls:</strong> These are issues frequently encountered when implementing this node type. Review carefully before implementation.
+              </DocAlert>
+              <p class="m-0 mb-3">
+                Common issues and solutions:
+              </p>
+              <DocCodeBlock code={`// Issue: Document must always have at least one block
+// Solution: Ensure document always has content
+if (node.children.length === 0) {
+  node.children.push({
+    type: 'paragraph',
+    children: []
+  });
+}
+
+// Issue: Document structure validation
+// Solution: Validate all children are block nodes
+function validateDocument(doc) {
+  return doc.children.every(child => 
+    isBlockNode(child)
+  );
+}
+
+// Issue: Empty document handling
+// Solution: Always maintain at least one empty paragraph
+function ensureDocumentNotEmpty(doc) {
+  if (doc.children.length === 0) {
+    doc.children.push(createEmptyParagraph());
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-3">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock code={`class DocumentNode {
+  constructor(children) {
+    this.type = 'document';
+    this.children = children || [];
+  }
+  
+  toDOM() {
+    const fragment = document.createDocumentFragment();
+    this.children.forEach(child => {
+      fragment.appendChild(child.toDOM());
+    });
+    return fragment;
+  }
+  
+  static fromDOM(domNode) {
+    const children = Array.from(domNode.childNodes)
+      .map(node => parseNode(node))
+      .filter(Boolean);
+    return new DocumentNode(children);
+  }
+}`} />
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,217 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'basic-nodes', text: 'Basic Nodes' },
+  { depth: 2, slug: 'formatting-nodes', text: 'Formatting Nodes' },
+  { depth: 2, slug: 'structural-nodes', text: 'Structural Nodes' },
+  { depth: 2, slug: 'media-nodes', text: 'Media Nodes' },
+  { depth: 2, slug: 'complex-nodes', text: 'Complex Nodes' },
+  { depth: 2, slug: 'custom-nodes', text: 'Custom Nodes' },
+];
+
+const nodeTypes = {
+  basic: [
+    { id: 'document', name: 'Document', description: 'Root node of the document' },
+    { id: 'paragraph', name: 'Paragraph', description: 'Basic text container' },
+    { id: 'text', name: 'Text', description: 'Plain text content' },
+    { id: 'heading', name: 'Heading', description: 'Heading levels h1-h6' },
+    { id: 'hardBreak', name: 'Hard Break', description: 'Line break' },
+    { id: 'horizontalRule', name: 'Horizontal Rule', description: 'Horizontal divider' },
+  ],
+  formatting: [
+    { id: 'bold', name: 'Bold', description: 'Bold text formatting' },
+    { id: 'italic', name: 'Italic', description: 'Italic text formatting' },
+    { id: 'underline', name: 'Underline', description: 'Underlined text' },
+    { id: 'strikethrough', name: 'Strikethrough', description: 'Strikethrough text' },
+    { id: 'code', name: 'Code', description: 'Inline code' },
+    { id: 'link', name: 'Link', description: 'Hyperlink' },
+    { id: 'color', name: 'Color', description: 'Text color' },
+    { id: 'highlight', name: 'Highlight', description: 'Text highlighting' },
+    { id: 'fontSize', name: 'Font Size', description: 'Font size control' },
+    { id: 'fontFamily', name: 'Font Family', description: 'Font family control' },
+  ],
+  structural: [
+    { id: 'blockquote', name: 'Blockquote', description: 'Quoted text block' },
+    { id: 'codeBlock', name: 'Code Block', description: 'Code block with syntax highlighting' },
+    { id: 'orderedList', name: 'Ordered List', description: 'Numbered list' },
+    { id: 'bulletList', name: 'Bullet List', description: 'Unordered list' },
+    { id: 'listItem', name: 'List Item', description: 'List item container' },
+  ],
+  media: [
+    { id: 'image', name: 'Image', description: 'Image embedding' },
+    { id: 'video', name: 'Video', description: 'Video embedding' },
+    { id: 'audio', name: 'Audio', description: 'Audio embedding' },
+    { id: 'iframe', name: 'Iframe', description: 'Iframe embedding' },
+  ],
+  complex: [
+    { id: 'table', name: 'Table', description: 'Table structure' },
+    { id: 'tableRow', name: 'Table Row', description: 'Table row' },
+    { id: 'tableCell', name: 'Table Cell', description: 'Table cell' },
+    { id: 'tableHeader', name: 'Table Header', description: 'Table header cell' },
+    { id: 'card', name: 'Card', description: 'Card container' },
+    { id: 'cardHeader', name: 'Card Header', description: 'Card header section' },
+    { id: 'cardBody', name: 'Card Body', description: 'Card body section' },
+    { id: 'accordion', name: 'Accordion', description: 'Collapsible accordion' },
+    { id: 'tabs', name: 'Tabs', description: 'Tabbed interface' },
+    { id: 'columns', name: 'Columns', description: 'Multi-column layout' },
+    { id: 'divider', name: 'Divider', description: 'Visual divider' },
+    { id: 'callout', name: 'Callout', description: 'Callout box' },
+  ],
+  custom: [
+    { id: 'math', name: 'Math', description: 'Mathematical formula' },
+    { id: 'diagram', name: 'Diagram', description: 'Diagram visualization' },
+    { id: 'chart', name: 'Chart', description: 'Data chart' },
+    { id: 'map', name: 'Map', description: 'Map embedding' },
+    { id: 'calendar', name: 'Calendar', description: 'Calendar widget' },
+    { id: 'poll', name: 'Poll', description: 'Poll widget' },
+    { id: 'quiz', name: 'Quiz', description: 'Quiz widget' },
+    { id: 'embed', name: 'Embed', description: 'External content embed' },
+    { id: 'mention', name: 'Mention', description: 'User mention' },
+    { id: 'hashtag', name: 'Hashtag', description: 'Hashtag' },
+    { id: 'bookmark', name: 'Bookmark', description: 'Link bookmark' },
+    { id: 'annotation', name: 'Annotation', description: 'Annotation/comment' },
+    { id: 'customBlock', name: 'Custom Block', description: 'User-defined custom block' },
+    { id: 'section', name: 'Section', description: 'Document section' },
+  ],
+};
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Node Types – contenteditable.lab"
+      description="Comprehensive guide to 52+ node types for rich text editors, from basic to complex custom schemas"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Node Types</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Node Types
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Comprehensive guide to 52+ node types with detailed implementation examples, view integration notes, and common pitfalls.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Each node type below includes detailed documentation covering:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li>Schema definition and validation rules</li>
+                <li>Model representation examples</li>
+                <li>HTML serialization and deserialization</li>
+                <li>View integration considerations</li>
+                <li>Common issues and solutions</li>
+                <li>Implementation examples</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="basic-nodes" title="Basic Nodes">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.basic.map((node) => (
+                  <a
+                    href={`/model-schema/node-types/${node.id}`}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="formatting-nodes" title="Formatting Nodes">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.formatting.map((node) => (
+                  <a
+                    href={`/model-schema/node-types/${node.id}`}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="structural-nodes" title="Structural Nodes">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.structural.map((node) => (
+                  <a
+                    href={`/model-schema/node-types/${node.id}`}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="media-nodes" title="Media Nodes">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.media.map((node) => (
+                  <a
+                    href={`/model-schema/node-types/${node.id}`}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="complex-nodes" title="Complex Nodes">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.complex.map((node) => (
+                  <a
+                    href={`/model-schema/node-types/${node.id}`}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+
+            <DocSection id="custom-nodes" title="Custom Nodes">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {nodeTypes.custom.map((node) => (
+                  <a
+                    href={`/model-schema/node-types/${node.id}`}
+                    class="block p-4 bg-bg-muted rounded-lg border border-border-light hover:border-accent-primary transition-colors no-underline"
+                  >
+                    <h3 class="text-lg font-semibold mb-2 text-text-primary">{node.name}</h3>
+                    <p class="m-0 text-sm text-text-secondary">{node.description}</p>
+                  </a>
+                ))}
+              </div>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

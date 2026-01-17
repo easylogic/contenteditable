@@ -1,6 +1,6 @@
 ---
 id: ce-0225-memory-leak-large-docs
-scenarioId: scenario-performance-memory-leak
+scenarioId: scenario-memory-leak-prevention
 locale: en
 os: Any
 osVersion: "Any"

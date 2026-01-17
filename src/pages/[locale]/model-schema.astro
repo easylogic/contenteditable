@@ -1,0 +1,1008 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import '../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'model-schema-relationship', text: '모델 & 스키마 관계' },
+  { depth: 2, slug: 'data-transformation', text: '데이터 변환' },
+  { depth: 2, slug: 'view-integration', text: '뷰 연동' },
+  { depth: 2, slug: 'collaborative-editing', text: '동시편집' },
+  { depth: 2, slug: 'node-types', text: '노드 타입' },
+  { depth: 3, slug: 'basic-nodes', text: '기본 노드' },
+  { depth: 3, slug: 'formatting-nodes', text: '포맷팅 노드' },
+  { depth: 3, slug: 'structural-nodes', text: '구조적 노드' },
+  { depth: 3, slug: 'media-nodes', text: '미디어 노드' },
+  { depth: 3, slug: 'complex-nodes', text: '복잡한 노드' },
+  { depth: 3, slug: 'custom-nodes', text: '커스텀 노드' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="모델 & 스키마 – contenteditable.lab"
+      description="모델과 스키마의 관계, 데이터 변환, 뷰 연동, 동시편집 이해하기 및 기본부터 복잡한 커스텀 스키마까지 포괄적인 노드 타입 예제"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">모델/스키마</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              모델 & 스키마
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델과 스키마의 관계, 데이터 변환, 뷰 연동, 동시편집에 대한 심화 가이드 및 기본 텍스트 노드부터 복잡한 커스텀 스키마까지 50개 이상의 노드 타입 예제를 제공합니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                모델은 실제 문서 데이터를 나타내고, 스키마는 유효한 구조를 정의합니다. 이들의 관계를 이해하는 것은 데이터를 변환하고, 뷰와 통합하며, 동시편집을 지원하는 견고한 에디터를 구축하는 데 필수적입니다.
+              </p>
+              <p class="m-0 mb-4">
+                이 가이드는 기본 개념을 다루고 기본 텍스트 노드부터 카드, 테이블, 인터랙티브 컴포넌트와 같은 복잡한 커스텀 스키마까지 50개 이상의 노드 타입 예제를 제공합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-schema-relationship" title="모델 & 스키마 관계">
+              <p class="m-0 mb-4">
+                <strong>스키마</strong>는 문서가 포함할 수 있는 것을 정의하는 계약입니다. 다음을 지정합니다:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li>어떤 노드 타입이 존재하는지</li>
+                <li>각 노드가 가질 수 있는 속성</li>
+                <li>각 노드가 포함할 수 있는 콘텐츠</li>
+                <li>적용할 수 있는 마크</li>
+                <li>검증 규칙 및 제약 조건</li>
+              </ul>
+              <p class="m-0 mb-4">
+                <strong>모델</strong>은 스키마를 준수하는 문서의 인스턴스입니다. 문서의 현재 상태를 나타내는 실제 데이터 구조입니다.
+              </p>
+              <DocCodeBlock code={`// 스키마는 규칙을 정의
+const schema = {
+  nodes: {
+    paragraph: {
+      content: 'inline*',
+      group: 'block'
+    },
+    heading: {
+      content: 'inline*',
+      group: 'block',
+      attrs: {
+        level: { default: 1 }
+      }
+    }
+  }
+};
+
+// 모델은 스키마를 준수하는 인스턴스
+const model = {
+  type: 'document',
+  children: [
+    {
+      type: 'heading',
+      attrs: { level: 1 },
+      children: [
+        { type: 'text', text: '안녕하세요' }
+      ]
+    },
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '이것은 단락입니다.' }
+      ]
+    }
+  ]
+};`} />
+            </DocSection>
+
+            <DocSection id="data-transformation" title="데이터 변환">
+              <p class="m-0 mb-4">
+                데이터 변환은 문서의 다른 표현 간 변환 과정입니다:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>직렬화</strong>: 모델 → JSON, HTML, Markdown 등</li>
+                <li><strong>역직렬화</strong>: JSON, HTML, Markdown → 모델</li>
+                <li><strong>마이그레이션</strong>: 스키마 변경 시 모델 구조 업데이트</li>
+                <li><strong>정규화</strong>: 모델이 스키마를 준수하도록 보장</li>
+              </ul>
+              <DocCodeBlock code={`// 모델을 JSON으로 직렬화
+function serializeToJSON(model) {
+  return JSON.stringify(model, null, 2);
+}
+
+// JSON을 모델로 역직렬화
+function deserializeFromJSON(json) {
+  const data = JSON.parse(json);
+  return normalizeModel(data); // 스키마 준수 보장
+}
+
+// 모델 정규화하여 스키마 준수 보장
+function normalizeModel(model) {
+  // 구조 검증
+  // 유효하지 않은 중첩 수정
+  // 누락된 필수 속성 추가
+  // 유효하지 않은 속성 제거
+  return validatedModel;
+}
+
+// 이전 모델을 새 스키마 버전으로 마이그레이션
+function migrateModel(oldModel, oldSchema, newSchema) {
+  // 변경된 노드 변환
+  // 속성 업데이트
+  // 제거된 노드 타입 처리
+  return migratedModel;
+}`} />
+            </DocSection>
+
+            <DocSection id="view-integration" title="뷰 연동">
+              <p class="m-0 mb-4">
+                뷰 레이어는 모델을 렌더링하고 사용자 상호작용을 처리합니다. 연동에는 다음이 필요합니다:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>렌더링</strong>: 모델을 DOM으로 변환</li>
+                <li><strong>입력 처리</strong>: DOM 변경을 모델 업데이트로 변환</li>
+                <li><strong>선택 매핑</strong>: DOM 선택과 모델 위치 간 변환</li>
+                <li><strong>변경 감지</strong>: 모델 변경 감지 및 뷰 업데이트</li>
+              </ul>
+              <DocCodeBlock code={`// 모델을 DOM으로 렌더링
+function renderModel(model, container) {
+  container.innerHTML = '';
+  model.children.forEach(child => {
+    const element = renderNode(child);
+    container.appendChild(element);
+  });
+}
+
+function renderNode(node) {
+  switch (node.type) {
+    case 'paragraph':
+      const p = document.createElement('p');
+      node.children.forEach(child => {
+        p.appendChild(renderNode(child));
+      });
+      return p;
+    case 'text':
+      const text = document.createTextNode(node.text);
+      // 마크 적용
+      if (node.marks && node.marks.length > 0) {
+        return wrapWithMarks(text, node.marks);
+      }
+      return text;
+    // ... 기타 노드 타입
+  }
+}
+
+// DOM 변경 처리 및 모델 업데이트
+function handleInput(domElement, model) {
+  // DOM 변경을 모델 작업으로 변환
+  const operations = diffDOMToModel(domElement, model);
+  operations.forEach(op => {
+    applyOperation(model, op);
+  });
+  return model;
+}
+
+// DOM 선택을 모델 위치로 매핑
+function getModelPosition(domSelection) {
+  const range = domSelection.getRangeAt(0);
+  const path = getPathFromDOMNode(range.startContainer);
+  return {
+    path: path,
+    offset: range.startOffset
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="collaborative-editing" title="동시편집">
+              <p class="m-0 mb-4">
+                동시편집은 동시 편집을 처리하기 위해 작업을 변환하는 것이 필요합니다:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>작업 변환 (OT)</strong>: 동시 변경을 고려하여 작업 변환</li>
+                <li><strong>CRDT</strong>: 최종 일관성을 위한 충돌 없는 복제 데이터 타입</li>
+                <li><strong>위치 매핑</strong>: 다른 문서 버전 간 위치 변환</li>
+                <li><strong>충돌 해결</strong>: 작업이 충돌할 때 처리</li>
+              </ul>
+              <DocCodeBlock code={`// 동시 변경을 고려하여 작업 변환
+function transformOperation(op1, op2) {
+  // op1과 op2가 충돌하지 않으면 op1을 그대로 반환
+  if (!operationsConflict(op1, op2)) {
+    return op1;
+  }
+  
+  // 그렇지 않으면 op2를 고려하여 op1 변환
+  if (op1.type === 'insert' && op2.type === 'insert') {
+    // 같은 위치에 삽입
+    if (op1.path === op2.path && op1.offset === op2.offset) {
+      // op1을 op2 뒤로 이동
+      return {
+        ...op1,
+        offset: op1.offset + op2.content.length
+      };
+    }
+  }
+  
+  // 더 복잡한 변환...
+  return transformedOp1;
+}
+
+// 모델에 작업 적용
+function applyOperation(model, operation) {
+  switch (operation.type) {
+    case 'insert':
+      insertNode(model, operation.path, operation.node);
+      break;
+    case 'delete':
+      deleteNode(model, operation.path);
+      break;
+    case 'update':
+      updateNode(model, operation.path, operation.attrs);
+      break;
+  }
+  return model;
+}
+
+// 문서 버전 간 위치 매핑
+function mapPosition(position, operations) {
+  let mappedPosition = position;
+  operations.forEach(op => {
+    mappedPosition = transformPosition(mappedPosition, op);
+  });
+  return mappedPosition;
+}`} />
+            </DocSection>
+
+            <DocSection id="node-types" title="노드 타입">
+              <p class="m-0 mb-4">
+                아래는 기본부터 복잡한 커스텀 스키마까지 포괄적인 노드 타입 예제입니다. 각 예제에는 스키마 정의와 모델 표현이 포함되어 있습니다.
+              </p>
+
+              <DocSection id="basic-nodes" title="기본 노드" depth={3}>
+                <p class="m-0 mb-3">모든 문서의 기본 구성 요소:</p>
+                <DocCodeBlock code={`// 1. 문서 (루트 노드)
+{
+  type: 'document',
+  children: [...]
+}
+
+// 2. 단락
+{
+  type: 'paragraph',
+  children: [
+    { type: 'text', text: '안녕하세요' }
+  ]
+}
+
+// 3. 텍스트
+{
+  type: 'text',
+  text: '일반 텍스트 콘텐츠',
+  marks: []
+}
+
+// 4. 제목 (h1-h6)
+{
+  type: 'heading',
+  attrs: { level: 1 },
+  children: [
+    { type: 'text', text: '메인 제목' }
+  ]
+}
+
+// 5. 줄바꿈
+{
+  type: 'hardBreak'
+}
+
+// 6. 수평선
+{
+  type: 'horizontalRule'
+}`} />
+              </DocSection>
+
+              <DocSection id="formatting-nodes" title="포맷팅 노드" depth={3}>
+                <p class="m-0 mb-3">텍스트 포맷팅 및 마크:</p>
+                <DocCodeBlock code={`// 7. 볼드 (마크로)
+{
+  type: 'text',
+  text: '볼드 텍스트',
+  marks: [{ type: 'bold' }]
+}
+
+// 8. 이탤릭 (마크로)
+{
+  type: 'text',
+  text: '이탤릭 텍스트',
+  marks: [{ type: 'italic' }]
+}
+
+// 9. 밑줄 (마크로)
+{
+  type: 'text',
+  text: '밑줄',
+  marks: [{ type: 'underline' }]
+}
+
+// 10. 취소선 (마크로)
+{
+  type: 'text',
+  text: '삭제됨',
+  marks: [{ type: 'strikethrough' }]
+}
+
+// 11. 코드 (마크로)
+{
+  type: 'text',
+  text: '인라인 코드',
+  marks: [{ type: 'code' }]
+}
+
+// 12. 링크 (마크로)
+{
+  type: 'text',
+  text: '클릭하세요',
+  marks: [{
+    type: 'link',
+    attrs: { href: 'https://example.com' }
+  }]
+}
+
+// 13. 색상 (마크로)
+{
+  type: 'text',
+  text: '색상 텍스트',
+  marks: [{
+    type: 'color',
+    attrs: { color: '#ff0000' }
+  }]
+}
+
+// 14. 하이라이트 (마크로)
+{
+  type: 'text',
+  text: '강조',
+  marks: [{
+    type: 'highlight',
+    attrs: { color: '#ffff00' }
+  }]
+}
+
+// 15. 글꼴 크기 (마크로)
+{
+  type: 'text',
+  text: '큰 텍스트',
+  marks: [{
+    type: 'fontSize',
+    attrs: { size: 24 }
+  }]
+}
+
+// 16. 글꼴 패밀리 (마크로)
+{
+  type: 'text',
+  text: '고정폭',
+  marks: [{
+    type: 'fontFamily',
+    attrs: { family: 'monospace' }
+  }]
+}`} />
+              </DocSection>
+
+              <DocSection id="structural-nodes" title="구조적 노드" depth={3}>
+                <p class="m-0 mb-3">문서 구조 및 조직:</p>
+                <DocCodeBlock code={`// 17. 인용구
+{
+  type: 'blockquote',
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '인용된 텍스트' }
+      ]
+    }
+  ]
+}
+
+// 18. 코드 블록
+{
+  type: 'codeBlock',
+  attrs: { language: 'javascript' },
+  children: [
+    { type: 'text', text: 'const x = 1;' }
+  ]
+}
+
+// 19. 순서 있는 목록
+{
+  type: 'orderedList',
+  attrs: { start: 1 },
+  children: [
+    {
+      type: 'listItem',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '첫 번째 항목' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 20. 순서 없는 목록
+{
+  type: 'bulletList',
+  children: [
+    {
+      type: 'listItem',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '항목' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 21. 목록 항목
+{
+  type: 'listItem',
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '목록 콘텐츠' }]
+    }
+  ]
+}
+
+// 22. 중첩 목록
+{
+  type: 'bulletList',
+  children: [
+    {
+      type: 'listItem',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '부모' }]
+        },
+        {
+          type: 'bulletList',
+          children: [
+            {
+              type: 'listItem',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [{ type: 'text', text: '자식' }]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="media-nodes" title="미디어 노드" depth={3}>
+                <p class="m-0 mb-3">이미지, 비디오 및 기타 미디어:</p>
+                <DocCodeBlock code={`// 23. 이미지
+{
+  type: 'image',
+  attrs: {
+    src: 'https://example.com/image.jpg',
+    alt: '설명',
+    width: 800,
+    height: 600
+  }
+}
+
+// 24. 비디오
+{
+  type: 'video',
+  attrs: {
+    src: 'https://example.com/video.mp4',
+    width: 640,
+    height: 360,
+    controls: true
+  }
+}
+
+// 25. 오디오
+{
+  type: 'audio',
+  attrs: {
+    src: 'https://example.com/audio.mp3',
+    controls: true
+  }
+}
+
+// 26. Iframe
+{
+  type: 'iframe',
+  attrs: {
+    src: 'https://example.com',
+    width: 800,
+    height: 600
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="complex-nodes" title="복잡한 노드" depth={3}>
+                <p class="m-0 mb-3">테이블, 카드, 인터랙티브 컴포넌트와 같은 고급 구조:</p>
+                <DocCodeBlock code={`// 27. 테이블
+{
+  type: 'table',
+  attrs: { colCount: 3 },
+  children: [
+    {
+      type: 'tableRow',
+      children: [
+        {
+          type: 'tableHeader',
+          attrs: { colspan: 1, rowspan: 1 },
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '헤더 1' }]
+            }
+          ]
+        },
+        {
+          type: 'tableHeader',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '헤더 2' }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      type: 'tableRow',
+      children: [
+        {
+          type: 'tableCell',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '셀 1' }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+// 28. 테이블 행
+{
+  type: 'tableRow',
+  children: [
+    { type: 'tableCell', children: [...] },
+    { type: 'tableCell', children: [...] }
+  ]
+}
+
+// 29. 테이블 셀
+{
+  type: 'tableCell',
+  attrs: { colspan: 1, rowspan: 1 },
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '셀 콘텐츠' }]
+    }
+  ]
+}
+
+// 30. 테이블 헤더
+{
+  type: 'tableHeader',
+  attrs: { colspan: 1, rowspan: 1 },
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '헤더' }]
+    }
+  ]
+}
+
+// 31. 카드
+{
+  type: 'card',
+  attrs: {
+    type: 'default',
+    backgroundColor: '#ffffff'
+  },
+  children: [
+    {
+      type: 'cardHeader',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '카드 제목' }]
+        }
+      ]
+    },
+    {
+      type: 'cardBody',
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '카드 콘텐츠' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 32. 카드 헤더
+{
+  type: 'cardHeader',
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '헤더' }]
+    }
+  ]
+}
+
+// 33. 카드 본문
+{
+  type: 'cardBody',
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '본문' }]
+    }
+  ]
+}
+
+// 34. 아코디언
+{
+  type: 'accordion',
+  children: [
+    {
+      type: 'accordionItem',
+      attrs: { open: false },
+      children: [
+        {
+          type: 'accordionHeader',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '질문' }]
+            }
+          ]
+        },
+        {
+          type: 'accordionContent',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '답변' }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+// 35. 탭
+{
+  type: 'tabs',
+  attrs: { activeTab: 0 },
+  children: [
+    {
+      type: 'tabList',
+      children: [
+        {
+          type: 'tab',
+          attrs: { id: 'tab1', label: '탭 1' }
+        },
+        {
+          type: 'tab',
+          attrs: { id: 'tab2', label: '탭 2' }
+        }
+      ]
+    },
+    {
+      type: 'tabPanel',
+      attrs: { tabId: 'tab1' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '탭 1 콘텐츠' }]
+        }
+      ]
+    },
+    {
+      type: 'tabPanel',
+      attrs: { tabId: 'tab2' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '탭 2 콘텐츠' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 36. 컬럼
+{
+  type: 'columns',
+  attrs: { count: 2 },
+  children: [
+    {
+      type: 'column',
+      attrs: { width: '50%' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '컬럼 1' }]
+        }
+      ]
+    },
+    {
+      type: 'column',
+      attrs: { width: '50%' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '컬럼 2' }]
+        }
+      ]
+    }
+  ]
+}
+
+// 37. 구분선
+{
+  type: 'divider',
+  attrs: { style: 'solid' }
+}
+
+// 38. 콜아웃
+{
+  type: 'callout',
+  attrs: {
+    type: 'info',
+    icon: 'ℹ️'
+  },
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '중요한 정보' }
+      ]
+    }
+  ]
+}`} />
+              </DocSection>
+
+              <DocSection id="custom-nodes" title="커스텀 노드" depth={3}>
+                <p class="m-0 mb-3">고도로 커스터마이즈된 도메인별 노드 타입:</p>
+                <DocCodeBlock code={`// 39. 수식
+{
+  type: 'math',
+  attrs: {
+    formula: 'E = mc^2',
+    display: 'block'
+  }
+}
+
+// 40. 다이어그램
+{
+  type: 'diagram',
+  attrs: {
+    type: 'flowchart',
+    content: 'graph TD; A-->B;'
+  }
+}
+
+// 41. 차트
+{
+  type: 'chart',
+  attrs: {
+    type: 'bar',
+    data: { labels: ['A', 'B'], values: [1, 2] }
+  }
+}
+
+// 42. 지도
+{
+  type: 'map',
+  attrs: {
+    lat: 37.7749,
+    lng: -122.4194,
+    zoom: 10
+  }
+}
+
+// 43. 캘린더
+{
+  type: 'calendar',
+  attrs: {
+    view: 'month',
+    date: '2024-01-15'
+  }
+}
+
+// 44. 투표
+{
+  type: 'poll',
+  attrs: {
+    question: '가장 좋아하는 것은?',
+    options: ['옵션 1', '옵션 2'],
+    allowMultiple: false
+  }
+}
+
+// 45. 퀴즈
+{
+  type: 'quiz',
+  children: [
+    {
+      type: 'quizQuestion',
+      attrs: { type: 'multiple-choice' },
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text: '문제 텍스트' }]
+        },
+        {
+          type: 'quizOption',
+          attrs: { correct: true },
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '정답' }]
+            }
+          ]
+        },
+        {
+          type: 'quizOption',
+          attrs: { correct: false },
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: '오답' }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+// 46. 임베드 (트위터, 유튜브 등)
+{
+  type: 'embed',
+  attrs: {
+    provider: 'youtube',
+    id: 'dQw4w9WgXcQ',
+    url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
+  }
+}
+
+// 47. 멘션
+{
+  type: 'mention',
+  attrs: {
+    id: 'user123',
+    label: '@사용자명'
+  }
+}
+
+// 48. 해시태그
+{
+  type: 'hashtag',
+  attrs: {
+    tag: 'javascript'
+  }
+}
+
+// 49. 북마크
+{
+  type: 'bookmark',
+  attrs: {
+    url: 'https://example.com',
+    title: '예제',
+    description: '예제 웹사이트',
+    image: 'https://example.com/image.jpg'
+  }
+}
+
+// 50. 주석
+{
+  type: 'annotation',
+  attrs: {
+    id: 'ann1',
+    type: 'comment',
+    author: 'user123'
+  },
+  children: [
+    {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '주석 콘텐츠' }
+      ]
+    }
+  ]
+}
+
+// 51. 커스텀 블록 (사용자 정의)
+{
+  type: 'customBlock',
+  attrs: {
+    type: 'product-card',
+    data: {
+      name: '제품명',
+      price: 99.99,
+      image: 'product.jpg'
+    }
+  }
+}
+
+// 52. 섹션
+{
+  type: 'section',
+  attrs: { id: 'section1' },
+  children: [
+    {
+      type: 'paragraph',
+      children: [{ type: 'text', text: '섹션 콘텐츠' }]
+    }
+  ]
+}`} />
+              </DocSection>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

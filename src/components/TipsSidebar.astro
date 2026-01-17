@@ -1,0 +1,211 @@
+---
+interface Props {
+  allTips: any[];
+  currentPath: string;
+  locale: string;
+  baseUrl?: string;
+}
+
+const {
+  allTips,
+  currentPath,
+  locale,
+  baseUrl = '/tips',
+} = Astro.props;
+
+// Filter tips by current locale only
+const tipsForLocale = allTips.filter((tip) => tip.data.locale === locale);
+
+// Group tips by category for sidebar
+const tipsByCategory = tipsForLocale.reduce(
+  (acc, tip) => {
+    const category = tip.data.category || 'other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(tip);
+    return acc;
+  },
+  {} as Record<string, typeof tipsForLocale>,
+);
+
+// Sort tips within each category
+Object.keys(tipsByCategory).forEach((category) => {
+  tipsByCategory[category].sort((a, b) => a.data.id.localeCompare(b.data.id));
+});
+
+// Category labels
+const categoryLabels: Record<string, string> = {
+  framework: locale === 'ko' ? '프레임워크' : 'Framework',
+  'browser-feature': locale === 'ko' ? '브라우저 기능' : 'Browser Features',
+  performance: locale === 'ko' ? '성능' : 'Performance',
+  accessibility: locale === 'ko' ? '접근성' : 'Accessibility',
+  formatting: locale === 'ko' ? '포맷팅' : 'Formatting',
+  ime: locale === 'ko' ? 'IME & 컴포지션' : 'IME & Composition',
+  selection: locale === 'ko' ? '선택 & 캐럿' : 'Selection & Caret',
+  paste: locale === 'ko' ? '붙여넣기 & 클립보드' : 'Paste & Clipboard',
+  mobile: locale === 'ko' ? '모바일' : 'Mobile',
+  other: locale === 'ko' ? '기타' : 'Other',
+};
+
+const localePath = (path: string) => {
+  if (locale === 'en') return path;
+  return `/${locale}${path}`;
+};
+
+---
+
+<aside aria-label="Tips" class="tips-sidebar">
+  <div class="tips-sidebar-header">
+    <div class="tips-sidebar-title">
+      <span class="font-semibold text-sm">{locale === 'ko' ? '해결 팁' : 'Tips'}</span>
+      <a href={localePath('/tips')} class="tips-index-link">
+        {locale === 'ko' ? '목록' : 'Index'} →
+      </a>
+    </div>
+  </div>
+
+  <nav aria-label="Tips pages" class="py-2">
+    <ul class="list-none p-0 m-0">
+      {Object.entries(tipsByCategory).map(([category, categoryTips]) => (
+        <li class="m-0">
+          <div class="category-header">
+            <span class="category-label">{categoryLabels[category] || category}</span>
+            <span class="category-count">({categoryTips.length})</span>
+          </div>
+          <ul class="tips-list">
+            {categoryTips.map((tip) => {
+              const tipPath = localePath(`${baseUrl}/${tip.data.id}`);
+              const isActive = currentPath === tipPath || currentPath.endsWith(`/tips/${tip.data.id}`);
+              
+              return (
+                <li class="m-0">
+                  <a
+                    href={tipPath}
+                    title={tip.data.title}
+                    class={`tips-nav-link ${isActive ? 'active' : ''}`}
+                  >
+                    {tip.data.title}
+                    {tip.data.difficulty && (
+                      <span class={`difficulty-indicator difficulty-${tip.data.difficulty}`}></span>
+                    )}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</aside>
+
+<style>
+  .tips-sidebar {
+    position: sticky;
+    top: 52px;
+    height: calc(100vh - 52px);
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-light);
+    width: 280px;
+    flex-shrink: 0;
+  }
+
+  .tips-sidebar-header {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .tips-sidebar-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .tips-index-link {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .tips-index-link:hover {
+    color: var(--accent-primary);
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem 0.5rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .category-count {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  .tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tips-nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.15s;
+    margin: 0.125rem 0;
+  }
+
+  .tips-nav-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-muted);
+  }
+
+  .tips-nav-link.active {
+    color: var(--accent-primary);
+    background: var(--accent-primary-light);
+    font-weight: 500;
+  }
+
+  .difficulty-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .difficulty-beginner {
+    background: var(--accent-success);
+  }
+
+  .difficulty-intermediate {
+    background: var(--accent-warning);
+  }
+
+  .difficulty-advanced {
+    background: var(--accent-error);
+  }
+
+  @media (max-width: 1024px) {
+    .tips-sidebar {
+      display: none;
+    }
+  }
+</style>

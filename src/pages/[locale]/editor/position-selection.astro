@@ -1,0 +1,660 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'position-representation', text: '위치 표현' },
+  { depth: 3, slug: 'path-based-positions', text: '경로 기반 위치' },
+  { depth: 3, slug: 'offset-in-position', text: '위치의 오프셋' },
+  { depth: 3, slug: 'position-stability', text: '위치 안정성' },
+  { depth: 2, slug: 'selection-representation', text: '선택 표현' },
+  { depth: 3, slug: 'anchor-focus', text: '앵커와 포커스' },
+  { depth: 3, slug: 'collapsed-selection', text: '축소된 선택' },
+  { depth: 2, slug: 'dom-to-model', text: 'DOM에서 모델로 변환' },
+  { depth: 3, slug: 'dom-position-to-path', text: 'DOM 위치를 경로로' },
+  { depth: 3, slug: 'dom-range-to-selection', text: 'DOM 범위를 선택으로' },
+  { depth: 2, slug: 'model-to-dom', text: '모델에서 DOM으로 변환' },
+  { depth: 3, slug: 'path-to-dom-position', text: '경로를 DOM 위치로' },
+  { depth: 3, slug: 'selection-to-dom-range', text: '선택을 DOM 범위로' },
+  { depth: 2, slug: 'selection-normalization', text: '선택 정규화' },
+  { depth: 3, slug: 'normalize-invalid', text: '유효하지 않은 선택 정규화' },
+  { depth: 3, slug: 'expand-selection', text: '선택 확장' },
+  { depth: 2, slug: 'position-updates', text: '위치 업데이트' },
+  { depth: 3, slug: 'tracking-positions', text: '위치 추적' },
+  { depth: 3, slug: 'updating-positions', text: '편집 후 위치 업데이트' },
+];
+---
+
+<html lang={locale} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="위치 & 선택 관리 – contenteditable.lab"
+      description="모델에서 위치와 선택 관리: 경로 기반 위치, 선택 표현, DOM 변환"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">위치 & 선택</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              위치 & 선택 관리
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델에서 위치와 선택 관리: 경로 기반 위치, 선택 표현, DOM 변환, 정규화.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                모델의 위치와 선택은 DOM과 다르게 표현됩니다. 이 차이점과 둘 사이를 변환하는 방법을 이해하는 것은 신뢰할 수 있는 에디터를 구축하는 데 중요합니다.
+              </p>
+              <div class="my-6 p-6 bg-bg-muted rounded-lg border border-border-light">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">DOM 위치</h4>
+                    <pre class="text-xs bg-bg-surface p-3 rounded m-0 mb-3"><code>{`{
+  node: TextNode,
+  offset: 5
+}`}</code></pre>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">실제 DOM 노드를 참조</li>
+                      <li class="mb-2">DOM 변경 시 깨짐</li>
+                      <li class="mb-2">브라우저별 특이사항</li>
+                      <li class="mb-2">직렬화하기 어려움</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">모델 위치</h4>
+                    <pre class="text-xs bg-bg-surface p-3 rounded m-0 mb-3"><code>{`{
+  path: [0, 1, 2],
+  offset: 5
+}`}</code></pre>
+                    <ul class="m-0 pl-4 text-sm text-text-secondary">
+                      <li class="mb-2">모델 구조를 참조</li>
+                      <li class="mb-2">DOM 업데이트에 걸쳐 안정적</li>
+                      <li class="mb-2">프레임워크 독립적</li>
+                      <li class="mb-2">직렬화하기 쉬움</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </DocSection>
+
+            <DocSection id="position-representation" title="위치 표현">
+              <DocSection id="path-based-positions" title="경로 기반 위치" depth={3}>
+                <p class="m-0 mb-3">
+                  모델의 위치는 경로(인덱스 배열)를 사용하여 문서 트리를 탐색합니다:
+                </p>
+                <DocCodeBlock code={`// 경로 구조: [blockIndex, inlineIndex, textOffset]
+// 예제 문서:
+{
+  type: 'document',
+  children: [
+    { type: 'paragraph', children: [...] },  // 인덱스 0
+    { type: 'heading', children: [...] },     // 인덱스 1
+    { type: 'paragraph', children: [...] }    // 인덱스 2
+  ]
+}
+
+// 위치 예제:
+{ path: [0], offset: 0 }           // 첫 번째 단락의 시작
+{ path: [0, 0], offset: 5 }        // 첫 번째 단락의 첫 번째 인라인에서 5번째 문자
+{ path: [1, 0, 1], offset: 3 }     // 제목의 첫 번째 인라인의 2번째 텍스트 노드에서 3번째 문자`} />
+                <p class="m-0 mb-3">
+                  <strong>경로 해석:</strong>
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>각 숫자는 부모의 자식 배열에 대한 인덱스</li>
+                  <li>마지막 숫자는 텍스트 노드 내의 문자 오프셋</li>
+                  <li>경로는 DOM이 다시 렌더링되어도 안정적</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="offset-in-position" title="위치의 오프셋" depth={3}>
+                <p class="m-0 mb-3">
+                  오프셋은 대상 노드 내의 문자 위치를 나타냅니다:
+                </p>
+                <DocCodeBlock code={`// 텍스트 노드의 경우, 오프셋은 문자 위치
+{
+  path: [0, 0],  // 첫 번째 단락, 첫 번째 인라인
+  offset: 5      // 텍스트 노드에서 5번째 문자
+}
+
+// 요소 노드의 경우, 오프셋은 자식 인덱스
+{
+  path: [0],     // 첫 번째 단락
+  offset: 2      // 단락의 2번째 자식 이후
+}
+
+// 모델에서 위치 찾기
+function findPosition(path, offset) {
+  let node = document;
+  
+  // 경로를 사용하여 탐색
+  for (let i = 0; i < path.length - 1; i++) {
+    node = node.children[path[i]];
+  }
+  
+  // 마지막 경로 인덱스가 대상 노드를 가리킴
+  const targetNode = node.children[path[path.length - 1]];
+  
+  return {
+    node: targetNode,
+    offset: offset
+  };
+}`} />
+              </DocSection>
+
+              <DocSection id="position-stability" title="위치 안정성" depth={3}>
+                <p class="m-0 mb-3">
+                  경로 기반 위치는 DOM이 변경되어도 유효합니다:
+                </p>
+                <DocCodeBlock code={`// 편집 전 위치
+const position = { path: [0, 0], offset: 10 };
+
+// 사용자가 [0, 0], offset: 5 위치에 텍스트 삽입
+// 모델이 업데이트되지만 위치 경로 구조는 유지됨
+
+// 편집 후 위치 (오프셋 조정)
+const newPosition = { path: [0, 0], offset: 15 };  // 10 + 삽입된 5개 문자
+
+// 텍스트가 삭제되면 오프셋 감소
+// 노드가 분할되면 경로가 변경될 수 있음
+// 하지만 경로 구조는 항상 유효함`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="selection-representation" title="선택 표현">
+              <DocSection id="anchor-focus" title="앵커와 포커스" depth={3}>
+                <p class="m-0 mb-3">
+                  선택은 두 위치로 표현됩니다: 앵커(선택이 시작된 위치)와 포커스(선택이 끝난 위치):
+                </p>
+                <DocCodeBlock code={`// 모델 선택
+{
+  anchor: { path: [0, 0], offset: 5 },
+  focus: { path: [0, 2], offset: 3 },
+  isBackward: false
+}
+
+// 축소된 선택 (커서)
+{
+  anchor: { path: [0, 1], offset: 10 },
+  focus: { path: [0, 1], offset: 10 },
+  isBackward: false
+}
+
+// 역방향 선택 (오른쪽에서 왼쪽으로 선택)
+{
+  anchor: { path: [0, 2], offset: 10 },
+  focus: { path: [0, 0], offset: 5 },
+  isBackward: true
+}`} />
+                <p class="m-0 mb-3">
+                  <strong>왜 앵커와 포커스인가?</strong>
+                </p>
+                <ul class="m-0 mb-3 pl-6">
+                  <li>앵커는 사용자가 선택을 시작한 위치 (마우스 다운 또는 Shift+Arrow 시작)</li>
+                  <li>포커스는 선택이 현재 끝나는 위치 (마우스 위치 또는 커서)</li>
+                  <li>isBackward는 선택 방향을 나타냄</li>
+                  <li>선택 확장/축소를 적절히 처리할 수 있게 함</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="collapsed-selection" title="축소된 선택" depth={3}>
+                <p class="m-0 mb-3">
+                  축소된 선택은 커서를 나타냅니다 (선택된 텍스트 없음):
+                </p>
+                <DocCodeBlock code={`// 축소된 선택
+{
+  anchor: { path: [0, 1], offset: 10 },
+  focus: { path: [0, 1], offset: 10 },
+  isBackward: false
+}
+
+// 축소되었는지 확인
+function isCollapsed(selection) {
+  return (
+    selection.anchor.path.join(',') === selection.focus.path.join(',') &&
+    selection.anchor.offset === selection.focus.offset
+  );
+}
+
+// 커서 위치 가져오기
+function getCursorPosition(selection) {
+  if (isCollapsed(selection)) {
+    return selection.anchor;  // 또는 focus, 둘 다 동일함
+  }
+  return null;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="dom-to-model" title="DOM에서 모델로 변환">
+              <p class="m-0 mb-4">
+                브라우저의 DOM 선택을 모델 선택으로 변환합니다:
+              </p>
+
+              <DocSection id="dom-position-to-path" title="DOM 위치를 경로로" depth={3}>
+                <DocCodeBlock code={`function domPositionToPath(domNode, domOffset, model) {
+  // DOM 노드에 해당하는 모델 노드 찾기
+  const modelNode = findModelNodeForDOM(domNode, model);
+  
+  if (!modelNode) {
+    return null;
+  }
+  
+  // 모델 트리를 따라 올라가며 경로 계산
+  const path = [];
+  let current = modelNode;
+  
+  while (current && current !== model) {
+    const parent = findParent(current, model);
+    if (parent) {
+      const index = parent.children.indexOf(current);
+      path.unshift(index);
+    }
+    current = parent;
+  }
+  
+  // 오프셋 추가
+  if (domNode.nodeType === Node.TEXT_NODE) {
+    // 오프셋은 텍스트 노드의 문자 위치
+    return { path, offset: domOffset };
+  } else {
+    // 오프셋은 요소의 자식 인덱스
+    return { path: [...path, domOffset], offset: 0 };
+  }
+}
+
+function findModelNodeForDOM(domNode, model) {
+  // data-model-id를 가진 요소를 찾기 위해 DOM 트리를 따라 올라가기
+  let current = domNode;
+  while (current) {
+    if (current.nodeType === Node.ELEMENT_NODE) {
+      const modelId = current.getAttribute('data-model-id');
+      if (modelId) {
+        return findNodeById(model, modelId);
+      }
+    }
+    current = current.parentElement;
+  }
+  return null;
+}`} />
+              </DocSection>
+
+              <DocSection id="dom-range-to-selection" title="DOM 범위를 선택으로" depth={3}>
+                <DocCodeBlock code={`function domSelectionToModel(domSelection) {
+  if (domSelection.rangeCount === 0) {
+    return null;
+  }
+  
+  const range = domSelection.getRangeAt(0);
+  
+  // 시작 위치 변환
+  const anchor = domPositionToPath(
+    range.startContainer,
+    range.startOffset,
+    model
+  );
+  
+  // 끝 위치 변환
+  const focus = domPositionToPath(
+    range.endContainer,
+    range.endOffset,
+    model
+  );
+  
+  if (!anchor || !focus) {
+    return null;
+  }
+  
+  // 역방향인지 결정
+  const isBackward = comparePositions(anchor, focus) > 0;
+  
+  return {
+    anchor: isBackward ? focus : anchor,
+    focus: isBackward ? anchor : focus,
+    isBackward
+  };
+}
+
+function comparePositions(pos1, pos2) {
+  // 경로를 사전식으로 비교
+  for (let i = 0; i < Math.max(pos1.path.length, pos2.path.length); i++) {
+    const idx1 = pos1.path[i] || 0;
+    const idx2 = pos2.path[i] || 0;
+    if (idx1 !== idx2) {
+      return idx1 - idx2;
+    }
+  }
+  // 경로가 같으면 오프셋 비교
+  return pos1.offset - pos2.offset;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="model-to-dom" title="모델에서 DOM으로 변환">
+              <p class="m-0 mb-4">
+                모델 선택을 DOM 선택으로 변환합니다:
+              </p>
+
+              <DocSection id="path-to-dom-position" title="경로를 DOM 위치로" depth={3}>
+                <DocCodeBlock code={`function pathToDOMPosition(path, offset, model) {
+  // 경로를 사용하여 모델 트리 탐색
+  let node = model;
+  for (let i = 0; i < path.length; i++) {
+    if (!node.children || node.children.length <= path[i]) {
+      return null;  // 유효하지 않은 경로
+    }
+    node = node.children[path[i]];
+  }
+  
+  // 해당하는 DOM 노드 찾기
+  const domNode = findDOMNodeForModel(node);
+  if (!domNode) {
+    return null;
+  }
+  
+  // 오프셋 처리
+  if (node.type === 'text') {
+    // 텍스트 노드의 경우, 오프셋은 문자 위치
+    return {
+      node: domNode,
+      offset: offset
+    };
+  } else {
+    // 요소 노드의 경우, 오프셋은 자식 인덱스
+    if (domNode.childNodes.length > offset) {
+      return {
+        node: domNode,
+        offset: offset
+      };
+    }
+    // 자식 범위를 벗어난 오프셋, 마지막 자식 사용
+    return {
+      node: domNode,
+      offset: domNode.childNodes.length
+    };
+  }
+}
+
+function findDOMNodeForModel(modelNode) {
+  // 일치하는 data-model-id를 가진 DOM 요소 찾기
+  const modelId = getModelId(modelNode);
+  return editor.querySelector(\`[data-model-id="\${modelId}"]\`);
+}`} />
+              </DocSection>
+
+              <DocSection id="selection-to-dom-range" title="선택을 DOM 범위로" depth={3}>
+                <DocCodeBlock code={`function modelSelectionToDOM(modelSelection) {
+  // 앵커 위치 변환
+  const anchorDOM = pathToDOMPosition(
+    modelSelection.anchor.path,
+    modelSelection.anchor.offset,
+    model
+  );
+  
+  // 포커스 위치 변환
+  const focusDOM = pathToDOMPosition(
+    modelSelection.focus.path,
+    modelSelection.focus.offset,
+    model
+  );
+  
+  if (!anchorDOM || !focusDOM) {
+    return null;
+  }
+  
+  // DOM 범위 생성
+  const range = document.createRange();
+  
+  if (modelSelection.isBackward) {
+    range.setStart(focusDOM.node, focusDOM.offset);
+    range.setEnd(anchorDOM.node, anchorDOM.offset);
+  } else {
+    range.setStart(anchorDOM.node, anchorDOM.offset);
+    range.setEnd(focusDOM.node, focusDOM.offset);
+  }
+  
+  // 선택에 적용
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+  
+  return range;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="selection-normalization" title="선택 정규화">
+              <p class="m-0 mb-4">
+                선택은 모델 변경 후 유효하지 않을 수 있습니다. 정규화합니다:
+              </p>
+
+              <DocSection id="normalize-invalid" title="유효하지 않은 선택 정규화" depth={3}>
+                <DocCodeBlock code={`function normalizeSelection(selection, model) {
+  // 앵커가 유효한지 확인
+  const anchorValid = isValidPosition(selection.anchor, model);
+  if (!anchorValid) {
+    selection.anchor = findNearestValidPosition(selection.anchor, model);
+  }
+  
+  // 포커스가 유효한지 확인
+  const focusValid = isValidPosition(selection.focus, model);
+  if (!focusValid) {
+    selection.focus = findNearestValidPosition(selection.focus, model);
+  }
+  
+  // 두 위치가 이제 같으면 축소
+  if (isSamePosition(selection.anchor, selection.focus)) {
+    selection.focus = { ...selection.anchor };
+    selection.isBackward = false;
+  }
+  
+  return selection;
+}
+
+function isValidPosition(position, model) {
+  try {
+    const node = getNodeAtPath(model, position.path);
+    if (!node) return false;
+    
+    if (node.type === 'text') {
+      return position.offset <= node.text.length;
+    } else {
+      return position.offset <= node.children.length;
+    }
+  } catch (e) {
+    return false;
+  }
+}
+
+function findNearestValidPosition(position, model) {
+  // 유효하지 않은 위치 근처의 유효한 위치 찾기 시도
+  // 유효한 노드를 찾을 때까지 경로를 따라 올라가기
+  // 그 노드의 끝으로 오프셋 설정
+  let path = [...position.path];
+  
+  while (path.length > 0) {
+    const node = getNodeAtPath(model, path);
+    if (node) {
+      if (node.type === 'text') {
+        return { path, offset: node.text.length };
+      } else {
+        return { path, offset: node.children.length };
+      }
+    }
+    path.pop();
+  }
+  
+  // 대체: 문서 시작
+  return { path: [0], offset: 0 };
+}`} />
+              </DocSection>
+
+              <DocSection id="expand-selection" title="선택 확장" depth={3}>
+                <p class="m-0 mb-3">
+                  때로는 전체 노드를 포함하도록 선택을 확장해야 합니다:
+                </p>
+                <DocCodeBlock code={`function expandSelectionToNodes(selection, model) {
+  // 앵커를 노드 시작으로 확장
+  const anchorNode = getNodeAtPath(model, selection.anchor.path);
+  if (anchorNode && selection.anchor.offset > 0) {
+    selection.anchor = {
+      path: selection.anchor.path,
+      offset: 0
+    };
+  }
+  
+  // 포커스를 노드 끝으로 확장
+  const focusNode = getNodeAtPath(model, selection.focus.path);
+  if (focusNode) {
+    const endOffset = focusNode.type === 'text' 
+      ? focusNode.text.length 
+      : focusNode.children.length;
+    
+    selection.focus = {
+      path: selection.focus.path,
+      offset: endOffset
+    };
+  }
+  
+  return selection;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="position-updates" title="위치 업데이트">
+              <p class="m-0 mb-4">
+                모델이 변경되면 위치를 업데이트해야 합니다:
+              </p>
+
+              <DocSection id="tracking-positions" title="위치 추적" depth={3}>
+                <p class="m-0 mb-3">
+                  작업 후 업데이트가 필요한 위치를 추적합니다:
+                </p>
+                <DocCodeBlock code={`class PositionTracker {
+  constructor() {
+    this.positions = new Map();
+  }
+  
+  track(position, id) {
+    this.positions.set(id, position);
+  }
+  
+  updateAfterOperation(operation) {
+    // 작업을 기반으로 모든 추적된 위치 업데이트
+    for (const [id, position] of this.positions.entries()) {
+      const updated = this.updatePosition(position, operation);
+      this.positions.set(id, updated);
+    }
+  }
+  
+  updatePosition(position, operation) {
+    // 작업이 위치보다 앞이면 위치는 동일하게 유지
+    // 작업이 위치에 있으면 위치가 앞으로 이동
+    // 작업이 위치보다 뒤이면 위치는 변경되지 않음
+    
+    if (operation.type === 'insertText') {
+      if (isBefore(operation.position, position)) {
+        // 앞에 텍스트 삽입, 위치가 앞으로 이동
+        return {
+          ...position,
+          offset: position.offset + operation.text.length
+        };
+      }
+    }
+    
+    if (operation.type === 'deleteRange') {
+      if (overlaps(operation.range, position)) {
+        // 위치가 삭제된 범위에 있음, 범위 시작으로 이동
+        return { ...operation.range.anchor };
+      } else if (isAfter(operation.range, position)) {
+        // 위치 이후 삭제, 위치는 변경되지 않음
+        return position;
+      } else {
+        // 위치 이전 삭제, 오프셋 조정
+        const deletedLength = getRangeLength(operation.range);
+        return {
+          ...position,
+          offset: position.offset - deletedLength
+        };
+      }
+    }
+    
+    return position;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="updating-positions" title="편집 후 위치 업데이트" depth={3}>
+                <DocCodeBlock code={`function updateSelectionAfterEdit(selection, operation) {
+  // 앵커 업데이트
+  selection.anchor = updatePosition(selection.anchor, operation);
+  
+  // 포커스 업데이트
+  selection.focus = updatePosition(selection.focus, operation);
+  
+  // 필요시 정규화
+  return normalizeSelection(selection, model);
+}
+
+function updatePosition(position, operation) {
+  switch (operation.type) {
+    case 'insertText':
+      return updatePositionForInsert(position, operation);
+    case 'deleteRange':
+      return updatePositionForDelete(position, operation);
+    case 'splitNode':
+      return updatePositionForSplit(position, operation);
+    case 'mergeNodes':
+      return updatePositionForMerge(position, operation);
+    default:
+      return position;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>
