@@ -1,5 +1,5 @@
 ---
-id: ce-0243
+id: ce-0243-ime-start-delay-android-zh
 scenarioId: scenario-ime-start-delay-android
 locale: zh
 os: Android

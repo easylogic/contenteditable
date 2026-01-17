@@ -1,5 +1,5 @@
 ---
-id: scenario-list-item-deletion
+id: scenario-list-item-deletion-ko
 title: 리스트 항목 삭제 동작이 브라우저마다 다름
 description: "리스트 항목의 시작 또는 끝에서 Backspace 또는 Delete를 누를 때 동작이 브라우저마다 크게 다릅니다. 일부 브라우저는 리스트 항목을 삭제하고 인접한 콘텐츠와 병합하는 반면, 다른 브라우저는 전체 리스트를 삭제하거나 예상치 못한 DOM 구조를 생성할 수 있습니다."
 category: formatting
@@ -74,3 +74,10 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [Dev.to: What happens when you delete text by backspace](https://dev.to/takechamp/what-happens-when-you-delete-text-by-backspace-in-a-contenteditable-element-45bg) - Deletion behavior analysis
+- [W3C Community: ContentEditable](https://www.w3.org/community/editing/wiki/ContentEditable) - Spec behavior
+- [Stack Overflow: Prevent deletion of all li tags](https://stackoverflow.com/questions/24188565/prevent-deletion-of-all-li-tags-in-a-content-editable-ul) - Chrome deletion issues
+- [Stack Overflow: Empty HTML tag disappears on backspace](https://stackoverflow.com/questions/57910781/empty-html-tag-in-an-editable-div-disappears-when-backspace-is-pressed-on-firefo) - Empty tag handling

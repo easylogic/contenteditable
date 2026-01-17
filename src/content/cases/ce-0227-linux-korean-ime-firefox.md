@@ -1,5 +1,5 @@
 ---
-id: ce-0227
+id: ce-0227-linux-korean-ime-firefox
 scenarioId: scenario-linux-korean-ime-hangul
 locale: en
 os: Linux

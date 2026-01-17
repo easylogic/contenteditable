@@ -1,5 +1,5 @@
 ---
-id: ce-0201
+id: ce-0201-chinese-ime-focus-blur-chrome
 scenarioId: scenario-ime-composition-focus-blur
 locale: en
 os: Windows

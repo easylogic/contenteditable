@@ -1,5 +1,5 @@
 ---
-id: ce-0014
+id: ce-0014-nested-contenteditable
 scenarioId: scenario-nested-contenteditable
 locale: en
 os: Any

@@ -1,5 +1,5 @@
 ---
-id: ce-0099
+id: ce-0099-nested-list-enter-chrome-ko
 scenarioId: scenario-nested-list-behavior
 locale: ko
 os: Windows

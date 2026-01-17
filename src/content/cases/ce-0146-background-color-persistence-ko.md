@@ -1,5 +1,5 @@
 ---
-id: ce-0146
+id: ce-0146-background-color-persistence-ko
 scenarioId: scenario-background-color-change
 locale: ko
 os: Windows

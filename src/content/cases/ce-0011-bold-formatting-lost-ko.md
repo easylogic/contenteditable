@@ -1,5 +1,5 @@
 ---
-id: ce-0011
+id: ce-0011-bold-formatting-lost-ko
 scenarioId: scenario-formatting-persistence
 locale: ko
 os: macOS

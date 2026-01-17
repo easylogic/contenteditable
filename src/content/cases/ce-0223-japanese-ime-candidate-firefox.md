@@ -1,5 +1,5 @@
 ---
-id: ce-0223
+id: ce-0223-japanese-ime-candidate-firefox
 scenarioId: scenario-japanese-ime-convertion-firefox
 locale: en
 os: macOS

@@ -102,6 +102,10 @@ Firefox's IME handling appears to have a race condition or memory corruption whe
    }
    ```
 
-## Reference
+## References
 
-- GitHub Issue: https://github.com/facebookarchive/draft-js/issues/2412
+- [Draft.js Issue #2412: Korean IME crash](https://github.com/facebookarchive/draft-js/issues/2412) - Original GitHub issue
+- [Stack Overflow: Draft.js not registering IME input](https://stackoverflow.com/questions/65595829/draft-js-not-registering-ime-input) - Related IME issues
+- [Firefox Bugzilla #1633399: Draft.js editor crash](https://bugzilla.mozilla.org/show_bug.cgi?id=1633399) - Firefox crash reports
+- [Firefox Bugzilla #1739489: macOS Emoji crash](https://bugzilla.mozilla.org/show_bug.cgi?id=1739489) - Related emoji crash
+- [Lightrun: Netlify CMS Hangul crash](https://lightrun.com/answers/netlify-netlify-cms-editor-crashes-when-write-in-hangul) - Similar crash reports

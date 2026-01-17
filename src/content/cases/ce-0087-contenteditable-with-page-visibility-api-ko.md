@@ -1,5 +1,5 @@
 ---
-id: ce-0087
+id: ce-0087-contenteditable-with-page-visibility-api-ko
 scenarioId: scenario-page-visibility-api
 locale: ko
 os: macOS

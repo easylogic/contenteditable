@@ -1,5 +1,5 @@
 ---
-id: ce-0012
+id: ce-0012-caret-jumps-on-paste
 scenarioId: scenario-caret-position-after-paste
 locale: en
 os: Windows

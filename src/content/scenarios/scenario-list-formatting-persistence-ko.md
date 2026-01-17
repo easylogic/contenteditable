@@ -1,5 +1,5 @@
 ---
-id: scenario-list-formatting-persistence
+id: scenario-list-formatting-persistence-ko
 title: 리스트 항목 편집 시 리스트 포맷팅이 손실됨
 description: "리스트 항목 내에서 텍스트를 편집할 때 굵게, 기울임꼴 또는 링크와 같은 포맷팅이 손실되거나 예상치 못하게 동작할 수 있습니다. 특정 작업(예: 콘텐츠 붙여넣기 또는 포맷팅 적용)을 수행하면 리스트 구조 자체도 손실될 수 있습니다."
 category: formatting
@@ -86,3 +86,11 @@ element.addEventListener('paste', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [Stack Overflow: Enforce li formatting in contenteditable ul](https://stackoverflow.com/questions/13240310/how-to-enforce-li-formatting-in-a-contenteditable-ul) - Formatting preservation
+- [Stack Overflow: Restrict style of pasted text](https://stackoverflow.com/questions/63052383/how-do-i-restrict-the-style-of-the-text-pasted-in-a-contenteditable-area) - Paste filtering
+- [Stack Overflow: Prevent deletion of all li tags](https://stackoverflow.com/questions/24188565/prevent-deletion-of-all-li-tags-in-a-content-editable-ul) - List structure issues
+- [Reddit: SharePoint grid view losing bold](https://www.reddit.com/r/sharepoint/comments/1lahodr) - Storage issues
+- [GitHub: MediumEditor](https://github.com/yabwe/medium-editor) - Editor configuration

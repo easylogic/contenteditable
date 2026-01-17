@@ -76,6 +76,8 @@ When composition is confirmed with Space key, Safari fails to properly clear the
    - Use a modal or overlay when user needs to edit table cell content
    - Prevent IME composition in table cell altogether
 
-## Reference
+## References
 
-- GitHub Issue: https://github.com/ueberdosis/tiptap/issues/7186
+- [TipTap Issue #7186: IME Pinyin visible in table cells](https://github.com/ueberdosis/tiptap/issues/7186) - GitHub issue report
+- [ProseMirror Discuss: IME composing problems in table cells](https://discuss.prosemirror.net/t/ime-composing-problems-on-td-or-th-element-in-safari-browser/4501) - Detailed discussion and workarounds
+- [ProseMirror Issue #944: Duplicated characters in Safari with IME](https://github.com/ProseMirror/prosemirror/issues/944) - Related IME duplication issues

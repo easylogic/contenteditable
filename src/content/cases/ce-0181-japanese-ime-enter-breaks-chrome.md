@@ -1,5 +1,5 @@
 ---
-id: ce-0181
+id: ce-0181-japanese-ime-enter-breaks-chrome
 scenarioId: scenario-ime-enter-breaks
 locale: en
 os: Windows

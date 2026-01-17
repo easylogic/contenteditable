@@ -1,5 +1,5 @@
 ---
-id: ce-0076
+id: ce-0076-contenteditable-with-cors
 scenarioId: scenario-cors-restrictions
 locale: en
 os: macOS

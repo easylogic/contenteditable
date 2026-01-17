@@ -1,5 +1,5 @@
 ---
-id: ce-0096
+id: ce-0096-ime-composition-duplicate-events-ios-safari
 scenarioId: scenario-ime-composition-duplicate-events
 locale: en
 os: iOS

@@ -1,5 +1,5 @@
 ---
-id: ce-0271
+id: ce-0271-caret-invisible-relative-safari-ko
 scenarioId: scenario-caret-invisible-relative
 locale: ko
 os: macOS

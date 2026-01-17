@@ -1,5 +1,5 @@
 ---
-id: ce-0057
+id: ce-0057-contenteditable-with-maxlength-ko
 scenarioId: scenario-maxlength-behavior
 locale: ko
 os: Windows

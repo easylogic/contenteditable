@@ -100,6 +100,8 @@ macOS treats accent menu input differently from full IME composition:
    };
    ```
 
-## Reference
+## References
 
-- Stack Overflow: https://stackoverflow.com/questions/76820259
+- [Stack Overflow: JS IME composition and Mac accent menu handling](https://stackoverflow.com/questions/76820259/js-ime-composition-and-mac-accent-menu-handling-in-custom-input-field) - Discussion and workarounds
+- [Firefox Bug 1390124: compositionstart should fire when accent menu is invoked](https://bugzilla.mozilla.org/show_bug.cgi?id=1390124) - Firefox behavior discussion
+- [Apple Support: Use accent marks in Keynote](https://support.apple.com/en-afri/guide/keynote/tan5f40be0d1/mac) - Accent menu documentation

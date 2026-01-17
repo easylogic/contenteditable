@@ -1,5 +1,5 @@
 ---
-id: ce-0090
+id: ce-0090-contenteditable-with-css-isolation-ko
 scenarioId: scenario-css-isolation
 locale: ko
 os: macOS

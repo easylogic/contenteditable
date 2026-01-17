@@ -1,5 +1,5 @@
 ---
-id: ce-0226
+id: ce-0226-selection-performance-large
 scenarioId: scenario-performance-selection-large-content
 locale: en
 os: Any

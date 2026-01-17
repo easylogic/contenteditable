@@ -1,5 +1,5 @@
 ---
-id: ce-0115
+id: ce-0115-table-tab-navigation-ko
 scenarioId: scenario-table-editing
 locale: ko
 os: Windows

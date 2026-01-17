@@ -1,5 +1,5 @@
 ---
-id: ce-0296
+id: ce-0296-beforeinput-input-selection-mismatch-ko
 scenarioId: scenario-beforeinput-input-selection-mismatch
 locale: ko
 os: Android

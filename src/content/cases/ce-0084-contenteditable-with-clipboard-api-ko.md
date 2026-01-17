@@ -1,5 +1,5 @@
 ---
-id: ce-0084
+id: ce-0084-contenteditable-with-clipboard-api-ko
 scenarioId: scenario-clipboard-api
 locale: ko
 os: Windows

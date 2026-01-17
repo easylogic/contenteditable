@@ -1,5 +1,5 @@
 ---
-id: scenario-caret-out-of-viewport
+id: scenario-caret-out-of-viewport-ko
 title: 커서 위치가 예상치 못하게 뷰포트 밖으로 이동함
 description: "contenteditable 요소의 텍스트 커서(커서)가 편집 작업 중에 보이는 뷰포트 밖으로 이동할 수 있어 사용자가 어디에 입력하고 있는지 보기 어렵습니다. 이것은 붙여넣기 작업, 서식 변경 또는 프로그래밍 방식 콘텐츠 업데이트 중에 발생할 수 있습니다."
 category: selection
@@ -108,3 +108,13 @@ element.addEventListener('paste', () => {
   }, 0);
 });
 ```
+
+## 참고 자료
+
+- [MDN: contenteditable global attribute](https://developer.mozilla.org/docs/Web/HTML/Reference/Global_attributes/contenteditable) - contenteditable documentation
+- [W3C ContentEditable: Caret positioning](https://w3c.github.io/contentEditable/) - Caret specification
+- [CKEditor Issue #9771: Scroll to top after paste](https://dev.ckeditor.com/ticket/9771) - Paste scroll issues
+- [Chromium Code Review: Caret scroll into view](https://codereview.chromium.org/9969106/patch/1/5) - Chrome behavior
+- [TipTap Issue #2629: iOS Safari caret visibility](https://github.com/ueberdosis/tiptap/issues/2629) - iOS scroll issues
+- [GeeksforGeeks: Set cursor position in contenteditable](https://www.geeksforgeeks.org/how-to-set-cursor-position-in-content-editable-element-using-javascript/) - Caret positioning
+- [GitHub Gist: caret.js utilities](https://gist.github.com/imolorhe/b6ec41233cf7756eeacbb1e38cd42856) - Caret position helpers

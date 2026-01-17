@@ -1,5 +1,5 @@
 ---
-id: ce-0169
+id: ce-0169-blockquote-formatting-breaks-ko
 scenarioId: scenario-blockquote-behavior
 locale: ko
 os: Windows

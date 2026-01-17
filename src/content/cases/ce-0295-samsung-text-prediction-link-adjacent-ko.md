@@ -1,5 +1,5 @@
 ---
-id: ce-0295
+id: ce-0295-samsung-text-prediction-link-adjacent-ko
 scenarioId: scenario-samsung-keyboard-text-prediction
 locale: ko
 os: Android

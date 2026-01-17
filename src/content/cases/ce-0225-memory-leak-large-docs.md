@@ -1,5 +1,5 @@
 ---
-id: ce-0225
+id: ce-0225-memory-leak-large-docs
 scenarioId: scenario-performance-memory-leak
 locale: en
 os: Any

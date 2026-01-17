@@ -1,5 +1,5 @@
 ---
-id: ce-0198
+id: ce-0198-hindi-ime-space-ignored-firefox-ko
 scenarioId: scenario-space-during-composition
 locale: ko
 os: Windows

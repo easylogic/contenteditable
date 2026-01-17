@@ -91,3 +91,10 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [W3C Editing: execCommand](https://w3c.github.io/editing/docs/execCommand/) - execCommand specification
+- [Stack Overflow: How to change font size using execCommand](https://stackoverflow.com/questions/51909403/how-to-change-font-size-using-document-execcommand) - fontSize limitations
+- [Stack Overflow: execCommand fontSize in pixels](https://stackoverflow.com/questions/5868295/document-execcommand-fontsize-in-pixels) - Pixel size workarounds
+- [Stack Overflow: Font size changes on contenteditable div](https://stackoverflow.com/questions/34052260/font-size-changes-on-contenteditable-div) - em/rem units

@@ -1,5 +1,5 @@
 ---
-id: ce-0106
+id: ce-0106-font-family-persistence-safari
 scenarioId: scenario-font-family-change
 locale: en
 os: macOS

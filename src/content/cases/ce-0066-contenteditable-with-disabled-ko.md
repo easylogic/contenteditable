@@ -1,5 +1,5 @@
 ---
-id: ce-0066
+id: ce-0066-contenteditable-with-disabled-ko
 scenarioId: scenario-disabled-attribute
 locale: ko
 os: macOS

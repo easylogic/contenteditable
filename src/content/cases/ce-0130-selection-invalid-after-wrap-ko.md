@@ -1,5 +1,5 @@
 ---
-id: ce-0130
+id: ce-0130-selection-invalid-after-wrap-ko
 scenarioId: scenario-selection-restoration
 locale: ko
 os: Windows

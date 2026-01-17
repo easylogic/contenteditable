@@ -1,5 +1,5 @@
 ---
-id: ce-0218
+id: ce-0218-mobile-keyboard-resize-android-chrome
 scenarioId: scenario-mobile-virtual-keyboard-resize
 locale: en
 os: Android

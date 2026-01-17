@@ -1,5 +1,5 @@
 ---
-id: ce-0047
+id: ce-0047-paste-from-clipboard-api-ko
 scenarioId: scenario-clipboard-api
 locale: ko
 os: macOS

@@ -103,3 +103,7 @@ element.addEventListener('drop', (e) => {
 });
 ```
 
+## References
+
+- [Stack Overflow: Drop image into contenteditable in Chrome to the cursor](https://stackoverflow.com/questions/10654262/drop-image-into-contenteditable-in-chrome-to-the-cursor) - Image drop handling
+- [Froala Help: Can I insert images as base64?](https://wysiwyg-editor.froala.help/hc/en-us/articles/115000555949-Can-I-insert-images-as-base64) - Base64 image considerations

@@ -1,5 +1,5 @@
 ---
-id: ce-0178
+id: ce-0178-vietnamese-ime-diacritic-loss-chrome
 scenarioId: scenario-ime-combining-characters-composition
 locale: en
 os: Windows

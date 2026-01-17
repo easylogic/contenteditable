@@ -474,3 +474,13 @@ Similar issues related to iOS dictation have been reported in React Native appli
 - **Workaround**: Implement debouncing mechanism to prevent re-renders during dictation
 
 This suggests similar issues may occur in web applications.
+
+## References
+
+- [WebKit Bug 261764: iOS/iPadOS dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Composition events not firing
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2016/WD-uievents-20160804/) - Composition event specification
+- [Reddit: Dictation input jumping around](https://www.reddit.com//r/ios/comments/1pfv6c4/dictation_input_jumping_around/) - User reports of duplicate text
+- [Reddit: iPhone dictation issues](https://www.reddit.com/r/iphone/comments/1crdigu) - Dictation problems
+- [Stack Overflow: Detect voice dictation in iOS](https://stackoverflow.com/questions/32652775/ios-how-to-detect-if-voice-dictation-was-used-for-uitextfield-or-microphone-bu) - Dictation detection
+- [ProseMirror Issue #944: Duplicate character with IME](https://github.com/ProseMirror/prosemirror/issues/944) - Related IME issues
+- [ProseMirror Discuss: isComposing gets out of sync on iOS](https://discuss.prosemirror.net/t/iscomposing-gets-out-of-sync-on-ios/4067) - isComposing state issues

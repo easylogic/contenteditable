@@ -1,5 +1,5 @@
 ---
-id: ce-0141
+id: ce-0141-undo-redo-multiple-ops-ko
 scenarioId: scenario-undo-redo-stack
 locale: ko
 os: Windows

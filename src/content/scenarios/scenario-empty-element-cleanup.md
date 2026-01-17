@@ -122,3 +122,9 @@ element.addEventListener('input', () => {
 });
 ```
 
+## References
+
+- [GitHub Gist: Empty element cleanup](https://gist.github.com/1318279) - Cleanup patterns
+- [Telerik Forums: Editor removes content from paragraph](https://www.telerik.com/forums/editor-removes-content-from-paragraph) - Empty paragraph handling
+- [Stack Overflow: Can't get to empty paragraphs in contenteditable](https://stackoverflow.com/questions/17714340/cant-get-to-empty-paragraphs-in-contenteditable) - Empty paragraph focus issues
+- [Django Tricks: ContentEditable empty paragraph handling](https://www.djangotricks.com/tricks/8Kg4KtMWaoAJ/) - Placeholder solutions

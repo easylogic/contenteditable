@@ -1,5 +1,5 @@
 ---
-id: ce-0281
+id: ce-0281-ios-keyboard-hides-text-android-en
 scenarioId: scenario-ios-keyboard-hides-text
 locale: en
 os: Android

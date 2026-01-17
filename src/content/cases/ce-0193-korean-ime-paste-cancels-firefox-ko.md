@@ -1,5 +1,5 @@
 ---
-id: ce-0193
+id: ce-0193-korean-ime-paste-cancels-firefox-ko
 scenarioId: scenario-ime-composition-paste
 locale: ko
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0007
+id: ce-0007-undo-breaks-composition-ko
 scenarioId: scenario-undo-with-composition
 locale: ko
 os: Windows

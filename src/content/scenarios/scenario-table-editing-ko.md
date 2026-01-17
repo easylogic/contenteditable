@@ -1,5 +1,5 @@
 ---
-id: scenario-table-editing
+id: scenario-table-editing-ko
 title: contenteditable에서 테이블 편집이 제한적이고 일관되지 않음
 description: "contenteditable 요소 내에서 테이블 편집은 제한적이며 브라우저마다 일관되지 않게 동작합니다. 테이블 생성, 셀 편집, 행/열 추가/제거, 테이블 구조 유지 모두 브라우저별 동작과 제한이 있습니다."
 category: formatting
@@ -114,3 +114,10 @@ function focusCell(cell) {
   cell.focus();
 }
 ```
+
+## 참고 자료
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [Can I Use: execCommand](https://caniuse.com/wf-execcommand) - Browser compatibility
+- [Can I Use: execCommand insertHTML](https://caniuse.com/mdn-api_document_execcommand_inserthtml) - insertHTML command support
+- [TypeError: contenteditable browser support](https://www.typeerror.org/docs/browser_support_tables/contenteditable) - Table editing limitations

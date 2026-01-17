@@ -1,5 +1,5 @@
 ---
-id: ce-0137
+id: ce-0137-blockquote-exit-difficult-ko
 scenarioId: scenario-blockquote-behavior
 locale: ko
 os: Windows

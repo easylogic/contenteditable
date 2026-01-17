@@ -1,5 +1,5 @@
 ---
-id: ce-0200
+id: ce-0200-vietnamese-ime-backspace-granularity-edge-ko
 scenarioId: scenario-ime-backspace-granularity
 locale: ko
 os: Windows

@@ -112,6 +112,10 @@ Chrome Mobile's caret positioning algorithm appears to have a bug when:
 
 4. **Use desktop browser**: Recommend users use desktop browsers for editing when possible
 
-## Reference
+## References
 
-- GitHub Issue: https://github.com/ProseMirror/prosemirror/issues/1141
+- [ProseMirror Issue #1141: Caret jump on Chrome Mobile](https://github.com/ProseMirror/prosemirror/issues/1141) - GitHub issue report
+- [Stack Overflow: Fix cursor jumping in inline contenteditable on Android Chrome](https://stackoverflow.com/questions/68187400/how-to-fix-cursor-jumping-in-inline-contenteditable-on-android-chrome) - Inline element caret issues
+- [Stack Overflow: Why is contenteditable caret jumping to the end in Chrome](https://stackoverflow.com/questions/27786048/why-is-my-contenteditable-caret-jumping-to-the-end-in-chrome) - Related caret jump issues
+- [Stack Overflow: Cursor in wrong place in contenteditable](https://stackoverflow.com/questions/18985261/cursor-in-wrong-place-in-contenteditable) - Caret positioning problems
+- [ProseMirror Discuss: Samsung keyboard causes spam of new lines](https://discuss.prosemirror.net/t/samsung-keyboard-within-android-webview-causes-a-spam-of-new-lines/5246) - Keyboard-specific issues

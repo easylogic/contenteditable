@@ -1,5 +1,5 @@
 ---
-id: scenario-beforeinput-input-inputtype-mismatch
+id: scenario-beforeinput-input-inputtype-mismatch-ko
 title: beforeinput과 input 이벤트가 다른 inputType 값을 가짐
 description: "IME 조합 중 또는 특정 브라우저/IME 조합에서 beforeinput 이벤트가 해당 input 이벤트와 다른 inputType을 가질 수 있습니다. 예를 들어, beforeinput은 insertCompositionText로 발생하는 반면 input은 deleteContentBackward로 발생할 수 있습니다. 이 불일치는 핸들러가 실제 DOM 변경을 잘못 해석하게 만들 수 있으며, input 이벤트 처리에서 사용하기 위해 beforeinput의 targetRanges를 저장해야 합니다."
 category: ime
@@ -122,3 +122,12 @@ function handleActualChange(targetRanges, inputEvent) {
 3. **DOM 직접 검사**: 불일치가 발생하면 실제 변경을 이해하기 위해 DOM 상태 검사
 4. **우아하게 처리**: `inputType`이 항상 올바르다고 가정하지 말고 폴백 로직을 가짐
 5. **브라우저 간 테스트**: 이 문제는 브라우저와 IME 조합에 따라 크게 다름
+
+## 참고 자료
+
+- [W3C Input Events Level 2](https://www.w3.org/TR/input-events-2/) - beforeinput and inputType specification
+- [W3C Input Events: targetRanges](https://www.w3.org/TR/2016/WD-input-events-20161018/) - getTargetRanges documentation
+- [W3C Input Events: insertCompositionText](https://www.w3.org/TR/2017/WD-input-events-20170320/) - Composition input types
+- [W3C Input Events: deleteContentBackward](https://www.w3.org/TR/input-events-2/) - Deletion input types
+- [W3C Input Events: Grapheme clusters](https://www.w3.org/TR/2017/WD-input-events-1-20170714/) - Text unit handling
+- [W3C Input Events GitHub Issue #86](https://github.com/w3c/input-events/issues/86) - Event ordering issues

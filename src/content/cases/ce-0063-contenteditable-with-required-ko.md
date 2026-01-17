@@ -1,5 +1,5 @@
 ---
-id: ce-0063
+id: ce-0063-contenteditable-with-required-ko
 scenarioId: scenario-required-validation
 locale: ko
 os: macOS

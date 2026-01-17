@@ -441,6 +441,7 @@ function insertTextAfterElement(element, text) {
 
 ## References
 
-- MDN: Selection API - https://developer.mozilla.org/en-US/docs/Web/API/Selection
-- MDN: Range API - https://developer.mozilla.org/en-US/docs/Web/API/Range
-- W3C Input Events Specification - https://www.w3.org/TR/2016/WD-input-events-20160928/
+- [MDN: Selection API](https://developer.mozilla.org/en-US/docs/Web/API/Selection) - Official documentation
+- [MDN: Range API](https://developer.mozilla.org/en-US/docs/Web/API/Range) - Official documentation
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - Official specification
+- [W3C Input Events Level 1 Specification](https://www.w3.org/TR/2016/WD-input-events-20160928/) - Legacy specification

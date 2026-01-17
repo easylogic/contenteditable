@@ -1,5 +1,5 @@
 ---
-id: ce-0077
+id: ce-0077-contenteditable-with-web-components
 scenarioId: scenario-web-components-integration
 locale: en
 os: Windows

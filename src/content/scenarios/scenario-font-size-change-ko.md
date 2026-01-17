@@ -1,5 +1,5 @@
 ---
-id: scenario-font-size-change
+id: scenario-font-size-change-ko
 title: 글꼴 크기 변경이 일관되지 않게 동작함
 description: "contenteditable 요소에서 글꼴 크기를 변경하는 것이 브라우저마다 일관되지 않게 동작합니다. 글꼴 크기가 인라인 스타일로, font 태그로 적용되거나 새 텍스트를 입력할 때 유지되지 않을 수 있습니다. 단위(px, em, rem) 처리도 다양합니다."
 category: formatting
@@ -90,3 +90,11 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [W3C Editing: execCommand](https://w3c.github.io/editing/docs/execCommand/) - execCommand specification
+- [Stack Overflow: How to change font size using execCommand](https://stackoverflow.com/questions/51909403/how-to-change-font-size-using-document-execcommand) - fontSize limitations
+- [Stack Overflow: execCommand fontSize in pixels](https://stackoverflow.com/questions/5868295/document-execcommand-fontsize-in-pixels) - Pixel size workarounds
+- [Stack Overflow: Font size changes on contenteditable div](https://stackoverflow.com/questions/34052260/font-size-changes-on-contenteditable-div) - em/rem units

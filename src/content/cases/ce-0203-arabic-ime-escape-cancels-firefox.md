@@ -1,5 +1,5 @@
 ---
-id: ce-0203
+id: ce-0203-arabic-ime-escape-cancels-firefox
 scenarioId: scenario-ime-composition-escape-key
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0131
+id: ce-0131-auto-scroll-lag-rapid-typing-ko
 scenarioId: scenario-auto-scroll-on-typing
 locale: ko
 os: Windows

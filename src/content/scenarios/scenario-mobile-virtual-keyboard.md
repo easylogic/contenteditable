@@ -734,3 +734,11 @@ class MobileVirtualKeyboardTester {
 ---
 
 This comprehensive mobile virtual keyboard management scenario provides solutions for one of the most challenging aspects of mobile contenteditable development.
+
+## References
+
+- [MDN: VirtualKeyboard API](https://developer.mozilla.org/docs/Web/API/VirtualKeyboard_API) - Official VirtualKeyboard API documentation
+- [MDN: VirtualKeyboard.overlaysContent](https://developer.mozilla.org/en-US/docs/Web/API/VirtualKeyboard/overlaysContent) - Overlay content property
+- [Chrome Developers: Viewport resize behavior](https://developer.chrome.com/blog/viewport-resize-behavior) - interactive-widget meta tag documentation
+- [MDN: Visual Viewport API](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API) - Visual Viewport API documentation
+- [Ionic Capacitor Issue #8181: Virtual keyboard behavior](https://github.com/ionic-team/capacitor/issues/8181) - WebView keyboard issues

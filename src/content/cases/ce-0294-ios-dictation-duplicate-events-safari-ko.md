@@ -1,5 +1,5 @@
 ---
-id: ce-0294
+id: ce-0294-ios-dictation-duplicate-events-safari-ko
 scenarioId: scenario-ios-dictation-duplicate-events
 locale: ko
 os: iOS

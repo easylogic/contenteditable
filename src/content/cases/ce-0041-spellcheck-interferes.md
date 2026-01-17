@@ -1,5 +1,5 @@
 ---
-id: ce-0041
+id: ce-0041-spellcheck-interferes
 scenarioId: scenario-spellcheck-behavior
 locale: en
 os: macOS

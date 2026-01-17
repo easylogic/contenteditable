@@ -1,5 +1,5 @@
 ---
-id: ce-0199
+id: ce-0199-thai-ime-backspace-granularity-chrome-ko
 scenarioId: scenario-ime-backspace-granularity
 locale: ko
 os: Windows

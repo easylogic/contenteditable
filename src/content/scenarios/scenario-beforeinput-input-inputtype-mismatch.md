@@ -122,3 +122,12 @@ function handleActualChange(targetRanges, inputEvent) {
 3. **Inspect DOM directly**: When mismatch occurs, inspect DOM state to understand actual change
 4. **Handle gracefully**: Don't assume `inputType` is always correct - have fallback logic
 5. **Test across browsers**: This issue varies significantly by browser and IME combination
+
+## References
+
+- [W3C Input Events Level 2](https://www.w3.org/TR/input-events-2/) - beforeinput and inputType specification
+- [W3C Input Events: targetRanges](https://www.w3.org/TR/2016/WD-input-events-20161018/) - getTargetRanges documentation
+- [W3C Input Events: insertCompositionText](https://www.w3.org/TR/2017/WD-input-events-20170320/) - Composition input types
+- [W3C Input Events: deleteContentBackward](https://www.w3.org/TR/input-events-2/) - Deletion input types
+- [W3C Input Events: Grapheme clusters](https://www.w3.org/TR/2017/WD-input-events-1-20170714/) - Text unit handling
+- [W3C Input Events GitHub Issue #86](https://github.com/w3c/input-events/issues/86) - Event ordering issues

@@ -82,3 +82,10 @@ element.addEventListener('compositionend', () => {
 });
 ```
 
+## References
+
+- [Microsoft Support: Microsoft Simplified Chinese IME](https://support.microsoft.com/en-au/windows/microsoft-simplified-chinese-ime-9b962a3b-2fa4-4f37-811c-b1886320dd72) - Chinese IME candidate selection
+- [Microsoft Support: Microsoft Traditional Chinese IME](https://support.microsoft.com/en-us/windows/microsoft-traditional-chinese-ime-ef596ca5-aff7-4272-b34b-0ac7c2631a38) - Traditional Chinese IME behavior
+- [Microsoft Support: Microsoft Japanese IME](https://support.microsoft.com/en-gb/windows/microsoft-japanese-ime-da40471d-6b91-4042-ae8b-713a96476916) - Japanese IME candidate selection
+- [Microsoft Learn: Traditional Chinese IME](https://learn.microsoft.com/en-us/globalization/input/traditional-chinese-ime) - IME implementation details
+- [Apple Support: Japanese Input Method on Mac](https://support.apple.com/es-us/guide/japanese-input-method/jpim10262/mac) - macOS Japanese IME behavior

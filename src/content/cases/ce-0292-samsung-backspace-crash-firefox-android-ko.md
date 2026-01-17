@@ -1,5 +1,5 @@
 ---
-id: ce-0292
+id: ce-0292-samsung-backspace-crash-firefox-android-ko
 scenarioId: scenario-samsung-backspace-crash
 locale: ko
 os: Android

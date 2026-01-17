@@ -1,5 +1,5 @@
 ---
-id: ce-0067
+id: ce-0067-contenteditable-with-form-ko
 scenarioId: scenario-form-integration
 locale: ko
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0038
+id: ce-0038-mobile-zoom-on-focus-ko
 scenarioId: scenario-mobile-touch-behavior
 locale: ko
 os: iOS

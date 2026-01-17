@@ -1,5 +1,5 @@
 ---
-id: ce-0180
+id: ce-0180-hindi-ime-devanagari-conjuncts-chrome-ko
 scenarioId: scenario-ime-combining-characters-composition
 locale: ko
 os: Windows

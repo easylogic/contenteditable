@@ -1,5 +1,5 @@
 ---
-id: scenario-clipboard-api
+id: scenario-clipboard-api-ko
 title: Clipboard API 붙여넣기가 contenteditable에서 작동하지 않음
 description: "Clipboard API(navigator.clipboard.readText() 또는 navigator.clipboard.read())를 사용하여 contenteditable 영역에 프로그래밍 방식으로 콘텐츠를 붙여넣을 때 붙여넣기 작업이 실패하거나 예상대로 작동하지 않을 수 있습니다."
 category: paste
@@ -15,3 +15,12 @@ locale: ko
 Clipboard API(`navigator.clipboard.readText()` 또는 `navigator.clipboard.read()`)를 사용하여 contenteditable 영역에 프로그래밍 방식으로 콘텐츠를 붙여넣을 때 붙여넣기 작업이 실패하거나 예상대로 작동하지 않을 수 있습니다.
 
 이 시나리오는 유사한 동작으로 여러 환경에서 관찰되었습니다.
+
+## 참고 자료
+
+- [MDN: Clipboard.readText](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/readText) - readText API documentation
+- [Web.dev: Image support for async clipboard](https://web.dev/image-support-for-async-clipboard/) - Clipboard API requirements
+- [Stack Overflow: When does clipboard readText prompt for permission?](https://stackoverflow.com/questions/79538731/when-exactly-does-navigator-clipboard-readtext-prompt-for-user-permission-in-c) - Permission requirements
+- [Stack Overflow: clipboard readText not working in Firefox](https://stackoverflow.com/questions/67440036/navigator-clipboard-readtext-is-not-working-in-firefox) - Firefox compatibility
+- [MDN: Clipboard.read](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/read) - read API documentation
+- [W3C: Clipboard APIs](https://www.w3.org/TR/2016/WD-clipboard-apis-20161213/) - Clipboard API specification

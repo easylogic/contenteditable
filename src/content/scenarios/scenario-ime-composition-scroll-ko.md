@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-scroll
+id: scenario-ime-composition-scroll-ko
 title: 스크롤이 IME 컴포지션을 취소하거나 간섭함
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 스크롤(마우스 휠, 터치 또는 프로그래밍 방식)이 활성 컴포지션을 취소하거나, 컴포지션된 텍스트가 손실되거나, 컴포지션 UI가 잘못된 위치에 배치될 수 있습니다. 여러 언어에 영향을 미치며 모바일 기기에서 특히 문제가 됩니다."
 category: ime
@@ -86,3 +86,11 @@ element.addEventListener('scroll', () => {
   }
 });
 ```
+
+## 참고 자료
+
+- [WebKit Bug 261764: iOS/iPadOS dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Related composition event issues
+- [Stack Overflow: Mobile Safari input caret does not scroll](https://stackoverflow.com/questions/20737503/mobile-safari-input-caret-does-not-scroll-along-with-overflow-scrolling-touch) - Caret scrolling issues
+- [Stack Overflow: iOS Safari unwanted scrolling when focusing input](https://stackoverflow.com/questions/37287148/ios-safari-chrome-unwanted-scrolling-when-focusing-an-input-inside-the-modal) - Scroll behavior during input
+- [W3C UI Events: Composition Events](https://w3c.github.io/uievents/split/composition-events.html) - Official composition events specification
+- [TutorialPedia: iOS Safari overscroll behavior](https://www.tutorialpedia.org/blog/ios-safari-how-to-disable-overscroll-but-allow-scrollable-divs-to-scroll-normally/) - Overscroll handling

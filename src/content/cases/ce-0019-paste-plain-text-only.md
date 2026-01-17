@@ -1,5 +1,5 @@
 ---
-id: ce-0019
+id: ce-0019-paste-plain-text-only
 scenarioId: scenario-paste-plain-text
 locale: en
 os: macOS

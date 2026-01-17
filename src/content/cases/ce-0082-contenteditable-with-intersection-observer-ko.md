@@ -1,5 +1,5 @@
 ---
-id: ce-0082
+id: ce-0082-contenteditable-with-intersection-observer-ko
 scenarioId: scenario-intersection-observer-interference
 locale: ko
 os: macOS

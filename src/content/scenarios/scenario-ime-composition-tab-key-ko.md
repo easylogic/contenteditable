@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-tab-key
+id: scenario-ime-composition-tab-key-ko
 title: Tab 키가 IME 컴포지션을 취소하거나 예상치 못한 탐색을 유발함
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 Tab 키를 누르면 컴포지션이 취소되거나, 예상치 못한 포커스 탐색이 발생하거나, 컴포지션이 예상치 못한 방식으로 커밋될 수 있습니다. 여러 언어에 영향을 미치며 폼이나 테이블의 키보드 탐색과 충돌할 수 있습니다."
 category: ime
@@ -82,3 +82,11 @@ element.addEventListener('keydown', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [Firefox Source Docs: IME Handling Guide](https://firefox-source-docs.mozilla.org/editor/IMEHandlingGuide.html) - IME composition lifecycle
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2016/WD-uievents-20160804/) - Composition specification
+- [Android Developers: Keyboard focus management](https://developer.android.com/codelabs/large-screens/keyboard-focus-management-in-compose) - Tab navigation
+- [Reddit: Tab key during composition](https://www.reddit.com/r/cn1/comments/1ctgpfn) - Tab behavior issues
+- [Samsung Developers: Keyboard IME](https://developer.samsung.com/smarttv/develop/guides/user-interaction/keyboardime.html) - Platform-specific behavior

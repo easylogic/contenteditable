@@ -1,5 +1,5 @@
 ---
-id: ce-0256
+id: ce-0256-selection-addrange-edge-en
 scenarioId: scenario-selection-addrange-safari-fail
 locale: en
 os: Windows

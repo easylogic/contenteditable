@@ -87,3 +87,10 @@ element.addEventListener('paste', (e) => {
 });
 ```
 
+## References
+
+- [Stack Overflow: Enforce li formatting in contenteditable ul](https://stackoverflow.com/questions/13240310/how-to-enforce-li-formatting-in-a-contenteditable-ul) - Formatting preservation
+- [Stack Overflow: Restrict style of pasted text](https://stackoverflow.com/questions/63052383/how-do-i-restrict-the-style-of-the-text-pasted-in-a-contenteditable-area) - Paste filtering
+- [Stack Overflow: Prevent deletion of all li tags](https://stackoverflow.com/questions/24188565/prevent-deletion-of-all-li-tags-in-a-content-editable-ul) - List structure issues
+- [Reddit: SharePoint grid view losing bold](https://www.reddit.com/r/sharepoint/comments/1lahodr) - Storage issues
+- [GitHub: MediumEditor](https://github.com/yabwe/medium-editor) - Editor configuration

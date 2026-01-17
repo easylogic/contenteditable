@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-rtl-and-character-joining
+id: scenario-ime-rtl-and-character-joining-ko
 title: IME RTL 텍스트 방향 및 문맥적 문자 결합 문제
 description: "오른쪽에서 왼쪽(RTL) 텍스트 방향과 문맥적 문자 결합(아랍어, 히브리어 등)을 사용하는 언어는 contenteditable에서 텍스트 방향이 올바르게 처리되지 않거나, 문자가 제대로 결합되지 않거나, RTL 컨텍스트에서 캐럿 이동이 잘못될 수 있는 문제를 경험할 수 있습니다."
 category: ime
@@ -91,3 +91,10 @@ element.addEventListener('input', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [HRCD: RTL Usability](https://hrcd.pubpub.org/pub/rtlusability) - RTL text direction guide
+- [Wikipedia: Implicit directional marks](https://en.wikipedia.org/wiki/Implicit_directional_marks) - Bidirectional text handling
+- [Stack Overflow: Right to left text HTML input](https://stackoverflow.com/questions/7524855/right-to-left-text-html-input) - RTL direction setup
+- [CKEditor Issue #1151: RTL support](https://github.com/ckeditor/ckeditor5/issues/1151) - Editor RTL implementation

@@ -1,5 +1,5 @@
 ---
-id: ce-0060
+id: ce-0060-contenteditable-with-dir
 scenarioId: scenario-text-direction
 locale: en
 os: Windows

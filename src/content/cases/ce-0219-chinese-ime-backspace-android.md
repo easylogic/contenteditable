@@ -1,5 +1,5 @@
 ---
-id: ce-0219
+id: ce-0219-chinese-ime-backspace-android
 scenarioId: scenario-ime-backspace-chinese-mobile
 locale: en
 os: Android

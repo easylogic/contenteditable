@@ -1,5 +1,5 @@
 ---
-id: scenario-code-block-editing
+id: scenario-code-block-editing-ko
 title: 코드 블록 편집 동작이 브라우저마다 다름
 description: "contenteditable 요소에서 코드 블록(<pre><code>) 내에서 텍스트를 편집하는 것이 브라우저마다 일관되지 않게 동작합니다. 줄바꿈, 들여쓰기, 공백 보존 및 서식이 다르게 처리될 수 있어 코드 서식을 유지하기 어렵습니다."
 category: formatting
@@ -99,3 +99,11 @@ element.addEventListener('paste', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [BomberBot: Preserving formatting with HTML pre tag](https://www.bomberbot.com/html/preserving-formatting-with-the-html-pre-tag/) - pre tag behavior
+- [Stack Overflow: HTML newline char in div contenteditable](https://stackoverflow.com/questions/19038070/html-newline-char-in-div-content-editable) - white-space values
+- [Stack Overflow: Dealing with line breaks on contenteditable div](https://stackoverflow.com/questions/6023307/dealing-with-line-breaks-on-contenteditable-div) - Enter key handling
+- [Stack Overflow: Preserve whitespace indentation in pre tags](https://stackoverflow.com/questions/4631646/how-to-preserve-whitespace-indentation-of-text-enclosed-in-html-pre-tags-exclu) - Indentation issues
+- [PrinceXML Forum: Preserving whitespace in pre code blocks](https://www.princexml.com/forum/topic/2949/preserving-whitespace-in-pre-code-blocks) - tab-size property

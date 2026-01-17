@@ -1,5 +1,5 @@
 ---
-id: ce-0228
+id: ce-0228-linux-korean-ime-fcitx
 scenarioId: scenario-linux-korean-ime-fcitx
 locale: en
 os: Linux

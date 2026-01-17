@@ -1,5 +1,5 @@
 ---
-id: scenario-empty-element-cleanup
+id: scenario-empty-element-cleanup-ko
 title: 편집 중 DOM에 빈 요소가 누적됨
 description: "편집 작업 중 빈 요소(빈 단락, div, 콘텐츠가 없는 span)가 DOM에 누적됩니다. 이러한 요소는 레이아웃 문제를 일으킬 수 있고, HTML을 비대하게 만들며, 예상치 못한 동작을 만들 수 있습니다. 브라우저가 빈 요소 정리를 일관되게 처리하지 않습니다."
 category: formatting
@@ -121,3 +121,10 @@ element.addEventListener('input', () => {
   });
 });
 ```
+
+## 참고 자료
+
+- [GitHub Gist: Empty element cleanup](https://gist.github.com/1318279) - Cleanup patterns
+- [Telerik Forums: Editor removes content from paragraph](https://www.telerik.com/forums/editor-removes-content-from-paragraph) - Empty paragraph handling
+- [Stack Overflow: Can't get to empty paragraphs in contenteditable](https://stackoverflow.com/questions/17714340/cant-get-to-empty-paragraphs-in-contenteditable) - Empty paragraph focus issues
+- [Django Tricks: ContentEditable empty paragraph handling](https://www.djangotricks.com/tricks/8Kg4KtMWaoAJ/) - Placeholder solutions

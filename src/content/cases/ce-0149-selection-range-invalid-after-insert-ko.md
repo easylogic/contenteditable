@@ -1,5 +1,5 @@
 ---
-id: ce-0149
+id: ce-0149-selection-range-invalid-after-insert-ko
 scenarioId: scenario-selection-restoration
 locale: ko
 os: Windows

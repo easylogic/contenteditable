@@ -1,5 +1,5 @@
 ---
-id: ce-0215
+id: ce-0215-ime-insertfromcomposition-targetranges-ios-safari-japanese-ko
 scenarioId: scenario-ime-insertfromcomposition-targetranges
 locale: ko
 os: iOS

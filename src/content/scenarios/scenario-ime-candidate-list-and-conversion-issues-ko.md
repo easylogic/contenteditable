@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-candidate-list-and-conversion-issues
+id: scenario-ime-candidate-list-and-conversion-issues-ko
 title: 여러 언어에 걸친 IME 후보 목록 표시 및 변환 문제
 description: "contenteditable에서 문자 변환이 필요한 IME(일본어, 중국어 등)를 사용할 때 후보 목록이 올바르게 표시되지 않거나, 화살표 키 탐색이 편집을 방해하거나, 변환 프로세스가 지연되거나, 중단되거나, 잘못된 결과를 생성할 수 있습니다. 이것은 음성-문자 변환을 사용하는 일본어, 중국어 및 기타 언어를 포함하여 여러 언어에 영향을 줍니다."
 category: ime
@@ -110,3 +110,10 @@ element.addEventListener('click', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [W3C UI Events: Composition events](https://w3c.github.io/uievents/split/composition-events.html) - Composition event specification
+- [Chromium Blink Dev: Event ordering discussion](https://groups.google.com/a/chromium.org/g/blink-dev/c/spwtbdODC3Q) - beforeinput and composition event order
+- [W3C DOM Level 3 Events](https://www.w3.org/TR/2013/WD-DOM-Level-3-Events-20131105/) - Event cancelability
+- [MDN: compositionstart event](https://devdoc.net/web/developer.mozilla.org/en-US/docs/DOM/DOM_event_reference/compositionstart.html) - Composition event documentation

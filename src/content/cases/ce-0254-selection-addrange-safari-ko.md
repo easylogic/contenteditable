@@ -1,5 +1,5 @@
 ---
-id: ce-0254
+id: ce-0254-selection-addrange-safari-ko
 scenarioId: scenario-selection-addrange-safari-fail
 locale: ko
 os: macOS

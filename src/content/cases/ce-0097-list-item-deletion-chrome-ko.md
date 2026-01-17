@@ -1,5 +1,5 @@
 ---
-id: ce-0097
+id: ce-0097-list-item-deletion-chrome-ko
 scenarioId: scenario-list-item-deletion
 locale: ko
 os: Windows

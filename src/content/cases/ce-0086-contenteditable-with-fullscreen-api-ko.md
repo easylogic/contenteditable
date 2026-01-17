@@ -1,5 +1,5 @@
 ---
-id: ce-0086
+id: ce-0086-contenteditable-with-fullscreen-api-ko
 scenarioId: scenario-fullscreen-api
 locale: ko
 os: Windows

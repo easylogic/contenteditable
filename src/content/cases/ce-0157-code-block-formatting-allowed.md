@@ -1,5 +1,5 @@
 ---
-id: ce-0157
+id: ce-0157-code-block-formatting-allowed
 scenarioId: scenario-code-block-editing
 locale: en
 os: Windows

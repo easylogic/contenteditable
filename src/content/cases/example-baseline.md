@@ -1,5 +1,5 @@
 ---
-id: ce-0001
+id: example-baseline
 scenarioId: scenario-baseline
 locale: en
 os: Any

@@ -1,5 +1,5 @@
 ---
-id: ce-0229
+id: ce-0229-korean-ime-focus-blur-chrome-ko
 scenarioId: scenario-ime-composition-focus-change
 locale: ko
 os: Windows

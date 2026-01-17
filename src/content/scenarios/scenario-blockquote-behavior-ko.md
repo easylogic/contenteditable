@@ -1,5 +1,5 @@
 ---
-id: scenario-blockquote-behavior
+id: scenario-blockquote-behavior-ko
 title: Blockquote 편집 동작이 브라우저마다 다름
 description: "contenteditable에서 blockquote 요소 내에서 텍스트를 편집하는 것이 브라우저마다 일관되지 않게 동작합니다. Enter를 누르거나, 서식을 적용하거나, 콘텐츠를 붙여넣으면 blockquote 구조가 깨지거나, 중첩 blockquote가 생성되거나, 예상치 못하게 동작할 수 있습니다."
 category: formatting
@@ -111,3 +111,10 @@ element.addEventListener('paste', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [W3C Community: ContentEditable specification](https://www.w3.org/community/editing/wiki/ContentEditable) - Enter key behavior in blocks
+- [WHATWG Lists: Blockquote Enter behavior](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2009-December/024627.html) - Specification discussion
+- [Stack Overflow: Add paragraph after blockquote on Enter](https://stackoverflow.com/questions/14667764/in-contenteditable-how-do-you-add-a-paragraph-after-blockquote-on-enter-key-pres) - Exit blockquote solutions
+- [ProseMirror Discuss: Strange behaviour when pasting inside blockquote](https://discuss.prosemirror.net/t/strange-behaviour-when-pasting-inside-blockquote/1200) - Paste behavior in blockquotes

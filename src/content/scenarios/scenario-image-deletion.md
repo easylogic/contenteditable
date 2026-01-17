@@ -95,3 +95,9 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [W3C Community: ContentEditable specification](https://www.w3.org/community/editing/wiki/ContentEditable) - Official contenteditable spec
+- [Stack Overflow: Can't get to empty paragraphs in contenteditable](https://stackoverflow.com/questions/17714340/cant-get-to-empty-paragraphs-in-contenteditable) - Empty element handling
+- [Stack Overflow: Empty HTML tag disappears on backspace in Firefox](https://stackoverflow.com/questions/57910781/empty-html-tag-in-an-editable-div-disappears-when-backspace-is-pressed-on-firefo) - Firefox empty tag removal
+- [Stack Overflow: contenteditable re-creates deleted child elements](https://stackoverflow.com/questions/31207738/contenteditable-re-creates-deleted-child-elements) - Element recreation issues

@@ -1,5 +1,5 @@
 ---
-id: ce-0136
+id: ce-0136-code-block-paste-formats
 scenarioId: scenario-code-block-editing
 locale: en
 os: Windows

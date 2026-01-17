@@ -87,3 +87,10 @@ element.addEventListener('scroll', () => {
 });
 ```
 
+## References
+
+- [WebKit Bug 261764: iOS/iPadOS dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Related composition event issues
+- [Stack Overflow: Mobile Safari input caret does not scroll](https://stackoverflow.com/questions/20737503/mobile-safari-input-caret-does-not-scroll-along-with-overflow-scrolling-touch) - Caret scrolling issues
+- [Stack Overflow: iOS Safari unwanted scrolling when focusing input](https://stackoverflow.com/questions/37287148/ios-safari-chrome-unwanted-scrolling-when-focusing-an-input-inside-the-modal) - Scroll behavior during input
+- [W3C UI Events: Composition Events](https://w3c.github.io/uievents/split/composition-events.html) - Official composition events specification
+- [TutorialPedia: iOS Safari overscroll behavior](https://www.tutorialpedia.org/blog/ios-safari-how-to-disable-overscroll-but-allow-scrollable-divs-to-scroll-normally/) - Overscroll handling

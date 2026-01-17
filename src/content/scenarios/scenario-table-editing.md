@@ -115,3 +115,9 @@ function focusCell(cell) {
 }
 ```
 
+## References
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [Can I Use: execCommand](https://caniuse.com/wf-execcommand) - Browser compatibility
+- [Can I Use: execCommand insertHTML](https://caniuse.com/mdn-api_document_execcommand_inserthtml) - insertHTML command support
+- [TypeError: contenteditable browser support](https://www.typeerror.org/docs/browser_support_tables/contenteditable) - Table editing limitations

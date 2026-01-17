@@ -91,6 +91,10 @@ This is particularly problematic when:
    - Simplify DOM structure to avoid deep nesting
    - Use data attributes or class-based markers instead of separate span elements
 
-## Reference
+## References
 
-- Stack Overflow: https://stackoverflow.com/questions/39906099
+- [Stack Overflow: Safari selection.addRange issue](https://stackoverflow.com/questions/39906099) - Discussion about addRange problems
+- [WebKit Bug 232891: Dragging across nested contenteditable=false causes collapsed selection](https://bugs.webkit.org/show_bug.cgi?id=232891) - Fixed in Safari 15
+- [WebKit Bug 265674: Caret/Predictive Text Bar out of sync when programmatically moving selection](https://lists.webkit.org/pipermail/webkit-unassigned/2023-December/1135698.html) - Predictive text not updating after addRange
+- [ProseMirror Discuss: Selection is lost on Safari when editor is blurred](https://discuss.prosemirror.net/t/selection-is-lost-on-safari-when-editor-is-blured/3001) - Selection preservation issues
+- [Stack Overflow: Clicking outside a contenteditable div still gives focus to it](https://stackoverflow.com/questions/34354085/clicking-outside-a-contenteditable-div-stills-give-focus-to-it) - Related focus/selection issues

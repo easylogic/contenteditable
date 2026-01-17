@@ -1,5 +1,5 @@
 ---
-id: scenario-image-deletion
+id: scenario-image-deletion-ko
 title: 이미지 삭제 동작이 브라우저마다 다름
 description: "contenteditable 요소에서 이미지를 삭제하는 것이 브라우저마다 다르게 동작합니다. 일부 브라우저는 이미지를 깨끗하게 삭제하지만 다른 브라우저는 빈 요소를 남기거나, DOM 구조를 깨뜨리거나, 여러 삭제 작업이 필요할 수 있습니다."
 category: formatting
@@ -94,3 +94,10 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [W3C Community: ContentEditable specification](https://www.w3.org/community/editing/wiki/ContentEditable) - Official contenteditable spec
+- [Stack Overflow: Can't get to empty paragraphs in contenteditable](https://stackoverflow.com/questions/17714340/cant-get-to-empty-paragraphs-in-contenteditable) - Empty element handling
+- [Stack Overflow: Empty HTML tag disappears on backspace in Firefox](https://stackoverflow.com/questions/57910781/empty-html-tag-in-an-editable-div-disappears-when-backspace-is-pressed-on-firefo) - Firefox empty tag removal
+- [Stack Overflow: contenteditable re-creates deleted child elements](https://stackoverflow.com/questions/31207738/contenteditable-re-creates-deleted-child-elements) - Element recreation issues

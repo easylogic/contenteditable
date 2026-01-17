@@ -1,5 +1,5 @@
 ---
-id: ce-0020
+id: ce-0020-focus-lost-on-click
 scenarioId: scenario-focus-management
 locale: en
 os: Windows

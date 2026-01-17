@@ -92,3 +92,9 @@ element.addEventListener('input', (e) => {
 });
 ```
 
+## References
+
+- [HRCD: RTL Usability](https://hrcd.pubpub.org/pub/rtlusability) - RTL text direction guide
+- [Wikipedia: Implicit directional marks](https://en.wikipedia.org/wiki/Implicit_directional_marks) - Bidirectional text handling
+- [Stack Overflow: Right to left text HTML input](https://stackoverflow.com/questions/7524855/right-to-left-text-html-input) - RTL direction setup
+- [CKEditor Issue #1151: RTL support](https://github.com/ckeditor/ckeditor5/issues/1151) - Editor RTL implementation

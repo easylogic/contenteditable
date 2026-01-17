@@ -1,5 +1,5 @@
 ---
-id: ce-0166
+id: ce-0166-font-size-persistence-edge-ko
 scenarioId: scenario-font-size-change
 locale: ko
 os: Windows

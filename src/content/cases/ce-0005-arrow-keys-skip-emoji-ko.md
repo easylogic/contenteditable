@@ -1,5 +1,5 @@
 ---
-id: ce-0005
+id: ce-0005-arrow-keys-skip-emoji-ko
 scenarioId: scenario-caret-movement-with-emoji
 locale: ko
 os: macOS

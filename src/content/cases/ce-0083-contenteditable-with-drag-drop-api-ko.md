@@ -1,5 +1,5 @@
 ---
-id: ce-0083
+id: ce-0083-contenteditable-with-drag-drop-api-ko
 scenarioId: scenario-drag-drop-api
 locale: ko
 os: macOS

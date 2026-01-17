@@ -1,5 +1,5 @@
 ---
-id: ce-0184
+id: ce-0184-thai-ime-space-ignored-firefox
 scenarioId: scenario-space-during-composition
 locale: en
 os: Windows

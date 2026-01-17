@@ -75,3 +75,9 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [Dev.to: What happens when you delete text by backspace](https://dev.to/takechamp/what-happens-when-you-delete-text-by-backspace-in-a-contenteditable-element-45bg) - Deletion behavior analysis
+- [W3C Community: ContentEditable](https://www.w3.org/community/editing/wiki/ContentEditable) - Spec behavior
+- [Stack Overflow: Prevent deletion of all li tags](https://stackoverflow.com/questions/24188565/prevent-deletion-of-all-li-tags-in-a-content-editable-ul) - Chrome deletion issues
+- [Stack Overflow: Empty HTML tag disappears on backspace](https://stackoverflow.com/questions/57910781/empty-html-tag-in-an-editable-div-disappears-when-backspace-is-pressed-on-firefo) - Empty tag handling

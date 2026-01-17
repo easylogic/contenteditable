@@ -1,5 +1,5 @@
 ---
-id: ce-0110
+id: ce-0110-selection-lost-after-dom-update-ko
 scenarioId: scenario-selection-restoration
 locale: ko
 os: Windows

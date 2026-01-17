@@ -1,5 +1,5 @@
 ---
-id: scenario-consecutive-spaces
+id: scenario-consecutive-spaces-ko
 title: contenteditable에서 연속된 공백이 축소됨
 description: "contenteditable 요소에서 여러 개의 연속된 공백을 입력할 때 브라우저가 기본적으로 하나의 공백으로 축소합니다(HTML 공백 규칙을 따름). 이 동작은 네이티브 텍스트 입력과 다르며 여러 공백을 보존해야 하는 사용자에게 예상치 못할 수 있습니다."
 category: formatting
@@ -77,3 +77,12 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [W3C HTML5 Editing: Whitespace handling](https://www.w3.org/TR/2015/WD-html51-20151008/editing.html) - NBSP insertion
+- [MDN: white-space](https://developer.mozilla.org/en-US/docs/Web/CSS/white-space) - white-space CSS property
+- [WHATWG HTML: Whitespace](https://html.spec.whatwg.org/multipage/interaction.html) - pre-wrap behavior
+- [WHATWG Lists: NBSP magic](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-June/032187.html) - NBSP insertion algorithm
+- [W3C Editing: NBSP handling](https://dvcs.w3.org/hg/editing/rev/1658d3f45c56) - Space preservation
+- [W3C Style Lists: Whitespace boundary issues](https://lists.w3.org/Archives/Public/www-style/2015Mar/0139.html) - Boundary truncation

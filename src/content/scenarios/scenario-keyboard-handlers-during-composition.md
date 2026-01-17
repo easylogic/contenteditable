@@ -195,3 +195,11 @@ element.addEventListener('beforeinput', (e) => {
 - Do not rely on `isComposing` flag or composition events in iOS Safari for Korean IME
 - Use platform detection to apply the correct strategy
 - Consider using `beforeinput` events instead of `keydown` events for better composition state detection
+
+## References
+
+- [Lexical Issue #5841: isComposing always false on iOS Safari Korean IME](https://github.com/facebook/lexical/issues/5841) - iOS Safari Korean IME issues
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2016/WD-uievents-20160804/) - Composition event specification
+- [WebKit Bug 261764: iOS dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Related dictation issues
+- [WebKit Bug 43020: Korean Hangul composition test](https://bugs.webkit.org/show_bug.cgi?id=43020) - Korean IME composition issues
+- [Tanishiking: IME event handling](https://tanishiking.github.io/posts/ime-event-handling/) - IME detection heuristics

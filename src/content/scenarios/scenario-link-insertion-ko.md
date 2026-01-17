@@ -1,5 +1,5 @@
 ---
-id: scenario-link-insertion
+id: scenario-link-insertion-ko
 title: 링크 삽입 및 편집 동작이 브라우저마다 다름
 description: "contenteditable 요소에서 링크를 삽입하거나 편집할 때 동작이 브라우저마다 크게 다릅니다. 링크 생성, 링크 텍스트 편집, 링크 제거는 예상치 못한 DOM 구조나 손실된 포맷팅을 초래할 수 있습니다."
 category: formatting
@@ -91,3 +91,12 @@ function createLinkSafely(range, url) {
   range.insertNode(link);
 }
 ```
+
+## 참고 자료
+
+- [MDN: contenteditable global attribute](https://developer.mozilla.org/docs/Web/HTML/Reference/Global_attributes/contenteditable) - contenteditable documentation
+- [Stack Overflow: Edit HTML a tag without href inside contenteditable](https://stackoverflow.com/questions/50071785/edit-html-a-tag-without-href-attribute-inside-a-contenteditable-div) - Link editing issues
+- [Stack Overflow: Problems with contenteditable span inside hyperlink in Firefox](https://stackoverflow.com/questions/37962939/problems-with-contenteditable-span-inside-hyperlink-in-firefox) - Firefox nested link issues
+- [ProseMirror Discuss: Inserting text at end of link causes anchorNode to move](https://discuss.prosemirror.net/t/inserting-text-at-end-of-link-causes-window-getselection-anchornode-to-move-from-text-to-p/6014) - Selection node changes
+- [Stack Overflow: contenteditable nested browser differences](https://stackoverflow.com/questions/9913710/contenteditable-nested-browser-differences) - Browser comparison
+- [Stack Overflow: Newlines and contenteditable with nested non-editable tags](https://stackoverflow.com/questions/11452590/newlines-and-contenteditable-with-nested-non-editable-tags) - Non-editable element handling

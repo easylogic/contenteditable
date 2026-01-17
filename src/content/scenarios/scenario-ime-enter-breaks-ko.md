@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-enter-breaks
+id: scenario-ime-enter-breaks-ko
 title: "contenteditable 내에서 Enter를 누르면 컴포지션이 취소됨"
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 Enter를 누르면 컴포지션이 취소되고 때로는 부분 문자 또는 음절만 커밋됩니다. 캐럿이 다음 줄로 이동하지만 마지막 컴포지션된 문자가 손실될 수 있습니다. 한국어, 일본어, 중국어 및 기타 언어를 포함한 여러 언어에 영향을 미칩니다."
 category: ime
@@ -23,3 +23,9 @@ locale: ko
 - **기타 IME**: 컴포지션을 사용하는 다른 언어에서도 유사한 문제가 발생할 수 있습니다
 
 이 시나리오는 여러 환경에서 관찰되었으며 다른 언어에서도 유사한 동작이 나타납니다.
+
+## 참고 자료
+
+- [Ghostty Issue #8440: Korean IME character loss with arrow keys](https://github.com/ghostty-org/ghostty/issues/8440) - Related IME composition issues
+- [ProseMirror Issue #1484: Enter during Korean IME causes character to vanish](https://github.com/ProseMirror/prosemirror/issues/1484) - Enter key during composition
+- [Microsoft Support: Korean/Japanese IME composition issues](https://support.microsoft.com/en-us/topic/korean-or-japanese-ime-composition-may-not-work-correctly-in-internet-explorer-11-or-microsoft-edge-901941be-8632-1efd-df3b-7102112f0e91) - IME composition problems

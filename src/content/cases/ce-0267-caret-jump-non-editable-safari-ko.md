@@ -1,5 +1,5 @@
 ---
-id: ce-0267
+id: ce-0267-caret-jump-non-editable-safari-ko
 scenarioId: scenario-caret-jump-non-editable
 locale: ko
 os: macOS

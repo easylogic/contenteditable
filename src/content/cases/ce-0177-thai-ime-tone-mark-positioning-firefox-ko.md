@@ -1,5 +1,5 @@
 ---
-id: ce-0177
+id: ce-0177-thai-ime-tone-mark-positioning-firefox-ko
 scenarioId: scenario-ime-combining-characters-composition
 locale: ko
 os: Windows

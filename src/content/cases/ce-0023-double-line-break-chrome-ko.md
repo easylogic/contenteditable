@@ -1,5 +1,5 @@
 ---
-id: ce-0023
+id: ce-0023-double-line-break-chrome-ko
 scenarioId: scenario-double-line-break
 locale: ko
 os: macOS

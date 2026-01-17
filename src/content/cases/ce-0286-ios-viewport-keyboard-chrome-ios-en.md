@@ -1,5 +1,5 @@
 ---
-id: ce-0286
+id: ce-0286-ios-viewport-keyboard-chrome-ios-en
 scenarioId: scenario-ios-viewport-keyboard
 locale: en
 os: iOS

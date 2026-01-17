@@ -1,5 +1,5 @@
 ---
-id: ce-0026
+id: ce-0026-performance-large-content-ko
 scenarioId: scenario-performance-large-content
 locale: ko
 os: Any

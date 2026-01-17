@@ -1,5 +1,5 @@
 ---
-id: ce-0252
+id: ce-0252-mac-accent-menu-composition-ja
 scenarioId: scenario-mac-accent-menu-composition
 locale: ja
 os: macOS

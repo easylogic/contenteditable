@@ -1,5 +1,5 @@
 ---
-id: ce-0101
+id: ce-0101-link-click-navigation-chrome
 scenarioId: scenario-link-click-editing
 locale: en
 os: Windows

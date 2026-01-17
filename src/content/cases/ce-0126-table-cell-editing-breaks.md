@@ -1,5 +1,5 @@
 ---
-id: ce-0126
+id: ce-0126-table-cell-editing-breaks
 scenarioId: scenario-table-editing
 locale: en
 os: Windows

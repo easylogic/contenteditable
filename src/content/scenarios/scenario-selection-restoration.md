@@ -139,3 +139,9 @@ function manipulateDOM(callback) {
 }
 ```
 
+## References
+
+- [Stack Overflow: Reset cursor position after DOM change](https://stackoverflow.com/questions/6329487/reset-cursor-position-in-content-editable-after-dom-change) - Cursor restoration
+- [Stack Overflow: contenteditable div issue when restore saving selection](https://stackoverflow.com/questions/16604213/contenteditable-div-issue-when-restore-saving-selection) - Selection saving issues
+- [Stack Overflow: Saving and restoring caret position](https://stackoverflow.com/questions/4576694/saving-and-restoring-caret-position-for-contenteditable-div) - Character offset method
+- [Stack Overflow: Preserve cursor position when changing innerHTML](https://stackoverflow.com/questions/62232111/preserve-cursor-position-when-changing-innerhtml-in-a-contenteditable-div) - Timing considerations

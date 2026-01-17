@@ -1,5 +1,5 @@
 ---
-id: ce-0027
+id: ce-0027-copy-selection-lost
 scenarioId: scenario-copy-selection-behavior
 locale: en
 os: macOS

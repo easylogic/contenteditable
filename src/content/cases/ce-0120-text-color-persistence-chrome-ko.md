@@ -1,5 +1,5 @@
 ---
-id: ce-0120
+id: ce-0120-text-color-persistence-chrome-ko
 scenarioId: scenario-text-color-change
 locale: ko
 os: Windows

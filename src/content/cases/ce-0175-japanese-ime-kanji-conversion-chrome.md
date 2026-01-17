@@ -1,5 +1,5 @@
 ---
-id: ce-0175
+id: ce-0175-japanese-ime-kanji-conversion-chrome
 scenarioId: scenario-ime-candidate-list-and-conversion-issues
 locale: en
 os: Windows

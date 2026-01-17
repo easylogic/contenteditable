@@ -305,6 +305,7 @@ element.addEventListener('beforeinput', (e) => {
 
 ## References
 
-- MDN: InputEvent.getTargetRanges() - https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges
-- Stack Overflow: InputEvent.getTargetRanges always empty - https://stackoverflow.com/questions/58892747/inputevent-gettargetranges-always-empty
-- W3C Input Events Specification - https://www.w3.org/TR/2016/WD-input-events-20160928/
+- [MDN: InputEvent.getTargetRanges()](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges) - Official documentation
+- [Stack Overflow: InputEvent.getTargetRanges always empty](https://stackoverflow.com/questions/58892747/inputevent-gettargetranges-always-empty) - Chrome 77 issue discussion
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - Official specification
+- [W3C Input Events Level 1 Specification](https://www.w3.org/TR/2016/WD-input-events-20160928/) - Legacy specification

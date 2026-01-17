@@ -1,5 +1,5 @@
 ---
-id: ce-0068
+id: ce-0068-contenteditable-with-spellcheck-ko
 scenarioId: scenario-spellcheck-interference
 locale: ko
 os: macOS

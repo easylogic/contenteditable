@@ -1,5 +1,5 @@
 ---
-id: ce-0031
+id: ce-0031-underline-formatting-firefox
 scenarioId: scenario-formatting-persistence
 locale: en
 os: Linux

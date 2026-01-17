@@ -112,3 +112,9 @@ element.addEventListener('paste', (e) => {
 });
 ```
 
+## References
+
+- [W3C Community: ContentEditable specification](https://www.w3.org/community/editing/wiki/ContentEditable) - Enter key behavior in blocks
+- [WHATWG Lists: Blockquote Enter behavior](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2009-December/024627.html) - Specification discussion
+- [Stack Overflow: Add paragraph after blockquote on Enter](https://stackoverflow.com/questions/14667764/in-contenteditable-how-do-you-add-a-paragraph-after-blockquote-on-enter-key-pres) - Exit blockquote solutions
+- [ProseMirror Discuss: Strange behaviour when pasting inside blockquote](https://discuss.prosemirror.net/t/strange-behaviour-when-pasting-inside-blockquote/1200) - Paste behavior in blockquotes

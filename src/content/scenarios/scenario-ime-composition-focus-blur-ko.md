@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-focus-blur
+id: scenario-ime-composition-focus-blur-ko
 title: 포커스 변경 시 IME 컴포지션이 취소되거나 손실됨
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 포커스 변경(blur) 또는 다른 곳 클릭 시 컴포지션이 취소되거나, 컴포지션된 텍스트가 손실되거나, 예상치 못하게 커밋될 수 있습니다. 여러 언어에 영향을 미치며, 다른 UI 요소와 상호작용하거나, 스크롤하거나, 프로그래밍 방식으로 포커스를 변경할 때 발생할 수 있습니다."
 category: ime
@@ -90,3 +90,11 @@ HTMLElement.prototype.blur = function() {
   originalBlur.call(this);
 };
 ```
+
+## 참고 자료
+
+- [Mozilla IME Handling Guide](https://udn.realityripple.com/docs/Mozilla/IME_handling_guide) - IME composition and focus
+- [ProseMirror Discuss: Composition lost when input after select multi lines](https://discuss.prosemirror.net/t/composition-lost-when-i-input-after-select-multi-lines/4493) - DOM manipulation issues
+- [Microsoft Learn: WM_IME_COMPOSITION](https://learn.microsoft.com/en-us/windows/win32/intl/wm-ime-composition) - Windows IME composition messages
+- [W3C IME API](https://www.w3.org/TR/2013/WD-ime-api-20130404/) - IME API specification
+- [Android Developer: InputConnectionWrapper](https://developer.android.com/reference/android/view/inputmethod/InputConnectionWrapper) - Android IME APIs

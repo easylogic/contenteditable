@@ -1,5 +1,5 @@
 ---
-id: ce-0149
+id: ce-0149-selection-range-invalid-after-insert
 scenarioId: scenario-selection-restoration
 locale: en
 os: Windows

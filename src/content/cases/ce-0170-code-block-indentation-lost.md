@@ -1,68 +1,74 @@
 ---
-id: ce-0170
-scenarioId: scenario-code-block-editing
+id: ce-0170-code-block-indentation-lost
+scenarioId: scenario-code-block-indentation-lost
 locale: en
-os: Windows
-osVersion: "11"
+os: Any
+osVersion: Any
 device: Desktop or Laptop
 deviceVersion: Any
 browser: Chrome
-browserVersion: "120.0"
+browserVersion: Latest
 keyboard: US
-caseTitle: Code indentation is lost when editing code blocks
-description: "When editing text within a code block in Chrome, indentation (leading spaces or tabs) may be lost or converted incorrectly. This breaks code formatting and structure."
+caseTitle: Code block loses indentation when typing in contenteditable pre tag
+description: "When using a <pre> tag with contenteditable to create an editable code block, pressing Enter inserts <br> tags instead of preserving newline characters, and indentation is lost."
 tags:
-  - code
+  - code-block
   - pre
   - indentation
-  - chrome
+  - whitespace
 status: draft
-domSteps:
-  - label: "Before"
-    html: '<pre><code>    function test() {<br>        return true;<br>    }</code></pre>'
-    description: "Code block with indentation"
-  - label: "After Editing (Bug)"
-    html: '<pre><code>function test() {<br>return true;<br>}</code></pre>'
-    description: "Indentation lost after editing"
-  - label: "✅ Expected"
-    html: '<pre><code>    function test() {<br>        return true;<br>    }</code></pre>'
-    description: "Expected: Indentation preserved"
 ---
 
 ## Phenomenon
 
-When editing text within a code block in Chrome, indentation (leading spaces or tabs) may be lost or converted incorrectly. This breaks code formatting and structure.
+When using a `<pre>` tag with the `contenteditable` attribute to create an editable code block, pressing Enter often inserts `<br>` tags instead of preserving newline characters (`\n`). This behavior disrupts the intended formatting of code, and indentation may be lost when users type.
 
 ## Reproduction example
 
-1. Create a code block with indented code: `<pre><code>    function test() {</code></pre>`
-2. Edit the code (add, delete, modify)
-3. Observe indentation preservation
+1. Create a `<pre contenteditable="true">` element with code content.
+2. Place cursor in the middle of a line.
+3. Press Enter to create a new line.
+4. Inspect the HTML to see if `<br>` tags were inserted.
+5. Type code with indentation and observe if indentation is preserved.
 
 ## Observed behavior
 
-- Leading spaces may be lost
-- Tabs may be converted to spaces or vice versa
-- Indentation is not preserved
-- Code structure is broken
+- **Enter key**: Inserts `<br>` tags instead of newline characters.
+- **Indentation lost**: Whitespace and indentation may not be preserved.
+- **Wrapping elements**: Some browsers may wrap new lines in `<div>` or `<p>` tags.
+- **Formatting disruption**: Code formatting is broken by unexpected HTML structure.
+- **Whitespace collapse**: Multiple spaces may be collapsed into single spaces.
 
 ## Expected behavior
 
-- Indentation should be preserved
-- Spaces and tabs should be maintained
-- Code structure should remain intact
-- Formatting should be preserved
+- Pressing Enter should insert newline characters (`\n`), not `<br>` tags.
+- Indentation should be preserved when typing.
+- Whitespace should be maintained as entered.
+- Code formatting should remain intact.
 
-## Browser Comparison
+## Analysis
 
-- **Chrome/Edge**: Indentation may be lost (this case)
-- **Firefox**: Similar indentation issues
-- **Safari**: Indentation preservation inconsistent
+Browsers treat contenteditable `<pre>` elements similarly to other contenteditable elements, applying HTML formatting rules that don't preserve code-specific formatting. The browser's default Enter behavior inserts HTML elements rather than preserving plain text newlines.
 
-## Notes and possible direction for workarounds
+## Workarounds
 
-- Ensure `white-space: pre` CSS is applied
-- Preserve leading whitespace during editing
-- Monitor and restore indentation if lost
-- Handle tabs and spaces explicitly
-
+- Intercept Enter key to insert newline character:
+  ```javascript
+  preElement.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.execCommand('insertText', false, '\n');
+    }
+  });
+  ```
+- Sanitize content after input to replace `<br>` with `\n`:
+  ```javascript
+  function sanitizePreContent(preElement) {
+    let content = preElement.innerHTML;
+    content = content.replace(/<br>/g, '\n');
+    content = content.replace(/<\/?div>/g, '');
+    preElement.textContent = content;
+  }
+  ```
+- Use `white-space: pre-wrap;` CSS to preserve whitespace.
+- Consider alternative approaches like overlaying syntax-highlighted `<pre>` over hidden `<textarea>`.

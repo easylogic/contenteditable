@@ -1,5 +1,5 @@
 ---
-id: ce-0139
+id: ce-0139-image-resize-aspect-ratio-ko
 scenarioId: scenario-image-resize
 locale: ko
 os: Windows

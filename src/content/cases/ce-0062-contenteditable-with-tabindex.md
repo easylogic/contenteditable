@@ -1,5 +1,5 @@
 ---
-id: ce-0062
+id: ce-0062-contenteditable-with-tabindex
 scenarioId: scenario-tabindex-behavior
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0194
+id: ce-0194-japanese-ime-scroll-cancels-ios-safari-ko
 scenarioId: scenario-ime-composition-scroll
 locale: ko
 os: iOS

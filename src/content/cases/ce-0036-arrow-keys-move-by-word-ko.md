@@ -1,5 +1,5 @@
 ---
-id: ce-0036
+id: ce-0036-arrow-keys-move-by-word-ko
 scenarioId: scenario-caret-movement-granularity
 locale: ko
 os: Windows

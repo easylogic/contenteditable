@@ -120,3 +120,11 @@ element.addEventListener('beforeinput', (e) => {
 - The `isComposing` property is available on `beforeinput` and `input` events, but not on `keydown` events in all browsers
 - Always test with actual IMEs (Korean, Japanese, Chinese) as behavior may vary
 
+## References
+
+- [Stack Overflow: Is it ok to ignore keydown events with keyCode 229?](https://stackoverflow.com/questions/25043934/is-it-ok-to-ignore-keydown-events-with-keycode-229) - keyCode 229 handling
+- [Stum.de: Handling IME events in JavaScript](https://www.stum.de/2016/06/24/handling-ime-events-in-javascript/) - IME event patterns
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2015/WD-uievents-20151215/) - Event specification
+- [Dev.to: Why 1.6 billion East Asians are raging at your Enter key handler](https://dev.to/yukimi-inu/why-16-billion-east-asians-are-quietly-raging-at-your-enter-key-handler-1po0) - Composition event handling
+- [Alibaba Cloud: Listen to IME keyboard input events](https://topic.alibabacloud.com/a/listen-to-ime-keyboard-input-events-in-javascript_1_24_32332279.html) - Browser differences
+- [Gatunka Blog: IME basics for developers](https://blog.gatunka.com/2009/09/20/ime-basics-for-developers/) - Firefox behavior

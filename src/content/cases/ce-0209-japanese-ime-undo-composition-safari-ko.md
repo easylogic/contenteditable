@@ -1,5 +1,5 @@
 ---
-id: ce-0209
+id: ce-0209-japanese-ime-undo-composition-safari-ko
 scenarioId: scenario-undo-with-composition
 locale: ko
 os: macOS

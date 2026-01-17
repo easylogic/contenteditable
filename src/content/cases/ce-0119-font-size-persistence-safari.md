@@ -1,5 +1,5 @@
 ---
-id: ce-0119
+id: ce-0119-font-size-persistence-safari
 scenarioId: scenario-font-size-change
 locale: en
 os: macOS

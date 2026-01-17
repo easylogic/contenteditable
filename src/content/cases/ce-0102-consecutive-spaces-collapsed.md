@@ -1,5 +1,5 @@
 ---
-id: ce-0102
+id: ce-0102-consecutive-spaces-collapsed
 scenarioId: scenario-consecutive-spaces
 locale: en
 os: Windows

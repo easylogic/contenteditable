@@ -83,3 +83,10 @@ element.addEventListener('keydown', (e) => {
 });
 ```
 
+## References
+
+- [Firefox Source Docs: IME Handling Guide](https://firefox-source-docs.mozilla.org/editor/IMEHandlingGuide.html) - IME composition lifecycle
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2016/WD-uievents-20160804/) - Composition specification
+- [Android Developers: Keyboard focus management](https://developer.android.com/codelabs/large-screens/keyboard-focus-management-in-compose) - Tab navigation
+- [Reddit: Tab key during composition](https://www.reddit.com/r/cn1/comments/1ctgpfn) - Tab behavior issues
+- [Samsung Developers: Keyboard IME](https://developer.samsung.com/smarttv/develop/guides/user-interaction/keyboardime.html) - Platform-specific behavior

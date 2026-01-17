@@ -1,5 +1,5 @@
 ---
-id: ce-0037
+id: ce-0037-undo-stack-cleared-ko
 scenarioId: scenario-undo-redo-behavior
 locale: ko
 os: macOS

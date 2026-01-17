@@ -1,5 +1,5 @@
 ---
-id: scenario-auto-scroll-on-typing
+id: scenario-auto-scroll-on-typing-ko
 title: 입력 중 자동 스크롤 동작이 브라우저마다 다름
 description: "contenteditable 요소의 가장자리 근처에서 입력할 때 브라우저가 커서를 보이게 유지하기 위해 자동으로 스크롤합니다. 그러나 스크롤 동작, 타이밍 및 부드러움이 브라우저마다 다르며, 이것은 불쾌한 사용자 경험을 일으킬 수 있습니다."
 category: performance
@@ -92,3 +92,11 @@ element.addEventListener('input', () => {
   }
 });
 ```
+
+## 참고 자료
+
+- [GitHub Gist: Get caret position](https://gist.github.com/nothingismagick/642861242050c1d5f3f1cfa7bcd2b3fd) - 커서 위치 계산
+- [Stack Overflow: Keep caret position when innerHTML changes](https://stackoverflow.com/questions/69956977/html-contenteditable-keep-caret-position-when-inner-html-changes) - 선택 보존
+- [TipTap Issue #2629: iOS Safari caret visibility](https://github.com/ueberdosis/tiptap/issues/2629) - 모바일 스크롤 이슈
+- [Stack Overflow: Edit cursor not displayed on Chrome](https://stackoverflow.com/questions/25897883/edit-cursor-not-displayed-on-chrome-in-contenteditable) - 빈 요소 커서 이슈
+- [Stack Overflow: Cursor caret is not visible in contenteditable](https://stackoverflow.com/questions/13073679/cursor-caret-is-not-visible-in-contenteditable-div) - CSS 커서 가시성

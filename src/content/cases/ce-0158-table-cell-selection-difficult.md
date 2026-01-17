@@ -1,5 +1,5 @@
 ---
-id: ce-0158
+id: ce-0158-table-cell-selection-difficult
 scenarioId: scenario-table-editing
 locale: en
 os: Windows

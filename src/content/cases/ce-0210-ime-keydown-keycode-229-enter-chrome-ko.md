@@ -1,5 +1,5 @@
 ---
-id: ce-0210
+id: ce-0210-ime-keydown-keycode-229-enter-chrome-ko
 scenarioId: scenario-ime-composition-keydown-keycode-229
 locale: ko
 os: Windows

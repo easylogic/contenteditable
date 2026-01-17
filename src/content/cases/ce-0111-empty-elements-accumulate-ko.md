@@ -1,5 +1,5 @@
 ---
-id: ce-0111
+id: ce-0111-empty-elements-accumulate-ko
 scenarioId: scenario-empty-element-cleanup
 locale: ko
 os: Windows

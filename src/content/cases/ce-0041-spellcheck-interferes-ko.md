@@ -1,5 +1,5 @@
 ---
-id: ce-0041
+id: ce-0041-spellcheck-interferes-ko
 scenarioId: scenario-spellcheck-behavior
 locale: ko
 os: macOS

@@ -1,5 +1,5 @@
 ---
-id: ce-0185
+id: ce-0185-japanese-ime-backspace-granularity-chrome
 scenarioId: scenario-ime-backspace-granularity
 locale: en
 os: Windows

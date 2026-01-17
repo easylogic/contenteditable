@@ -1,5 +1,5 @@
 ---
-id: ce-0016
+id: ce-0016-undo-redo-inconsistent
 scenarioId: scenario-undo-redo-behavior
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: scenario-nested-formatting
+id: scenario-nested-formatting-ko
 title: 중첩된 포맷팅 요소가 복잡한 DOM 구조를 생성함
 description: "여러 포맷팅 작업(굵게, 기울임꼴, 밑줄 등)을 적용하면 복잡하고 관리하기 어려운 중첩된 HTML 요소가 생성됩니다. 브라우저는 중첩된 포맷팅을 다르게 처리하며, 결과 DOM 구조가 일관되지 않을 수 있습니다."
 category: formatting
@@ -107,3 +107,10 @@ element.addEventListener('input', () => {
   });
 });
 ```
+
+## 참고 자료
+
+- [W3C ContentEditable: Nested formatting](https://www.w3.org/TR/content-editable/) - Formatting specification
+- [W3C Editing: contentEditableDisabled](https://w3c.github.io/editing/docs/contentEditableDisabled/) - Formatting control
+- [CodingEasyPeasy: Normalize HTML DOM](https://www.codingeasypeasy.com/blog/normalize-html-dom-deep-dive-into-whitespace-and-text-node-management) - DOM normalization
+- [Stack Overflow: Restrict style of pasted text](https://stackoverflow.com/questions/63052383/how-do-i-restrict-the-style-of-the-text-pasted-in-a-contenteditable-area) - Paste handling

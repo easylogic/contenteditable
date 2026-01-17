@@ -1,5 +1,5 @@
 ---
-id: ce-0189
+id: ce-0189-chinese-ime-tab-cancels-firefox
 scenarioId: scenario-ime-composition-tab-key
 locale: en
 os: Windows

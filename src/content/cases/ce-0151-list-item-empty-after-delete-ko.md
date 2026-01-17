@@ -1,5 +1,5 @@
 ---
-id: ce-0151
+id: ce-0151-list-item-empty-after-delete-ko
 scenarioId: scenario-list-item-deletion
 locale: ko
 os: Windows

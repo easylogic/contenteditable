@@ -1,5 +1,5 @@
 ---
-id: ce-0116
+id: ce-0116-list-formatting-lost-paste-ko
 scenarioId: scenario-list-formatting-persistence
 locale: ko
 os: Windows

@@ -93,3 +93,11 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [Stack Overflow: Prevent deletion of all li tags in contenteditable ul](https://stackoverflow.com/questions/24188565/prevent-deletion-of-all-li-tags-in-a-content-editable-ul) - List deletion issues
+- [Stack Overflow: contenteditable in Firefox creates 2 newlines](https://stackoverflow.com/questions/52817606/contenteditable-in-firefox-creates-2-newlines-instead-of-1) - Firefox Enter behavior
+- [Stack Overflow: contenteditable div outdent](https://stackoverflow.com/questions/21263875/contenteditable-div-outdent) - Tab/Shift+Tab behavior
+- [Stack Overflow: contenteditable nested browser differences](https://stackoverflow.com/questions/9913710/contenteditable-nested-browser-differences) - Nested contenteditable issues
+- [Stack Overflow: Prevent contenteditable adding div on Enter](https://stackoverflow.com/questions/18552336/prevent-contenteditable-adding-div-on-enter-chrome) - execCommand behavior
+- [WHATWG Lists: contenteditable default behaviors](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2009-December/024627.html) - Spec recommendations

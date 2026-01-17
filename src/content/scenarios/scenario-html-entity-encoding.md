@@ -102,3 +102,13 @@ element.addEventListener('paste', (e) => {
 });
 ```
 
+## References
+
+- [CodeShack: HTML entity encoder decoder](https://codeshack.io/html-entity-encoder-decoder/) - Entity encoding basics
+- [MiniWebTool: HTML entity encoder decoder](https://miniwebtool.com/html-entity-encoder-decoder/) - Entity reference
+- [MDN: contenteditable global attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) - contenteditable documentation
+- [XJavaScript: innerHTML without HTML encoding](https://www.xjavascript.com/blog/javascript-using-innerhtml-to-output-strings-without-html-encoded-special-characters/) - innerHTML handling
+- [Drupal: Mercury editor entity encoding](https://www.drupal.org/project/mercury_editor_live_edit/issues/3502573) - Double encoding issues
+- [GitHub Gist: HTML entity encoding](https://gist.github.com/yidas/797c9e6d5c856158cffd685b8a8b4ee4) - Encoding helpers
+- [GitHub: he library](https://github.com/mathiasbynens/he) - Robust entity encoding library
+- [CSS Script: HTML entity encoder](https://www.cssscript.com/encode-decode-html-entities/) - Entity libraries

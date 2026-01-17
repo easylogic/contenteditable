@@ -76,6 +76,9 @@ The IME composition lifecycle is tied to a specific editable element's focus sta
 - **Affected languages**: All CJK languages (Korean, Japanese, Chinese) that use IME composition
 - **Not a pure bug**: The behavior is partially expected as IME implementations vary across platforms
 
-## Reference
+## References
 
-- Stack Overflow: https://stackoverflow.com/questions/65569739
+- [Stack Overflow: IME composition breaks when moving focus](https://stackoverflow.com/questions/65569739) - Discussion and solutions
+- [Mozilla Firefox IME Handling Guide](https://firefox-source-docs.mozilla.org/editor/IMEHandlingGuide.html) - Firefox composition lifecycle documentation
+- [Microsoft Learn: WM_IME_COMPOSITION message](https://learn.microsoft.com/en-us/windows/win32/intl/wm-ime-composition) - Windows IME API documentation
+- [Microsoft Learn: Composition String](https://learn.microsoft.com/en-us/windows/win32/intl/composition-string) - Windows composition state management

@@ -1,5 +1,5 @@
 ---
-id: ce-0127
+id: ce-0127-empty-paragraph-after-delete-ko
 scenarioId: scenario-empty-element-cleanup
 locale: ko
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0069
+id: ce-0069-contenteditable-with-autofocus
 scenarioId: scenario-autofocus-behavior
 locale: en
 os: Windows

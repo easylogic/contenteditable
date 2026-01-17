@@ -1,5 +1,5 @@
 ---
-id: ce-0155
+id: ce-0155-font-family-inheritance-issue
 scenarioId: scenario-font-family-change
 locale: en
 os: Windows

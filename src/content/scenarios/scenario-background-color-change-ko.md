@@ -1,5 +1,5 @@
 ---
-id: scenario-background-color-change
+id: scenario-background-color-change-ko
 title: 배경색 변경이 일관되지 않게 동작함
 description: "contenteditable 요소에서 배경색(하이라이트) 변경이 브라우저마다 일관되지 않게 동작합니다. 배경색이 인라인 스타일로 적용될 수 있고, 입력 시 유지되지 않을 수 있으며, 텍스트 선택을 방해할 수 있습니다. 동작이 텍스트 색상 변경과 다릅니다."
 category: formatting
@@ -90,3 +90,9 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [MDN: execCommand reference](https://devdoc.net/web/developer.mozilla.org/en-US/docs/Web/API/Document/execCommand.html) - backColor and hiliteColor
+- [Stack Overflow: execCommand backColor CSS variable](https://stackoverflow.com/questions/53383478/why-document-execcommandbackcolor-does-not-work-with-css-variable-while-fo) - CSS variable limitations

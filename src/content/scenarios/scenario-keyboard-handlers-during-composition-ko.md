@@ -1,5 +1,5 @@
 ---
-id: scenario-keyboard-handlers-during-composition
+id: scenario-keyboard-handlers-during-composition-ko
 title: 키보드 핸들러는 조합 중 브라우저 기본 동작을 허용해야 함
 description: "키보드 핸들러(Enter, Backspace, Delete)를 재정의하는 에디터는 IME 조합 중 브라우저 기본 동작을 허용해야 합니다. 그러나 iOS Safari는 조합 이벤트를 발생시키지 않아 isComposing이 항상 false가 됩니다. iOS Safari는 항상 브라우저 기본 동작을 허용하도록 특별한 처리가 필요합니다."
 category: ime
@@ -195,3 +195,11 @@ element.addEventListener('beforeinput', (e) => {
 - iOS Safari의 한글 IME에 대해 `isComposing` 플래그나 조합 이벤트에 의존하지 않음
 - 플랫폼 감지를 사용하여 올바른 전략을 적용함
 - 조합 상태 감지를 위해 `keydown` 이벤트 대신 `beforeinput` 이벤트 사용을 고려함
+
+## 참고 자료
+
+- [Lexical Issue #5841: isComposing always false on iOS Safari Korean IME](https://github.com/facebook/lexical/issues/5841) - iOS Safari Korean IME issues
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2016/WD-uievents-20160804/) - Composition event specification
+- [WebKit Bug 261764: iOS dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Related dictation issues
+- [WebKit Bug 43020: Korean Hangul composition test](https://bugs.webkit.org/show_bug.cgi?id=43020) - Korean IME composition issues
+- [Tanishiking: IME event handling](https://tanishiking.github.io/posts/ime-event-handling/) - IME detection heuristics

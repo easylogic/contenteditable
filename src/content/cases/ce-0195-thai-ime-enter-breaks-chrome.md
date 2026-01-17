@@ -1,5 +1,5 @@
 ---
-id: ce-0195
+id: ce-0195-thai-ime-enter-breaks-chrome
 scenarioId: scenario-ime-enter-breaks
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0233
+id: ce-0233-chinese-ime-pinyin-heading-chrome-en
 scenarioId: scenario-ime-duplicate-text-heading
 locale: en
 os: Windows

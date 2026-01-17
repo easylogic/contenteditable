@@ -1,5 +1,5 @@
 ---
-id: ce-0160
+id: ce-0160-nested-formatting-order-inconsistent
 scenarioId: scenario-nested-formatting
 locale: en
 os: Windows

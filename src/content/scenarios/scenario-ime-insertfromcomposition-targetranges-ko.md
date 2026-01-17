@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-insertfromcomposition-targetranges
+id: scenario-ime-insertfromcomposition-targetranges-ko
 title: insertFromComposition targetRanges 동작이 Safari 플랫폼 간에 다름
 description: "insertFromComposition inputType이 Desktop Safari와 iOS Safari에서 다른 targetRanges 동작과 함께 발생하여 다른 처리 전략이 필요합니다. Desktop Safari는 collapsed여도 정확한 targetRanges를 제공하는 반면, iOS Safari는 재계산이 필요한 collapsed 범위를 제공할 수 있습니다. 또한 iOS Safari 한글 IME는 insertFromComposition이 전혀 발생하지 않습니다."
 category: ime
@@ -140,3 +140,9 @@ element.addEventListener('beforeinput', (e) => {
 ```
 
 **중요**: 올바른 처리 전략을 적용하려면 플랫폼 및 IME 감지가 필요합니다.
+
+## 참고 자료
+
+- [ContentEditable Real Error: insertFromComposition targetRanges differences](https://contenteditable.realerror.com/) - Platform-specific behavior documentation
+- [WebKit Bug 170416: Support InputEventInit inputType, dataTransfer, isComposing, targetRanges](https://bugs.webkit.org/show_bug.cgi?id=170416) - Input Events API support
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - Official specification for insertFromComposition

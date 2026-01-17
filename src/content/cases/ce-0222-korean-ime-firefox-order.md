@@ -1,5 +1,5 @@
 ---
-id: ce-0222
+id: ce-0222-korean-ime-firefox-order
 scenarioId: scenario-korean-ime-composition-firefox
 locale: en
 os: Windows

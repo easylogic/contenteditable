@@ -1,5 +1,5 @@
 ---
-id: ce-0212
+id: ce-0212-ime-keydown-keycode-229-enter-japanese-chrome
 scenarioId: scenario-ime-composition-keydown-keycode-229
 locale: en
 os: Windows

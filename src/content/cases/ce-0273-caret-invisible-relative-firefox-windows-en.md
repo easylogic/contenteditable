@@ -1,5 +1,5 @@
 ---
-id: ce-0273
+id: ce-0273-caret-invisible-relative-firefox-windows-en
 scenarioId: scenario-caret-invisible-relative
 locale: en
 os: Windows

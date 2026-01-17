@@ -1,5 +1,5 @@
 ---
-id: scenario-font-family-change
+id: scenario-font-family-change-ko
 title: 글꼴 패밀리 변경이 일관되지 않게 동작함
 description: "contenteditable 요소에서 글꼴 패밀리를 변경하는 것이 브라우저마다 일관되지 않게 동작합니다. font-family CSS 속성이 인라인으로, style 속성으로 적용되거나 전혀 적용되지 않을 수 있습니다. 글꼴을 적용한 후 텍스트를 편집할 때도 동작이 다양합니다."
 category: formatting
@@ -85,3 +85,11 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [Stack Overflow: Change font family to custom font using execCommand](https://stackoverflow.com/questions/42331001/can-you-change-the-font-family-of-contenteditable-text-to-a-custom-font-using-ex) - Custom font handling
+- [Stack Overflow: Change font size for contenteditable div](https://stackoverflow.com/questions/22116956/change-the-font-size-for-a-contenteditable-div) - FontName vs CSS
+- [Programming Books: execCommand and contenteditable](https://www.programming-books.io/essential/javascript/execcommand-and-contenteditable-5257f91227764826a1b1b77f465d8efa) - styleWithCSS usage
+- [AngularFix: execCommand doesn't work](https://www.angularfix.com/2022/11/execcommand-doesn-text.html) - Style interference issues

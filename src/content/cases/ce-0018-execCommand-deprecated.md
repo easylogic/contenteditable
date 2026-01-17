@@ -1,5 +1,5 @@
 ---
-id: ce-0018
+id: ce-0018-execCommand-deprecated
 scenarioId: scenario-execCommand-alternatives
 locale: en
 os: Any

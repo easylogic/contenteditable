@@ -1,5 +1,5 @@
 ---
-id: ce-0071
+id: ce-0071-contenteditable-with-autocorrect
 scenarioId: scenario-autocorrect-behavior
 locale: en
 os: iOS

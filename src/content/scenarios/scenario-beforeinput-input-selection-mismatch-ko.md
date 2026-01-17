@@ -1,5 +1,5 @@
 ---
-id: scenario-beforeinput-input-selection-mismatch
+id: scenario-beforeinput-input-selection-mismatch-ko
 title: beforeinput과 input 이벤트 간 selection 불일치
 description: "beforeinput 이벤트의 selection(window.getSelection())이 해당 input 이벤트의 selection과 다를 수 있습니다. 이 불일치는 IME 조합 중, 구문 추천 중, 또는 링크와 같은 포맷된 요소 옆에서 입력할 때 발생할 수 있습니다. beforeinput의 selection은 인접한 포맷된 텍스트를 포함할 수 있는 반면, input selection은 최종 커서 위치를 반영합니다."
 category: ime
@@ -393,6 +393,7 @@ function normalizeSelectionForLink(range) {
 
 ## 참고 자료
 
-- MDN: Selection API - https://developer.mozilla.org/en-US/docs/Web/API/Selection
-- MDN: Range API - https://developer.mozilla.org/en-US/docs/Web/API/Range
-- W3C Input Events Specification - https://www.w3.org/TR/2016/WD-input-events-20160928/
+- [MDN: Selection API](https://developer.mozilla.org/en-US/docs/Web/API/Selection) - 공식 문서
+- [MDN: Range API](https://developer.mozilla.org/en-US/docs/Web/API/Range) - 공식 문서
+- [W3C Input Events Level 2 사양](https://www.w3.org/TR/input-events-2/) - 공식 사양
+- [W3C Input Events Level 1 사양](https://www.w3.org/TR/2016/WD-input-events-20160928/) - 레거시 사양

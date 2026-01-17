@@ -1,5 +1,5 @@
 ---
-id: ce-0190
+id: ce-0190-korean-ime-escape-cancels-edge
 scenarioId: scenario-ime-composition-escape-key
 locale: en
 os: Windows

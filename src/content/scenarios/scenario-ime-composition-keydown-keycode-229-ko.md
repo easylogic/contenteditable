@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-keydown-keycode-229
+id: scenario-ime-composition-keydown-keycode-229-ko
 title: IME 컴포지션 중 keyCode 229를 가진 중복 keydown 이벤트 발생
 description: "IME 컴포지션 중 특정 키(특히 Enter)를 누르면 중복된 keydown 이벤트가 발생할 수 있습니다. 첫 번째 이벤트는 keyCode 229(IME가 입력을 처리 중임을 나타냄)를 가지며, 그 다음 실제 키의 keyCode(예: Enter의 경우 13)가 발생합니다. 이로 인해 단일 키 입력에 대해 이벤트 핸들러가 두 번 실행될 수 있습니다."
 category: ime
@@ -119,3 +119,12 @@ element.addEventListener('beforeinput', (e) => {
 - 그러나 `keyCode 229`는 IME 처리에 여전히 관련이 있을 수 있는 특수한 경우입니다
 - `isComposing` 속성은 `beforeinput` 및 `input` 이벤트에서 사용할 수 있지만, 모든 브라우저의 `keydown` 이벤트에서는 사용할 수 없습니다
 - 동작이 다를 수 있으므로 실제 IME(한국어, 일본어, 중국어)로 항상 테스트하세요
+
+## 참고 자료
+
+- [Stack Overflow: Is it ok to ignore keydown events with keyCode 229?](https://stackoverflow.com/questions/25043934/is-it-ok-to-ignore-keydown-events-with-keycode-229) - keyCode 229 handling
+- [Stum.de: Handling IME events in JavaScript](https://www.stum.de/2016/06/24/handling-ime-events-in-javascript/) - IME event patterns
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2015/WD-uievents-20151215/) - Event specification
+- [Dev.to: Why 1.6 billion East Asians are raging at your Enter key handler](https://dev.to/yukimi-inu/why-16-billion-east-asians-are-quietly-raging-at-your-enter-key-handler-1po0) - Composition event handling
+- [Alibaba Cloud: Listen to IME keyboard input events](https://topic.alibabacloud.com/a/listen-to-ime-keyboard-input-events-in-javascript_1_24_32332279.html) - Browser differences
+- [Gatunka Blog: IME basics for developers](https://blog.gatunka.com/2009/09/20/ime-basics-for-developers/) - Firefox behavior

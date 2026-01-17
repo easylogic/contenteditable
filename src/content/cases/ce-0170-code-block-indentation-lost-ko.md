@@ -1,5 +1,5 @@
 ---
-id: ce-0170
+id: ce-0170-code-block-indentation-lost-ko
 scenarioId: scenario-code-block-editing
 locale: ko
 os: Windows

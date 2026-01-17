@@ -1,7 +1,7 @@
 ---
-id: ce-0217
+id: ce-0541-mobile-selection-drag-ios-safari-ko
 scenarioId: scenario-mobile-selection-drag-to-select
-locale: en
+locale: ko
 os: iOS
 osVersion: "16.0+"
 device: iPhone or iPad

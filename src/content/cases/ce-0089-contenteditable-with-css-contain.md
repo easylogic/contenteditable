@@ -1,5 +1,5 @@
 ---
-id: ce-0089
+id: ce-0089-contenteditable-with-css-contain
 scenarioId: scenario-css-contain
 locale: en
 os: Windows

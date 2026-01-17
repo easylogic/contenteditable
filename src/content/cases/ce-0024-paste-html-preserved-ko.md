@@ -1,5 +1,5 @@
 ---
-id: ce-0024
+id: ce-0024-paste-html-preserved-ko
 scenarioId: scenario-paste-formatting-loss
 locale: ko
 os: macOS

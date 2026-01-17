@@ -1,5 +1,5 @@
 ---
-id: ce-0140
+id: ce-0140-empty-span-style-attributes-ko
 scenarioId: scenario-empty-element-cleanup
 locale: ko
 os: Windows

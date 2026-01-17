@@ -1,5 +1,5 @@
 ---
-id: ce-0297
+id: ce-0297-gettargetranges-empty-ko
 scenarioId: scenario-gettargetranges-empty
 locale: ko
 os: Android

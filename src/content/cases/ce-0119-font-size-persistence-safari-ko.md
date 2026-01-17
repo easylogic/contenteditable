@@ -1,5 +1,5 @@
 ---
-id: ce-0119
+id: ce-0119-font-size-persistence-safari-ko
 scenarioId: scenario-font-size-change
 locale: ko
 os: macOS

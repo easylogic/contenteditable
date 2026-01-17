@@ -1,5 +1,5 @@
 ---
-id: scenario-image-resize
+id: scenario-image-resize-ko
 title: contenteditable에서 이미지 크기 조정이 제한되거나 일관되지 않음
 description: "contenteditable 요소 내에서 이미지 크기 조정이 제한되거나 브라우저마다 일관되지 않게 동작합니다. 일부 브라우저는 네이티브 크기 조정 핸들을 지원하지만 다른 브라우저는 수동 구현이 필요합니다. 크기 조정 동작이 예상치 못하게 DOM 구조에 영향을 줄 수도 있습니다."
 category: formatting
@@ -102,3 +102,11 @@ function addResizeHandles(img) {
   wrapper.appendChild(handle);
 }
 ```
+
+## 참고 자료
+
+- [Stack Overflow: WebKit live images resize in contenteditable](https://stackoverflow.com/questions/8040909/webkit-live-images-resize-in-contenteditable-container) - Native resize support
+- [Stack Overflow: Disable img resize handles in IE](https://stackoverflow.com/questions/22318586/disable-img-resize-handles-in-ie-8-11-in-contenteditable-and-remove-them-if-po) - IE resize handles
+- [Stack Overflow: Removing resize handlers on contenteditable](https://stackoverflow.com/questions/1926525/removing-resize-handlers-on-contenteditable-div) - Disabling resize
+- [Telerik Feedback: No resizing handles for image with Firefox](https://feedback.telerik.com/aspnet-ajax/1383248-no-resizing-handles-for-image-with-firefox) - Firefox regression
+- [Interact.js: Resizable](https://interactjs.io/docs/resizable/) - Custom resize library

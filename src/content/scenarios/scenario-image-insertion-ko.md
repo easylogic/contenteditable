@@ -1,5 +1,5 @@
 ---
-id: scenario-image-insertion
+id: scenario-image-insertion-ko
 title: 이미지 삽입 동작이 브라우저마다 다름
 description: "contenteditable 요소에 이미지를 삽입할 때 동작이 브라우저마다 크게 다릅니다. 이미지가 <img> 태그로, base64 데이터 URL로 삽입되거나 전혀 지원되지 않을 수 있습니다. 크기, 위치 및 편집 동작도 다릅니다."
 category: formatting
@@ -102,3 +102,8 @@ element.addEventListener('drop', (e) => {
   });
 });
 ```
+
+## 참고 자료
+
+- [Stack Overflow: Drop image into contenteditable in Chrome to the cursor](https://stackoverflow.com/questions/10654262/drop-image-into-contenteditable-in-chrome-to-the-cursor) - Image drop handling
+- [Froala Help: Can I insert images as base64?](https://wysiwyg-editor.froala.help/hc/en-us/articles/115000555949-Can-I-insert-images-as-base64) - Base64 image considerations

@@ -1,5 +1,5 @@
 ---
-id: ce-0221
+id: ce-0221-edge-clipboard-linux
 scenarioId: scenario-edge-clipboard-linux
 locale: en
 os: Linux

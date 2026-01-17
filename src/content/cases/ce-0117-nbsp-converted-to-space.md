@@ -1,5 +1,5 @@
 ---
-id: ce-0117
+id: ce-0117-nbsp-converted-to-space
 scenarioId: scenario-non-breaking-space
 locale: en
 os: Windows

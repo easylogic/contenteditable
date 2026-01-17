@@ -1,5 +1,5 @@
 ---
-id: ce-0142
+id: ce-0142-link-double-click-select-ko
 scenarioId: scenario-link-click-editing
 locale: ko
 os: Windows

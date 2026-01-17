@@ -1,5 +1,5 @@
 ---
-id: ce-0163
+id: ce-0163-list-formatting-across-items
 scenarioId: scenario-list-formatting-persistence
 locale: en
 os: Windows

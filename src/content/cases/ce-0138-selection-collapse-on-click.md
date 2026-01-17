@@ -1,5 +1,5 @@
 ---
-id: ce-0138
+id: ce-0138-selection-collapse-on-click
 scenarioId: scenario-selection-restoration
 locale: en
 os: macOS

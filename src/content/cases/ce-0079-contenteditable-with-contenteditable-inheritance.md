@@ -1,5 +1,5 @@
 ---
-id: ce-0079
+id: ce-0079-contenteditable-with-contenteditable-inheritance
 scenarioId: scenario-contenteditable-inheritance
 locale: en
 os: Windows

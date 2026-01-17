@@ -1,5 +1,5 @@
 ---
-id: ce-0030
+id: ce-0030-backspace-composition-chrome
 scenarioId: scenario-ime-backspace-granularity
 locale: en
 os: macOS

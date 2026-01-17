@@ -1,5 +1,5 @@
 ---
-id: ce-0061
+id: ce-0061-contenteditable-with-lang-ko
 scenarioId: scenario-language-attribute
 locale: ko
 os: macOS

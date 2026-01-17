@@ -1,5 +1,5 @@
 ---
-id: ce-0206
+id: ce-0206-russian-ime-cyrillic-composition-chrome-ko
 scenarioId: scenario-ime-combining-characters-composition
 locale: ko
 os: Windows

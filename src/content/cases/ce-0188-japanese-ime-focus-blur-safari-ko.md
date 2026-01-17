@@ -1,5 +1,5 @@
 ---
-id: ce-0188
+id: ce-0188-japanese-ime-focus-blur-safari-ko
 scenarioId: scenario-ime-composition-focus-blur
 locale: ko
 os: macOS

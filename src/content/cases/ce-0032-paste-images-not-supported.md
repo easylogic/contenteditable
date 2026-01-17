@@ -1,5 +1,5 @@
 ---
-id: ce-0032
+id: ce-0032-paste-images-not-supported
 scenarioId: scenario-paste-media-handling
 locale: en
 os: macOS

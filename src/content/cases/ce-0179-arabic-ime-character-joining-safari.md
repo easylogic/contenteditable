@@ -1,5 +1,5 @@
 ---
-id: ce-0179
+id: ce-0179-arabic-ime-character-joining-safari
 scenarioId: scenario-ime-rtl-and-character-joining
 locale: en
 os: macOS

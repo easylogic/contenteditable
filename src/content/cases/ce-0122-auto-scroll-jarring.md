@@ -1,5 +1,5 @@
 ---
-id: ce-0122
+id: ce-0122-auto-scroll-jarring
 scenarioId: scenario-auto-scroll-on-typing
 locale: en
 os: Windows

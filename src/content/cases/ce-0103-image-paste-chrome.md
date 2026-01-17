@@ -1,5 +1,5 @@
 ---
-id: ce-0103
+id: ce-0103-image-paste-chrome
 scenarioId: scenario-image-insertion
 locale: en
 os: Windows

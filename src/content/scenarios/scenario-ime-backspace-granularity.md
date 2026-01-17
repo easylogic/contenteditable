@@ -25,3 +25,10 @@ This issue manifests differently across languages:
 This behavior can affect cursor movement, undo granularity, and diff calculation for text editors built on top of `contenteditable`.
 
 This scenario has been observed in multiple environments with similar behavior across different languages.
+
+## References
+
+- [Microsoft Learn: Composition string](https://learn.microsoft.com/en-us/windows/win32/intl/composition-string) - IME composition concepts
+- [Microsoft Learn: Korean IME](https://learn.microsoft.com/en-us/globalization/input/korean-ime) - Korean IME behavior
+- [Oracle Documentation: Korean input method](https://docs.oracle.com/cd/E19683-01/816-0671/6m752s9ev/index.html) - Korean IME backspace behavior
+- [Mozilla IME Handling Guide](https://udn.realityripple.com/docs/Mozilla/IME_handling_guide) - Chinese IME behavior

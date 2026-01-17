@@ -93,3 +93,10 @@ element.addEventListener('input', () => {
 });
 ```
 
+## References
+
+- [GitHub Gist: Get caret position](https://gist.github.com/nothingismagick/642861242050c1d5f3f1cfa7bcd2b3fd) - Caret position calculation
+- [Stack Overflow: Keep caret position when innerHTML changes](https://stackoverflow.com/questions/69956977/html-contenteditable-keep-caret-position-when-inner-html-changes) - Selection preservation
+- [TipTap Issue #2629: iOS Safari caret visibility](https://github.com/ueberdosis/tiptap/issues/2629) - Mobile scroll issues
+- [Stack Overflow: Edit cursor not displayed on Chrome](https://stackoverflow.com/questions/25897883/edit-cursor-not-displayed-on-chrome-in-contenteditable) - Empty element caret issues
+- [Stack Overflow: Cursor caret is not visible in contenteditable](https://stackoverflow.com/questions/13073679/cursor-caret-is-not-visible-in-contenteditable-div) - CSS caret visibility

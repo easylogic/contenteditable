@@ -111,3 +111,9 @@ element.addEventListener('click', (e) => {
 });
 ```
 
+## References
+
+- [W3C UI Events: Composition events](https://w3c.github.io/uievents/split/composition-events.html) - Composition event specification
+- [Chromium Blink Dev: Event ordering discussion](https://groups.google.com/a/chromium.org/g/blink-dev/c/spwtbdODC3Q) - beforeinput and composition event order
+- [W3C DOM Level 3 Events](https://www.w3.org/TR/2013/WD-DOM-Level-3-Events-20131105/) - Event cancelability
+- [MDN: compositionstart event](https://devdoc.net/web/developer.mozilla.org/en-US/docs/DOM/DOM_event_reference/compositionstart.html) - Composition event documentation

@@ -1,5 +1,5 @@
 ---
-id: ce-0022
+id: ce-0022-ime-enter-breaks-firefox-ko
 scenarioId: scenario-ime-enter-breaks
 locale: ko
 os: Windows

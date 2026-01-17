@@ -1,5 +1,5 @@
 ---
-id: ce-0148
+id: ce-0148-table-paste-breaks-structure
 scenarioId: scenario-table-editing
 locale: en
 os: Windows

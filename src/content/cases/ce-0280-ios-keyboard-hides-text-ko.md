@@ -1,5 +1,5 @@
 ---
-id: ce-0280
+id: ce-0280-ios-keyboard-hides-text-ko
 scenarioId: scenario-ios-keyboard-hides-text
 locale: ko
 os: iOS

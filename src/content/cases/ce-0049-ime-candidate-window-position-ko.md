@@ -1,5 +1,5 @@
 ---
-id: ce-0049
+id: ce-0049-ime-candidate-window-position-ko
 scenarioId: scenario-ime-ui-positioning
 locale: ko
 os: macOS

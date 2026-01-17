@@ -1,5 +1,5 @@
 ---
-id: ce-0101
+id: ce-0101-link-click-navigation-chrome-ko
 scenarioId: scenario-link-click-editing
 locale: ko
 os: Windows

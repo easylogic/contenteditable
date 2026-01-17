@@ -1,5 +1,5 @@
 ---
-id: ce-0004
+id: ce-0004-ime-backspace-removes-whole-syllable-ko
 scenarioId: scenario-ime-backspace-granularity
 locale: ko
 os: Windows

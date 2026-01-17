@@ -1,5 +1,5 @@
 ---
-id: scenario-typing-adjacent-formatted-elements
+id: scenario-typing-adjacent-formatted-elements-ko
 title: 포맷된 요소 옆에서 입력 시 예상치 못한 동작 발생
 description: "contenteditable에서 포맷된 요소(링크, bold, italic 등) 옆에서 텍스트를 입력할 때, 입력 이벤트의 event.data에 포맷된 요소의 텍스트가 포함될 수 있고, selection 범위가 포맷된 요소를 포함할 수 있으며, 텍스트가 포맷된 요소 뒤가 아닌 안에 삽입될 수 있습니다. 이것은 다양한 브라우저와 입력 방법에서 발생합니다."
 category: formatting
@@ -441,6 +441,7 @@ function insertTextAfterElement(element, text) {
 
 ## 참고 자료
 
-- MDN: Selection API - https://developer.mozilla.org/en-US/docs/Web/API/Selection
-- MDN: Range API - https://developer.mozilla.org/en-US/docs/Web/API/Range
-- W3C Input Events Specification - https://www.w3.org/TR/2016/WD-input-events-20160928/
+- [MDN: Selection API](https://developer.mozilla.org/en-US/docs/Web/API/Selection) - 공식 문서
+- [MDN: Range API](https://developer.mozilla.org/en-US/docs/Web/API/Range) - 공식 문서
+- [W3C Input Events Level 2 사양](https://www.w3.org/TR/input-events-2/) - 공식 사양
+- [W3C Input Events Level 1 사양](https://www.w3.org/TR/2016/WD-input-events-20160928/) - 레거시 사양

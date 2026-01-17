@@ -86,3 +86,7 @@ element.addEventListener('keydown', (e) => {
 });
 ```
 
+## References
+
+- [CKEditor Issue #7145: Link click behavior in contenteditable](https://dev.ckeditor.com/ticket/7145) - Link navigation in editors
+- [Stack Overflow: Disallow caret inside HTML anchor tags](https://stackoverflow.com/questions/35043719/disallow-caret-inside-html-anchor-tags) - Caret positioning in links

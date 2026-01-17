@@ -129,7 +129,10 @@ The Visual Viewport API and standard CSS positioning fail to work reliably when 
    }
    ```
 
-## Reference
+## References
 
-- WebKit Bug: https://bugs.webkit.org/show_bug.cgi?id=191204
-- CKEditor Issue: https://dev.ckeditor.com/ticket/9698
+- [WebKit Bug 191204: Broken viewport mechanics when software keyboard is visible](https://bugs.webkit.org/show_bug.cgi?id=191204) - Reported 2018, Status: NEW (unfixed)
+- [WebKit Bug 292603: Safari on iOS adds bottom offset to viewport when keyboard is open](https://bugs.webkit.org/show_bug.cgi?id=292603) - Related viewport offset issue
+- [CKEditor Issue 9698: iOS viewport keyboard issues](https://dev.ckeditor.com/ticket/9698) - Editor-specific workarounds
+- [Apple Developer Forums: Fixed positioning issues in iOS 26](https://developer.apple.com/forums/thread/800154) - Recent reports of persistent issues
+- [IIFX: Debugging iOS 26 fixed positioning post-keyboard](https://iifx.dev/en/articles/460201403/debugging-ios-26-how-to-correct-fixed-positioning-post-keyboard-interaction) - Workarounds and solutions

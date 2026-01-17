@@ -1,5 +1,5 @@
 ---
-id: ce-0153
+id: ce-0153-nbsp-line-break-prevention
 scenarioId: scenario-non-breaking-space
 locale: en
 os: Windows

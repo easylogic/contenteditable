@@ -79,3 +79,9 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [ProseMirror Discuss: Paste during IME composition corrupts IME](https://discuss.prosemirror.net/t/paste-during-ime-composition-corrupts-ime/4251) - Detailed discussion of paste corruption issues
+- [Chromium Code Review: Composition end event ordering fix](https://codereview.chromium.org/1998783002) - Fix for compositionend event ordering
+- [Chrome Developers: Introducing EditContext API](https://developer.chrome.com/blog/introducing-editcontext-api) - API for better composition handling
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - Official specification for composition events

@@ -1,5 +1,5 @@
 ---
-id: ce-0125
+id: ce-0125-image-deletion-cursor-position-ko
 scenarioId: scenario-image-deletion
 locale: ko
 os: Windows

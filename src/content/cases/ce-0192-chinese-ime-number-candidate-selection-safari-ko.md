@@ -1,5 +1,5 @@
 ---
-id: ce-0192
+id: ce-0192-chinese-ime-number-candidate-selection-safari-ko
 scenarioId: scenario-ime-composition-number-input
 locale: ko
 os: macOS

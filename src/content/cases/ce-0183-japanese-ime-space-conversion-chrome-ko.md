@@ -1,5 +1,5 @@
 ---
-id: ce-0183
+id: ce-0183-japanese-ime-space-conversion-chrome-ko
 scenarioId: scenario-space-during-composition
 locale: ko
 os: Windows

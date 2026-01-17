@@ -78,3 +78,11 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [W3C HTML5 Editing: Whitespace handling](https://www.w3.org/TR/2015/WD-html51-20151008/editing.html) - NBSP insertion
+- [MDN: white-space](https://developer.mozilla.org/en-US/docs/Web/CSS/white-space) - white-space CSS property
+- [WHATWG HTML: Whitespace](https://html.spec.whatwg.org/multipage/interaction.html) - pre-wrap behavior
+- [WHATWG Lists: NBSP magic](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-June/032187.html) - NBSP insertion algorithm
+- [W3C Editing: NBSP handling](https://dvcs.w3.org/hg/editing/rev/1658d3f45c56) - Space preservation
+- [W3C Style Lists: Whitespace boundary issues](https://lists.w3.org/Archives/Public/www-style/2015Mar/0139.html) - Boundary truncation

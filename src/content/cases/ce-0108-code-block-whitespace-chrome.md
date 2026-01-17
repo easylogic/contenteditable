@@ -1,5 +1,5 @@
 ---
-id: ce-0108
+id: ce-0108-code-block-whitespace-chrome
 scenarioId: scenario-code-block-editing
 locale: en
 os: Windows

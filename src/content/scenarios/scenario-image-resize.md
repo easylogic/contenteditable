@@ -103,3 +103,10 @@ function addResizeHandles(img) {
 }
 ```
 
+## References
+
+- [Stack Overflow: WebKit live images resize in contenteditable](https://stackoverflow.com/questions/8040909/webkit-live-images-resize-in-contenteditable-container) - Native resize support
+- [Stack Overflow: Disable img resize handles in IE](https://stackoverflow.com/questions/22318586/disable-img-resize-handles-in-ie-8-11-in-contenteditable-and-remove-them-if-po) - IE resize handles
+- [Stack Overflow: Removing resize handlers on contenteditable](https://stackoverflow.com/questions/1926525/removing-resize-handlers-on-contenteditable-div) - Disabling resize
+- [Telerik Feedback: No resizing handles for image with Firefox](https://feedback.telerik.com/aspnet-ajax/1383248-no-resizing-handles-for-image-with-firefox) - Firefox regression
+- [Interact.js: Resizable](https://interactjs.io/docs/resizable/) - Custom resize library

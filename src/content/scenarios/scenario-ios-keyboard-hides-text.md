@@ -112,7 +112,10 @@ iOS Safari's viewport and keyboard handling fails to:
    `;
    ```
 
-## Reference
+## References
 
-- Stack Overflow: https://stackoverflow.com/questions/41087416
-- WebKit Bug: https://bugs.webkit.org/show_bug.cgi?id=191204 (Related viewport issue)
+- [Stack Overflow: iOS Safari keyboard hides text](https://stackoverflow.com/questions/41087416) - Discussion and solutions
+- [WebKit Bug 191204: Broken viewport mechanics when software keyboard is visible](https://bugs.webkit.org/show_bug.cgi?id=191204) - Related viewport issue
+- [Bram.us: Prevent items from being hidden underneath virtual keyboard](https://www.bram.us/2021/09/13/prevent-items-from-being-hidden-underneath-the-virtual-keyboard-by-means-of-the-virtualkeyboard-api/) - Visual Viewport API guide
+- [Stack Overflow: iOS Safari unwanted scroll when keyboard opens](https://stackoverflow.com/questions/56351216/ios-safari-unwanted-scroll-when-keyboard-is-opened-and-body-scroll-is-disabled) - Scroll behavior issues
+- [Stack Overflow: Automatic scrolling in contenteditable](https://stackoverflow.com/questions/8523232/automatic-scrolling-when-contenteditable-designmode-in-a-uiwebview) - Auto-scroll solutions

@@ -1,5 +1,5 @@
 ---
-id: ce-0019
+id: ce-0019-paste-plain-text-only-ko
 scenarioId: scenario-paste-plain-text
 locale: ko
 os: macOS

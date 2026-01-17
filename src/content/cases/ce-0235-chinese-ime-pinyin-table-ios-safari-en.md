@@ -1,5 +1,5 @@
 ---
-id: ce-0235
+id: ce-0235-chinese-ime-pinyin-table-ios-safari-en
 scenarioId: scenario-ime-pinyin-visible-safari
 locale: en
 os: iOS

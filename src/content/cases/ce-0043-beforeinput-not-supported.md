@@ -1,5 +1,5 @@
 ---
-id: ce-0043
+id: ce-0043-beforeinput-not-supported
 scenarioId: scenario-beforeinput-support
 locale: en
 os: macOS

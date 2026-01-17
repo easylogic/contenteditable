@@ -1,5 +1,5 @@
 ---
-id: ce-0159
+id: ce-0159-empty-elements-after-format-remove-ko
 scenarioId: scenario-empty-element-cleanup
 locale: ko
 os: Windows

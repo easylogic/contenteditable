@@ -1,5 +1,5 @@
 ---
-id: ce-0167
+id: ce-0167-background-color-format-variation
 scenarioId: scenario-background-color-change
 locale: en
 os: Windows

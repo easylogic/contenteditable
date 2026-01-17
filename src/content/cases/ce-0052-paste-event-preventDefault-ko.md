@@ -1,5 +1,5 @@
 ---
-id: ce-0052
+id: ce-0052-paste-event-preventDefault-ko
 scenarioId: scenario-paste-event-handling
 locale: ko
 os: Windows

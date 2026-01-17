@@ -78,6 +78,10 @@ When composition is confirmed with Space key, WebKit fails to properly clear the
    });
    ```
 
-## Reference
+## References
 
-- GitHub Issue: https://github.com/ueberdosis/tiptap/issues/7271
+- [TipTap Issue #7271: Chinese Pinyin input duplicates in headings](https://github.com/ueberdosis/tiptap/issues/7271) - GitHub issue report
+- [ProseMirror Issue #944: Duplicated characters in Safari with IME](https://github.com/ProseMirror/prosemirror/issues/944) - Related IME duplication issues
+- [Coda Community: Chinese Pinyin input on macOS Safari duplicates Latin characters](https://community.coda.io/t/bug-chinese-pinyin-input-on-mac-os-safari-duplicates-latin-characters-randomly/54608) - User reports
+- [Apple Discussions: Chinese IME duplication issues](https://discussions.apple.com/thread/255791663) - Related Safari IME issues
+- [ProseMirror Discuss: IME composing problems in table cells](https://discuss.prosemirror.net/t/ime-composing-problems-on-td-or-th-element-in-safari-browser/4501) - Related empty container issues

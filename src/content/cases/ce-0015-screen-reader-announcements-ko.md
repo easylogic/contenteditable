@@ -1,5 +1,5 @@
 ---
-id: ce-0015
+id: ce-0015-screen-reader-announcements-ko
 scenarioId: scenario-accessibility-announcements
 locale: ko
 os: macOS

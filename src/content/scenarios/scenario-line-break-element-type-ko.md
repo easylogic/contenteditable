@@ -1,5 +1,5 @@
 ---
-id: scenario-line-break-element-type
+id: scenario-line-break-element-type-ko
 title: 줄바꿈 요소 유형이 브라우저마다 다름
 description: "contenteditable 요소에서 줄바꿈을 생성할 때 브라우저는 다른 HTML 요소를 사용합니다: <br>, <p>, 또는 <div>. 이 불일치는 DOM 구조를 예측하고 정규화하기 어렵게 만들며, 특히 리치 텍스트 에디터를 작업할 때 그렇습니다."
 category: formatting
@@ -87,3 +87,11 @@ element.addEventListener('input', () => {
   normalizeLineBreaks(element);
 });
 ```
+
+## 참고 자료
+
+- [MDN: Content Editable](https://www.devdoc.net/web/developer.mozilla.org/en-US/docs/HTML/Content_Editable.html) - Browser behavior differences
+- [Can I Use: defaultParagraphSeparator](https://caniuse.com/mdn-api_document_execcommand_defaultparagraphseparator) - Browser compatibility
+- [Stack Overflow: contenteditable in Firefox creates 2 newlines](https://stackoverflow.com/questions/52817606/contenteditable-in-firefox-creates-2-newlines-instead-of-1) - Firefox behavior
+- [WHATWG Lists: Paragraph separator discussion](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html) - Styling differences
+- [Stack Overflow: Cross-browser way to insert br or p tag](https://stackoverflow.com/questions/35705291/cross-browser-way-to-insert-br-or-p-tag-when-hitting-enter-on-a-contenteditable) - Consistency approaches

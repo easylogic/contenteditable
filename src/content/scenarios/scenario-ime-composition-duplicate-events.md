@@ -78,3 +78,12 @@ element.addEventListener('beforeinput', (e) => {
 
 **Important**: In iOS Safari, `insertText` (not `insertCompositionText`) fires during composition, so handlers should check for both `insertText` and `insertCompositionText` when handling composition updates.
 
+## References
+
+- [ProseMirror Issue #944: Duplicated characters in Safari with IME](https://github.com/ProseMirror/prosemirror/issues/944) - Related duplication issues when marks are active
+- [WebKit Bug 31902: DOM modified again after compositionend](https://bugs.webkit.org/show_bug.cgi?id=31902) - Extra deletions/insertions after composition
+- [WebKit Bug 261764: Dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Dictation bypasses composition events
+- [Stack Overflow: Safari event order during composition](https://stackoverflow.com/questions/79501572/safari-is-theres-any-way-to-detect-that-this-particular-keydown-event-triggere) - Event ordering issues
+- [ProseMirror Discuss: iOS replace causes handleTextInput to receive single letter](https://discuss.prosemirror.net/t/ios-replace-causes-handletextinput-to-receive-a-single-letter-rather-than-the-replacement-text/6695) - beforeinput type mismatches
+- [Apple Discussions: Japanese Kana keyboard duplicating digits](https://discussions.apple.com/thread/255011682) - Related duplication issues
+

@@ -1,5 +1,5 @@
 ---
-id: ce-0039
+id: ce-0039-paste-table-structure-lost-ko
 scenarioId: scenario-paste-formatting-loss
 locale: ko
 os: Windows

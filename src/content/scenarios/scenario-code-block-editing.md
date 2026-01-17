@@ -100,3 +100,10 @@ element.addEventListener('paste', (e) => {
 });
 ```
 
+## References
+
+- [BomberBot: Preserving formatting with HTML pre tag](https://www.bomberbot.com/html/preserving-formatting-with-the-html-pre-tag/) - pre tag behavior
+- [Stack Overflow: HTML newline char in div contenteditable](https://stackoverflow.com/questions/19038070/html-newline-char-in-div-content-editable) - white-space values
+- [Stack Overflow: Dealing with line breaks on contenteditable div](https://stackoverflow.com/questions/6023307/dealing-with-line-breaks-on-contenteditable-div) - Enter key handling
+- [Stack Overflow: Preserve whitespace indentation in pre tags](https://stackoverflow.com/questions/4631646/how-to-preserve-whitespace-indentation-of-text-enclosed-in-html-pre-tags-exclu) - Indentation issues
+- [PrinceXML Forum: Preserving whitespace in pre code blocks](https://www.princexml.com/forum/topic/2949/preserving-whitespace-in-pre-code-blocks) - tab-size property

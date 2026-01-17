@@ -1,5 +1,5 @@
 ---
-id: ce-0202
+id: ce-0202-thai-ime-tab-cancels-safari-ko
 scenarioId: scenario-ime-composition-tab-key
 locale: ko
 os: macOS

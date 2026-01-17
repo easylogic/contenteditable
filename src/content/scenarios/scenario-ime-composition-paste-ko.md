@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-paste
+id: scenario-ime-composition-paste-ko
 title: 붙여넣기 작업이 IME 컴포지션을 취소하거나 간섭함
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 콘텐츠를 붙여넣기(Ctrl+V / Cmd+V)하면 활성 컴포지션이 취소되거나, 컴포지션된 텍스트가 손실되거나, 붙여넣은 콘텐츠가 예상치 못한 위치에 삽입될 수 있습니다. 여러 언어에 영향을 미칩니다."
 category: ime
@@ -78,3 +78,10 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [ProseMirror Discuss: Paste during IME composition corrupts IME](https://discuss.prosemirror.net/t/paste-during-ime-composition-corrupts-ime/4251) - 붙여넣기 손상 이슈 상세 토론
+- [Chromium Code Review: Composition end event ordering fix](https://codereview.chromium.org/1998783002) - compositionend 이벤트 순서 수정
+- [Chrome Developers: Introducing EditContext API](https://developer.chrome.com/blog/introducing-editcontext-api) - 컴포지션 처리 개선 API
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - 컴포지션 이벤트 공식 사양

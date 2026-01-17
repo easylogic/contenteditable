@@ -456,3 +456,12 @@ async function testIMEStateManagement() {
 ---
 
 This comprehensive IME composition state management system provides the foundation for handling the complex world of multi-language input editing, enabling developers to build reliable rich text editors that work consistently across browsers and IME implementations.
+
+## References
+
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - Official specification for input events and composition
+- [W3C UI Events: Composition Events](https://w3c.github.io/uievents/split/composition-events.html) - Composition events specification
+- [W3C Input Events: insertCompositionText](https://w3c.github.io/input-events/) - Composition input types
+- [W3C IME API](https://www.w3.org/TR/ime-api/) - IME API proposal for advanced composition control
+- [MDN: CompositionEvent](https://developer.mozilla.org/en-US/docs/Web/API/CompositionEvent) - CompositionEvent API documentation
+- [MDN: InputEvent.getTargetRanges()](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges) - Target ranges documentation

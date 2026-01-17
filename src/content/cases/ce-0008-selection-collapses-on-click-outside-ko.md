@@ -1,5 +1,5 @@
 ---
-id: ce-0008
+id: ce-0008-selection-collapses-on-click-outside-ko
 scenarioId: scenario-selection-collapse-on-blur
 locale: ko
 os: macOS

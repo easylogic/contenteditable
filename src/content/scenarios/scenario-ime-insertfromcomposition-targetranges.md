@@ -140,3 +140,9 @@ element.addEventListener('beforeinput', (e) => {
 ```
 
 **Important**: Platform and IME detection is required to apply the correct handling strategy.
+
+## References
+
+- [ContentEditable Real Error: insertFromComposition targetRanges differences](https://contenteditable.realerror.com/) - Platform-specific behavior documentation
+- [WebKit Bug 170416: Support InputEventInit inputType, dataTransfer, isComposing, targetRanges](https://bugs.webkit.org/show_bug.cgi?id=170416) - Input Events API support
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - Official specification for insertFromComposition

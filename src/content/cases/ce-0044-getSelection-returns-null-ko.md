@@ -1,5 +1,5 @@
 ---
-id: ce-0044
+id: ce-0044-getSelection-returns-null-ko
 scenarioId: scenario-selection-api-behavior
 locale: ko
 os: macOS

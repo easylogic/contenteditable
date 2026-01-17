@@ -1,5 +1,5 @@
 ---
-id: scenario-ios-dictation-duplicate-events
+id: scenario-ios-dictation-duplicate-events-ko
 title: iOS 음성 인식이 완료 후 중복 입력 이벤트를 발생시킴
 description: "iOS에서 contenteditable 요소에 음성 인식으로 텍스트를 입력할 때, 시스템이 초기 음성 인식 완료 후 beforeinput과 input 이벤트를 중복으로 발생시킬 수 있습니다. 텍스트가 단어로 나뉘어 이벤트가 다시 발생하여 동기화 문제가 발생합니다. 음성 인식 중에는 composition 이벤트가 발생하지 않아 음성 인식과 키보드 입력을 구분하기 어렵습니다."
 category: ime
@@ -474,3 +474,13 @@ React Native 애플리케이션에서도 iOS dictation과 관련된 유사한 �
 - **해결 방법**: dictation 중 재렌더링을 방지하기 위한 디바운싱 메커니즘 구현
 
 이는 웹 애플리케이션에서도 유사한 문제가 발생할 수 있음을 시사합니다.
+
+## 참고 자료
+
+- [WebKit Bug 261764: iOS/iPadOS dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Composition events not firing
+- [W3C UI Events: Composition events](https://www.w3.org/TR/2016/WD-uievents-20160804/) - Composition event specification
+- [Reddit: Dictation input jumping around](https://www.reddit.com//r/ios/comments/1pfv6c4/dictation_input_jumping_around/) - User reports of duplicate text
+- [Reddit: iPhone dictation issues](https://www.reddit.com/r/iphone/comments/1crdigu) - Dictation problems
+- [Stack Overflow: Detect voice dictation in iOS](https://stackoverflow.com/questions/32652775/ios-how-to-detect-if-voice-dictation-was-used-for-uitextfield-or-microphone-bu) - Dictation detection
+- [ProseMirror Issue #944: Duplicate character with IME](https://github.com/ProseMirror/prosemirror/issues/944) - Related IME issues
+- [ProseMirror Discuss: isComposing gets out of sync on iOS](https://discuss.prosemirror.net/t/iscomposing-gets-out-of-sync-on-ios/4067) - isComposing state issues

@@ -94,6 +94,9 @@ Android's IME implementation appears to have a race condition or incorrect state
    - Show message: "Type a letter to start IME"
    - Or automatically clear selection when user starts typing
 
-## Reference
+## References
 
-- GitHub Issue: https://github.com/slab/quill/issues/4748
+- [Quill Issue #4748: IME start delay after select all](https://github.com/slab/quill/issues/4748) - GitHub issue report
+- [Android Developer: InputConnection API](https://developer.android.com/reference/android/view/inputmethod/InputConnection) - IME composition API documentation
+- [Stack Overflow: EditText select all and type first letter not displayed](https://stackoverflow.com/questions/47173464/edittext-text-select-all-and-then-type-first-letter-will-not-displayed) - Related Android EditText issue
+- [Stack Overflow: When first letter isn't accepted by InputFilter](https://stackoverflow.com/questions/59619717/when-the-first-letter-isnt-accepted-by-an-input-filter-no-entry-will-be-accept) - InputFilter issues

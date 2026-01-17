@@ -1,5 +1,5 @@
 ---
-id: ce-0184
+id: ce-0184-thai-ime-space-ignored-firefox-ko
 scenarioId: scenario-space-during-composition
 locale: ko
 os: Windows

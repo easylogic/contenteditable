@@ -1,5 +1,5 @@
 ---
-id: ce-0026
+id: ce-0026-performance-large-content
 scenarioId: scenario-performance-large-content
 locale: en
 os: Any

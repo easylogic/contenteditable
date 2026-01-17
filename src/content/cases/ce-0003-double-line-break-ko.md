@@ -1,5 +1,5 @@
 ---
-id: ce-0003
+id: ce-0003-double-line-break-ko
 scenarioId: scenario-double-line-break
 locale: ko
 os: macOS

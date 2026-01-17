@@ -1,5 +1,5 @@
 ---
-id: ce-0285
+id: ce-0285-ios-viewport-keyboard-safari-ko
 scenarioId: scenario-ios-viewport-keyboard
 locale: ko
 os: iOS

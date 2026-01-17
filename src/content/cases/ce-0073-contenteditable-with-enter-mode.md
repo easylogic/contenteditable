@@ -1,5 +1,5 @@
 ---
-id: ce-0073
+id: ce-0073-contenteditable-with-enter-mode
 scenarioId: scenario-entermode-behavior
 locale: en
 os: iOS

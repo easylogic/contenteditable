@@ -91,3 +91,8 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [Stack Overflow: JavaScript text editor using execCommand](https://stackoverflow.com/questions/18094787/javascript-text-editor-in-uiwebview-using-execcommand) - foreColor usage
+- [Stack Overflow: Change selected opacity in contenteditable](https://stackoverflow.com/questions/27441062/html-contenteditable-document-execcommand-change-selected-opacity) - styleWithCSS and color formats

@@ -1,5 +1,5 @@
 ---
-id: ce-0112
+id: ce-0112-nested-formatting-complex-ko
 scenarioId: scenario-nested-formatting
 locale: ko
 os: Windows

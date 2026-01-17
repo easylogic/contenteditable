@@ -1,5 +1,5 @@
 ---
-id: ce-0268
+id: ce-0268-caret-jump-chrome-mobile-ko
 scenarioId: scenario-caret-jump-chrome-mobile
 locale: ko
 os: Android

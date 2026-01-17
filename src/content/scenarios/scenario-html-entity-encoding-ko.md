@@ -1,5 +1,5 @@
 ---
-id: scenario-html-entity-encoding
+id: scenario-html-entity-encoding-ko
 title: HTML 엔티티 인코딩 및 디코딩이 일관되지 않음
 description: "contenteditable 요소의 특수 문자가 브라우저마다 일관되지 않게 HTML 엔티티(&lt;, &gt;, &amp; 등)로 인코딩되거나 실제 문자로 디코딩될 수 있습니다. 이것은 콘텐츠를 복사, 붙여넣기 또는 직렬화할 때 문제를 일으킬 수 있습니다."
 category: formatting
@@ -101,3 +101,14 @@ element.addEventListener('paste', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [CodeShack: HTML entity encoder decoder](https://codeshack.io/html-entity-encoder-decoder/) - Entity encoding basics
+- [MiniWebTool: HTML entity encoder decoder](https://miniwebtool.com/html-entity-encoder-decoder/) - Entity reference
+- [MDN: contenteditable global attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) - contenteditable documentation
+- [XJavaScript: innerHTML without HTML encoding](https://www.xjavascript.com/blog/javascript-using-innerhtml-to-output-strings-without-html-encoded-special-characters/) - innerHTML handling
+- [Drupal: Mercury editor entity encoding](https://www.drupal.org/project/mercury_editor_live_edit/issues/3502573) - Double encoding issues
+- [GitHub Gist: HTML entity encoding](https://gist.github.com/yidas/797c9e6d5c856158cffd685b8a8b4ee4) - Encoding helpers
+- [GitHub: he library](https://github.com/mathiasbynens/he) - Robust entity encoding library
+- [CSS Script: HTML entity encoder](https://www.cssscript.com/encode-decode-html-entities/) - Entity libraries

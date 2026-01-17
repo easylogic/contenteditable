@@ -1,5 +1,5 @@
 ---
-id: ce-0158
+id: ce-0158-table-cell-selection-difficult-ko
 scenarioId: scenario-table-editing
 locale: ko
 os: Windows

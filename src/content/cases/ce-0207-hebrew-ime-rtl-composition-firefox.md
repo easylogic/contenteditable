@@ -1,5 +1,5 @@
 ---
-id: ce-0207
+id: ce-0207-hebrew-ime-rtl-composition-firefox
 scenarioId: scenario-ime-rtl-and-character-joining
 locale: en
 os: Windows

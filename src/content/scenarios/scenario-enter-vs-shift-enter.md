@@ -89,3 +89,12 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [MDN: Content Editable](https://www.devdoc.net/web/developer.mozilla.org/en-US/docs/HTML/Content_Editable.html) - Enter key behavior documentation
+- [MDN: Editable content guide](https://udn.realityripple.com/docs/Web/Guide/HTML/Editable_content) - Firefox behavior changes
+- [Stack Overflow: Prevent contenteditable adding div on Enter](https://stackoverflow.com/questions/18552336/prevent-contenteditable-adding-div-on-enter-chrome) - Enter key handling
+- [Web Platform DX: contenteditable="plaintext-only"](https://web-platform-dx.github.io/web-features-explorer/features/contenteditable-plaintextonly/) - plaintext-only support
+- [Can I Use: contenteditable plaintext-only](https://caniuse.com/mdn-html_global_attributes_contenteditable_plaintext-only) - Browser compatibility
+- [Microsoft Support: IE11 BR tag loss](https://support.microsoft.com/en-au/topic/contenteditable-div-loses-br-tag-when-you-type-after-selected-line-of-text-in-internet-explorer-11-af31d62f-b806-433a-025f-842261f27500) - IE11 Enter key issues
+- [Stack Overflow: Firefox creates 2 newlines instead of 1](https://stackoverflow.com/questions/52817606/contenteditable-in-firefox-creates-2-newlines-instead-of-1) - Empty div behavior

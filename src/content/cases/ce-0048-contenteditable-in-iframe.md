@@ -1,5 +1,5 @@
 ---
-id: ce-0048
+id: ce-0048-contenteditable-in-iframe
 scenarioId: scenario-contenteditable-iframe
 locale: en
 os: Windows

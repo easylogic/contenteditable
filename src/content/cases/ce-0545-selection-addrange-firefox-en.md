@@ -1,5 +1,5 @@
 ---
-id: ce-0255
+id: ce-0545-selection-addrange-firefox-en
 scenarioId: scenario-selection-addrange-safari-fail
 locale: en
 os: Windows

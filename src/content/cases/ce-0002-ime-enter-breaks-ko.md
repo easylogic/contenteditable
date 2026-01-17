@@ -1,5 +1,5 @@
 ---
-id: ce-0002
+id: ce-0002-ime-enter-breaks-ko
 scenarioId: scenario-ime-enter-breaks
 locale: ko
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0105
+id: ce-0105-shift-enter-creates-br
 scenarioId: scenario-enter-vs-shift-enter
 locale: en
 os: Windows

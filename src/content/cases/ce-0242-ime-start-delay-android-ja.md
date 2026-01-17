@@ -1,5 +1,5 @@
 ---
-id: ce-0242
+id: ce-0242-ime-start-delay-android-ja
 scenarioId: scenario-ime-start-delay-android
 locale: ja
 os: Android

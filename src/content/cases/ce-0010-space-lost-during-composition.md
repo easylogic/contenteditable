@@ -1,5 +1,5 @@
 ---
-id: ce-0010
+id: ce-0010-space-lost-during-composition
 scenarioId: scenario-space-during-composition
 locale: en
 os: Windows

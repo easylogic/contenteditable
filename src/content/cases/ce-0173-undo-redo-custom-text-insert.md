@@ -1,5 +1,5 @@
 ---
-id: ce-0173
+id: ce-0173-undo-redo-custom-text-insert
 scenarioId: scenario-undo-redo-stack
 locale: en
 os: Windows

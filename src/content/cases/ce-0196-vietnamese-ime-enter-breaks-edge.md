@@ -1,5 +1,5 @@
 ---
-id: ce-0196
+id: ce-0196-vietnamese-ime-enter-breaks-edge
 scenarioId: scenario-ime-enter-breaks
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-combining-characters-composition
+id: scenario-ime-combining-characters-composition-ko
 title: IME 결합 문자 및 분음 기호 조합 문제
 description: "결합 문자, 분음 기호, 성조 표시 또는 복잡한 문자 조합(태국어, 베트남어, 힌디어/데바나가리 등)을 사용하는 언어는 이러한 표시가 올바르게 위치하지 않거나, 잘못 결합되거나, 편집 작업 중 손실될 수 있는 contenteditable에서 문제를 경험할 수 있습니다."
 category: ime
@@ -100,3 +100,12 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [Microsoft Learn: Vietnamese IME](https://learn.microsoft.com/ja-jp/globalization/input/vietnamese-ime) - Vietnamese input methods
+- [Unicode Core Specification: Character encoding](https://www.unicode.org/versions/latest/core-spec/chapter-2/) - Unicode normalization
+- [Unicode Core Specification: Thai script](https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-16/) - Thai combining characters
+- [Unicode Core Specification: Devanagari](https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-12/) - Devanagari script
+- [Linux Thai Network: Thai OpenType shaping](https://www.linux.thai.net/~thep/th-otf/shaping.html) - Thai rendering
+- [Unicode Technical Report TR15: Normalization](https://unicode.org/reports/tr15/pdtr15.html) - Unicode normalization forms

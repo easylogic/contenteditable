@@ -1,5 +1,5 @@
 ---
-id: ce-0298
+id: ce-0549-typing-adjacent-formatted-elements-en
 scenarioId: scenario-typing-adjacent-formatted-elements
 locale: en
 os: Android

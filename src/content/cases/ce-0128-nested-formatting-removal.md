@@ -1,5 +1,5 @@
 ---
-id: ce-0128
+id: ce-0128-nested-formatting-removal
 scenarioId: scenario-nested-formatting
 locale: en
 os: Windows

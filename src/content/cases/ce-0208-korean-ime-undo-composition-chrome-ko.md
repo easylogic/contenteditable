@@ -1,5 +1,5 @@
 ---
-id: ce-0208
+id: ce-0208-korean-ime-undo-composition-chrome-ko
 scenarioId: scenario-undo-with-composition
 locale: ko
 os: Windows

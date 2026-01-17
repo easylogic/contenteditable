@@ -1,5 +1,5 @@
 ---
-id: ce-0150
+id: ce-0150-undo-redo-custom-formatting-ko
 scenarioId: scenario-undo-redo-stack
 locale: ko
 os: Windows

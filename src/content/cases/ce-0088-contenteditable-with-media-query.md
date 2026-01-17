@@ -1,5 +1,5 @@
 ---
-id: ce-0088
+id: ce-0088-contenteditable-with-media-query
 scenarioId: scenario-media-query-layout
 locale: en
 os: iOS

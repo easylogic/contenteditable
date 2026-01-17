@@ -1,5 +1,5 @@
 ---
-id: ce-0133
+id: ce-0133-link-removal-leaves-empty
 scenarioId: scenario-link-insertion
 locale: en
 os: Windows

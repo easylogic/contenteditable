@@ -1,5 +1,5 @@
 ---
-id: ce-0075
+id: ce-0075-contenteditable-with-xss-protection
 scenarioId: scenario-xss-protection
 locale: en
 os: Windows

@@ -123,6 +123,8 @@ Samsung Keyboard's backspace handling appears to have a race condition or memory
    });
    ```
 
-## Reference
+## References
 
-- GitHub Issue: https://github.com/facebookarchive/draft-js/issues/2815
+- [Draft.js Issue #2815: Samsung keyboard backspace crash](https://github.com/facebookarchive/draft-js/issues/2815) - GitHub issue report
+- [Chromium Code Review: Samsung Keyboard Backspace Handling](https://codereview.chromium.org/1126203013) - Fix for backspace key event handling
+- [Chromium Commit: Fix Samsung keyboard backspace in WebView](https://chromium.googlesource.com/chromium/src.git/+/30b299cb04b4ba2330ef61a8a24c1e58513a0af2) - Patch from May 2015

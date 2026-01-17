@@ -1,5 +1,5 @@
 ---
-id: ce-0171
+id: ce-0171-table-row-deletion-difficult
 scenarioId: scenario-table-editing
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0021
+id: ce-0021-bold-formatting-chrome-ko
 scenarioId: scenario-formatting-persistence
 locale: ko
 os: Windows

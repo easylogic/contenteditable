@@ -153,3 +153,10 @@ element.addEventListener('keydown', (e) => {
 });
 ```
 
+## References
+
+- [W3C HTML5 Editing: Undo transaction history](https://www.w3.org/TR/2008/WD-html5-20080610/editing.html) - Undo stack specification
+- [W3C UndoManager: DOM Transaction proposal](https://dvcs.w3.org/hg/undomanager/raw-file/tip/undomanager.html) - UndoManager API
+- [Stack Overflow: iframe undo redo for execCommand insertHTML](https://stackoverflow.com/questions/51831623/iframe-undo-redo-for-execcommand-using-inserthtml-contenteditable) - execCommand undo issues
+- [Stack Overflow: Custom texteditor work with undo redo shortcuts](https://stackoverflow.com/questions/66854679/how-to-make-a-custom-texteditor-work-with-the-undo-and-redo-shortcuts-after-modi) - Custom undo implementation
+- [Addy Osmani: Mutation Observers](https://addyosmani.com/blog/mutation-observers/) - MutationObserver for undo tracking

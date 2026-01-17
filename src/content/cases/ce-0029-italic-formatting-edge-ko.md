@@ -1,5 +1,5 @@
 ---
-id: ce-0029
+id: ce-0029-italic-formatting-edge-ko
 scenarioId: scenario-formatting-persistence
 locale: ko
 os: Windows

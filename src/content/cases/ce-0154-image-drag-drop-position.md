@@ -1,5 +1,5 @@
 ---
-id: ce-0154
+id: ce-0154-image-drag-drop-position
 scenarioId: scenario-image-insertion
 locale: en
 os: Windows

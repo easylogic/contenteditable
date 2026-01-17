@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-duplicate-events
+id: scenario-ime-composition-duplicate-events-ko
 title: IME 컴포지션 중 중복되거나 예상치 못한 이벤트 시퀀스 발생
 description: "IME 컴포지션 중 일부 브라우저와 IME 조합에서 예상치 못한 이벤트 시퀀스가 발생합니다 (예: insertCompositionText 대신 deleteContentBackward 다음에 insertText). 이로 인해 단일 컴포지션 업데이트에 대해 이벤트 핸들러가 여러 번 실행될 수 있습니다. 여러 언어와 브라우저 조합에 영향을 미칩니다."
 category: ime
@@ -78,3 +78,12 @@ element.addEventListener('beforeinput', (e) => {
 ```
 
 **중요**: iOS Safari에서는 컴포지션 중 `insertCompositionText`가 아닌 `insertText`가 발생하므로, 핸들러는 컴포지션 업데이트를 처리할 때 `insertText`와 `insertCompositionText`를 모두 확인해야 합니다.
+
+## 참고 자료
+
+- [ProseMirror Issue #944: Duplicated characters in Safari with IME](https://github.com/ProseMirror/prosemirror/issues/944) - Related duplication issues when marks are active
+- [WebKit Bug 31902: DOM modified again after compositionend](https://bugs.webkit.org/show_bug.cgi?id=31902) - Extra deletions/insertions after composition
+- [WebKit Bug 261764: Dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Dictation bypasses composition events
+- [Stack Overflow: Safari event order during composition](https://stackoverflow.com/questions/79501572/safari-is-theres-any-way-to-detect-that-this-particular-keydown-event-triggere) - Event ordering issues
+- [ProseMirror Discuss: iOS replace causes handleTextInput to receive single letter](https://discuss.prosemirror.net/t/ios-replace-causes-handletextinput-to-receive-a-single-letter-rather-than-the-replacement-text/6695) - beforeinput type mismatches
+- [Apple Discussions: Japanese Kana keyboard duplicating digits](https://discussions.apple.com/thread/255011682) - Related duplication issues

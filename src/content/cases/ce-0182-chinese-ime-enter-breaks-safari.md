@@ -1,5 +1,5 @@
 ---
-id: ce-0182
+id: ce-0182-chinese-ime-enter-breaks-safari
 scenarioId: scenario-ime-enter-breaks
 locale: en
 os: macOS

@@ -1,5 +1,5 @@
 ---
-id: ce-0260
+id: ce-0260-korean-ime-crash-firefox-ko
 scenarioId: scenario-ime-korean-crash-firefox
 locale: ko
 os: Windows

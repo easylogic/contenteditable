@@ -1,5 +1,5 @@
 ---
-id: ce-0147
+id: ce-0147-code-block-line-breaks-lost-ko
 scenarioId: scenario-code-block-editing
 locale: ko
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: scenario-maxlength-behavior
+id: scenario-maxlength-behavior-ko
 title: "contenteditable에서 maxlength 속성이 지원되지 않음"
 description: "`<input>` 및 `<textarea>` 요소에서 작동하는 `maxlength` 속성은 contenteditable 영역에서 지원되지 않습니다. 입력할 수 있는 콘텐츠의 양을 제한하는 내장 방법이 없습니다."
 category: other
@@ -12,3 +12,8 @@ locale: ko
 ---
 
 `<input>` 및 `<textarea>` 요소에서 작동하는 `maxlength` 속성은 contenteditable 영역에서 지원되지 않습니다. 입력할 수 있는 콘텐츠의 양을 제한하는 내장 방법이 없습니다.
+
+## 참고 자료
+
+- [MDN: maxlength attribute](https://developer.mozilla.org/docs/Web/HTML/Reference/Attributes/maxlength) - maxlength attribute documentation
+- [NPM: maxlength-contenteditable](https://npm.io/package/maxlength-contenteditable) - Library for contenteditable character limits

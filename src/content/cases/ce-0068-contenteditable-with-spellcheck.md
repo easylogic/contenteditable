@@ -1,5 +1,5 @@
 ---
-id: ce-0068
+id: ce-0068-contenteditable-with-spellcheck
 scenarioId: scenario-spellcheck-interference
 locale: en
 os: macOS

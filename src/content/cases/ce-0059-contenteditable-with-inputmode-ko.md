@@ -1,5 +1,5 @@
 ---
-id: ce-0059
+id: ce-0059-contenteditable-with-inputmode-ko
 scenarioId: scenario-inputmode-behavior
 locale: ko
 os: iOS

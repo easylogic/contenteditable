@@ -1,5 +1,5 @@
 ---
-id: ce-0224
+id: ce-0224-firefox-undo-corruption
 scenarioId: scenario-firefox-undo-dom-mutation
 locale: en
 os: Windows

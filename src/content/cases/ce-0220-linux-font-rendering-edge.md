@@ -1,5 +1,5 @@
 ---
-id: ce-0220
+id: ce-0220-linux-font-rendering-edge
 scenarioId: scenario-linux-font-rendering-edge
 locale: en
 os: Linux

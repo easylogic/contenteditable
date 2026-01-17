@@ -1,5 +1,5 @@
 ---
-id: ce-0165
+id: ce-0165-image-selection-deletion-ko
 scenarioId: scenario-image-deletion
 locale: ko
 os: Windows

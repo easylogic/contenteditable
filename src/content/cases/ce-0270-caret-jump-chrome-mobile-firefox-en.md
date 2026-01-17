@@ -1,5 +1,5 @@
 ---
-id: ce-0270
+id: ce-0270-caret-jump-chrome-mobile-firefox-en
 scenarioId: scenario-caret-jump-chrome-mobile
 locale: en
 os: Windows

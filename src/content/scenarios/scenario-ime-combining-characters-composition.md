@@ -101,3 +101,11 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [Microsoft Learn: Vietnamese IME](https://learn.microsoft.com/ja-jp/globalization/input/vietnamese-ime) - Vietnamese input methods
+- [Unicode Core Specification: Character encoding](https://www.unicode.org/versions/latest/core-spec/chapter-2/) - Unicode normalization
+- [Unicode Core Specification: Thai script](https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-16/) - Thai combining characters
+- [Unicode Core Specification: Devanagari](https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-12/) - Devanagari script
+- [Linux Thai Network: Thai OpenType shaping](https://www.linux.thai.net/~thep/th-otf/shaping.html) - Thai rendering
+- [Unicode Technical Report TR15: Normalization](https://unicode.org/reports/tr15/pdtr15.html) - Unicode normalization forms

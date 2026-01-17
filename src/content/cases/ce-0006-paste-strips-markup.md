@@ -1,5 +1,5 @@
 ---
-id: ce-0006
+id: ce-0006-paste-strips-markup
 scenarioId: scenario-paste-formatting-loss
 locale: en
 os: Windows

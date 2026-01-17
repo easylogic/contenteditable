@@ -1,5 +1,5 @@
 ---
-id: ce-0124
+id: ce-0124-list-formatting-bold-lost-ko
 scenarioId: scenario-list-formatting-persistence
 locale: ko
 os: Windows

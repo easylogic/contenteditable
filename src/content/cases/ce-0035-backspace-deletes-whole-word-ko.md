@@ -1,5 +1,5 @@
 ---
-id: ce-0035
+id: ce-0035-backspace-deletes-whole-word-ko
 scenarioId: scenario-backspace-granularity
 locale: ko
 os: macOS

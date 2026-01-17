@@ -1,5 +1,5 @@
 ---
-id: ce-0211
+id: ce-0211-ime-keydown-keycode-229-enter-firefox-ko
 scenarioId: scenario-ime-composition-keydown-keycode-229
 locale: ko
 os: Windows

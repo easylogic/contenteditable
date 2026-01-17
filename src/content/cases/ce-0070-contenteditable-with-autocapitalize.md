@@ -1,5 +1,5 @@
 ---
-id: ce-0070
+id: ce-0070-contenteditable-with-autocapitalize
 scenarioId: scenario-autocapitalize-behavior
 locale: en
 os: iOS

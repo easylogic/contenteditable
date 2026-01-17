@@ -445,6 +445,8 @@ function showKeyboardWarning() {
 
 ## References
 
-- MDN: InputEvent.getTargetRanges() - https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges
-- W3C Input Events Specification - https://www.w3.org/TR/2016/WD-input-events-20160928/
-- Chromium Code Review: Samsung Keyboard Backspace Handling - https://codereview.chromium.org/1126203013
+- [MDN: InputEvent.getTargetRanges()](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges) - Official documentation
+- [W3C Input Events Level 2 Specification](https://www.w3.org/TR/input-events-2/) - Official specification
+- [W3C Input Events Level 1 Specification](https://www.w3.org/TR/2016/WD-input-events-20160928/) - Legacy specification
+- [ProseMirror Discuss: Samsung keyboard within Android WebView causes spam of new lines](https://discuss.prosemirror.net/t/samsung-keyboard-within-android-webview-causes-a-spam-of-new-lines/5246) - Detailed discussion and workarounds
+- [Chromium Code Review: Samsung Keyboard Backspace Handling](https://codereview.chromium.org/1126203013) - Related code review

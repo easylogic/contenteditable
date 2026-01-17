@@ -1,5 +1,5 @@
 ---
-id: ce-0028
+id: ce-0028-mobile-touch-focus-ko
 scenarioId: scenario-mobile-touch-behavior
 locale: ko
 os: iOS

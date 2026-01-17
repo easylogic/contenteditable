@@ -1,5 +1,5 @@
 ---
-id: scenario-enter-vs-shift-enter
+id: scenario-enter-vs-shift-enter-ko
 title: Enter vs Shift+Enter 동작이 브라우저마다 다름
 description: "contenteditable 요소에서 Enter와 Shift+Enter 키의 동작이 브라우저마다 다릅니다. Enter는 새 단락, 줄바꿈 또는 div를 만들 수 있는 반면 Shift+Enter는 줄바꿈을 만들거나 다르게 동작할 수 있습니다. 결과 DOM 구조도 다양합니다."
 category: formatting
@@ -88,3 +88,13 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [MDN: Content Editable](https://www.devdoc.net/web/developer.mozilla.org/en-US/docs/HTML/Content_Editable.html) - Enter 키 동작 문서
+- [MDN: Editable content guide](https://udn.realityripple.com/docs/Web/Guide/HTML/Editable_content) - Firefox 동작 변경
+- [Stack Overflow: Prevent contenteditable adding div on Enter](https://stackoverflow.com/questions/18552336/prevent-contenteditable-adding-div-on-enter-chrome) - Enter 키 처리
+- [Web Platform DX: contenteditable="plaintext-only"](https://web-platform-dx.github.io/web-features-explorer/features/contenteditable-plaintextonly/) - plaintext-only 지원
+- [Can I Use: contenteditable plaintext-only](https://caniuse.com/mdn-html_global_attributes_contenteditable_plaintext-only) - 브라우저 호환성
+- [Microsoft Support: IE11 BR tag loss](https://support.microsoft.com/en-au/topic/contenteditable-div-loses-br-tag-when-you-type-after-selected-line-of-text-in-internet-explorer-11-af31d62f-b806-433a-025f-842261f27500) - IE11 Enter 키 이슈
+- [Stack Overflow: Firefox creates 2 newlines instead of 1](https://stackoverflow.com/questions/52817606/contenteditable-in-firefox-creates-2-newlines-instead-of-1) - 빈 div 동작

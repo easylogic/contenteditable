@@ -1,5 +1,5 @@
 ---
-id: ce-0174
+id: ce-0174-empty-div-after-list-removal
 scenarioId: scenario-empty-element-cleanup
 locale: en
 os: Windows

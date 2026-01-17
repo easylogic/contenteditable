@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-backspace-granularity
+id: scenario-ime-backspace-granularity-ko
 title: "Backspace가 단일 문자 구성 요소 대신 전체 조합 단위를 제거함"
 description: "contenteditable 요소에서 IME로 텍스트를 편집할 때 Backspace를 누르면 단일 구성 요소 대신 전체 조합 단위(음절, 문자 등)가 제거됩니다. 이것은 세밀한 수정을 어렵게 만들고 네이티브 입력 필드와 다릅니다. 이것은 한글, 일본어, 중국어 및 기타 언어를 포함하여 여러 언어에 영향을 줍니다."
 category: ime
@@ -25,3 +25,10 @@ locale: ko
 이 동작은 `contenteditable` 위에 구축된 텍스트 편집기의 커서 이동, 실행 취소 세밀도 및 diff 계산에 영향을 줄 수 있습니다.
 
 이 시나리오는 다른 언어에 걸쳐 유사한 동작으로 여러 환경에서 관찰되었습니다.
+
+## 참고 자료
+
+- [Microsoft Learn: Composition string](https://learn.microsoft.com/en-us/windows/win32/intl/composition-string) - IME 컴포지션 개념
+- [Microsoft Learn: Korean IME](https://learn.microsoft.com/en-us/globalization/input/korean-ime) - 한글 IME 동작
+- [Oracle Documentation: Korean input method](https://docs.oracle.com/cd/E19683-01/816-0671/6m752s9ev/index.html) - 한글 IME Backspace 동작
+- [Mozilla IME Handling Guide](https://udn.realityripple.com/docs/Mozilla/IME_handling_guide) - 중국어 IME 동작

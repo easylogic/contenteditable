@@ -1,5 +1,5 @@
 ---
-id: ce-0072
+id: ce-0072-contenteditable-with-enterkeyhint-ko
 scenarioId: scenario-enterkeyhint-behavior
 locale: ko
 os: Android

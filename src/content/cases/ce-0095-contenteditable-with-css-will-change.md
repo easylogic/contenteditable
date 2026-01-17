@@ -1,5 +1,5 @@
 ---
-id: ce-0095
+id: ce-0095-contenteditable-with-css-will-change
 scenarioId: scenario-css-will-change
 locale: en
 os: macOS

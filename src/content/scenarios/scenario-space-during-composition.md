@@ -24,3 +24,9 @@ This issue manifests differently across languages:
 - **Other IMEs**: Similar issues may occur with other languages that use composition
 
 The behavior can affect how products interpret word boundaries and trigger autocomplete or suggestion features.
+
+## References
+
+- [Google Input Tools: Input method features](https://www.google.com/intl/or/inputtools/services/features/input-method.html) - IME behavior documentation
+- [MindFusion: IME mode and CJK languages](https://www.mindfusion.eu/onlinehelp/keyboard.wpf/IME_mode_and_CJK_languages.htm) - IME composition behavior
+- [Reddit: Korean IME Hanja selection](https://www.reddit.com/r/Korean/comments/m6xuor) - Korean IME behavior discussion

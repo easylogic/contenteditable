@@ -1,5 +1,5 @@
 ---
-id: ce-0217
+id: ce-0217-keyboard-handlers-iscomposing-false-ios-safari-korean
 scenarioId: scenario-keyboard-handlers-during-composition
 locale: en
 os: iOS

@@ -1,5 +1,5 @@
 ---
-id: ce-0033
+id: ce-0033-selection-range-incorrect-ko
 scenarioId: scenario-selection-range-accuracy
 locale: ko
 os: Windows

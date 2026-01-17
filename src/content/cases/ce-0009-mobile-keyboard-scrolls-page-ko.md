@@ -1,5 +1,5 @@
 ---
-id: ce-0009
+id: ce-0009-mobile-keyboard-scrolls-page-ko
 scenarioId: scenario-mobile-keyboard-scroll
 locale: ko
 os: iOS

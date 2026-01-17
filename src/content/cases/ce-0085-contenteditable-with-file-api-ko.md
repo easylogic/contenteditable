@@ -1,5 +1,5 @@
 ---
-id: ce-0085
+id: ce-0085-contenteditable-with-file-api-ko
 scenarioId: scenario-file-api
 locale: ko
 os: macOS

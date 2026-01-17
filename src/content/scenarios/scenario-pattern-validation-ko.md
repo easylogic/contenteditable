@@ -1,5 +1,5 @@
 ---
-id: scenario-pattern-validation
+id: scenario-pattern-validation-ko
 title: "pattern 속성이 contenteditable 콘텐츠를 검증하지 않음"
 description: "폼 입력에서 정규식 기반 검증을 허용하는 `pattern` 속성은 contenteditable 영역에서 작동하지 않습니다. 콘텐츠를 패턴에 대해 검증할 수 없습니다."
 category: other
@@ -13,3 +13,8 @@ locale: ko
 ---
 
 폼 입력에서 정규식 기반 검증을 허용하는 `pattern` 속성은 contenteditable 영역에서 작동하지 않습니다. 콘텐츠를 패턴에 대해 검증할 수 없습니다.
+
+## 참고 자료
+
+- [MDN: pattern attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern) - pattern attribute documentation
+- [MDN: HTMLElement.contentEditable](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/contentEditable) - contentEditable property

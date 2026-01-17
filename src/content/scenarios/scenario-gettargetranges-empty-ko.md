@@ -1,5 +1,5 @@
 ---
-id: scenario-gettargetranges-empty
+id: scenario-gettargetranges-empty-ko
 title: beforeinput 이벤트에서 getTargetRanges()가 빈 배열을 반환
 description: "beforeinput 이벤트의 getTargetRanges() 메서드가 구문 추천, 특정 IME 조합, 또는 특정 브라우저/기기 조합에서 빈 배열이나 undefined를 반환할 수 있습니다. getTargetRanges()를 사용할 수 없을 때, 개발자는 폴백으로 window.getSelection()에 의존해야 하지만 이것은 덜 정확할 수 있습니다."
 category: ime
@@ -305,6 +305,7 @@ element.addEventListener('beforeinput', (e) => {
 
 ## 참고 자료
 
-- MDN: InputEvent.getTargetRanges() - https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges
-- Stack Overflow: InputEvent.getTargetRanges always empty - https://stackoverflow.com/questions/58892747/inputevent-gettargetranges-always-empty
-- W3C Input Events Specification - https://www.w3.org/TR/2016/WD-input-events-20160928/
+- [MDN: InputEvent.getTargetRanges()](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges) - 공식 문서
+- [Stack Overflow: InputEvent.getTargetRanges always empty](https://stackoverflow.com/questions/58892747/inputevent-gettargetranges-always-empty) - Chrome 77 이슈 토론
+- [W3C Input Events Level 2 사양](https://www.w3.org/TR/input-events-2/) - 공식 사양
+- [W3C Input Events Level 1 사양](https://www.w3.org/TR/2016/WD-input-events-20160928/) - 레거시 사양

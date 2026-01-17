@@ -1,5 +1,5 @@
 ---
-id: ce-0214
+id: ce-0214-ime-insertfromcomposition-targetranges-desktop-safari-korean-ko
 scenarioId: scenario-ime-insertfromcomposition-targetranges
 locale: ko
 os: macOS

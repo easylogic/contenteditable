@@ -1,5 +1,5 @@
 ---
-id: ce-0231
+id: ce-0231-korean-ime-focus-blur-safari
 scenarioId: scenario-ime-composition-focus-change
 locale: en
 os: macOS

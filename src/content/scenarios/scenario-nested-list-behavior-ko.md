@@ -1,5 +1,5 @@
 ---
-id: scenario-nested-list-behavior
+id: scenario-nested-list-behavior-ko
 title: 중첩된 리스트 편집 동작이 일관되지 않음
 description: "중첩된 리스트(리스트 항목 내의 리스트)를 편집할 때 Enter, Backspace, Delete, Tab 키의 동작이 브라우저마다 크게 다릅니다. 중첩된 리스트 항목 생성, 편집, 삭제는 예상치 못한 DOM 구조나 손실된 포맷팅을 초래할 수 있습니다."
 category: formatting
@@ -92,3 +92,12 @@ element.addEventListener('beforeinput', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [Stack Overflow: Prevent deletion of all li tags in contenteditable ul](https://stackoverflow.com/questions/24188565/prevent-deletion-of-all-li-tags-in-a-content-editable-ul) - List deletion issues
+- [Stack Overflow: contenteditable in Firefox creates 2 newlines](https://stackoverflow.com/questions/52817606/contenteditable-in-firefox-creates-2-newlines-instead-of-1) - Firefox Enter behavior
+- [Stack Overflow: contenteditable div outdent](https://stackoverflow.com/questions/21263875/contenteditable-div-outdent) - Tab/Shift+Tab behavior
+- [Stack Overflow: contenteditable nested browser differences](https://stackoverflow.com/questions/9913710/contenteditable-nested-browser-differences) - Nested contenteditable issues
+- [Stack Overflow: Prevent contenteditable adding div on Enter](https://stackoverflow.com/questions/18552336/prevent-contenteditable-adding-div-on-enter-chrome) - execCommand behavior
+- [WHATWG Lists: contenteditable default behaviors](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2009-December/024627.html) - Spec recommendations

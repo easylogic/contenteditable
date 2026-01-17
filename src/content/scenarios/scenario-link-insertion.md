@@ -92,3 +92,11 @@ function createLinkSafely(range, url) {
 }
 ```
 
+## References
+
+- [MDN: contenteditable global attribute](https://developer.mozilla.org/docs/Web/HTML/Reference/Global_attributes/contenteditable) - contenteditable documentation
+- [Stack Overflow: Edit HTML a tag without href inside contenteditable](https://stackoverflow.com/questions/50071785/edit-html-a-tag-without-href-attribute-inside-a-contenteditable-div) - Link editing issues
+- [Stack Overflow: Problems with contenteditable span inside hyperlink in Firefox](https://stackoverflow.com/questions/37962939/problems-with-contenteditable-span-inside-hyperlink-in-firefox) - Firefox nested link issues
+- [ProseMirror Discuss: Inserting text at end of link causes anchorNode to move](https://discuss.prosemirror.net/t/inserting-text-at-end-of-link-causes-window-getselection-anchornode-to-move-from-text-to-p/6014) - Selection node changes
+- [Stack Overflow: contenteditable nested browser differences](https://stackoverflow.com/questions/9913710/contenteditable-nested-browser-differences) - Browser comparison
+- [Stack Overflow: Newlines and contenteditable with nested non-editable tags](https://stackoverflow.com/questions/11452590/newlines-and-contenteditable-with-nested-non-editable-tags) - Non-editable element handling

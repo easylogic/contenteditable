@@ -1,5 +1,5 @@
 ---
-id: ce-0131
+id: ce-0131-auto-scroll-lag-rapid-typing
 scenarioId: scenario-auto-scroll-on-typing
 locale: en
 os: Windows

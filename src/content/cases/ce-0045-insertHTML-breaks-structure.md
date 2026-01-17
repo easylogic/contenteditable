@@ -1,5 +1,5 @@
 ---
-id: ce-0045
+id: ce-0045-insertHTML-breaks-structure
 scenarioId: scenario-insertHTML-behavior
 locale: en
 os: Windows

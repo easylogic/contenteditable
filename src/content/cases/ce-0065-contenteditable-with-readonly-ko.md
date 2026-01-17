@@ -1,5 +1,5 @@
 ---
-id: ce-0065
+id: ce-0065-contenteditable-with-readonly-ko
 scenarioId: scenario-readonly-attribute
 locale: ko
 os: Linux

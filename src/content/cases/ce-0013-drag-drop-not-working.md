@@ -1,5 +1,5 @@
 ---
-id: ce-0013
+id: ce-0013-drag-drop-not-working
 scenarioId: scenario-drag-drop-behavior
 locale: en
 os: macOS

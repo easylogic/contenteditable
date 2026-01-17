@@ -1,5 +1,5 @@
 ---
-id: ce-0040
+id: ce-0040-contenteditable-readonly
 scenarioId: scenario-contenteditable-readonly
 locale: en
 os: Any

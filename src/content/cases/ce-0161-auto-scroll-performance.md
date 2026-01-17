@@ -1,5 +1,5 @@
 ---
-id: ce-0161
+id: ce-0161-auto-scroll-performance
 scenarioId: scenario-auto-scroll-on-typing
 locale: en
 os: Windows

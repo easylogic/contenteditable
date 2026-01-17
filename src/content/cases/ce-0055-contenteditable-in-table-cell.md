@@ -1,5 +1,5 @@
 ---
-id: ce-0055
+id: ce-0055-contenteditable-in-table-cell
 scenarioId: scenario-contenteditable-table
 locale: en
 os: Windows

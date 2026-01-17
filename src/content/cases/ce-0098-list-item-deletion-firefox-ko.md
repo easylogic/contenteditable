@@ -1,5 +1,5 @@
 ---
-id: ce-0098
+id: ce-0098-list-item-deletion-firefox-ko
 scenarioId: scenario-list-item-deletion
 locale: ko
 os: Windows

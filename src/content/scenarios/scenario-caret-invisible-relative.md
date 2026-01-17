@@ -100,6 +100,7 @@ The `position:relative` property creates a new positioning context that breaks t
    `;
    ```
 
-## Reference
+## References
 
-- WebKit Bug Tracker: https://bugs.webkit.org/show_bug.cgi?id=213501
+- [WebKit Bug 213501: Text caret is invisible on position relative elements](https://bugs.webkit.org/show_bug.cgi?id=213501) - Reported June 22, 2020, Status: NEW
+- [Stack Overflow: Why is the caret invisible in a contenteditable with position:relative?](https://stackoverflow.com/questions/70565449/why-is-the-caret-invisible-in-a-contenteditable-with-positionrelative) - Discussion and workarounds

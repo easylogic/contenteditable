@@ -1,5 +1,5 @@
 ---
-id: ce-0132
+id: ce-0132-html-entities-copy-ko
 scenarioId: scenario-html-entity-encoding
 locale: ko
 os: Windows

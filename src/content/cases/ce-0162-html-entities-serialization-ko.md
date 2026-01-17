@@ -1,5 +1,5 @@
 ---
-id: ce-0162
+id: ce-0162-html-entities-serialization-ko
 scenarioId: scenario-html-entity-encoding
 locale: ko
 os: Windows

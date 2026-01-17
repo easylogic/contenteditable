@@ -1,5 +1,5 @@
 ---
-id: ce-0234
+id: ce-0234-chinese-ime-pinyin-table-safari-ko
 scenarioId: scenario-ime-pinyin-visible-safari
 locale: ko
 os: macOS

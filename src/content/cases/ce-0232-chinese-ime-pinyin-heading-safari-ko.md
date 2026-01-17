@@ -1,5 +1,5 @@
 ---
-id: ce-0232
+id: ce-0232-chinese-ime-pinyin-heading-safari-ko
 scenarioId: scenario-ime-duplicate-text-heading
 locale: ko
 os: macOS

@@ -91,3 +91,10 @@ HTMLElement.prototype.blur = function() {
 };
 ```
 
+## References
+
+- [Mozilla IME Handling Guide](https://udn.realityripple.com/docs/Mozilla/IME_handling_guide) - IME composition and focus
+- [ProseMirror Discuss: Composition lost when input after select multi lines](https://discuss.prosemirror.net/t/composition-lost-when-i-input-after-select-multi-lines/4493) - DOM manipulation issues
+- [Microsoft Learn: WM_IME_COMPOSITION](https://learn.microsoft.com/en-us/windows/win32/intl/wm-ime-composition) - Windows IME composition messages
+- [W3C IME API](https://www.w3.org/TR/2013/WD-ime-api-20130404/) - IME API specification
+- [Android Developer: InputConnectionWrapper](https://developer.android.com/reference/android/view/inputmethod/InputConnectionWrapper) - Android IME APIs

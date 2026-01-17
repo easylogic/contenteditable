@@ -1,5 +1,5 @@
 ---
-id: ce-0042
+id: ce-0042-input-events-duplicate
 scenarioId: scenario-input-event-duplication
 locale: en
 os: Windows

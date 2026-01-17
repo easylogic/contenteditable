@@ -1,5 +1,5 @@
 ---
-id: ce-0107
+id: ce-0107-blockquote-enter-safari
 scenarioId: scenario-blockquote-behavior
 locale: en
 os: macOS

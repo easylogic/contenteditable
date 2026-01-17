@@ -91,3 +91,8 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [MDN: execCommand reference](https://devdoc.net/web/developer.mozilla.org/en-US/docs/Web/API/Document/execCommand.html) - backColor and hiliteColor
+- [Stack Overflow: execCommand backColor CSS variable](https://stackoverflow.com/questions/53383478/why-document-execcommandbackcolor-does-not-work-with-css-variable-while-fo) - CSS variable limitations

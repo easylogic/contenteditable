@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-escape-key
+id: scenario-ime-composition-escape-key-ko
 title: Escape 키가 IME 컴포지션을 예상치 못하게 취소함
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 Escape 키를 누르면 컴포지션이 취소되거나, 컴포지션된 텍스트가 손실되거나, 일관되지 않게 동작할 수 있습니다. 여러 언어에 영향을 미치며, Escape를 취소 또는 대화상자 닫기에 사용하는 UI 상호작용과 충돌할 수 있습니다."
 category: ime
@@ -70,3 +70,11 @@ element.addEventListener('keydown', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [W3C UI Events: Composition Events](https://w3c.github.io/uievents/split/composition-events.html) - Official composition events specification
+- [MDN: Element keydown event](https://developer.mozilla.org/docs/Web/API/Element/keydown_event) - KeyboardEvent.isComposing documentation
+- [W3C Lists: Composition event cancelability](https://lists.w3.org/Archives/Public/public-webapps-github/2023Nov/0539.html) - Discussion on event cancelability
+- [Stack Overflow: Why is contenteditable beforeinput event not cancelable?](https://stackoverflow.com/questions/53140803/why-is-contenteditable-beforeinput-event-not-cancelable) - beforeinput cancelability during composition
+- [W3C EditContext API Explainer](https://w3c.github.io/editing/docs/EditContext/explainer.html) - Experimental API for better composition control

@@ -1,5 +1,5 @@
 ---
-id: ce-0197
+id: ce-0197-arabic-ime-space-ignored-chrome-ko
 scenarioId: scenario-space-during-composition
 locale: ko
 os: Windows

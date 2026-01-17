@@ -1,5 +1,5 @@
 ---
-id: ce-0143
+id: ce-0143-nested-list-backspace
 scenarioId: scenario-nested-list-behavior
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0123
+id: ce-0123-html-entities-paste
 scenarioId: scenario-html-entity-encoding
 locale: en
 os: Windows

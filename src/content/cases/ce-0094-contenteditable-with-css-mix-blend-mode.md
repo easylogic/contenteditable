@@ -1,5 +1,5 @@
 ---
-id: ce-0094
+id: ce-0094-contenteditable-with-css-mix-blend-mode
 scenarioId: scenario-css-mix-blend-mode
 locale: en
 os: Windows

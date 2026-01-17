@@ -1,5 +1,5 @@
 ---
-id: ce-0216
+id: ce-0216-ime-insertfromcomposition-missing-ios-safari-korean-ko
 scenarioId: scenario-ime-insertfromcomposition-targetranges
 locale: ko
 os: iOS

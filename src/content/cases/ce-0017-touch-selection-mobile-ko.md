@@ -1,5 +1,5 @@
 ---
-id: ce-0017
+id: ce-0017-touch-selection-mobile-ko
 scenarioId: scenario-touch-selection-mobile
 locale: ko
 os: iOS

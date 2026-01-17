@@ -1,5 +1,5 @@
 ---
-id: ce-0253
+id: ce-0253-mac-accent-menu-composition-zh
 scenarioId: scenario-mac-accent-menu-composition
 locale: zh
 os: macOS

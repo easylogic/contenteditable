@@ -1,5 +1,5 @@
 ---
-id: ce-0152
+id: ce-0152-link-href-update-difficult-ko
 scenarioId: scenario-link-insertion
 locale: ko
 os: Windows

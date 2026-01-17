@@ -1,5 +1,5 @@
 ---
-id: ce-0051
+id: ce-0051-contenteditable-in-shadow-dom-ko
 scenarioId: scenario-contenteditable-shadow-dom
 locale: ko
 os: macOS

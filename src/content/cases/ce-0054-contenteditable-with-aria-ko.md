@@ -1,5 +1,5 @@
 ---
-id: ce-0054
+id: ce-0054-contenteditable-with-aria-ko
 scenarioId: scenario-accessibility-aria
 locale: ko
 os: macOS

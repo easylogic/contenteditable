@@ -1,5 +1,5 @@
 ---
-id: scenario-undo-redo-stack
+id: scenario-undo-redo-stack-ko
 title: 실행 취소/다시 실행 스택 관리가 일관되지 않음
 description: "contenteditable 요소의 실행 취소/다시 실행 스택은 브라우저마다 일관되지 않게 동작합니다. 프로그래밍 방식 DOM 변경이 실행 취소 스택에 추가되거나 추가되지 않을 수 있으며, 스택이 예상치 못하게 지워질 수 있습니다. 사용자 정의 실행 취소/다시 실행 구현이 종종 필요합니다."
 category: other
@@ -152,3 +152,11 @@ element.addEventListener('keydown', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [W3C HTML5 Editing: Undo transaction history](https://www.w3.org/TR/2008/WD-html5-20080610/editing.html) - Undo stack specification
+- [W3C UndoManager: DOM Transaction proposal](https://dvcs.w3.org/hg/undomanager/raw-file/tip/undomanager.html) - UndoManager API
+- [Stack Overflow: iframe undo redo for execCommand insertHTML](https://stackoverflow.com/questions/51831623/iframe-undo-redo-for-execcommand-using-inserthtml-contenteditable) - execCommand undo issues
+- [Stack Overflow: Custom texteditor work with undo redo shortcuts](https://stackoverflow.com/questions/66854679/how-to-make-a-custom-texteditor-work-with-the-undo-and-redo-shortcuts-after-modi) - Custom undo implementation
+- [Addy Osmani: Mutation Observers](https://addyosmani.com/blog/mutation-observers/) - MutationObserver for undo tracking

@@ -1,5 +1,5 @@
 ---
-id: ce-0238
+id: ce-0238-chinese-ime-pinyin-table-edge-en
 scenarioId: scenario-ime-table-cell-pinyin-safari
 locale: en
 os: Windows

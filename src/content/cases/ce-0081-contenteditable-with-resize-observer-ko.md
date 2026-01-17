@@ -1,5 +1,5 @@
 ---
-id: ce-0081
+id: ce-0081-contenteditable-with-resize-observer-ko
 scenarioId: scenario-resize-observer-interference
 locale: ko
 os: Windows

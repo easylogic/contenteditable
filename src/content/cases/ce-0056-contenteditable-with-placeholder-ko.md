@@ -1,5 +1,5 @@
 ---
-id: ce-0056
+id: ce-0056-contenteditable-with-placeholder-ko
 scenarioId: scenario-placeholder-behavior
 locale: ko
 os: macOS

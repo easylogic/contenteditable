@@ -1,5 +1,5 @@
 ---
-id: ce-0074
+id: ce-0074-contenteditable-with-content-security-policy-ko
 scenarioId: scenario-csp-restrictions
 locale: ko
 os: Windows

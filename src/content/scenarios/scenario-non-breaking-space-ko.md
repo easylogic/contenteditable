@@ -1,5 +1,5 @@
 ---
-id: scenario-non-breaking-space
+id: scenario-non-breaking-space-ko
 title: 줄바꿈 없는 공백이 일반 공백과 다르게 동작함
 description: "줄바꿈 없는 공백(`&nbsp;` 또는 `\u00A0`)은 HTML에서 간격을 보존하는 데 사용되지만, contenteditable 요소에서 일반 공백과 다르게 동작합니다. 편집 중에 일반 공백으로 변환되거나 예상치 못한 방식으로 줄바꿈을 방지할 수 있습니다."
 category: formatting
@@ -91,3 +91,10 @@ element.addEventListener('paste', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [W3C Editing: ContentEditable specification](https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html) - NBSP insertion behavior
+- [WHATWG Lists: Whitespace handling discussion](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-June/032187.html) - Line break and NBSP issues
+- [Telerik Feedback: Editor does not remove NBSP on new line](https://feedback.telerik.com/kendo-jquery-ui/1526239-editor-does-not-remove-the-non-breaking-space-on-each-new-line-when-typing) - Leading NBSP issues
+- [DevSolus: Pressing Enter copies line style](https://devsolus.com/on-pressing-enter-in-contenteditable-its-copying-line-style-title-to-next-line/) - Style inheritance with NBSP

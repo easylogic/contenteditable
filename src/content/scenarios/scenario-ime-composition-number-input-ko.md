@@ -1,5 +1,5 @@
 ---
-id: scenario-ime-composition-number-input
+id: scenario-ime-composition-number-input-ko
 title: IME 컴포지션 중 숫자 입력이 예상치 못한 동작을 유발함
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션할 때 숫자 키를 누르면 숫자를 삽입하는 대신 IME 특정 기능(예: 일본어/중국어 IME의 후보 선택)이 트리거되거나, 컴포지션이 예상치 못하게 취소될 수 있습니다."
 category: ime
@@ -81,3 +81,11 @@ element.addEventListener('compositionend', () => {
   candidateListActive = false;
 });
 ```
+
+## 참고 자료
+
+- [Microsoft Support: Microsoft Simplified Chinese IME](https://support.microsoft.com/en-au/windows/microsoft-simplified-chinese-ime-9b962a3b-2fa4-4f37-811c-b1886320dd72) - Chinese IME candidate selection
+- [Microsoft Support: Microsoft Traditional Chinese IME](https://support.microsoft.com/en-us/windows/microsoft-traditional-chinese-ime-ef596ca5-aff7-4272-b34b-0ac7c2631a38) - Traditional Chinese IME behavior
+- [Microsoft Support: Microsoft Japanese IME](https://support.microsoft.com/en-gb/windows/microsoft-japanese-ime-da40471d-6b91-4042-ae8b-713a96476916) - Japanese IME candidate selection
+- [Microsoft Learn: Traditional Chinese IME](https://learn.microsoft.com/en-us/globalization/input/traditional-chinese-ime) - IME implementation details
+- [Apple Support: Japanese Input Method on Mac](https://support.apple.com/es-us/guide/japanese-input-method/jpim10262/mac) - macOS Japanese IME behavior

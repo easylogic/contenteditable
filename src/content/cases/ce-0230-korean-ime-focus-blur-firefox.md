@@ -1,5 +1,5 @@
 ---
-id: ce-0230
+id: ce-0230-korean-ime-focus-blur-firefox
 scenarioId: scenario-ime-composition-focus-change
 locale: en
 os: Windows

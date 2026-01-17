@@ -1,5 +1,5 @@
 ---
-id: ce-0145
+id: ce-0145-text-color-format-consistency-ko
 scenarioId: scenario-text-color-change
 locale: ko
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: scenario-samsung-keyboard-text-prediction
+id: scenario-samsung-keyboard-text-prediction-ko
 title: contenteditable에서 삼성 키보드 구문 추천 문제
 description: "안드로이드 크롬에서 삼성 키보드의 구문 추천 기능이 contenteditable 요소에서 다양한 입력 이벤트 처리 문제를 일으킵니다. insertCompositionText 이벤트, getTargetRanges() 누락, selection 불일치, 링크나 포맷된 요소 옆에서 입력 시 event.data 결합 등의 문제가 발생합니다."
 category: mobile
@@ -445,6 +445,8 @@ function showKeyboardWarning() {
 
 ## 참고 자료
 
-- MDN: InputEvent.getTargetRanges() - https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges
-- W3C Input Events Specification - https://www.w3.org/TR/2016/WD-input-events-20160928/
-- Chromium Code Review: 삼성 키보드 백스페이스 처리 - https://codereview.chromium.org/1126203013
+- [MDN: InputEvent.getTargetRanges()](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/getTargetRanges) - 공식 문서
+- [W3C Input Events Level 2 사양](https://www.w3.org/TR/input-events-2/) - 공식 사양
+- [W3C Input Events Level 1 사양](https://www.w3.org/TR/2016/WD-input-events-20160928/) - 레거시 사양
+- [ProseMirror 토론: Android WebView에서 삼성 키보드가 줄바꿈 스팸을 발생시킴](https://discuss.prosemirror.net/t/samsung-keyboard-within-android-webview-causes-a-spam-of-new-lines/5246) - 상세 토론 및 해결 방법
+- [Chromium Code Review: 삼성 키보드 백스페이스 처리](https://codereview.chromium.org/1126203013) - 관련 코드 리뷰

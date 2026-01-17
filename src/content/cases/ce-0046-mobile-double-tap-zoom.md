@@ -1,5 +1,5 @@
 ---
-id: ce-0046
+id: ce-0046-mobile-double-tap-zoom
 scenarioId: scenario-mobile-touch-behavior
 locale: en
 os: iOS

@@ -86,3 +86,10 @@ element.addEventListener('beforeinput', (e) => {
 });
 ```
 
+## References
+
+- [MDN: Document.execCommand](https://developer.mozilla.org/en-US/docs/Web/API/Document/execCommand) - execCommand API documentation
+- [Stack Overflow: Change font family to custom font using execCommand](https://stackoverflow.com/questions/42331001/can-you-change-the-font-family-of-contenteditable-text-to-a-custom-font-using-ex) - Custom font handling
+- [Stack Overflow: Change font size for contenteditable div](https://stackoverflow.com/questions/22116956/change-the-font-size-for-a-contenteditable-div) - FontName vs CSS
+- [Programming Books: execCommand and contenteditable](https://www.programming-books.io/essential/javascript/execcommand-and-contenteditable-5257f91227764826a1b1b77f465d8efa) - styleWithCSS usage
+- [AngularFix: execCommand doesn't work](https://www.angularfix.com/2022/11/execcommand-doesn-text.html) - Style interference issues

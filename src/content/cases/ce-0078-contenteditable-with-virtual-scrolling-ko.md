@@ -1,5 +1,5 @@
 ---
-id: ce-0078
+id: ce-0078-contenteditable-with-virtual-scrolling-ko
 scenarioId: scenario-virtual-scrolling
 locale: ko
 os: macOS

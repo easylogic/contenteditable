@@ -108,3 +108,9 @@ element.addEventListener('input', () => {
 });
 ```
 
+## References
+
+- [W3C ContentEditable: Nested formatting](https://www.w3.org/TR/content-editable/) - Formatting specification
+- [W3C Editing: contentEditableDisabled](https://w3c.github.io/editing/docs/contentEditableDisabled/) - Formatting control
+- [CodingEasyPeasy: Normalize HTML DOM](https://www.codingeasypeasy.com/blog/normalize-html-dom-deep-dive-into-whitespace-and-text-node-management) - DOM normalization
+- [Stack Overflow: Restrict style of pasted text](https://stackoverflow.com/questions/63052383/how-do-i-restrict-the-style-of-the-text-pasted-in-a-contenteditable-area) - Paste handling

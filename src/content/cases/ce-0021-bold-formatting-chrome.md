@@ -1,5 +1,5 @@
 ---
-id: ce-0021
+id: ce-0021-bold-formatting-chrome
 scenarioId: scenario-formatting-persistence
 locale: en
 os: Windows

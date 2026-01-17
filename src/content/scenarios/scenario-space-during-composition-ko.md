@@ -1,5 +1,5 @@
 ---
-id: scenario-space-during-composition
+id: scenario-space-during-composition-ko
 title: "컴포지션 중 Space 키가 무시되거나 일관되지 않게 커밋됨"
 description: "contenteditable 요소에서 IME로 텍스트를 컴포지션하는 동안 Space 키를 누르면 무시되거나 네이티브 텍스트 컨트롤과 비교하여 일관되지 않은 방식으로 컴포지션이 커밋됩니다. 한국어, 일본어, 중국어, 태국어 및 기타 언어를 포함한 여러 언어에 영향을 미칩니다."
 category: ime
@@ -24,3 +24,9 @@ locale: ko
 - **기타 IME**: 컴포지션을 사용하는 다른 언어에서도 유사한 문제가 발생할 수 있습니다
 
 이 동작은 제품이 단어 경계를 해석하고 자동 완성 또는 제안 기능을 트리거하는 방식에 영향을 줄 수 있습니다.
+
+## 참고 자료
+
+- [Google Input Tools: Input method features](https://www.google.com/intl/or/inputtools/services/features/input-method.html) - IME behavior documentation
+- [MindFusion: IME mode and CJK languages](https://www.mindfusion.eu/onlinehelp/keyboard.wpf/IME_mode_and_CJK_languages.htm) - IME composition behavior
+- [Reddit: Korean IME Hanja selection](https://www.reddit.com/r/Korean/comments/m6xuor) - Korean IME behavior discussion

@@ -1,5 +1,5 @@
 ---
-id: ce-0163
+id: ce-0163-list-formatting-across-items-ko
 scenarioId: scenario-list-formatting-persistence
 locale: ko
 os: Windows

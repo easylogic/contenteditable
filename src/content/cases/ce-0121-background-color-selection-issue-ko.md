@@ -1,5 +1,5 @@
 ---
-id: ce-0121
+id: ce-0121-background-color-selection-issue-ko
 scenarioId: scenario-background-color-change
 locale: ko
 os: Windows

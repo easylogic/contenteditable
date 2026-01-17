@@ -1,5 +1,5 @@
 ---
-id: ce-0176
+id: ce-0176-chinese-ime-conversion-delay-safari
 scenarioId: scenario-ime-candidate-list-and-conversion-issues
 locale: en
 os: macOS

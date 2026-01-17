@@ -1,5 +1,5 @@
 ---
-id: ce-0063
+id: ce-0063-contenteditable-with-required
 scenarioId: scenario-required-validation
 locale: en
 os: macOS

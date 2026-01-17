@@ -1,5 +1,5 @@
 ---
-id: ce-0025
+id: ce-0025-caret-position-emoji-edge-ko
 scenarioId: scenario-caret-movement-with-emoji
 locale: ko
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0118
+id: ce-0118-image-deletion-leaves-empty
 scenarioId: scenario-image-deletion
 locale: en
 os: Windows

@@ -1,5 +1,5 @@
 ---
-id: ce-0172
+id: ce-0172-selection-invalid-after-replace
 scenarioId: scenario-selection-restoration
 locale: en
 os: Windows

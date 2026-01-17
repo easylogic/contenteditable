@@ -88,3 +88,10 @@ element.addEventListener('input', () => {
 });
 ```
 
+## References
+
+- [MDN: Content Editable](https://www.devdoc.net/web/developer.mozilla.org/en-US/docs/HTML/Content_Editable.html) - Browser behavior differences
+- [Can I Use: defaultParagraphSeparator](https://caniuse.com/mdn-api_document_execcommand_defaultparagraphseparator) - Browser compatibility
+- [Stack Overflow: contenteditable in Firefox creates 2 newlines](https://stackoverflow.com/questions/52817606/contenteditable-in-firefox-creates-2-newlines-instead-of-1) - Firefox behavior
+- [WHATWG Lists: Paragraph separator discussion](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-May/031577.html) - Styling differences
+- [Stack Overflow: Cross-browser way to insert br or p tag](https://stackoverflow.com/questions/35705291/cross-browser-way-to-insert-br-or-p-tag-when-hitting-enter-on-a-contenteditable) - Consistency approaches

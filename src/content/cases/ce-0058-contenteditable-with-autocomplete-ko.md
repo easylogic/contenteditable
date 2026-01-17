@@ -1,5 +1,5 @@
 ---
-id: ce-0058
+id: ce-0058-contenteditable-with-autocomplete-ko
 scenarioId: scenario-autocomplete-behavior
 locale: ko
 os: macOS

@@ -1,5 +1,5 @@
 ---
-id: ce-0050
+id: ce-0050-delete-key-behavior
 scenarioId: scenario-delete-key-behavior
 locale: en
 os: Linux

@@ -109,3 +109,12 @@ element.addEventListener('paste', () => {
 });
 ```
 
+## References
+
+- [MDN: contenteditable global attribute](https://developer.mozilla.org/docs/Web/HTML/Reference/Global_attributes/contenteditable) - contenteditable documentation
+- [W3C ContentEditable: Caret positioning](https://w3c.github.io/contentEditable/) - Caret specification
+- [CKEditor Issue #9771: Scroll to top after paste](https://dev.ckeditor.com/ticket/9771) - Paste scroll issues
+- [Chromium Code Review: Caret scroll into view](https://codereview.chromium.org/9969106/patch/1/5) - Chrome behavior
+- [TipTap Issue #2629: iOS Safari caret visibility](https://github.com/ueberdosis/tiptap/issues/2629) - iOS scroll issues
+- [GeeksforGeeks: Set cursor position in contenteditable](https://www.geeksforgeeks.org/how-to-set-cursor-position-in-content-editable-element-using-javascript/) - Caret positioning
+- [GitHub Gist: caret.js utilities](https://gist.github.com/imolorhe/b6ec41233cf7756eeacbb1e38cd42856) - Caret position helpers

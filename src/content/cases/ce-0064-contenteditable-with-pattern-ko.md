@@ -1,5 +1,5 @@
 ---
-id: ce-0064
+id: ce-0064-contenteditable-with-pattern-ko
 scenarioId: scenario-pattern-validation
 locale: ko
 os: Windows

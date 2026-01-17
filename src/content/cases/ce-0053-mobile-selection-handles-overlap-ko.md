@@ -1,5 +1,5 @@
 ---
-id: ce-0053
+id: ce-0053-mobile-selection-handles-overlap-ko
 scenarioId: scenario-mobile-touch-behavior
 locale: ko
 os: Android

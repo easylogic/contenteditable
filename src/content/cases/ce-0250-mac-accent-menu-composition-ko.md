@@ -1,5 +1,5 @@
 ---
-id: ce-0250
+id: ce-0250-mac-accent-menu-composition-ko
 scenarioId: scenario-mac-accent-menu-composition
 locale: ko
 os: macOS

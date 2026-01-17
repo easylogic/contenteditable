@@ -1,5 +1,5 @@
 ---
-id: scenario-link-click-editing
+id: scenario-link-click-editing-ko
 title: 링크 클릭이 contenteditable 편집을 간섭함
 description: "링크가 contenteditable 요소 내부에 있을 때 링크를 클릭하면 텍스트 편집을 허용하는 대신 이동하거나 예상치 못한 동작이 트리거될 수 있습니다. 동작은 브라우저마다 다르며 링크 텍스트를 편집하거나 삭제할 링크를 선택하기 어렵게 만들 수 있습니다."
 category: formatting
@@ -85,3 +85,8 @@ element.addEventListener('keydown', (e) => {
   }
 });
 ```
+
+## 참고 자료
+
+- [CKEditor Issue #7145: Link click behavior in contenteditable](https://dev.ckeditor.com/ticket/7145) - Link navigation in editors
+- [Stack Overflow: Disallow caret inside HTML anchor tags](https://stackoverflow.com/questions/35043719/disallow-caret-inside-html-anchor-tags) - Caret positioning in links

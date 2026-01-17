@@ -746,3 +746,13 @@ For documents with **100K+ characters**:
 This comprehensive performance documentation provides benchmarks, optimization strategies, and implementation guidance for handling large content in contenteditable elements. The focus is on practical, implementable solutions that can significantly improve performance for documents of 10,000+ characters.
 
 When a contenteditable region contains a large amount of content (thousands of DOM nodes), typing becomes noticeably slow. There is a visible lag between pressing keys and seeing characters appear.
+
+## References
+
+- [Stack Overflow: Editable HTML content is very laggy when large](https://stackoverflow.com/questions/24888187/editable-html-content-is-very-laggy-when-it-is-large) - Performance discussion
+- [Reddit: contenteditable performance with large content](https://www.reddit.com/r/webdev/comments/hwkdeg) - Community discussion
+- [Microsoft Learn: DOM leaks memory tool - detached elements](https://learn.microsoft.com/en-us/microsoft-edge/devtools/memory-problems/dom-leaks-memory-tool-detached-elements) - Memory leak detection
+- [Microsoft Learn: Memory problems](https://learn.microsoft.com/en-us/microsoft-edge/devtools/memory-problems/) - Memory debugging guide
+- [Chrome DevTools: Memory problems](https://developer.chrome.com/docs/devtools/memory-problems) - Chrome memory debugging
+- [Chrome DevTools: DOM Size insights](https://developer.chrome.com/docs/performance/insights/dom-size) - DOM size optimization
+- [MoldStud: DOM manipulation performance tips](https://moldstud.com/articles/p-top-performance-optimization-tips-for-efficient-dom-manipulation-in-javascript) - Performance optimization strategies

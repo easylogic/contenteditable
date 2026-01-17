@@ -1,5 +1,5 @@
 ---
-id: ce-0109
+id: ce-0109-image-resize-limited
 scenarioId: scenario-image-resize
 locale: en
 os: Windows

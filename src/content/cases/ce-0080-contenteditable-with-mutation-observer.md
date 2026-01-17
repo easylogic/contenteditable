@@ -1,5 +1,5 @@
 ---
-id: ce-0080
+id: ce-0080-contenteditable-with-mutation-observer
 scenarioId: scenario-mutation-observer-interference
 locale: en
 os: macOS

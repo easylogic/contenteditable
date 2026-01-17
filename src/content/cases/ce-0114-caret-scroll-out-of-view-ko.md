@@ -1,5 +1,5 @@
 ---
-id: ce-0114
+id: ce-0114-caret-scroll-out-of-view-ko
 scenarioId: scenario-caret-out-of-viewport
 locale: ko
 os: Windows

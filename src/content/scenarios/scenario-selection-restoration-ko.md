@@ -1,5 +1,5 @@
 ---
-id: scenario-selection-restoration
+id: scenario-selection-restoration-ko
 title: DOM 조작 후 선택 복원이 신뢰할 수 없음
 description: "contenteditable 요소에서 프로그래밍 방식으로 DOM을 조작한 후 텍스트 선택(커서 위치)을 복원하는 것은 브라우저 간에 신뢰할 수 없습니다. 선택이 손실되거나, 잘못된 위치로 이동하거나, 유효하지 않게 될 수 있습니다."
 category: selection
@@ -138,3 +138,10 @@ function manipulateDOM(callback) {
   });
 }
 ```
+
+## 참고 자료
+
+- [Stack Overflow: Reset cursor position after DOM change](https://stackoverflow.com/questions/6329487/reset-cursor-position-in-content-editable-after-dom-change) - Cursor restoration
+- [Stack Overflow: contenteditable div issue when restore saving selection](https://stackoverflow.com/questions/16604213/contenteditable-div-issue-when-restore-saving-selection) - Selection saving issues
+- [Stack Overflow: Saving and restoring caret position](https://stackoverflow.com/questions/4576694/saving-and-restoring-caret-position-for-contenteditable-div) - Character offset method
+- [Stack Overflow: Preserve cursor position when changing innerHTML](https://stackoverflow.com/questions/62232111/preserve-cursor-position-when-changing-innerhtml-in-a-contenteditable-div) - Timing considerations

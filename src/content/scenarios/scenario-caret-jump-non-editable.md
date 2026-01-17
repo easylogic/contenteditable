@@ -91,6 +91,11 @@ Chrome's caret positioning algorithm appears to incorrectly calculate where the 
    });
    ```
 
-## Reference
+## References
 
-- Stack Overflow: https://stackoverflow.com/questions/27786048
+- [Stack Overflow: Why is my contenteditable caret jumping to the end in Chrome?](https://stackoverflow.com/questions/27786048/why-is-my-contenteditable-caret-jumping-to-the-end-in-chrome) - Detailed discussion
+- [Stack Overflow: Cursor in wrong place in contenteditable](https://stackoverflow.com/questions/18985261/cursor-in-wrong-place-in-contenteditable) - Related issue
+- [CKEditor Issue 11923: Caret is rendered at wrong location when editable region ends with a non-editable region](https://dev.ckeditor.com/ticket/11923) - Blink/Safari caret positioning bug
+- [Chromium Issue 71598: Caret in wrong position after non-editable element at the end of contentEditable](https://stackoverflow.com/questions/27786048/why-is-my-contenteditable-caret-jumping-to-the-end-in-chrome) - Referenced in discussions
+- [Chromium Issue 107366: Unable to delete the first and the last characters of a contenteditable div with display: table](https://groups.google.com/a/chromium.org/g/chromium-bugs/c/JYakmPtVCeM/m/TcnaPcXe2fYJ) - Related display:table issue
+- [ProseMirror Discuss: Chrome caret cursor larger than the text with inlined items](https://discuss.prosemirror.net/t/chrome-caret-cursor-larger-than-the-text-with-inlined-items/5946) - Related widget/caret issues

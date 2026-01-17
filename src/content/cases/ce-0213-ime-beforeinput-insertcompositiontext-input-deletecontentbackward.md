@@ -1,5 +1,5 @@
 ---
-id: ce-0213
+id: ce-0213-ime-beforeinput-insertcompositiontext-input-deletecontentbackward
 scenarioId: scenario-beforeinput-input-inputtype-mismatch
 locale: en
 os: iOS

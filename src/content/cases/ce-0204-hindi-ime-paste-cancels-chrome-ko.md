@@ -1,5 +1,5 @@
 ---
-id: ce-0204
+id: ce-0204-hindi-ime-paste-cancels-chrome-ko
 scenarioId: scenario-ime-composition-paste
 locale: ko
 os: Windows

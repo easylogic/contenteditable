@@ -92,3 +92,9 @@ element.addEventListener('paste', (e) => {
 });
 ```
 
+## References
+
+- [W3C Editing: ContentEditable specification](https://dvcs.w3.org/hg/editing/raw-file/tip/editing.html) - NBSP insertion behavior
+- [WHATWG Lists: Whitespace handling discussion](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2011-June/032187.html) - Line break and NBSP issues
+- [Telerik Feedback: Editor does not remove NBSP on new line](https://feedback.telerik.com/kendo-jquery-ui/1526239-editor-does-not-remove-the-non-breaking-space-on-each-new-line-when-typing) - Leading NBSP issues
+- [DevSolus: Pressing Enter copies line style](https://devsolus.com/on-pressing-enter-in-contenteditable-its-copying-line-style-title-to-next-line/) - Style inheritance with NBSP

@@ -1,5 +1,5 @@
 ---
-id: ce-0084
+id: ce-0084-contenteditable-with-clipboard-api
 scenarioId: scenario-clipboard-api
 locale: en
 os: Windows

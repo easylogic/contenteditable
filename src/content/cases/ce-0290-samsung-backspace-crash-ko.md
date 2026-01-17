@@ -1,5 +1,5 @@
 ---
-id: ce-0290
+id: ce-0290-samsung-backspace-crash-ko
 scenarioId: scenario-samsung-backspace-crash
 locale: ko
 os: Android

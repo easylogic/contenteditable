@@ -1,5 +1,5 @@
 ---
-id: ce-0100
+id: ce-0100-link-insertion-chrome-ko
 scenarioId: scenario-link-insertion
 locale: ko
 os: Windows

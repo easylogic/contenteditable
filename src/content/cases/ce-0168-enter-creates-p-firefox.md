@@ -1,5 +1,5 @@
 ---
-id: ce-0168
+id: ce-0168-enter-creates-p-firefox
 scenarioId: scenario-line-break-element-type
 locale: en
 os: Windows

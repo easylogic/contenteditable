@@ -1,5 +1,5 @@
 ---
-id: ce-0034
+id: ce-0034-composition-events-missing-ko
 scenarioId: scenario-composition-events
 locale: ko
 os: macOS

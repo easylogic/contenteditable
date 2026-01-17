@@ -1,5 +1,5 @@
 ---
-id: ce-0164
+id: ce-0164-link-text-editing-navigates-ko
 scenarioId: scenario-link-click-editing
 locale: ko
 os: macOS

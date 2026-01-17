@@ -1,5 +1,5 @@
 ---
-id: ce-0191
+id: ce-0191-japanese-ime-number-candidate-selection-chrome-ko
 scenarioId: scenario-ime-composition-number-input
 locale: ko
 os: Windows

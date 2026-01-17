@@ -71,3 +71,10 @@ element.addEventListener('keydown', (e) => {
 });
 ```
 
+## References
+
+- [W3C UI Events: Composition Events](https://w3c.github.io/uievents/split/composition-events.html) - Official composition events specification
+- [MDN: Element keydown event](https://developer.mozilla.org/docs/Web/API/Element/keydown_event) - KeyboardEvent.isComposing documentation
+- [W3C Lists: Composition event cancelability](https://lists.w3.org/Archives/Public/public-webapps-github/2023Nov/0539.html) - Discussion on event cancelability
+- [Stack Overflow: Why is contenteditable beforeinput event not cancelable?](https://stackoverflow.com/questions/53140803/why-is-contenteditable-beforeinput-event-not-cancelable) - beforeinput cancelability during composition
+- [W3C EditContext API Explainer](https://w3c.github.io/editing/docs/EditContext/explainer.html) - Experimental API for better composition control

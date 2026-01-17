@@ -646,3 +646,12 @@ Always have non-JavaScript fallbacks
 ---
 
 This scenario provides comprehensive focus management strategies for mobile contenteditable implementations, addressing the unique challenges of touch devices, virtual keyboards, and browser-specific behaviors.
+
+## References
+
+- [Ionic Framework Issue #18368: contenteditable focus issues](https://github.com/ionic-team/ionic-framework/issues/18368) - Touch focus problems
+- [Stack Overflow: contenteditable div doesn't focus on iPad](https://stackoverflow.com/questions/76043001/contenteditable-div-doesnt-focus-on-ipad-using-requestanimationframe) - iOS focus issues
+- [Stack Overflow: Android doesn't scroll on input focus](https://stackoverflow.com/questions/23757345/android-does-not-correctly-scroll-on-input-focus-if-not-body-element) - Android scroll issues
+- [TipTap Issue #1806: Caret visibility and selection loss](https://github.com/ueberdosis/tiptap/issues/1806) - Selection loss issues
+- [React Native WebView Issue #1172: Focus management](https://github.com/react-native-webview/react-native-webview/issues/1172) - WebView focus issues
+- [Lightrun: Ionic contenteditable focus problems](https://lightrun.com/answers/ionic-team-ionic-framework-bug-contenteditable-cant-scroll-in-iosandroid-and-difficult-to-get-focus) - Framework-specific issues

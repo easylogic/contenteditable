@@ -1,5 +1,5 @@
 ---
-id: ce-0205
+id: ce-0205-chinese-ime-scroll-cancels-android-chrome-ko
 scenarioId: scenario-ime-composition-scroll
 locale: ko
 os: Android

@@ -1,5 +1,5 @@
 ---
-id: ce-0111
+id: ce-0111-empty-elements-accumulate
 scenarioId: scenario-empty-element-cleanup
 locale: en
 os: Windows
