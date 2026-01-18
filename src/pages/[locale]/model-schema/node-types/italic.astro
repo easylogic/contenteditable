@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="이탤릭 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>이탤릭</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   italic: {
   }
 }`} />
@@ -83,7 +83,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '이탤릭 텍스트',
   marks: [{ type: 'italic' }]
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeItalicMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeItalicMark(text, mark) {
   return '<em>' + text + '</em>';
 }`} />
             </DocSection>
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractItalicMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractItalicMark(element) {
   if (element.tagName === 'EM' || element.tagName === 'I') {
     return { type: 'italic' };
   }
@@ -118,7 +118,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 이탤릭 토글
+              <DocCodeBlock language="typescript" code={`// 이탤릭 토글
 function toggleItalic() {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
@@ -141,7 +141,7 @@ function toggleItalic() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: <i> vs <em> 정규화
+              <DocCodeBlock language="typescript" code={`// 문제: <i> vs <em> 정규화
 // 해결: 항상 <i>를 <em>으로 변환
 function normalizeItalic(element) {
   element.querySelectorAll('i').forEach(i => {
@@ -164,7 +164,7 @@ function applyBoldAndItalic(text) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class ItalicMark {
+              <DocCodeBlock language="typescript" code={`class ItalicMark {
   constructor() {
     this.type = 'italic';
   }

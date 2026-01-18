@@ -1,0 +1,136 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'interface', text: '인터페이스' },
+  { depth: 2, slug: 'usage', text: '사용법' },
+  { depth: 2, slug: 'inverse', text: '역 Operation' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Wrap Operation – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터를 위한 감싸기 operation"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Wrap</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Wrap Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              노드나 콘텐츠를 다른 노드로 감쌉니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                Wrap operation은 기존 노드나 콘텐츠를 새로운 부모 노드로 감쌉니다. 텍스트를 링크로 감싸거나 단락을 목록 항목으로 감쌀 때 일반적으로 사용됩니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="인터페이스">
+              <DocCodeBlock language="typescript" code={`interface WrapOperation extends Operation {
+  type: 'wrap';
+  path: Path; // 감쌀 첫 번째 노드 경로
+  length?: number; // 감쌀 노드 수 (기본값: 1)
+  wrapper: Node; // 감쌀 노드
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="사용법">
+              <DocCodeBlock language="typescript" code={`// 텍스트를 링크로 감싸기
+function wrapTextWithLink(editor: Editor, textPath: Path, url: string) {
+  const operation: WrapOperation = {
+    type: 'wrap',
+    path: textPath,
+    wrapper: {
+      type: 'link',
+      attributes: { href: url },
+      children: [editor.getNodeAtPath(textPath)]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// 선택 영역을 링크로 감싸기
+function wrapSelectionWithLink(editor: Editor, selection: Selection, url: string) {
+  const nodes = editor.getNodesInRange(selection);
+  
+  const tx = editor.beginTransaction();
+  
+  // 각 노드 감싸기
+  for (const node of nodes) {
+    tx.add({
+      type: 'wrap',
+      path: node.path,
+      wrapper: {
+        type: 'link',
+        attributes: { href: url },
+        children: [node]
+      }
+    });
+  }
+  
+  tx.commit();
+}`} />
+            </DocSection>
+
+            <DocSection id="inverse" title="역 Operation">
+              <p class="m-0 mb-4">
+                Wrap의 역 operation은 unwrap입니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`function getInverse(operation: WrapOperation): UnwrapOperation {
+  return {
+    type: 'unwrap',
+    path: operation.path,
+    wrapperType: operation.wrapper.type
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/wrap"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations 개요' },
+                { title: 'Unwrap', href: '/editor/operations/unwrap', description: 'Unwrap operation' },
+                { title: 'Insert Node', href: '/editor/operations/insert-node', description: 'Insert node operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

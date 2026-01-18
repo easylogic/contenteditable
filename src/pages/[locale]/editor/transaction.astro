@@ -1,0 +1,683 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'transaction-history', text: 'Transaction과 History' },
+  { depth: 3, slug: 'atomic-history-entries', text: '원자적 History Entry' },
+  { depth: 3, slug: 'transaction-boundaries', text: 'Transaction 경계' },
+  { depth: 2, slug: 'transaction-lifecycle', text: 'Transaction 생명주기' },
+  { depth: 3, slug: 'begin-commit-rollback', text: 'Begin, Commit, Rollback' },
+  { depth: 3, slug: 'transaction-state', text: 'Transaction 상태 관리' },
+  { depth: 2, slug: 'history-integration', text: 'History 통합' },
+  { depth: 3, slug: 'single-undo-entry', text: '단일 Undo Entry' },
+  { depth: 3, slug: 'operation-grouping', text: 'Operation 그룹화' },
+  { depth: 2, slug: 'transaction-patterns', text: 'Transaction 패턴' },
+  { depth: 3, slug: 'user-action-transactions', text: '사용자 액션 Transaction' },
+  { depth: 3, slug: 'formatting-transactions', text: '서식 Transaction' },
+  { depth: 3, slug: 'paste-transactions', text: '붙여넣기 Transaction' },
+  { depth: 2, slug: 'nested-transactions', text: '중첩 Transaction' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Transaction 시스템 – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터에서 history를 원자적으로 관리하기 위한 transaction 사용"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Transaction 시스템</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Transaction 시스템
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델 기반 에디터에서 일관된 history 관리를 위해 operation을 원자적 단위로 그룹화하는 transaction 사용.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                Transaction은 여러 operation을 단일 history entry로 기록되는 원자적 단위로 그룹화합니다. 이를 통해 관련 operation들이 함께 실행 취소/다시 실행되어 문서 일관성을 유지하고 더 나은 사용자 경험을 제공합니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>주요 장점:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">원자적 작업 - 모두 성공하거나 모두 실패</li>
+                  <li class="mb-1">관련 operation에 대한 단일 undo entry</li>
+                  <li class="mb-1">일관된 문서 상태</li>
+                  <li class="mb-1">더 나은 undo/redo 세분성</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="transaction-history" title="Transaction과 History">
+              <p class="m-0 mb-4">
+                Transaction은 원자적 history 관리의 기초입니다. 각 transaction은 undo/redo 스택의 단일 entry가 됩니다.
+              </p>
+
+              <DocSection id="atomic-history-entries" title="원자적 History Entry" depth={3}>
+                <p class="m-0 mb-3">
+                  관련 operation을 단일 history entry로 그룹화:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  operations: Operation[]; // Transaction의 모든 operation
+  beforeModel: DocumentModel;
+  afterModel: DocumentModel;
+  beforeSelection: Selection | null;
+  afterSelection: Selection | null;
+}
+
+class Transaction {
+  #operations: Operation[] = [];
+  #editor: Editor;
+  #beforeModel: DocumentModel;
+  #beforeSelection: Selection | null;
+  #isCommitted = false;
+
+  constructor(editor: Editor) {
+    this.#editor = editor;
+    this.#beforeModel = editor.getModel();
+    this.#beforeSelection = editor.getSelection();
+  }
+
+  add(operation: Operation) {
+    if (this.#isCommitted) {
+      throw new Error('커밋된 transaction에 추가할 수 없습니다');
+    }
+    this.#operations.push(operation);
+  }
+
+  async commit(): Promise<boolean> {
+    if (this.#isCommitted) {
+      return false;
+    }
+
+    // 모든 operation 검증
+    for (const op of this.#operations) {
+      if (!this.#editor.canApply(op)) {
+        return false;
+      }
+    }
+
+    // 모든 operation 적용
+    try {
+      for (const op of this.#operations) {
+        this.#editor.applyOperation(op);
+      }
+
+      // 단일 history entry로 기록
+      const historyEntry: HistoryEntry = {
+        id: generateId(),
+        timestamp: Date.now(),
+        operations: [...this.#operations],
+        beforeModel: this.#beforeModel,
+        afterModel: this.#editor.getModel(),
+        beforeSelection: this.#beforeSelection,
+        afterSelection: this.#editor.getSelection()
+      };
+
+      this.#editor.getHistory().push(historyEntry);
+      this.#isCommitted = true;
+      return true;
+    } catch (error) {
+      // 오류 시 롤백
+      this.rollback();
+      return false;
+    }
+  }
+
+  rollback() {
+    this.#editor.setModel(this.#beforeModel);
+    this.#editor.setSelection(this.#beforeSelection);
+    this.#operations = [];
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="transaction-boundaries" title="Transaction 경계" depth={3}>
+                <p class="m-0 mb-3">
+                  사용자 액션을 기반으로 transaction 경계 정의:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  #currentTransaction: Transaction | null = null;
+
+  beginTransaction(): Transaction {
+    if (this.#currentTransaction) {
+      throw new Error('Transaction이 이미 진행 중입니다');
+    }
+    this.#currentTransaction = new Transaction(this);
+    return this.#currentTransaction;
+  }
+
+  async commitTransaction(): Promise<boolean> {
+    if (!this.#currentTransaction) {
+      return false;
+    }
+    const success = await this.#currentTransaction.commit();
+    this.#currentTransaction = null;
+    return success;
+  }
+
+  rollbackTransaction() {
+    if (this.#currentTransaction) {
+      this.#currentTransaction.rollback();
+      this.#currentTransaction = null;
+    }
+  }
+
+  // 현재 transaction에 operation 추가하는 헬퍼
+  addOperation(operation: Operation) {
+    if (this.#currentTransaction) {
+      this.#currentTransaction.add(operation);
+    } else {
+      // Transaction이 없으면 생성하고 즉시 커밋
+      const tx = this.beginTransaction();
+      tx.add(operation);
+      tx.commit();
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="transaction-lifecycle" title="Transaction 생명주기">
+              <p class="m-0 mb-4">
+                완전한 transaction 생명주기를 이해하는 것이 올바른 구현에 중요합니다.
+              </p>
+
+              <DocSection id="begin-commit-rollback" title="Begin, Commit, Rollback" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 예제: 서식 작업
+async function applyBoldFormatting(editor: Editor, selection: Selection) {
+  const tx = editor.beginTransaction();
+  
+  try {
+    // 서식을 위한 여러 operation
+    tx.add({
+      type: 'format',
+      path: selection.start,
+      format: 'bold',
+      value: true
+    });
+    
+    tx.add({
+      type: 'format',
+      path: selection.end,
+      format: 'bold',
+      value: true
+    });
+    
+    // 모든 operation이 단일 history entry로 커밋됨
+    const success = await tx.commit();
+    
+    if (!success) {
+      console.error('서식 적용 실패');
+    }
+  } catch (error) {
+    tx.rollback();
+    throw error;
+  }
+}
+
+// 예제: 붙여넣기 작업
+async function handlePaste(editor: Editor, pastedContent: string) {
+  const tx = editor.beginTransaction();
+  
+  try {
+    // 선택된 콘텐츠 삭제
+    const selection = editor.getSelection();
+    if (!selection.isCollapsed) {
+      tx.add({
+        type: 'delete',
+        path: selection.start,
+        length: selection.length
+      });
+    }
+    
+    // 붙여넣은 콘텐츠 삽입
+    tx.add({
+      type: 'insert',
+      path: selection.start,
+      content: pastedContent
+    });
+    
+    await tx.commit(); // 붙여넣기에 대한 단일 undo entry
+  } catch (error) {
+    tx.rollback();
+    throw error;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="transaction-state" title="Transaction 상태 관리" depth={3}>
+                <DocCodeBlock language="typescript" code={`class TransactionManager {
+  #activeTransactions: Transaction[] = [];
+  #transactionStack: Transaction[] = []; // 중첩 transaction용
+
+  beginTransaction(editor: Editor): Transaction {
+    const tx = new Transaction(editor);
+    this.#transactionStack.push(tx);
+    this.#activeTransactions.push(tx);
+    return tx;
+  }
+
+  async commitTransaction(tx: Transaction): Promise<boolean> {
+    const index = this.#activeTransactions.indexOf(tx);
+    if (index === -1) {
+      return false;
+    }
+
+    const success = await tx.commit();
+    
+    if (success) {
+      this.#activeTransactions.splice(index, 1);
+      const stackIndex = this.#transactionStack.indexOf(tx);
+      if (stackIndex !== -1) {
+        this.#transactionStack.splice(stackIndex, 1);
+      }
+    }
+    
+    return success;
+  }
+
+  rollbackTransaction(tx: Transaction) {
+    tx.rollback();
+    const index = this.#activeTransactions.indexOf(tx);
+    if (index !== -1) {
+      this.#activeTransactions.splice(index, 1);
+    }
+    const stackIndex = this.#transactionStack.indexOf(tx);
+    if (stackIndex !== -1) {
+      this.#transactionStack.splice(stackIndex, 1);
+    }
+  }
+
+  getCurrentTransaction(): Transaction | null {
+    return this.#transactionStack.length > 0
+      ? this.#transactionStack[this.#transactionStack.length - 1]
+      : null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="history-integration" title="History 통합">
+              <p class="m-0 mb-4">
+                Transaction은 history 관리와 원활하게 통합되어 원자적 undo/redo를 제공합니다.
+              </p>
+
+              <DocSection id="single-undo-entry" title="단일 Undo Entry" depth={3}>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #redoStack: HistoryEntry[] = [];
+
+  recordTransaction(transaction: Transaction) {
+    if (!transaction.isCommitted()) {
+      return;
+    }
+
+    const entry: HistoryEntry = {
+      id: generateId(),
+      timestamp: Date.now(),
+      operations: transaction.getOperations(),
+      beforeModel: transaction.getBeforeModel(),
+      afterModel: transaction.getAfterModel(),
+      beforeSelection: transaction.getBeforeSelection(),
+      afterSelection: transaction.getAfterSelection()
+    };
+
+    this.#undoStack.push(entry);
+    this.#redoStack = []; // 새 액션에서 redo 스택 지우기
+  }
+
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+
+    const entry = this.#undoStack.pop()!;
+    
+    // 역 operation 적용
+    for (let i = entry.operations.length - 1; i >= 0; i--) {
+      const op = entry.operations[i];
+      const inverse = this.#getInverseOperation(op);
+      this.#editor.applyOperation(inverse);
+    }
+
+    // 선택 영역 복원
+    this.#editor.setSelection(entry.beforeSelection);
+
+    // redo 스택으로 이동
+    this.#redoStack.push(entry);
+    return true;
+  }
+
+  redo(): boolean {
+    if (this.#redoStack.length === 0) {
+      return false;
+    }
+
+    const entry = this.#redoStack.pop()!;
+    
+    // operation 재적용
+    for (const op of entry.operations) {
+      this.#editor.applyOperation(op);
+    }
+
+    // 선택 영역 복원
+    this.#editor.setSelection(entry.afterSelection);
+
+    // undo 스택으로 이동
+    this.#undoStack.push(entry);
+    return true;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="operation-grouping" title="Operation 그룹화" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 예제: 사용자가 "Hello" 입력 - 단일 undo entry여야 함
+class InputHandler {
+  #transaction: Transaction | null = null;
+  #lastInputTime = 0;
+  #inputTimeout: number | null = null;
+
+  handleInput(e: InputEvent) {
+    // 빠른 입력을 단일 transaction으로 그룹화
+    const now = Date.now();
+    const timeSinceLastInput = now - this.#lastInputTime;
+
+    if (timeSinceLastInput > 500 || !this.#transaction) {
+      // 새 transaction 시작
+      this.#commitCurrentTransaction();
+      this.#transaction = this.#editor.beginTransaction();
+    }
+
+    this.#lastInputTime = now;
+
+    // Transaction에 operation 추가
+    if (e.inputType === 'insertText') {
+      this.#transaction.add({
+        type: 'insert',
+        path: this.#editor.getSelection().start,
+        content: e.data
+      });
+    }
+
+    // 지연 후 커밋 (디바운스)
+    if (this.#inputTimeout) {
+      clearTimeout(this.#inputTimeout);
+    }
+    this.#inputTimeout = setTimeout(() => {
+      this.#commitCurrentTransaction();
+    }, 500);
+  }
+
+  #commitCurrentTransaction() {
+    if (this.#transaction) {
+      this.#transaction.commit();
+      this.#transaction = null;
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="transaction-patterns" title="Transaction 패턴">
+              <p class="m-0 mb-4">
+                다양한 시나리오에서 transaction을 사용하는 일반적인 패턴입니다.
+              </p>
+
+              <DocSection id="user-action-transactions" title="사용자 액션 Transaction" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 패턴: 각 사용자 액션은 transaction
+class UserActionHandler {
+  async handleUserAction(action: UserAction) {
+    const tx = this.#editor.beginTransaction();
+
+    try {
+      switch (action.type) {
+        case 'type':
+          tx.add({ type: 'insert', path: action.position, content: action.text });
+          break;
+        case 'delete':
+          tx.add({ type: 'delete', path: action.position, length: action.length });
+          break;
+        case 'format':
+          tx.add({ type: 'format', path: action.selection.start, format: action.format });
+          break;
+      }
+
+      await tx.commit();
+    } catch (error) {
+      tx.rollback();
+      throw error;
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="formatting-transactions" title="서식 Transaction" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 패턴: 서식 operation을 함께 그룹화
+async function applyFormatting(
+  editor: Editor,
+  selection: Selection,
+  format: Format
+) {
+  const tx = editor.beginTransaction();
+
+  // 전체 선택 영역에 서식 적용
+  const nodes = editor.getNodesInRange(selection);
+  
+  for (const node of nodes) {
+    tx.add({
+      type: 'format',
+      path: node.path,
+      format: format.name,
+      value: format.value
+    });
+  }
+
+  await tx.commit(); // 전체 서식에 대한 단일 undo
+}
+
+// 패턴: 서식 토글
+async function toggleFormatting(
+  editor: Editor,
+  selection: Selection,
+  format: string
+) {
+  const tx = editor.beginTransaction();
+  const hasFormat = editor.hasFormat(selection, format);
+
+  if (hasFormat) {
+    // 서식 제거
+    const nodes = editor.getNodesInRange(selection);
+    for (const node of nodes) {
+      tx.add({
+        type: 'format',
+        path: node.path,
+        format: format,
+        value: false
+      });
+    }
+  } else {
+    // 서식 적용
+    const nodes = editor.getNodesInRange(selection);
+    for (const node of nodes) {
+      tx.add({
+        type: 'format',
+        path: node.path,
+        format: format,
+        value: true
+      });
+    }
+  }
+
+  await tx.commit();
+}`} />
+              </DocSection>
+
+              <DocSection id="paste-transactions" title="붙여넣기 Transaction" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 패턴: 단일 transaction으로 붙여넣기
+async function handlePaste(
+  editor: Editor,
+  clipboardData: DataTransfer
+) {
+  const tx = editor.beginTransaction();
+  const selection = editor.getSelection();
+
+  try {
+    // 1. 선택된 콘텐츠 삭제
+    if (!selection.isCollapsed) {
+      tx.add({
+        type: 'delete',
+        path: selection.start,
+        length: selection.length
+      });
+    }
+
+    // 2. 붙여넣은 콘텐츠 파싱 및 삽입
+    const pastedContent = await parseClipboardData(clipboardData);
+    
+    for (const item of pastedContent) {
+      if (item.type === 'text') {
+        tx.add({
+          type: 'insert',
+          path: selection.start,
+          content: item.text
+        });
+      } else if (item.type === 'node') {
+        tx.add({
+          type: 'insert',
+          path: selection.start,
+          node: item.node
+        });
+      }
+    }
+
+    await tx.commit(); // 전체 붙여넣기에 대한 단일 undo
+  } catch (error) {
+    tx.rollback();
+    throw error;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="nested-transactions" title="중첩 Transaction">
+              <p class="m-0 mb-4">
+                복잡한 작업을 위한 중첩 transaction 지원.
+              </p>
+              <DocCodeBlock language="typescript" code={`class NestedTransactionManager {
+  #transactionStack: Transaction[] = [];
+
+  beginTransaction(editor: Editor): Transaction {
+    const tx = new Transaction(editor);
+    this.#transactionStack.push(tx);
+    return tx;
+  }
+
+  async commitTransaction(tx: Transaction): Promise<boolean> {
+    const index = this.#transactionStack.indexOf(tx);
+    if (index === -1) {
+      return false;
+    }
+
+    // 최상위 transaction인 경우에만 커밋
+    if (index === this.#transactionStack.length - 1) {
+      const success = await tx.commit();
+      if (success) {
+        this.#transactionStack.pop();
+      }
+      return success;
+    } else {
+      // 중첩 transaction - 커밋된 것으로만 표시
+      // 부모가 커밋할 때 커밋됨
+      return true;
+    }
+  }
+
+  getCurrentTransaction(): Transaction | null {
+    return this.#transactionStack.length > 0
+      ? this.#transactionStack[this.#transactionStack.length - 1]
+      : null;
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>관련 operation 그룹화:</strong> 함께 실행 취소되어야 하는 operation은 같은 transaction에 있어야 합니다
+                </li>
+                <li class="mb-2">
+                  <strong>사용자 액션 경계:</strong> 각 사용자 액션(키 입력, 붙여넣기, 서식)은 일반적으로 자체 transaction이어야 합니다
+                </li>
+                <li class="mb-2">
+                  <strong>빠른 입력 디바운스:</strong> 더 나은 undo 세분성을 위해 빠른 텍스트 입력을 단일 transaction으로 그룹화
+                </li>
+                <li class="mb-2">
+                  <strong>오류 시 항상 롤백:</strong> 커밋이 실패하면 transaction 상태가 복원되도록 보장
+                </li>
+                <li class="mb-2">
+                  <strong>커밋 전 검증:</strong> 커밋하기 전에 모든 operation이 적용 가능한지 확인
+                </li>
+                <li class="mb-2">
+                  <strong>선택 영역 보존:</strong> 적절한 undo/redo를 위해 transaction에 선택 영역 상태 저장
+                </li>
+                <li class="mb-2">
+                  <strong>중첩 transaction 피하기:</strong> 필요하지 않으면 transaction 구조를 단순하게 유지
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/transaction"
+              pages={[
+                { title: 'History 관리', href: '/editor/history-management', description: 'Undo/redo history 관리' },
+                { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+                { title: 'Operations', href: '/editor/operations', description: 'Operation 타입 및 사용법' },
+                { title: '모델-DOM 동기화', href: '/editor/model-dom-synchronization', description: '모델과 DOM 동기화' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

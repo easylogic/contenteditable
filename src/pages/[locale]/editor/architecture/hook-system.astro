@@ -1,0 +1,394 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'sync-hooks', text: '동기 훅' },
+  { depth: 3, slug: 'basic-sync-hook', text: '기본 SyncHook' },
+  { depth: 3, slug: 'waterfall-hook', text: '워터폴 훅' },
+  { depth: 2, slug: 'async-hooks', text: '비동기 훅' },
+  { depth: 3, slug: 'parallel-hook', text: '병렬 훅' },
+  { depth: 3, slug: 'series-hook', text: '시리즈 훅' },
+  { depth: 2, slug: 'hook-lifecycle', text: '훅 생명주기 관리' },
+  { depth: 3, slug: 'hook-definition', text: '훅 정의' },
+  { depth: 3, slug: 'hook-integration', text: '훅 통합' },
+  { depth: 2, slug: 'advanced-patterns', text: '고급 패턴' },
+];
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="훅 시스템 구현 – 에디터 아키텍처 – contenteditable.lab"
+      description="훅 시스템 구현 이해: 동기 훅, 비동기 훅, 생명주기 관리"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor/architecture')} class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">훅 시스템</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              훅 시스템 구현
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              훅 시스템은 플러그인이 생명주기의 특정 지점에서 에디터 기능을 확장할 수 있게 합니다. 이 패턴은 webpack, Vue 및 기타 확장 가능한 시스템에서 사용됩니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                훅은 플러그인이 에디터의 생명주기에 연결하고 특정 지점에서 동작을 수정할 수 있는 방법을 제공합니다. 핵심 코드를 수정하지 않고 기능을 확장할 수 있는 플러그인 아키텍처를 가능하게 합니다.
+              </p>
+              <p class="m-0 mb-4">
+                훅 시스템은 webpack의 tapable 시스템과 Vue의 플러그인 시스템에서 영감을 받았습니다. 동기 및 비동기 훅을 모두 제공하여 유연한 플러그인 통합을 가능하게 합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="sync-hooks" title="동기 훅">
+              <DocSection id="basic-sync-hook" title="기본 SyncHook" depth={3}>
+                <p class="m-0 mb-3">
+                  동기 훅은 콜백을 순차적으로 실행합니다. 각 콜백은 동일한 인수를 받습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class SyncHook {
+  #callbacks = [];
+  
+  tap(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  call(...args) {
+    this.#callbacks.forEach(callback => {
+      callback(...args);
+    });
+  }
+  
+  untap(fn) {
+    const index = this.#callbacks.indexOf(fn);
+    if (index > -1) {
+      this.#callbacks.splice(index, 1);
+    }
+  }
+}
+
+// Usage
+const hooks = {
+  beforeOperation: new SyncHook(),
+  afterOperation: new SyncHook(),
+  render: new SyncHook()
+};
+
+// Register callbacks
+hooks.beforeOperation.tap((operation) => {
+  console.log('Before operation:', operation);
+});
+
+hooks.beforeOperation.tap((operation) => {
+  // Can modify operation
+  if (operation.type === 'insertText' && operation.text.length > 100) {
+    operation.text = operation.text.substring(0, 100);
+  }
+});
+
+// Call hook
+hooks.beforeOperation.call(operation);`} />
+              </DocSection>
+
+              <DocSection id="waterfall-hook" title="워터폴 훅" depth={3}>
+                <p class="m-0 mb-3">
+                  워터폴 훅은 반환 값을 다음 콜백에 전달합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class SyncWaterfallHook {
+  #callbacks = [];
+  
+  tap(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  call(initialValue) {
+    return this.#callbacks.reduce((value, callback) => {
+      return callback(value);
+    }, initialValue);
+  }
+}
+
+// Usage: Transform document through multiple plugins
+const transformHook = new SyncWaterfallHook();
+
+transformHook.tap((doc) => {
+  // Plugin 1: Normalize whitespace
+  return normalizeWhitespace(doc);
+});
+
+transformHook.tap((doc) => {
+  // Plugin 2: Validate structure
+  return validateStructure(doc);
+});
+
+const transformed = transformHook.call(originalDocument);`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="async-hooks" title="비동기 훅">
+              <DocSection id="parallel-hook" title="병렬 훅" depth={3}>
+                <p class="m-0 mb-3">
+                  비동기 훅은 병렬 실행을 허용합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class AsyncParallelHook {
+  #callbacks = [];
+  
+  tapPromise(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  async promise() {
+    // Execute all callbacks in parallel
+    await Promise.all(this.#callbacks.map(callback => callback()));
+  }
+}
+
+// Usage
+const hooks = {
+  initAsync: new AsyncParallelHook()
+};
+
+// Multiple plugins can initialize in parallel
+hooks.initAsync.tapPromise(async () => {
+  await loadUserPreferences();
+});
+
+hooks.initAsync.tapPromise(async () => {
+  await loadDocumentHistory();
+});
+
+// Both run in parallel
+await hooks.initAsync.promise();`} />
+              </DocSection>
+
+              <DocSection id="series-hook" title="시리즈 훅" depth={3}>
+                <p class="m-0 mb-3">
+                  시리즈 훅은 순차적으로 실행됩니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class AsyncSeriesHook {
+  #callbacks = [];
+  
+  tapPromise(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  async promise() {
+    // Execute callbacks sequentially
+    for (const callback of this.#callbacks) {
+      await callback();
+    }
+  }
+}
+
+// Usage
+const hooks = {
+  saveAsync: new AsyncSeriesHook()
+};
+
+// Save operations must be sequential
+hooks.saveAsync.tapPromise(async () => {
+  await saveToLocalStorage();
+});
+
+hooks.saveAsync.tapPromise(async () => {
+  await syncToServer();
+});
+
+// Run sequentially
+await hooks.saveAsync.promise();`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="hook-lifecycle" title="훅 생명주기 관리">
+              <DocSection id="hook-definition" title="훅 정의" depth={3}>
+                <p class="m-0 mb-3">
+                  에디터 작업을 위한 완전한 훅 생명주기를 정의합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Editor hooks definition
+const hooks = {
+  // Initialization
+  init: new SyncHook(),
+  initAsync: new AsyncParallelHook(),
+  ready: new SyncHook(),
+  
+  // Operations
+  beforeOperation: new SyncHook(),
+  operation: new SyncHook(),
+  afterOperation: new SyncHook(),
+  
+  // Rendering
+  beforeRender: new SyncHook(),
+  render: new SyncHook(),
+  afterRender: new SyncHook(),
+  
+  // Selection
+  selectionChange: new SyncHook(),
+  
+  // Cleanup
+  destroy: new SyncHook()
+};
+
+class Editor {
+  constructor() {
+    this.#hooks = hooks;
+  }
+  
+  applyOperation(operation) {
+    // Before operation hooks
+    this.#hooks.beforeOperation.call(operation);
+    
+    // Apply operation
+    this.#doApplyOperation(operation);
+    
+    // Operation hooks
+    this.#hooks.operation.call(operation);
+    
+    // After operation hooks
+    this.#hooks.afterOperation.call(operation);
+    
+    // Trigger render
+    this.render();
+  }
+  
+  render() {
+    const doc = this.getDocument();
+    
+    this.#hooks.beforeRender.call(doc);
+    this.#doRender(doc);
+    this.#hooks.render.call(doc);
+    this.#hooks.afterRender.call(doc);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="hook-integration" title="훅 통합" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인은 훅과 통합할 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryPlugin {
+  apply(editor) {
+    // Hook into operations
+    editor.hooks.beforeOperation.tap((operation) => {
+      // Save state before operation
+      this.#saveState(editor.getDocument());
+    });
+    
+    editor.hooks.afterOperation.tap((operation) => {
+      // Update history after operation
+      this.#updateHistory(operation);
+    });
+  }
+}
+
+class ValidationPlugin {
+  apply(editor) {
+    // Hook into rendering
+    editor.hooks.beforeRender.tap((doc) => {
+      // Validate document before rendering
+      const errors = this.#validate(doc);
+      if (errors.length > 0) {
+        console.warn('Validation errors:', errors);
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="advanced-patterns" title="고급 패턴">
+              <p class="m-0 mb-4">
+                복잡한 시나리오를 위한 고급 훅 패턴:
+              </p>
+              <DocCodeBlock language="typescript" code={`// Conditional hook execution
+class ConditionalHook extends SyncHook {
+  call(...args) {
+    this.#callbacks.forEach(callback => {
+      if (callback.condition(...args)) {
+        callback.fn(...args);
+      }
+    });
+  }
+}
+
+// Hook with priority
+class PriorityHook extends SyncHook {
+  tap(fn, priority = 0) {
+    this.#callbacks.push({ fn, priority });
+    this.#callbacks.sort((a, b) => b.priority - a.priority);
+  }
+  
+  call(...args) {
+    this.#callbacks.forEach(({ fn }) => {
+      fn(...args);
+    });
+  }
+}
+
+// Hook with context
+class ContextHook extends SyncHook {
+  call(context, ...args) {
+    this.#callbacks.forEach(callback => {
+      callback.call(context, ...args);
+    });
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current={localePath('/editor/architecture/hook-system')}
+              pages={[
+                { title: '에디터 아키텍처', href: localePath('/editor/architecture'), description: '에디터 아키텍처 패턴 개요' },
+                { title: '비동기 초기화', href: localePath('/editor/architecture/async-initialization'), description: 'Promise 기반 초기화 및 생명주기' },
+                { title: '이벤트 시스템', href: localePath('/editor/architecture/event-system'), description: '이벤트 시스템 아키텍처 및 패턴' },
+                { title: '성능 최적화', href: localePath('/editor/architecture/performance-optimization'), description: '대용량 문서를 위한 최적화 전략' },
+                { title: '렌더링 파이프라인', href: localePath('/editor/architecture/rendering-pipeline'), description: '렌더링 파이프라인 및 업데이트 스케줄링' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

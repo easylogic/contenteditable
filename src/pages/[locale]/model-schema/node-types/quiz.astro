@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="퀴즈 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>퀴즈</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   quiz: {
     content: 'block+',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'quiz',
   attrs: { title: '퀴즈 제목' },
   children: [
@@ -104,7 +104,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeQuiz(node) {
+              <DocCodeBlock language="typescript" code={`function serializeQuiz(node) {
   return '<div data-type="quiz" data-title="' + escapeHtml(node.attrs.title) + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseQuiz(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseQuiz(domNode) {
   return {
     type: 'quiz',
     attrs: { title: domNode.getAttribute('data-title') || '' },
@@ -132,7 +132,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 퀴즈 렌더링
+              <DocCodeBlock language="typescript" code={`// 퀴즈 렌더링
 const quiz = document.createElement('div');
 quiz.setAttribute('data-type', 'quiz');
 quiz.setAttribute('data-title', node.attrs.title);
@@ -149,7 +149,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 퀴즈 답안 검증
+              <DocCodeBlock language="typescript" code={`// 문제: 퀴즈 답안 검증
 // 해결: 답안 검증
 function validateQuizAnswer(quiz, answer) {
   // 정답과 비교
@@ -167,7 +167,7 @@ function calculateQuizScore(quiz) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class QuizNode {
+              <DocCodeBlock language="typescript" code={`class QuizNode {
   constructor(attrs, children) {
     this.type = 'quiz';
     this.attrs = { title: attrs?.title || '' };

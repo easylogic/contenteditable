@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Tabs</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tabs: {
     content: 'block+',
     group: 'block',
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tabs',
   attrs: { activeTab: 0 },
   children: [
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeTabs(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTabs(node) {
   return '<div data-type="tabs" data-active="' + node.attrs.activeTab + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -98,7 +98,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseTabs(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTabs(domNode) {
   return {
     type: 'tabs',
     attrs: { activeTab: parseInt(domNode.getAttribute('data-active')) || 0 },
@@ -116,7 +116,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering tabs
+              <DocCodeBlock language="typescript" code={`// Rendering tabs
 const tabs = document.createElement('div');
 tabs.setAttribute('data-type', 'tabs');
 tabs.setAttribute('data-active', node.attrs.activeTab);
@@ -141,7 +141,7 @@ function switchTab(tabs, index) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Tab state management
+              <DocCodeBlock language="typescript" code={`// Issue: Tab state management
 // Solution: Sync active tab between model and view
 function syncTabState(tabs, model) {
   tabs.setAttribute('data-active', model.attrs.activeTab);
@@ -160,7 +160,7 @@ function updateTabVisibility(tabs, activeIndex) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class TabsNode {
+              <DocCodeBlock language="typescript" code={`class TabsNode {
   constructor(attrs, children) {
     this.type = 'tabs';
     this.attrs = { activeTab: attrs?.activeTab || 0 };

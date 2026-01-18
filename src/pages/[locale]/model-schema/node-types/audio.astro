@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="오디오 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>오디오</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   audio: {
     group: 'block',
     attrs: {
@@ -90,7 +90,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'audio',
   attrs: {
     src: 'https://example.com/audio.mp3',
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeAudio(node) {
+              <DocCodeBlock language="typescript" code={`function serializeAudio(node) {
   const attrs = {};
   if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
   if (node.attrs.controls) attrs.controls = true;
@@ -117,7 +117,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseAudio(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseAudio(domNode) {
   return {
     type: 'audio',
     attrs: {
@@ -137,7 +137,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 오디오 렌더링
+              <DocCodeBlock language="typescript" code={`// 오디오 렌더링
 const audio = document.createElement('audio');
 audio.src = node.attrs.src;
 audio.controls = node.attrs.controls !== false;
@@ -153,7 +153,7 @@ audio.contentEditable = 'false'; // 오디오는 편집 불가`} />
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 오디오 형식 지원
+              <DocCodeBlock language="typescript" code={`// 문제: 오디오 형식 지원
 // 해결: 형식 지원 확인
 function checkAudioSupport(format) {
   const audio = document.createElement('audio');
@@ -174,7 +174,7 @@ audio.addEventListener('canplay', () => {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class AudioNode {
+              <DocCodeBlock language="typescript" code={`class AudioNode {
   constructor(attrs) {
     this.type = 'audio';
     this.attrs = {

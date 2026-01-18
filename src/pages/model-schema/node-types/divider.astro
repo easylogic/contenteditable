@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Divider</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   divider: {
     group: 'block',
     attrs: {
@@ -67,7 +67,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'divider',
   attrs: { style: 'solid' }
 }`} />
@@ -77,7 +77,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeDivider(node) {
+              <DocCodeBlock language="typescript" code={`function serializeDivider(node) {
   return '<div data-type="divider" data-style="' + node.attrs.style + '"></div>';
 }`} />
             </DocSection>
@@ -86,7 +86,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseDivider(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseDivider(domNode) {
   return {
     type: 'divider',
     attrs: { style: domNode.getAttribute('data-style') || 'solid' }
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering divider
+              <DocCodeBlock language="typescript" code={`// Rendering divider
 const divider = document.createElement('div');
 divider.setAttribute('data-type', 'divider');
 divider.setAttribute('data-style', node.attrs.style);
@@ -116,7 +116,7 @@ divider.contentEditable = 'false'; // Dividers are typically not editable`} />
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Divider styling
+              <DocCodeBlock language="typescript" code={`// Issue: Divider styling
 // Solution: Apply consistent styles
 function styleDivider(divider, style) {
   divider.className = 'divider divider-' + style;
@@ -140,7 +140,7 @@ function selectDivider(divider) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class DividerNode {
+              <DocCodeBlock language="typescript" code={`class DividerNode {
   constructor(attrs) {
     this.type = 'divider';
     this.attrs = { style: attrs?.style || 'solid' };

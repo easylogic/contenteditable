@@ -1,0 +1,343 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'debugging-tools', text: 'Debugging Tools' },
+  { depth: 3, slug: 'devtools', text: 'Browser DevTools' },
+  { depth: 3, slug: 'event-logging', text: 'Event Logging' },
+  { depth: 2, slug: 'common-issues', text: 'Common Issues' },
+  { depth: 3, slug: 'selection-issues', text: 'Selection Issues' },
+  { depth: 3, slug: 'dom-sync-issues', text: 'DOM Sync Issues' },
+  { depth: 3, slug: 'ime-issues', text: 'IME Issues' },
+  { depth: 2, slug: 'debugging-techniques', text: 'Debugging Techniques' },
+  { depth: 3, slug: 'breakpoints', text: 'Breakpoints' },
+  { depth: 3, slug: 'state-inspection', text: 'State Inspection' },
+  { depth: 2, slug: 'performance-debugging', text: 'Performance Debugging' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Debugging Techniques – Editor Architecture – contenteditable.lab"
+      description="Debugging strategies and techniques for contenteditable editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Debugging</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Debugging Techniques</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Debugging strategies and techniques for contenteditable editors.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Debugging contenteditable editors is challenging due to browser differences, event timing, and DOM complexity. This guide covers effective debugging techniques.
+              </p>
+            </DocSection>
+
+            <DocSection id="debugging-tools" title="Debugging Tools">
+              <p class="m-0 mb-4">
+                Essential tools for debugging contenteditable editors.
+              </p>
+
+              <DocSection id="devtools" title="Browser DevTools" depth={3}>
+                <p class="m-0 mb-3">
+                  Use browser DevTools effectively:
+                </p>
+                <DocCodeBlock language="javascript" code={`// Chrome DevTools: Emulate focused page
+// Prevents blur events when inspecting elements
+// Rendering panel → "Emulate a focused page"
+
+// Break on DOM mutations
+// Elements panel → Right-click → Break on → Subtree modifications
+
+// Monitor events
+monitorEvents(element, ['input', 'beforeinput', 'compositionstart']);
+
+// Get event listeners
+getEventListeners(element);`} />
+                <DocAlert type="info" class="mt-4">
+                  <p class="m-0 text-sm">
+                    <strong>Tip:</strong> Use "Emulate a focused page" in Chrome DevTools to prevent elements from disappearing when you click in DevTools.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="event-logging" title="Event Logging" depth={3}>
+                <DocCodeBlock language="typescript" code={`class EventLogger {
+  #logs: EventLog[] = [];
+
+  log(event: Event) {
+    this.#logs.push({
+      type: event.type,
+      timestamp: Date.now(),
+      target: event.target,
+      data: this.#extractEventData(event)
+    });
+  }
+
+  #extractEventData(event: Event) {
+    if (event instanceof InputEvent) {
+      return {
+        inputType: event.inputType,
+        data: event.data,
+        isComposing: event.isComposing
+      };
+    }
+    if (event instanceof CompositionEvent) {
+      return {
+        data: event.data
+      };
+    }
+    return {};
+  }
+
+  getLogs() {
+    return this.#logs;
+  }
+
+  clear() {
+    this.#logs = [];
+  }
+}
+
+// Usage
+const logger = new EventLogger();
+editor.element.addEventListener('*', (e) => logger.log(e));`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="common-issues" title="Common Issues">
+              <p class="m-0 mb-4">
+                Common debugging scenarios and solutions.
+              </p>
+
+              <DocSection id="selection-issues" title="Selection Issues" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Debug selection problems
+function debugSelection() {
+  const selection = window.getSelection();
+  console.log('Selection:', {
+    rangeCount: selection.rangeCount,
+    isCollapsed: selection.isCollapsed,
+    anchorNode: selection.anchorNode,
+    anchorOffset: selection.anchorOffset,
+    focusNode: selection.focusNode,
+    focusOffset: selection.focusOffset
+  });
+
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    console.log('Range:', {
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset,
+      collapsed: range.collapsed
+    });
+  }
+}
+
+// Monitor selection changes
+document.addEventListener('selectionchange', () => {
+  debugSelection();
+});`} />
+              </DocSection>
+
+              <DocSection id="dom-sync-issues" title="DOM Sync Issues" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Compare model and DOM
+function compareModelAndDOM(editor) {
+  const modelContent = editor.getModelContent();
+  const domContent = editor.element.textContent;
+  
+  if (modelContent !== domContent) {
+    console.error('Mismatch:', {
+      model: modelContent,
+      dom: domContent
+    });
+  }
+}
+
+// Monitor DOM mutations
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    console.log('DOM mutation:', {
+      type: mutation.type,
+      target: mutation.target,
+      addedNodes: Array.from(mutation.addedNodes),
+      removedNodes: Array.from(mutation.removedNodes)
+    });
+  });
+});
+
+observer.observe(editor.element, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});`} />
+              </DocSection>
+
+              <DocSection id="ime-issues" title="IME Issues" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Debug IME composition
+function debugIME() {
+  const element = editor.element;
+  
+  element.addEventListener('compositionstart', (e) => {
+    console.log('Composition start:', e.data);
+  });
+  
+  element.addEventListener('compositionupdate', (e) => {
+    console.log('Composition update:', e.data);
+  });
+  
+  element.addEventListener('compositionend', (e) => {
+    console.log('Composition end:', e.data);
+  });
+  
+  element.addEventListener('beforeinput', (e) => {
+    console.log('Before input:', {
+      inputType: e.inputType,
+      data: e.data,
+      isComposing: e.isComposing
+    });
+  });
+}
+
+// Check if composition is active
+function isComposing() {
+  return document.activeElement === editor.element &&
+         (editor.element as any).isComposing;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="debugging-techniques" title="Debugging Techniques">
+              <p class="m-0 mb-4">
+                Effective debugging techniques.
+              </p>
+
+              <DocSection id="breakpoints" title="Breakpoints" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Conditional breakpoints
+editor.on('operation', (operation) => {
+  if (operation.type === 'insert' && operation.data === 'problem') {
+    debugger; // Break here
+  }
+});
+
+// Break on specific conditions
+function breakOnCondition(condition: () => boolean) {
+  if (condition()) {
+    debugger;
+  }
+}
+
+// Break on selection change
+document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+  if (selection?.rangeCount === 0) {
+    debugger; // Break when selection is lost
+  }
+});`} />
+              </DocSection>
+
+              <DocSection id="state-inspection" title="State Inspection" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Inspect editor state
+function inspectEditor(editor) {
+  return {
+    model: editor.getModel(),
+    selection: editor.getSelection(),
+    history: editor.getHistory(),
+    isComposing: editor.isComposing,
+    dom: {
+      content: editor.element.innerHTML,
+      textContent: editor.element.textContent
+    }
+  };
+}
+
+// Make editor state available in console
+(window as any).editor = editor;
+(window as any).inspectEditor = () => console.log(inspectEditor(editor));`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="performance-debugging" title="Performance Debugging">
+              <p class="m-0 mb-4">
+                Debug performance issues.
+              </p>
+              <DocCodeBlock language="typescript" code={`// Measure operation performance
+function measurePerformance(fn: () => void) {
+  const start = performance.now();
+  fn();
+  const end = performance.now();
+  console.log('Operation took', end - start, 'ms');
+}
+
+// Profile rendering
+function profileRender(editor: Editor) {
+  console.profile('render');
+  editor.render();
+  console.profileEnd('render');
+}
+
+// Monitor memory usage
+function checkMemory() {
+  if ('memory' in performance) {
+    console.log('Memory:', (performance as any).memory);
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">Use event logging to track event sequences</li>
+                <li class="mb-2">Compare model and DOM state when debugging sync issues</li>
+                <li class="mb-2">Use conditional breakpoints to focus on specific scenarios</li>
+                <li class="mb-2">Monitor selection changes to debug selection issues</li>
+                <li class="mb-2">Test in multiple browsers to identify browser-specific issues</li>
+                <li class="mb-2">Use performance profiling to identify bottlenecks</li>
+                <li class="mb-2">Keep debugging code separate from production code</li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/debugging"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Testing Strategies', href: '/editor/testing-strategies', description: 'Testing strategies' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
+                { title: 'Mobile Support', href: '/editor/mobile-support', description: 'Mobile support guide' },
+                { title: 'Accessibility', href: '/editor/accessibility', description: 'Accessibility best practices' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

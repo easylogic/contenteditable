@@ -1,0 +1,311 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+import {
+  initializationPatternCode,
+  errorHandlingCode,
+  hookIntegrationCode,
+  pluginInitializationCode,
+  schemaLoaderCode,
+  pluginLoaderCode,
+  lifecyclePhasesCode,
+  dependencyResolutionCode,
+  timeoutRetryCode,
+  bestPracticesCode
+} from '../../../editor/architecture/code-examples';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'promise-based-api', text: 'Promise 기반 API 설계' },
+  { depth: 3, slug: 'initialization-pattern', text: '초기화 패턴' },
+  { depth: 3, slug: 'error-handling', text: '에러 처리' },
+  { depth: 2, slug: 'initialization-lifecycle', text: '초기화 생명주기' },
+  { depth: 3, slug: 'lifecycle-phases', text: '생명주기 단계' },
+  { depth: 3, slug: 'state-transitions', text: '상태 전이' },
+  { depth: 2, slug: 'dependency-resolution', text: '의존성 해결' },
+  { depth: 3, slug: 'dependency-graph', text: '의존성 그래프' },
+  { depth: 3, slug: 'topological-sort', text: '위상 정렬' },
+  { depth: 2, slug: 'initialization-hooks', text: '초기화 훅' },
+  { depth: 3, slug: 'hook-integration', text: '훅 통합' },
+  { depth: 3, slug: 'plugin-initialization', text: '플러그인 초기화' },
+  { depth: 2, slug: 'resource-loading', text: '리소스 로딩' },
+  { depth: 3, slug: 'schema-loading', text: '스키마 로딩' },
+  { depth: 3, slug: 'plugin-loading', text: '플러그인 로딩' },
+  { depth: 2, slug: 'timeout-retry', text: '타임아웃 및 재시도 전략' },
+  { depth: 3, slug: 'timeout-handling', text: '타임아웃 처리' },
+  { depth: 3, slug: 'retry-mechanisms', text: '재시도 메커니즘' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="비동기 초기화 – 에디터 아키텍처 – contenteditable.lab"
+      description="리치 텍스트 에디터의 비동기 초기화 패턴 이해: Promise 기반 API, 초기화 훅, 리소스 로딩"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor/architecture')} class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">비동기 초기화</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              비동기 초기화
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              현대적인 에디터는 리소스 로딩, 스키마 파싱, 플러그인 설정을 위해 비동기 초기화가 필요합니다. 이는 WebGPU가 비동기 디바이스 초기화를 요구하는 것과 유사합니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                전통적인 동기식 API와 달리, 현대적인 에디터는 초기화 중 비동기 작업을 처리해야 합니다. 여기에는 네트워크에서 스키마 로딩, 데이터를 가져와야 하는 플러그인 초기화, DOM 조작이 필요한 뷰 레이어 설정이 포함됩니다.
+              </p>
+              <p class="m-0 mb-4">
+                과제는 메인 스레드를 블로킹하지 않으면서 사용 전에 에디터가 완전히 준비되도록 하는 깔끔한 API를 제공하는 것입니다. 이 패턴은 WebGPU가 비동기 디바이스 초기화를 요구하거나, 현대적인 프레임워크가 컴포넌트 마운팅을 처리하는 방식과 유사합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="promise-based-api" title="Promise 기반 API 설계">
+              <p class="m-0 mb-4">
+                동기식 초기화 대신, 에디터가 준비되었을 때 해결되는 Promise 기반 API를 사용합니다:
+              </p>
+
+              <DocSection id="initialization-pattern" title="초기화 패턴" depth={3}>
+                <p class="m-0 mb-3">
+                  핵심 패턴은 생성자에서 Promise를 반환하고 getter를 통해 노출하는 것입니다:
+                </p>
+                <DocCodeBlock code={initializationPatternCode} />
+                <p class="m-0 mb-3">
+                  <strong>핵심 포인트:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Promise는 생성자에서 즉시 생성됩니다</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Promise.all</code>을 사용하여 여러 비동기 작업을 병렬로 실행할 수 있습니다</li>
+                  <li>에디터 인스턴스는 체이닝을 위해 Promise에서 반환됩니다</li>
+                  <li>모든 초기화는 Promise가 해결되기 전에 완료됩니다</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="error-handling" title="에러 처리" depth={3}>
+                <p class="m-0 mb-3">
+                  적절한 에러 처리는 비동기 초기화에 중요합니다:
+                </p>
+                <DocCodeBlock code={errorHandlingCode} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="initialization-lifecycle" title="초기화 생명주기">
+              <p class="m-0 mb-4">
+                초기화 생명주기를 이해하면 상태 전이를 관리하고 진행 상황 모니터링을 위한 훅을 제공할 수 있습니다:
+              </p>
+
+              <DocSection id="lifecycle-phases" title="생명주기 단계" depth={3}>
+                <p class="m-0 mb-3">
+                  명확한 상태 전이와 함께 초기화를 구별되는 단계로 나눕니다:
+                </p>
+                <DocCodeBlock code={lifecyclePhasesCode} />
+                <p class="m-0 mb-3">
+                  <strong>단계 분석:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>사전 초기화:</strong> 설정 검증, 내부 구조 설정</li>
+                  <li><strong>리소스 로딩:</strong> 스키마, 에셋, 외부 의존성</li>
+                  <li><strong>플러그인 초기화:</strong> 의존성 순서대로 플러그인 초기화</li>
+                  <li><strong>뷰 설정:</strong> DOM 조작, 이벤트 리스너, 렌더링</li>
+                  <li><strong>사후 초기화:</strong> 최종 검증, 준비 이벤트 발생</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="state-transitions" title="상태 전이" depth={3}>
+                <p class="m-0 mb-3">
+                  상태 머신 패턴은 예측 가능한 전이를 보장하고 잘못된 상태를 방지합니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>idle → loading:</strong> 초기화 시작</li>
+                  <li><strong>loading → ready:</strong> 모든 단계가 성공적으로 완료</li>
+                  <li><strong>loading → error:</strong> 어떤 단계든 실패</li>
+                  <li><strong>error → loading:</strong> 초기화 재시도</li>
+                </ul>
+                <p class="m-0 mb-4">
+                  상태 전이는 플러그인이 생명주기 관리를 위해 수신할 수 있는 이벤트를 발생시킵니다.
+                </p>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="dependency-resolution" title="의존성 해결">
+              <p class="m-0 mb-4">
+                플러그인은 종종 다른 플러그인에 의존합니다. 의존성을 올바르게 해결하면 적절한 초기화 순서가 보장됩니다:
+              </p>
+
+              <DocSection id="dependency-graph" title="의존성 그래프" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인 선언에서 의존성 그래프를 구축합니다:
+                </p>
+                <DocCodeBlock code={dependencyResolutionCode} />
+                <p class="m-0 mb-3">
+                  <strong>핵심 개념:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>의존성 그래프:</strong> 간선이 의존성을 나타내는 방향 그래프</li>
+                  <li><strong>순환 감지:</strong> 무한 루프를 일으킬 수 있는 순환 의존성 방지</li>
+                  <li><strong>위상 정렬:</strong> 의존성이 먼저 초기화되도록 플러그인 순서 지정</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="topological-sort" title="위상 정렬" depth={3}>
+                <p class="m-0 mb-3">
+                  위상 정렬은 플러그인이 올바른 순서로 초기화되도록 보장합니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>의존성이 없는 플러그인이 먼저 초기화됩니다</li>
+                  <li>의존성이 있는 플러그인은 의존성 이후에 초기화됩니다</li>
+                  <li>여러 독립적인 플러그인은 병렬로 초기화할 수 있습니다</li>
+                  <li>순환 의존성은 감지되어 에러로 보고됩니다</li>
+                </ul>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="initialization-hooks" title="초기화 훅">
+              <p class="m-0 mb-4">
+                훅을 사용하여 플러그인이 초기화에 참여할 수 있도록 합니다:
+              </p>
+
+              <DocSection id="hook-integration" title="훅 통합" depth={3}>
+                <p class="m-0 mb-3">
+                  초기화 프로세스에 훅을 통합합니다:
+                </p>
+                <DocCodeBlock code={hookIntegrationCode} />
+              </DocSection>
+
+              <DocSection id="plugin-initialization" title="플러그인 초기화" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인은 비동기 초기화를 수행할 수 있습니다:
+                </p>
+                <DocCodeBlock code={pluginInitializationCode} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="resource-loading" title="리소스 로딩">
+              <p class="m-0 mb-4">
+                초기화 중 리소스를 효율적으로 로딩합니다:
+              </p>
+
+              <DocSection id="schema-loading" title="스키마 로딩" depth={3}>
+                <p class="m-0 mb-3">
+                  다양한 소스에서 스키마를 로딩합니다:
+                </p>
+                <DocCodeBlock code={schemaLoaderCode} />
+              </DocSection>
+
+              <DocSection id="plugin-loading" title="플러그인 로딩" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인을 동적으로 로딩합니다:
+                </p>
+                <DocCodeBlock code={pluginLoaderCode} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="timeout-retry" title="타임아웃 및 재시도 전략">
+              <p class="m-0 mb-4">
+                네트워크 요청과 외부 리소스는 실패하거나 타임아웃될 수 있습니다. 견고한 재시도 및 타임아웃 메커니즘을 구현합니다:
+              </p>
+
+              <DocSection id="timeout-handling" title="타임아웃 처리" depth={3}>
+                <p class="m-0 mb-3">
+                  초기화가 무한정 멈추는 것을 방지합니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>각 초기화 단계에 대해 합리적인 타임아웃을 설정합니다</li>
+                  <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Promise.race</code>를 사용하여 타임아웃을 강제합니다</li>
+                  <li>다른 작업에 대해 다른 타임아웃 값을 제공합니다</li>
+                  <li>모니터링 및 디버깅을 위해 타임아웃 이벤트를 발생시킵니다</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="retry-mechanisms" title="재시도 메커니즘" depth={3}>
+                <p class="m-0 mb-3">
+                  지수 백오프 재시도 전략을 구현합니다:
+                </p>
+                <DocCodeBlock code={timeoutRetryCode} />
+                <p class="m-0 mb-3">
+                  <strong>재시도 전략:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>지수 백오프:</strong> 재시도 간 지연을 지수적으로 증가시킵니다</li>
+                  <li><strong>최대 재시도:</strong> 무한 루프를 방지하기 위해 시도 횟수를 제한합니다</li>
+                  <li><strong>선택적 재시도:</strong> 일시적인 에러(네트워크, 타임아웃)에만 재시도합니다</li>
+                  <li><strong>지터:</strong> thundering herd 문제를 방지하기 위해 무작위성을 추가합니다</li>
+                </ul>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <p class="m-0 mb-4">
+                비동기 초기화를 위한 모범 사례:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>항상 초기화를 기다립니다:</strong> 초기화가 완료되기 전에 에디터를 사용하지 마세요</li>
+                <li><strong>에러를 우아하게 처리합니다:</strong> 의미 있는 에러 메시지를 제공하고 실패 시 정리합니다</li>
+                <li><strong>리소스를 병렬로 로딩합니다:</strong> 가능한 경우 <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Promise.all</code>을 사용합니다</li>
+                <li><strong>로딩 상태를 제공합니다:</strong> 초기화 중 사용자에게 진행 상황을 표시합니다</li>
+                <li><strong>초기화된 상태를 캐시합니다:</strong> 이미 초기화된 경우 다시 초기화하지 마세요</li>
+                <li><strong>지연 초기화를 지원합니다:</strong> 필요할 때까지 초기화를 연기할 수 있도록 합니다</li>
+              </ul>
+              <DocCodeBlock code={bestPracticesCode} />
+            </DocSection>
+
+            <DocNavigation
+              current={localePath('/editor/architecture/async-initialization')}
+              pages={[
+                { title: '에디터 아키텍처', href: localePath('/editor/architecture'), description: '에디터 아키텍처 패턴 개요' },
+                { title: '훅 시스템', href: localePath('/editor/architecture/hook-system'), description: '훅 시스템 구현 이해' },
+                { title: '이벤트 시스템', href: localePath('/editor/architecture/event-system'), description: '이벤트 시스템 아키텍처 및 패턴' },
+                { title: '성능 최적화', href: localePath('/editor/architecture/performance-optimization'), description: '대용량 문서를 위한 최적화 전략' },
+                { title: '렌더링 파이프라인', href: localePath('/editor/architecture/rendering-pipeline'), description: '렌더링 파이프라인 및 업데이트 스케줄링' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

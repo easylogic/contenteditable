@@ -1,0 +1,570 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'react-integration', text: 'React Integration' },
+  { depth: 2, slug: 'vue-integration', text: 'Vue Integration' },
+  { depth: 2, slug: 'svelte-integration', text: 'Svelte Integration' },
+  { depth: 2, slug: 'common-patterns', text: 'Common Patterns' },
+  { depth: 2, slug: 'state-management', text: 'State Management' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Framework Integration – Editor Architecture – contenteditable.lab"
+      description="Integrating model-based contenteditable editors with React, Vue, Svelte, and other frameworks"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Framework Integration</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Framework Integration</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Integrating model-based contenteditable editors with React, Vue, Svelte, and other frameworks.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Integrating a model-based editor with frameworks requires careful handling of lifecycle, state management, and DOM updates. The key is to let the editor manage its own DOM while integrating with framework state.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Key principles:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Editor manages its own DOM - don't let framework re-render it</li>
+                  <li class="mb-1">Use refs to access editor instance</li>
+                  <li class="mb-1">Sync editor state with framework state when needed</li>
+                  <li class="mb-1">Handle lifecycle properly - initialize and cleanup</li>
+                  <li class="mb-1">Prevent framework from diffing editor DOM</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="react-integration" title="React Integration">
+              <p class="m-0 mb-4">
+                React integration requires using refs and preventing React from re-rendering the editor DOM:
+              </p>
+
+              <DocSection id="react-basic" title="Basic Integration" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { useEffect, useRef, useState } from 'react';
+import { Editor } from './editor';
+
+function EditorComponent() {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const [content, setContent] = useState('');
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    // Initialize editor
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent: content,
+    });
+
+    editorInstanceRef.current = editor;
+
+    // Listen to changes
+    editor.on('change', (newContent) => {
+      setContent(newContent);
+    });
+
+    // Cleanup
+    return () => {
+      editor.destroy();
+    };
+  }, []); // Only run once
+
+  // Update editor when content prop changes (from parent)
+  useEffect(() => {
+    if (editorInstanceRef.current && content !== editorInstanceRef.current.getContent()) {
+      editorInstanceRef.current.setContent(content);
+    }
+  }, [content]);
+
+  return (
+    <div
+      ref={editorRef}
+      contentEditable={false} // Let editor manage contenteditable
+      suppressContentEditableWarning // React warning suppression
+    />
+  );
+}`} />
+              </DocSection>
+
+              <DocSection id="react-hooks" title="Custom Hook" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { useEffect, useRef, useState, useCallback } from 'react';
+import { Editor } from './editor';
+
+function useEditor(initialContent: string = '') {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const [content, setContent] = useState(initialContent);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent,
+    });
+
+    editorInstanceRef.current = editor;
+    setIsReady(true);
+
+    editor.on('change', (newContent) => {
+      setContent(newContent);
+    });
+
+    return () => {
+      editor.destroy();
+      setIsReady(false);
+    };
+  }, []);
+
+  const setEditorContent = useCallback((newContent: string) => {
+    if (editorInstanceRef.current) {
+      editorInstanceRef.current.setContent(newContent);
+      setContent(newContent);
+    }
+  }, []);
+
+  const getEditorContent = useCallback(() => {
+    return editorInstanceRef.current?.getContent() || '';
+  }, []);
+
+  return {
+    editorRef,
+    content,
+    isReady,
+    setContent: setEditorContent,
+    getContent: getEditorContent,
+    editor: editorInstanceRef.current,
+  };
+}
+
+// Usage
+function MyEditor() {
+  const { editorRef, content, isReady, setContent } = useEditor('');
+
+  return (
+    <div>
+      <div ref={editorRef} suppressContentEditableWarning />
+      {isReady && <p>Editor is ready. Content: {content}</p>}
+    </div>
+  );
+}`} />
+              </DocSection>
+
+              <DocSection id="react-prevent-rerender" title="Preventing Re-renders" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { memo, useRef, useEffect } from 'react';
+
+// Memoize to prevent unnecessary re-renders
+const EditorComponent = memo(({ initialContent }: { initialContent: string }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent,
+    });
+
+    editorInstanceRef.current = editor;
+
+    return () => {
+      editor.destroy();
+    };
+  }, []); // Empty deps - only initialize once
+
+  // Use data attribute to prevent React from diffing
+  return (
+    <div
+      ref={editorRef}
+      data-editor-root
+      suppressContentEditableWarning
+      // Prevent React from updating this element
+      dangerouslySetInnerHTML={{ __html: '' }}
+    />
+  );
+});
+
+// Or use shouldComponentUpdate equivalent
+function EditorWrapper({ content }: { content: string }) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+    });
+
+    editorInstanceRef.current = editor;
+
+    return () => editor.destroy();
+  }, []);
+
+  // Only update if content actually changed
+  useEffect(() => {
+    if (editorInstanceRef.current) {
+      const current = editorInstanceRef.current.getContent();
+      if (current !== content) {
+        editorInstanceRef.current.setContent(content);
+      }
+    }
+  }, [content]);
+
+  return <div ref={editorRef} suppressContentEditableWarning />;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="vue-integration" title="Vue Integration">
+              <p class="m-0 mb-4">
+                Vue integration uses template refs and lifecycle hooks:
+              </p>
+
+              <DocSection id="vue-composition" title="Composition API" depth={3}>
+                <DocCodeBlock language="typescript" code={`<template>
+  <div ref="editorRef" />
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { Editor } from './editor';
+
+const editorRef = ref<HTMLElement | null>(null);
+const editorInstance = ref<Editor | null>(null);
+const content = ref('');
+
+onMounted(() => {
+  if (!editorRef.value) return;
+
+  const editor = new Editor({
+    element: editorRef.value,
+    initialContent: content.value,
+  });
+
+  editorInstance.value = editor;
+
+  editor.on('change', (newContent) => {
+    content.value = newContent;
+  });
+});
+
+onUnmounted(() => {
+  editorInstance.value?.destroy();
+});
+
+// Watch for external content changes
+watch(() => props.content, (newContent) => {
+  if (editorInstance.value && newContent !== editorInstance.value.getContent()) {
+    editorInstance.value.setContent(newContent);
+  }
+});
+</script>`} />
+              </DocSection>
+
+              <DocSection id="vue-options" title="Options API" depth={3}>
+                <DocCodeBlock language="typescript" code={`<template>
+  <div ref="editor" />
+</template>
+
+<script>
+import { Editor } from './editor';
+
+export default {
+  data() {
+    return {
+      editorInstance: null,
+      content: '',
+    };
+  },
+  mounted() {
+    if (!this.$refs.editor) return;
+
+    this.editorInstance = new Editor({
+      element: this.$refs.editor,
+      initialContent: this.content,
+    });
+
+    this.editorInstance.on('change', (newContent) => {
+      this.content = newContent;
+    });
+  },
+  beforeUnmount() {
+    if (this.editorInstance) {
+      this.editorInstance.destroy();
+    }
+  },
+  watch: {
+    // Watch for prop changes
+    initialContent(newContent) {
+      if (this.editorInstance && newContent !== this.editorInstance.getContent()) {
+        this.editorInstance.setContent(newContent);
+      }
+    },
+  },
+};
+</script>`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="svelte-integration" title="Svelte Integration">
+              <p class="m-0 mb-4">
+                Svelte integration uses bind:this and lifecycle functions:
+              </p>
+              <DocCodeBlock language="typescript" code={`<script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
+  import { Editor } from './editor';
+
+  let editorElement: HTMLDivElement;
+  let editorInstance: Editor | null = null;
+  let content = '';
+
+  onMount(() => {
+    if (!editorElement) return;
+
+    editorInstance = new Editor({
+      element: editorElement,
+      initialContent: content,
+    });
+
+    editorInstance.on('change', (newContent) => {
+      content = newContent;
+    });
+  });
+
+  onDestroy(() => {
+    editorInstance?.destroy();
+  });
+
+  // Reactive statement for prop updates
+  $: if (editorInstance && $initialContent !== editorInstance.getContent()) {
+    editorInstance.setContent($initialContent);
+  }
+</script>
+
+<div bind:this={editorElement} />`} />
+            </DocSection>
+
+            <DocSection id="common-patterns" title="Common Patterns">
+              <p class="m-0 mb-4">
+                Common patterns across frameworks:
+              </p>
+
+              <DocSection id="controlled-vs-uncontrolled" title="Controlled vs Uncontrolled" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Controlled: Framework manages content
+function ControlledEditor({ content, onChange }: ControlledProps) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent: content,
+    });
+
+    editorInstanceRef.current = editor;
+
+    editor.on('change', (newContent) => {
+      onChange(newContent); // Notify parent
+    });
+
+    return () => editor.destroy();
+  }, []);
+
+  // Update editor when content prop changes
+  useEffect(() => {
+    if (editorInstanceRef.current) {
+      editorInstanceRef.current.setContent(content);
+    }
+  }, [content]);
+
+  return <div ref={editorRef} suppressContentEditableWarning />;
+}
+
+// Uncontrolled: Editor manages its own state
+function UncontrolledEditor({ initialContent }: UncontrolledProps) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent,
+    });
+
+    editorInstanceRef.current = editor;
+
+    return () => editor.destroy();
+  }, []);
+
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    getContent: () => editorInstanceRef.current?.getContent() || '',
+    setContent: (content: string) => editorInstanceRef.current?.setContent(content),
+  }));
+
+  return <div ref={editorRef} suppressContentEditableWarning />;
+}`} />
+              </DocSection>
+
+              <DocSection id="preventing-diff" title="Preventing Framework DOM Diffing" depth={3}>
+                <DocCodeBlock language="typescript" code={`// React: Use key to prevent re-renders
+<div key="editor-root" ref={editorRef} suppressContentEditableWarning />
+
+// React: Use data attribute
+<div data-editor-root ref={editorRef} suppressContentEditableWarning />
+
+// Vue: Use key
+<div :key="'editor'" ref="editorRef" />
+
+// Vue: Use v-once (render once)
+<div v-once ref="editorRef" />
+
+// Svelte: Use key
+<div key="editor" bind:this={editorElement} />
+
+// General: Mark element as non-reactive
+<div 
+  ref={editorRef}
+  data-framework-ignore // Framework should ignore this element
+  suppressContentEditableWarning
+/>`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="state-management" title="State Management">
+              <p class="m-0 mb-4">
+                Integrating with state management libraries:
+              </p>
+
+              <DocSection id="redux-integration" title="Redux Integration" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Editor } from './editor';
+import { setEditorContent, selectEditorContent } from './editorSlice';
+
+function ReduxEditor() {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const dispatch = useDispatch();
+  const content = useSelector(selectEditorContent);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent: content,
+    });
+
+    editorInstanceRef.current = editor;
+
+    editor.on('change', (newContent) => {
+      dispatch(setEditorContent(newContent));
+    });
+
+    return () => editor.destroy();
+  }, []);
+
+  // Update editor when Redux state changes
+  useEffect(() => {
+    if (editorInstanceRef.current && content !== editorInstanceRef.current.getContent()) {
+      editorInstanceRef.current.setContent(content);
+    }
+  }, [content]);
+
+  return <div ref={editorRef} suppressContentEditableWarning />;
+}`} />
+              </DocSection>
+
+              <DocSection id="zustand-integration" title="Zustand Integration" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { useEffect, useRef } from 'react';
+import { useEditorStore } from './editorStore';
+import { Editor } from './editor';
+
+function ZustandEditor() {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const content = useEditorStore((state) => state.content);
+  const setContent = useEditorStore((state) => state.setContent);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent: content,
+    });
+
+    editorInstanceRef.current = editor;
+
+    editor.on('change', (newContent) => {
+      setContent(newContent);
+    });
+
+    return () => editor.destroy();
+  }, []);
+
+  useEffect(() => {
+    if (editorInstanceRef.current && content !== editorInstanceRef.current.getContent()) {
+      editorInstanceRef.current.setContent(content);
+    }
+  }, [content]);
+
+  return <div ref={editorRef} suppressContentEditableWarning />;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/framework-integration"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Model-DOM sync' },
+                { title: 'Plugin Development', href: '/editor/plugin-development', description: 'Plugin development guide' },
+                { title: 'Error Handling', href: '/editor/error-handling', description: 'Error handling strategies' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,142 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'interface', text: 'Interface' },
+  { depth: 2, slug: 'usage', text: 'Usage' },
+  { depth: 2, slug: 'inverse', text: 'Inverse Operation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Wrap Operation – Editor Architecture – contenteditable.lab"
+      description="Wrap operation for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Wrap</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Wrap Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Wrap nodes or content with another node.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The wrap operation wraps existing nodes or content with a new parent node. Commonly used to wrap text with a link, or wrap paragraphs with a list item.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="Interface">
+              <DocCodeBlock language="typescript" code={`interface WrapOperation extends Operation {
+  type: 'wrap';
+  path: Path; // Path to first node to wrap
+  length?: number; // Number of nodes to wrap (default: 1)
+  wrapper: Node; // Node to wrap with
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="Usage">
+              <DocCodeBlock language="typescript" code={`// Wrap text with link
+function wrapTextWithLink(editor: Editor, textPath: Path, url: string) {
+  const operation: WrapOperation = {
+    type: 'wrap',
+    path: textPath,
+    wrapper: {
+      type: 'link',
+      attributes: { href: url },
+      children: [editor.getNodeAtPath(textPath)]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Wrap selection with link
+function wrapSelectionWithLink(editor: Editor, selection: Selection, url: string) {
+  const nodes = editor.getNodesInRange(selection);
+  
+  const tx = editor.beginTransaction();
+  
+  // Wrap each node
+  for (const node of nodes) {
+    tx.add({
+      type: 'wrap',
+      path: node.path,
+      wrapper: {
+        type: 'link',
+        attributes: { href: url },
+        children: [node]
+      }
+    });
+  }
+  
+  tx.commit();
+}
+
+// Wrap paragraph with list item
+function wrapParagraphWithListItem(editor: Editor, paragraphPath: Path) {
+  const operation: WrapOperation = {
+    type: 'wrap',
+    path: paragraphPath,
+    wrapper: {
+      type: 'listItem',
+      children: [editor.getNodeAtPath(paragraphPath)]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}`} />
+            </DocSection>
+
+            <DocSection id="inverse" title="Inverse Operation">
+              <p class="m-0 mb-4">
+                The inverse of wrap is unwrap:
+              </p>
+              <DocCodeBlock language="typescript" code={`function getInverse(operation: WrapOperation): UnwrapOperation {
+  return {
+    type: 'unwrap',
+    path: operation.path,
+    wrapperType: operation.wrapper.type
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/wrap"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations overview' },
+                { title: 'Unwrap', href: '/editor/operations/unwrap', description: 'Unwrap operation' },
+                { title: 'Insert Node', href: '/editor/operations/insert-node', description: 'Insert node operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

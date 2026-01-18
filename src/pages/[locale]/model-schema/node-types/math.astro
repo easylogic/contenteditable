@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="수학 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>수학</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   math: {
     group: 'block',
     attrs: {
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'math',
   attrs: {
     formula: 'E = mc^2',
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeMath(node) {
+              <DocCodeBlock language="typescript" code={`function serializeMath(node) {
   return '<div data-type="math" data-display="' + node.attrs.display + '">' + 
          escapeHtml(node.attrs.formula) + '</div>';
 }`} />
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseMath(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseMath(domNode) {
   return {
     type: 'math',
     attrs: {
@@ -129,7 +129,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 수학 렌더링
+              <DocCodeBlock language="typescript" code={`// 수학 렌더링
 const math = document.createElement('div');
 math.setAttribute('data-type', 'math');
 math.setAttribute('data-display', node.attrs.display);
@@ -153,7 +153,7 @@ function renderMath(element) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 수학 렌더링 라이브러리
+              <DocCodeBlock language="typescript" code={`// 문제: 수학 렌더링 라이브러리
 // 해결: MathJax 또는 KaTeX 사용
 function initMathRenderer() {
   if (window.MathJax) {
@@ -173,7 +173,7 @@ function validateMathFormula(formula) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class MathNode {
+              <DocCodeBlock language="typescript" code={`class MathNode {
   constructor(attrs) {
     this.type = 'math';
     this.attrs = {

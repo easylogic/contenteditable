@@ -1,0 +1,634 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+import {
+  supportedLocales,
+  defaultLocale,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'problem', text: '전체 Model Snapshot의 문제점' },
+  { depth: 2, slug: 'operation-based', text: 'Operation 기반 History' },
+  { depth: 3, slug: 'inverse-operations', text: '역 Operation 사용' },
+  { depth: 3, slug: 'memory-efficiency', text: '메모리 효율성' },
+  { depth: 2, slug: 'hybrid-approach', text: 'Hybrid 접근법' },
+  { depth: 3, slug: 'periodic-snapshots', text: '주기적 Snapshot' },
+  { depth: 3, slug: 'checkpoint-system', text: 'Checkpoint 시스템' },
+  { depth: 2, slug: 'performance-comparison', text: '성능 비교' },
+  { depth: 2, slug: 'implementation', text: '구현' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="History 관리 최적화 – 에디터 아키텍처 – contenteditable.lab"
+      description="History 관리 최적화: 전체 model clone을 피하고 operation 기반 undo/redo 사용"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/history-management" class="text-text-muted no-underline">History 관리</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">최적화</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              History 관리 최적화
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              전체 model clone을 피하고: 더 나은 메모리와 성능을 위한 operation 기반 undo/redo 사용.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                모든 history entry에 대해 전체 model snapshot을 저장하는 것은 메모리 집약적이고 느립니다. Operation 기반 history 관리는 operation과 역 operation만 저장하여 메모리 사용량을 크게 줄이고 성능을 향상시킵니다.
+              </p>
+              <DocAlert type="error">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>문제:</strong> 전체 model snapshot은 비용이 큼
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">큰 메모리 사용량 (전체 문서 × history 크기)</li>
+                  <li class="mb-1">큰 문서에 대한 느린 clone 작업</li>
+                  <li class="mb-1">가비지 컬렉션 압력</li>
+                  <li class="mb-1">문서 크기에 따른 확장성 부족</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="problem" title="전체 Model Snapshot의 문제점">
+              <p class="m-0 mb-4">
+                각 history entry에 대해 완전한 model clone 저장:
+              </p>
+              <DocCodeBlock language="typescript" code={`// ❌ 나쁨: 전체 model snapshot 저장
+interface HistoryEntry {
+  operations: Operation[];
+  beforeModel: DocumentModel; // 전체 clone - 비용이 큼!
+  afterModel: DocumentModel;  // 전체 clone - 비용이 큼!
+  beforeSelection: Selection;
+  afterSelection: Selection;
+}
+
+class HistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  
+  record(operations: Operation[]) {
+    const beforeModel = this.model.clone(); // 비용이 큼!
+    
+    // Operation 적용
+    operations.forEach(op => this.model.apply(op));
+    
+    const afterModel = this.model.clone(); // 비용이 큼!
+    
+    this.#undoStack.push({
+      operations,
+      beforeModel,  // 전체 문서 저장
+      afterModel,   // 전체 문서 저장
+      // ...
+    });
+  }
+  
+  undo() {
+    const entry = this.#undoStack.pop()!;
+    // 전체 model 복원 - 역시 비용이 큼
+    this.model = entry.beforeModel.clone();
+  }
+}
+
+// 메모리 사용량: O(history_size × document_size)
+// 1MB 문서에 50개 history entry = 50MB+ 메모리`} />
+              <p class="m-0 mb-4 mt-4">
+                이 접근법은 확장되지 않습니다. 10,000개 노드와 50개 history entry가 있는 문서는 500,000개 노드 복사본을 저장해야 합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="operation-based" title="Operation 기반 History">
+              <p class="m-0 mb-4">
+                Operation만 저장하고 역 operation을 적용하여 undo:
+              </p>
+
+              <DocSection id="inverse-operations" title="역 Operation 사용" depth={3}>
+                <DocCodeBlock language="typescript" code={`// ✅ 좋음: Operation 기반 history
+interface HistoryEntry {
+  operations: Operation[];
+  inverseOperations: Operation[]; // 사전 계산된 역 operation
+  beforeSelection: Selection;
+  afterSelection: Selection;
+  // Model snapshot 없음!
+}
+
+class HistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #redoStack: HistoryEntry[] = [];
+  #model: DocumentModel; // 단일 현재 model
+  
+  record(operations: Operation[]) {
+    const beforeSelection = this.#model.getSelection();
+    
+    // Operation 적용
+    operations.forEach(op => this.#model.apply(op));
+    
+    const afterSelection = this.#model.getSelection();
+    
+    // 역 operation 계산
+    const inverseOperations = operations
+      .slice()
+      .reverse()
+      .map(op => this.#getInverseOperation(op));
+    
+    this.#undoStack.push({
+      operations,
+      inverseOperations,
+      beforeSelection,
+      afterSelection
+    });
+    
+    this.#redoStack = []; // 새 액션에서 redo 지우기
+  }
+  
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#undoStack.pop()!;
+    
+    // 역 operation 적용 (역순으로)
+    for (let i = entry.inverseOperations.length - 1; i >= 0; i--) {
+      this.#model.apply(entry.inverseOperations[i]);
+    }
+    
+    this.#model.setSelection(entry.beforeSelection);
+    
+    // redo 스택으로 이동
+    this.#redoStack.push(entry);
+    return true;
+  }
+  
+  redo(): boolean {
+    if (this.#redoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#redoStack.pop()!;
+    
+    // Operation 재적용
+    entry.operations.forEach(op => {
+      this.#model.apply(op);
+    });
+    
+    this.#model.setSelection(entry.afterSelection);
+    
+    // undo 스택으로 이동
+    this.#undoStack.push(entry);
+    return true;
+  }
+  
+  #getInverseOperation(op: Operation): Operation {
+    switch (op.type) {
+      case 'insertText':
+        return {
+          type: 'deleteText',
+          path: op.path,
+          length: op.text.length,
+          deletedContent: op.text // redo를 위해 저장
+        };
+      
+      case 'deleteText':
+        return {
+          type: 'insertText',
+          path: op.path,
+          text: op.deletedContent || ''
+        };
+      
+      case 'insertNode':
+        return {
+          type: 'deleteNode',
+          path: op.path,
+          deletedNode: op.node // redo를 위해 저장
+        };
+      
+      case 'deleteNode':
+        return {
+          type: 'insertNode',
+          path: op.path,
+          node: op.deletedNode
+        };
+      
+      case 'applyFormat':
+        return {
+          type: 'removeFormat',
+          path: op.path,
+          length: op.length,
+          format: op.format,
+          previousValue: this.#model.getFormatAt(op.path, op.format)
+        };
+      
+      case 'removeFormat':
+        return {
+          type: 'applyFormat',
+          path: op.path,
+          length: op.length,
+          format: op.format,
+          value: op.previousValue
+        };
+      
+      default:
+        throw new Error(\`알 수 없는 operation: \${op.type}\`);
+    }
+  }
+}
+
+// 메모리 사용량: O(history_size × operation_size)
+// 각각 약 10개 operation이 있는 50개 history entry = 약 수 KB
+// vs 전체 snapshot의 50MB+!`} />
+              </DocSection>
+
+              <DocSection id="memory-efficiency" title="메모리 효율성" depth={3}>
+                <p class="m-0 mb-4">
+                  Operation 기반 접근법은 수준이 다른 효율성을 제공합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`// 예제: 사용자가 "Hello World" 입력
+// 전체 snapshot 접근법:
+// - beforeModel: ~1MB (전체 문서)
+// - afterModel: ~1MB (전체 문서)
+// 총: entry당 ~2MB
+
+// Operation 기반 접근법:
+const entry = {
+  operations: [
+    { type: 'insertText', path: [0, 5], text: 'H' },
+    { type: 'insertText', path: [0, 6], text: 'e' },
+    { type: 'insertText', path: [0, 7], text: 'l' },
+    { type: 'insertText', path: [0, 8], text: 'l' },
+    { type: 'insertText', path: [0, 9], text: 'o' },
+    { type: 'insertText', path: [0, 10], text: ' ' },
+    { type: 'insertText', path: [0, 11], text: 'W' },
+    { type: 'insertText', path: [0, 12], text: 'o' },
+    { type: 'insertText', path: [0, 13], text: 'r' },
+    { type: 'insertText', path: [0, 14], text: 'l' },
+    { type: 'insertText', path: [0, 15], text: 'd' }
+  ],
+  inverseOperations: [/* 11개 역 operation */]
+};
+// 총: ~수백 바이트 vs 2MB!
+
+// 메모리 절약: 99.9%+ 감소`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="hybrid-approach" title="Hybrid 접근법">
+              <p class="m-0 mb-4">
+                매우 긴 undo 체인의 경우, operation 기반 history와 주기적 snapshot을 결합:
+              </p>
+
+              <DocSection id="periodic-snapshots" title="주기적 Snapshot" depth={3}>
+                <DocCodeBlock language="typescript" code={`class HybridHistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #checkpoints: Map<number, DocumentModel> = new Map();
+  #checkpointInterval = 20; // 20개 entry마다 snapshot 생성
+  
+  record(operations: Operation[]) {
+    const entryIndex = this.#undoStack.length;
+    
+    // 주기적으로 checkpoint 생성
+    if (entryIndex % this.#checkpointInterval === 0) {
+      this.#checkpoints.set(entryIndex, this.#model.clone());
+    }
+    
+    // Operation 저장 (전체 model 아님)
+    const entry: HistoryEntry = {
+      operations,
+      inverseOperations: this.#computeInverses(operations),
+      checkpointIndex: entryIndex,
+      // ...
+    };
+    
+    this.#undoStack.push(entry);
+  }
+  
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#undoStack.pop()!;
+    
+    // 가까운 checkpoint 확인
+    const nearestCheckpoint = this.#findNearestCheckpoint(entry.checkpointIndex);
+    
+    if (nearestCheckpoint && this.#shouldUseCheckpoint(entry, nearestCheckpoint)) {
+      // Checkpoint에서 복원하고 operation 재생
+      this.#restoreFromCheckpoint(nearestCheckpoint, entry);
+    } else {
+      // 역 operation 사용 (일반적인 경우)
+      this.#applyInverseOperations(entry.inverseOperations);
+    }
+    
+    return true;
+  }
+  
+  #shouldUseCheckpoint(entry: HistoryEntry, checkpoint: number): boolean {
+    // 많은 operation을 undo해야 하는 경우 checkpoint 사용
+    const distance = entry.checkpointIndex - checkpoint;
+    return distance > 10; // Checkpoint 사용 임계값
+  }
+  
+  #restoreFromCheckpoint(checkpointIndex: number, targetEntry: HistoryEntry) {
+    const checkpoint = this.#checkpoints.get(checkpointIndex)!;
+    this.#model = checkpoint.clone();
+    
+    // Checkpoint에서 target까지 operation 재생
+    const entries = this.#undoStack.slice(checkpointIndex, targetEntry.checkpointIndex);
+    entries.forEach(e => {
+      e.operations.forEach(op => this.#model.apply(op));
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="checkpoint-system" title="Checkpoint 시스템" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Checkpoint 전략: 전략적 지점에 snapshot 저장
+class CheckpointManager {
+  #checkpoints: Map<number, DocumentModel> = new Map();
+  #maxCheckpoints = 5; // Checkpoint 수 제한
+  
+  createCheckpoint(index: number, model: DocumentModel) {
+    // 제한에 도달하면 가장 오래된 checkpoint 제거
+    if (this.#checkpoints.size >= this.#maxCheckpoints) {
+      const oldest = Math.min(...this.#checkpoints.keys());
+      this.#checkpoints.delete(oldest);
+    }
+    
+    this.#checkpoints.set(index, model.clone());
+  }
+  
+  getNearestCheckpoint(targetIndex: number): [number, DocumentModel] | null {
+    let nearest: [number, DocumentModel] | null = null;
+    let minDistance = Infinity;
+    
+    for (const [index, model] of this.#checkpoints) {
+      if (index <= targetIndex) {
+        const distance = targetIndex - index;
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearest = [index, model];
+        }
+      }
+    }
+    
+    return nearest;
+  }
+  
+  // 오래된 checkpoint 정리
+  cleanup(beforeIndex: number) {
+    for (const index of this.#checkpoints.keys()) {
+      if (index < beforeIndex) {
+        this.#checkpoints.delete(index);
+      }
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="performance-comparison" title="성능 비교">
+              <table class="w-full border-collapse border border-border-light my-4">
+                <thead>
+                  <tr class="bg-bg-muted">
+                    <th class="border border-border-light p-3 text-left">지표</th>
+                    <th class="border border-border-light p-3 text-left">전체 Snapshot</th>
+                    <th class="border border-border-light p-3 text-left">Operation 기반</th>
+                    <th class="border border-border-light p-3 text-left">Hybrid</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-border-light p-3">Entry당 메모리</td>
+                    <td class="border border-border-light p-3">~1-10MB</td>
+                    <td class="border border-border-light p-3">~1-10KB</td>
+                    <td class="border border-border-light p-3">~1-10KB + 주기적 snapshot</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-border-light p-3">기록 시간</td>
+                    <td class="border border-border-light p-3">느림 (clone)</td>
+                    <td class="border border-border-light p-3">빠름 (operation만)</td>
+                    <td class="border border-border-light p-3">빠름 (주기적 clone)</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-border-light p-3">Undo 시간</td>
+                    <td class="border border-border-light p-3">빠름 (복원)</td>
+                    <td class="border border-border-light p-3">빠름 (역 operation 적용)</td>
+                    <td class="border border-border-light p-3">빠름 (checkpoint 또는 역 operation)</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-border-light p-3">확장성</td>
+                    <td class="border border-border-light p-3">나쁨 (O(n×m))</td>
+                    <td class="border border-border-light p-3">우수 (O(n))</td>
+                    <td class="border border-border-light p-3">우수 (O(n))</td>
+                  </tr>
+                </tbody>
+              </table>
+            </DocSection>
+
+            <DocSection id="implementation" title="구현">
+              <p class="m-0 mb-4">
+                완전한 구현 예제:
+              </p>
+              <DocCodeBlock language="typescript" code={`class OptimizedHistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #redoStack: HistoryEntry[] = [];
+  #model: DocumentModel;
+  #maxSize = 100;
+  
+  constructor(model: DocumentModel) {
+    this.#model = model;
+  }
+  
+  recordTransaction(transaction: Transaction) {
+    const operations = transaction.getOperations();
+    const beforeSelection = transaction.getBeforeSelection();
+    const afterSelection = transaction.getAfterSelection();
+    
+    // 역 operation 계산
+    const inverseOperations = this.#computeInverseOperations(operations);
+    
+    const entry: HistoryEntry = {
+      id: generateId(),
+      timestamp: Date.now(),
+      operations,
+      inverseOperations,
+      beforeSelection,
+      afterSelection
+      // Model snapshot 없음!
+    };
+    
+    this.#undoStack.push(entry);
+    
+    // 스택 크기 제한
+    if (this.#undoStack.length > this.#maxSize) {
+      this.#undoStack.shift();
+    }
+    
+    this.#redoStack = [];
+  }
+  
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#undoStack.pop()!;
+    
+    // 역순으로 역 operation 적용
+    for (let i = entry.inverseOperations.length - 1; i >= 0; i--) {
+      const inverseOp = entry.inverseOperations[i];
+      this.#model.apply(inverseOp);
+    }
+    
+    this.#model.setSelection(entry.beforeSelection);
+    this.#redoStack.push(entry);
+    
+    return true;
+  }
+  
+  redo(): boolean {
+    if (this.#redoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#redoStack.pop()!;
+    
+    // Operation 재적용
+    for (const op of entry.operations) {
+      this.#model.apply(op);
+    }
+    
+    this.#model.setSelection(entry.afterSelection);
+    this.#undoStack.push(entry);
+    
+    return true;
+  }
+  
+  #computeInverseOperations(operations: Operation[]): Operation[] {
+    // 역순으로 역 operation 계산 필요
+    // 각 operation 전 상태 캡처
+    const inverses: Operation[] = [];
+    
+    for (let i = operations.length - 1; i >= 0; i--) {
+      const op = operations[i];
+      const inverse = this.#getInverseOperation(op);
+      inverses.unshift(inverse); // 시작 부분에 추가
+    }
+    
+    return inverses;
+  }
+  
+  #getInverseOperation(op: Operation): Operation {
+    // 구현은 operation 타입에 따라 다름
+    // 필요한 상태 캡처 필요 (예: 삭제된 콘텐츠)
+    switch (op.type) {
+      case 'insertText':
+        return {
+          type: 'deleteText',
+          path: op.path,
+          length: op.text.length
+        };
+      
+      case 'deleteText':
+        // 원본 operation에 deletedContent가 저장되어 있어야 함
+        return {
+          type: 'insertText',
+          path: op.path,
+          text: op.deletedContent!
+        };
+      
+      // ... 기타 operation 타입
+    }
+  }
+  
+  // 선택사항: 현재 model 상태 가져오기 (디버깅용)
+  getCurrentModel(): DocumentModel {
+    return this.#model;
+  }
+  
+  // 선택사항: History 지우기
+  clear() {
+    this.#undoStack = [];
+    this.#redoStack = [];
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>항상 역 operation 저장:</strong> 기록 시 역 operation을 사전 계산하여 undo 중 계산 방지
+                </li>
+                <li class="mb-2">
+                  <strong>삭제된 콘텐츠 저장:</strong> Delete operation은 적절한 undo를 위해 삭제된 콘텐츠를 저장해야 함
+                </li>
+                <li class="mb-2">
+                  <strong>이전 값 저장:</strong> Format operation은 이전 format 값을 저장해야 함
+                </li>
+                <li class="mb-2">
+                  <strong>History 크기 제한:</strong> 무한 메모리 증가를 방지하기 위해 오래된 entry 제거
+                </li>
+                <li class="mb-2">
+                  <strong>긴 체인에 checkpoint 사용:</strong> 매우 긴 undo 체인의 경우 주기적 snapshot과 함께 hybrid 접근법 사용
+                </li>
+                <li class="mb-2">
+                  <strong>Operation 검증:</strong> 역 operation 적용 전에 operation이 유효한지 확인
+                </li>
+                <li class="mb-2">
+                  <strong>엣지 케이스 처리:</strong> 빈 operation, 잘못된 경로, 경계 조건 고려
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/history-management-optimization"
+              pages={[
+                { title: 'History 관리', href: '/editor/history-management', description: 'History 관리 개요' },
+                { title: 'Transaction 시스템', href: '/editor/transaction', description: 'Transaction 사용' },
+                { title: 'Operations', href: '/editor/operations', description: 'Operation 타입' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

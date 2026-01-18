@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Link</strong> mark type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   link: {
     attrs: {
       href: { default: '' },
@@ -67,7 +67,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: 'Click here',
   marks: [{
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeLinkMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeLinkMark(text, mark) {
   const href = escapeHtml(mark.attrs?.href || '');
   const title = mark.attrs?.title ? 
     ' title="' + escapeHtml(mark.attrs.title) + '"' : '';
@@ -93,7 +93,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function extractLinkMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractLinkMark(element) {
   if (element.tagName === 'A' && element.hasAttribute('href')) {
     return {
       type: 'link',
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Creating/editing links
+              <DocCodeBlock language="typescript" code={`// Creating/editing links
 function createLink(url, text) {
   return {
     type: 'text',
@@ -153,7 +153,7 @@ function handleLinkClick(e) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Empty href links
+              <DocCodeBlock language="typescript" code={`// Issue: Empty href links
 // Solution: Validate href before creating link
 function validateLink(link) {
   if (!link.attrs.href || link.attrs.href.trim() === '') {
@@ -196,7 +196,7 @@ function sanitizeUrl(url) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class LinkMark {
+              <DocCodeBlock language="typescript" code={`class LinkMark {
   constructor(attrs) {
     this.type = 'link';
     this.attrs = {

@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="차트 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>차트</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   chart: {
     group: 'block',
     attrs: {
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'chart',
   attrs: {
     type: 'bar',
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeChart(node) {
+              <DocCodeBlock language="typescript" code={`function serializeChart(node) {
   return '<div data-type="chart" data-chart-type="' + node.attrs.type + '">' + 
          escapeHtml(node.attrs.data) + '</div>';
 }`} />
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseChart(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseChart(domNode) {
   return {
     type: 'chart',
     attrs: {
@@ -129,7 +129,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 차트 렌더링
+              <DocCodeBlock language="typescript" code={`// 차트 렌더링
 const chart = document.createElement('div');
 chart.setAttribute('data-type', 'chart');
 chart.setAttribute('data-chart-type', node.attrs.type);
@@ -155,7 +155,7 @@ function renderChart(element) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 차트 데이터 검증
+              <DocCodeBlock language="typescript" code={`// 문제: 차트 데이터 검증
 // 해결: 차트 데이터 구조 검증
 function validateChartData(data, type) {
   try {
@@ -179,7 +179,7 @@ function makeChartResponsive(chart) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class ChartNode {
+              <DocCodeBlock language="typescript" code={`class ChartNode {
   constructor(attrs) {
     this.type = 'chart';
     this.attrs = {

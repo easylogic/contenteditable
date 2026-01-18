@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Math</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   math: {
     group: 'block',
     attrs: {
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'math',
   attrs: {
     formula: 'E = mc^2',
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeMath(node) {
+              <DocCodeBlock language="typescript" code={`function serializeMath(node) {
   return '<div data-type="math" data-display="' + node.attrs.display + '">' + 
          escapeHtml(node.attrs.formula) + '</div>';
 }`} />
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseMath(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseMath(domNode) {
   return {
     type: 'math',
     attrs: {
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering math
+              <DocCodeBlock language="typescript" code={`// Rendering math
 const math = document.createElement('div');
 math.setAttribute('data-type', 'math');
 math.setAttribute('data-display', node.attrs.display);
@@ -133,7 +133,7 @@ function renderMath(element) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Math rendering library
+              <DocCodeBlock language="typescript" code={`// Issue: Math rendering library
 // Solution: Use MathJax or KaTeX
 function initMathRenderer() {
   if (window.MathJax) {
@@ -153,7 +153,7 @@ function validateMathFormula(formula) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class MathNode {
+              <DocCodeBlock language="typescript" code={`class MathNode {
   constructor(attrs) {
     this.type = 'math';
     this.attrs = {

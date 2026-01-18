@@ -1,0 +1,388 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../../components/docs/DocAlert.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'operation-interface', text: 'Operation 인터페이스' },
+  { depth: 2, slug: 'insert-operations', text: 'Insert Operations' },
+  { depth: 2, slug: 'delete-operations', text: 'Delete Operations' },
+  { depth: 2, slug: 'format-operations', text: 'Format Operations' },
+  { depth: 2, slug: 'replace-operations', text: 'Replace Operations' },
+  { depth: 2, slug: 'move-operations', text: 'Move Operations' },
+  { depth: 2, slug: 'node-operations', text: 'Node 구조 Operations' },
+  { depth: 2, slug: 'composite-operations', text: 'Composite Operations' },
+  { depth: 2, slug: 'operation-inversion', text: 'Operation 역변환' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Operations – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터에서 transaction에 사용되는 operation 타입에 대한 포괄적인 가이드"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Operations</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Operations
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델 기반 에디터에서 transaction으로 조합할 수 있는 operation 타입에 대한 포괄적인 가이드입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                Operation은 문서 모델에 대한 원자적 변경입니다. 일관성을 보장하고 undo/redo 기능을 활성화하기 위해 transaction으로 그룹화할 수 있습니다. 각 operation 타입은 특정 속성과 동작을 가집니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Operation 특성:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">불변 - operation은 기존 상태를 수정하지 않음</li>
+                  <li class="mb-1">역변환 가능 - 각 operation은 역 operation을 가짐</li>
+                  <li class="mb-1">조합 가능 - operation은 transaction에서 조합 가능</li>
+                  <li class="mb-1">검증 가능 - operation은 적용 전에 검증 가능</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="operation-interface" title="Operation 인터페이스">
+              <p class="m-0 mb-4">
+                모든 operation은 공통 인터페이스를 따릅니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`interface Operation {
+  type: string;
+  path: Path;
+  data?: any;
+  inverse?: Operation; // 효율성을 위해 사전 계산된 역 operation
+  metadata?: {
+    source?: 'user' | 'programmatic';
+    timestamp?: number;
+    [key: string]: any;
+  };
+}
+
+// Path는 문서 트리의 위치를 나타냄
+type Path = number[];
+
+// 예제 경로:
+// [0] - 루트의 첫 번째 자식
+// [0, 1] - 첫 번째 자식의 두 번째 자식
+// [0, 1, 2] - 첫 번째 자식의 두 번째 자식의 세 번째 자식`} />
+            </DocSection>
+
+            <DocSection id="insert-operations" title="Insert Operations">
+              <p class="m-0 mb-4">
+                Insert operation은 특정 경로에 문서에 콘텐츠를 추가합니다.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/insert-text" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Text</h4>
+                  <p class="text-xs m-0 text-text-secondary">특정 위치에 텍스트 콘텐츠 삽입</p>
+                </a>
+                <a href="/editor/operations/insert-node" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Node</h4>
+                  <p class="text-xs m-0 text-text-secondary">블록 또는 인라인 노드 삽입</p>
+                </a>
+                <a href="/editor/operations/insert-paragraph" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Paragraph</h4>
+                  <p class="text-xs m-0 text-text-secondary">새 단락 노드 삽입</p>
+                </a>
+                <a href="/editor/operations/insert-line-break" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Line Break</h4>
+                  <p class="text-xs m-0 text-text-secondary">소프트 줄바꿈 삽입</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="delete-operations" title="Delete Operations">
+              <p class="m-0 mb-4">
+                Delete operation은 문서에서 콘텐츠를 제거합니다.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/delete-content" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Content</h4>
+                  <p class="text-xs m-0 text-text-secondary">범위의 콘텐츠 삭제</p>
+                </a>
+                <a href="/editor/operations/delete-backward" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Backward</h4>
+                  <p class="text-xs m-0 text-text-secondary">커서 앞의 콘텐츠 삭제</p>
+                </a>
+                <a href="/editor/operations/delete-forward" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Forward</h4>
+                  <p class="text-xs m-0 text-text-secondary">커서 뒤의 콘텐츠 삭제</p>
+                </a>
+                <a href="/editor/operations/delete-word" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Word</h4>
+                  <p class="text-xs m-0 text-text-secondary">단어를 뒤로 또는 앞으로 삭제</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="format-operations" title="Format Operations">
+              <p class="m-0 mb-4">
+                Format operation은 콘텐츠를 변경하지 않고 텍스트 스타일을 수정합니다.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/apply-format" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Apply Format</h4>
+                  <p class="text-xs m-0 text-text-secondary">텍스트 범위에 서식 적용</p>
+                </a>
+                <a href="/editor/operations/remove-format" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Remove Format</h4>
+                  <p class="text-xs m-0 text-text-secondary">텍스트 범위에서 서식 제거</p>
+                </a>
+                <a href="/editor/operations/toggle-format" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Toggle Format</h4>
+                  <p class="text-xs m-0 text-text-secondary">서식 켜기/끄기 토글</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="replace-operations" title="Replace Operations">
+              <p class="m-0 mb-4">
+                Replace operation은 단일 operation에서 delete와 insert를 결합합니다.
+              </p>
+              <div class="mb-4">
+                <a href="/editor/operations/replace" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline block">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Replace</h4>
+                  <p class="text-xs m-0 text-text-secondary">범위의 콘텐츠를 새 콘텐츠로 교체</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="move-operations" title="Move Operations">
+              <p class="m-0 mb-4">
+                Move operation은 문서 내에서 콘텐츠를 재배치합니다.
+              </p>
+              <div class="mb-4">
+                <a href="/editor/operations/move" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline block">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Move</h4>
+                  <p class="text-xs m-0 text-text-secondary">노드 또는 콘텐츠를 다른 위치로 이동</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="node-operations" title="Node 구조 Operations">
+              <p class="m-0 mb-4">
+                노드 구조와 관계를 수정하는 operation입니다.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/split-node" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Split Node</h4>
+                  <p class="text-xs m-0 text-text-secondary">위치에서 노드를 두 개의 노드로 분할</p>
+                </a>
+                <a href="/editor/operations/merge-nodes" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Merge Nodes</h4>
+                  <p class="text-xs m-0 text-text-secondary">두 개의 인접한 노드를 하나로 병합</p>
+                </a>
+                <a href="/editor/operations/wrap" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Wrap</h4>
+                  <p class="text-xs m-0 text-text-secondary">노드를 다른 노드로 감싸기</p>
+                </a>
+                <a href="/editor/operations/unwrap" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Unwrap</h4>
+                  <p class="text-xs m-0 text-text-secondary">래퍼 노드 제거 및 자식 승격</p>
+                </a>
+                <a href="/editor/operations/set-node-type" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Set Node Type</h4>
+                  <p class="text-xs m-0 text-text-secondary">콘텐츠를 보존하면서 노드 타입 변경</p>
+                </a>
+                <a href="/editor/operations/update-attributes" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Update Attributes</h4>
+                  <p class="text-xs m-0 text-text-secondary">구조 변경 없이 노드 속성 업데이트</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="composite-operations" title="Composite Operations">
+              <p class="m-0 mb-4">
+                Composite operation은 복잡한 변환을 위해 여러 operation을 결합합니다.
+              </p>
+              <div class="mb-4">
+                <a href="/editor/operations/composite" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline block">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Composite Operations</h4>
+                  <p class="text-xs m-0 text-text-secondary">복잡한 변환을 위해 여러 operation 결합</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="operation-inversion" title="Operation 역변환">
+              <p class="m-0 mb-4">
+                모든 operation은 undo 기능을 위해 역 operation을 가져야 합니다.
+              </p>
+              <DocCodeBlock language="typescript" code={`class OperationInverter {
+  invert(operation: Operation): Operation {
+    switch (operation.type) {
+      case 'insertText':
+        return {
+          type: 'deleteText',
+          path: operation.path,
+          length: operation.text.length
+        };
+      
+      case 'deleteText':
+        return {
+          type: 'insertText',
+          path: operation.path,
+          text: operation.deletedContent || ''
+        };
+      
+      case 'insertNode':
+        return {
+          type: 'deleteNode',
+          path: operation.path
+        };
+      
+      case 'deleteNode':
+        return {
+          type: 'insertNode',
+          path: operation.path,
+          node: operation.deletedNode
+        };
+      
+      case 'applyFormat':
+        return {
+          type: 'removeFormat',
+          path: operation.path,
+          length: operation.length,
+          format: operation.format
+        };
+      
+      case 'removeFormat':
+        return {
+          type: 'applyFormat',
+          path: operation.path,
+          length: operation.length,
+          format: operation.format,
+          value: operation.previousValue
+        };
+      
+      case 'replace':
+        return {
+          type: 'replace',
+          path: operation.path,
+          length: typeof operation.content === 'string' 
+            ? operation.content.length 
+            : 1,
+          content: operation.deletedContent
+        };
+      
+      case 'move':
+        return {
+          type: 'move',
+          fromPath: operation.toPath,
+          toPath: operation.fromPath
+        };
+      
+      case 'splitNode':
+        return {
+          type: 'mergeNodes',
+          path: operation.path,
+          targetPath: [operation.path[0] + 1],
+          position: operation.position
+        };
+      
+      case 'mergeNodes':
+        return {
+          type: 'splitNode',
+          path: operation.path,
+          position: operation.position
+        };
+      
+      case 'wrap':
+        return {
+          type: 'unwrap',
+          path: operation.path,
+          wrapperType: operation.wrapper.type,
+          preservedWrapper: operation.wrapper
+        };
+      
+      case 'unwrap':
+        return {
+          type: 'wrap',
+          path: operation.path,
+          wrapper: operation.preservedWrapper!
+        };
+      
+      case 'updateAttributes':
+        return {
+          type: 'updateAttributes',
+          path: operation.path,
+          attributes: operation.previousAttributes || {},
+          previousAttributes: operation.attributes
+        };
+      
+      case 'setNodeType':
+        return {
+          type: 'setNodeType',
+          path: operation.path,
+          nodeType: operation.previousType!,
+          previousType: operation.nodeType,
+          attributes: operation.previousAttributes,
+          previousAttributes: operation.attributes
+        };
+      
+      default:
+        throw new Error(\`알 수 없는 operation 타입: \${operation.type}\`);
+    }
+  }
+}
+
+// 효율성을 위해 역 operation 사전 계산
+function createOperationWithInverse(operation: Operation): Operation {
+  const inverter = new OperationInverter();
+  return {
+    ...operation,
+    inverse: inverter.invert(operation)
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations"
+              pages={[
+                { title: 'Transaction 시스템', href: '/editor/transaction', description: '원자적 작업을 위한 transaction 사용' },
+                { title: 'History 관리', href: '/editor/history-management', description: 'Undo/redo history 관리' },
+                { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

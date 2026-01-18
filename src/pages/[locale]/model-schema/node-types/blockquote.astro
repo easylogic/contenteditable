@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="인용구 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>인용구</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   blockquote: {
     content: 'block+',
     group: 'block',
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'blockquote',
   children: [
     {
@@ -100,7 +100,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeBlockquote(node) {
+              <DocCodeBlock language="typescript" code={`function serializeBlockquote(node) {
   return '<blockquote>' + serializeChildren(node.children) + '</blockquote>';
 }`} />
             </DocSection>
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseBlockquote(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseBlockquote(domNode) {
   return {
     type: 'blockquote',
     children: parseChildren(domNode.childNodes)
@@ -124,7 +124,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 렌더링
+              <DocCodeBlock language="typescript" code={`// 렌더링
 const blockquote = document.createElement('blockquote');
 blockquote.contentEditable = 'true';
 node.children.forEach(child => {
@@ -150,7 +150,7 @@ function createBlockquote() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 빈 인용구
+              <DocCodeBlock language="typescript" code={`// 문제: 빈 인용구
 // 해결: 최소 하나의 블록 보장
 if (node.children.length === 0) {
   node.children.push({
@@ -174,7 +174,7 @@ function validateBlockquote(blockquote) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class BlockquoteNode {
+              <DocCodeBlock language="typescript" code={`class BlockquoteNode {
   constructor(children) {
     this.type = 'blockquote';
     this.children = children || [];

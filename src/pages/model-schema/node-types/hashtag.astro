@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Hashtag</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   hashtag: {
     inline: true,
     attrs: {
@@ -67,7 +67,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'hashtag',
   attrs: {
     tag: 'javascript'
@@ -79,7 +79,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeHashtag(node) {
+              <DocCodeBlock language="typescript" code={`function serializeHashtag(node) {
   return '<span data-type="hashtag" data-tag="' + escapeHtml(node.attrs.tag) + 
          '">#' + escapeHtml(node.attrs.tag) + '</span>';
 }`} />
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseHashtag(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseHashtag(domNode) {
   const text = domNode.textContent || '';
   const tag = text.startsWith('#') ? text.slice(1) : text;
   return {
@@ -108,7 +108,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering hashtag
+              <DocCodeBlock language="typescript" code={`// Rendering hashtag
 const hashtag = document.createElement('span');
 hashtag.setAttribute('data-type', 'hashtag');
 hashtag.setAttribute('data-tag', node.attrs.tag);
@@ -124,7 +124,7 @@ hashtag.contentEditable = 'false'; // Hashtags are typically not directly editab
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Hashtag detection
+              <DocCodeBlock language="typescript" code={`// Issue: Hashtag detection
 // Solution: Detect hashtags in text
 function detectHashtags(text) {
   return text.match(/#\w+/g) || [];
@@ -141,7 +141,7 @@ function validateHashtag(tag) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class HashtagNode {
+              <DocCodeBlock language="typescript" code={`class HashtagNode {
   constructor(attrs) {
     this.type = 'hashtag';
     this.attrs = {

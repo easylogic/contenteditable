@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="밑줄 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>밑줄</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   underline: {
   }
 }`} />
@@ -83,7 +83,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '밑줄 텍스트',
   marks: [{ type: 'underline' }]
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeUnderlineMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeUnderlineMark(text, mark) {
   return '<u>' + text + '</u>';
 }`} />
             </DocSection>
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractUnderlineMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractUnderlineMark(element) {
   if (element.tagName === 'U') {
     return { type: 'underline' };
   }
@@ -118,7 +118,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 밑줄 토글
+              <DocCodeBlock language="typescript" code={`// 밑줄 토글
 function toggleUnderline() {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
@@ -141,7 +141,7 @@ function toggleUnderline() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: <u>는 일부 컨텍스트에서 사용 중단됨
+              <DocCodeBlock language="typescript" code={`// 문제: <u>는 일부 컨텍스트에서 사용 중단됨
 // 해결: CSS 또는 style이 있는 <span> 사용 고려
 function serializeUnderlineAlternative(text) {
   return '<span style="text-decoration: underline">' + text + '</span>';
@@ -159,7 +159,7 @@ function handleUnderlineInLink(link, underline) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class UnderlineMark {
+              <DocCodeBlock language="typescript" code={`class UnderlineMark {
   constructor() {
     this.type = 'underline';
   }

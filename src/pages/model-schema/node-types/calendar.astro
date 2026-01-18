@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Calendar</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   calendar: {
     group: 'block',
     attrs: {
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'calendar',
   attrs: {
     view: 'month',
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeCalendar(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCalendar(node) {
   return '<div data-type="calendar" data-view="' + node.attrs.view + 
          '" data-date="' + (node.attrs.date || '') + '"></div>';
 }`} />
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseCalendar(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCalendar(domNode) {
   return {
     type: 'calendar',
     attrs: {
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering calendar
+              <DocCodeBlock language="typescript" code={`// Rendering calendar
 const calendar = document.createElement('div');
 calendar.setAttribute('data-type', 'calendar');
 calendar.setAttribute('data-view', node.attrs.view);
@@ -124,7 +124,7 @@ calendar.contentEditable = 'false'; // Calendars are typically rendered`} />
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Calendar date format
+              <DocCodeBlock language="typescript" code={`// Issue: Calendar date format
 // Solution: Use ISO date format
 function formatCalendarDate(date) {
   return date.toISOString().split('T')[0];
@@ -142,7 +142,7 @@ function switchCalendarView(calendar, view) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class CalendarNode {
+              <DocCodeBlock language="typescript" code={`class CalendarNode {
   constructor(attrs) {
     this.type = 'calendar';
     this.attrs = {

@@ -5,6 +5,7 @@ import TableOfContents from '../../components/TableOfContents.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
 import '../../styles/global.css';
 
 const headings = [
@@ -26,6 +27,32 @@ const headings = [
   { depth: 3, slug: 'plugin-system', text: 'Plugin System' },
   { depth: 3, slug: 'command-system', text: 'Command System' },
   { depth: 3, slug: 'transform-system', text: 'Transform System' },
+  { depth: 2, slug: 'async-initialization', text: 'Asynchronous Initialization' },
+  { depth: 3, slug: 'promise-based-api', text: 'Promise-Based API Design' },
+  { depth: 3, slug: 'initialization-hooks', text: 'Initialization Hooks' },
+  { depth: 2, slug: 'hook-system', text: 'Hook System Implementation' },
+  { depth: 3, slug: 'sync-hooks', text: 'Synchronous Hooks' },
+  { depth: 3, slug: 'async-hooks', text: 'Asynchronous Hooks' },
+  { depth: 3, slug: 'hook-lifecycle', text: 'Hook Lifecycle Management' },
+  { depth: 2, slug: 'event-system', text: 'Event System Architecture' },
+  { depth: 3, slug: 'event-bubbling', text: 'Event Bubbling and Capturing' },
+  { depth: 3, slug: 'event-delegation', text: 'Event Delegation Pattern' },
+  { depth: 3, slug: 'custom-events', text: 'Custom Event System' },
+  { depth: 2, slug: 'performance-optimization', text: 'Performance Optimization' },
+  { depth: 3, slug: 'incremental-updates', text: 'Incremental DOM Updates' },
+  { depth: 3, slug: 'diff-algorithm', text: 'Diff Algorithm' },
+  { depth: 3, slug: 'batch-updates', text: 'Batch Updates and Batching' },
+  { depth: 3, slug: 'virtual-dom', text: 'Virtual DOM Pattern' },
+  { depth: 2, slug: 'rendering-pipeline', text: 'Rendering Pipeline' },
+  { depth: 3, slug: 'render-phases', text: 'Render Phases' },
+  { depth: 3, slug: 'update-scheduling', text: 'Update Scheduling' },
+  { depth: 2, slug: 'model-dom-synchronization', text: 'Model-DOM Synchronization' },
+  { depth: 3, slug: 'contenteditable-false-handling', text: 'contenteditable=false Handling' },
+  { depth: 3, slug: 'selection-preservation', text: 'Selection Preservation' },
+  { depth: 2, slug: 'history-management', text: 'History Management' },
+  { depth: 3, slug: 'model-history', text: 'Model-Based History' },
+  { depth: 3, slug: 'dom-history-conflict', text: 'DOM History Conflict' },
+  { depth: 2, slug: 'input-handling', text: 'Input Handling & IME' },
   { depth: 2, slug: 'editor-comparison', text: 'How Different Editors Approach This' },
 ];
 ---
@@ -150,7 +177,7 @@ const headings = [
                   <li><strong>Serializable:</strong> Can be converted to JSON, HTML, Markdown, etc.</li>
                 </ul>
 
-                <DocCodeBlock code={`// Example document model
+                <DocCodeBlock language="typescript" code={`// Example document model
 {
   type: 'document',
   children: [
@@ -185,7 +212,7 @@ const headings = [
                   The view is a <strong>projection</strong> of the model, not the source of truth. When the model changes, the view updates. When the user interacts with the view, it triggers model operations.
                 </p>
 
-                <DocCodeBlock code={`// View layer responsibilities
+                <DocCodeBlock language="typescript" code={`// View layer responsibilities
 class View {
   // Render model to DOM
   render(model) {
@@ -224,7 +251,7 @@ class View {
                   <li><strong>Text nodes:</strong> Actual text content with marks</li>
                 </ul>
 
-                <DocCodeBlock code={`// Complete document model example
+                <DocCodeBlock language="typescript" code={`// Complete document model example
 {
   type: 'document',
   children: [
@@ -274,7 +301,7 @@ class View {
                   <li>Framework integration (React, etc.)</li>
                 </ul>
 
-                <DocCodeBlock code={`// Immutable model update
+                <DocCodeBlock language="typescript" code={`// Immutable model update
 function insertText(model, position, text) {
   // Create new model instead of mutating
   return {
@@ -300,7 +327,7 @@ function insertText(model, position, text) {
                   <li>Easier to implement collaborative editing</li>
                 </ul>
 
-                <DocCodeBlock code={`// Versioned model
+                <DocCodeBlock language="typescript" code={`// Versioned model
 class Document {
   constructor() {
     this.nodes = [];
@@ -330,7 +357,7 @@ class Document {
                 <p class="m-0 mb-3">
                   Rendering converts model nodes to DOM elements:
                 </p>
-                <DocCodeBlock code={`function renderNode(node) {
+                <DocCodeBlock language="typescript" code={`function renderNode(node) {
   switch (node.type) {
     case 'paragraph':
       return createElement('p', renderChildren(node.children));
@@ -357,7 +384,7 @@ class Document {
                 <p class="m-0 mb-3">
                   The view intercepts user input and converts it to model operations:
                 </p>
-                <DocCodeBlock code={`editor.addEventListener('beforeinput', (e) => {
+                <DocCodeBlock language="typescript" code={`editor.addEventListener('beforeinput', (e) => {
   if (e.inputType === 'insertText') {
     e.preventDefault();
     
@@ -383,7 +410,7 @@ class Document {
                 <p class="m-0 mb-3">
                   Selection must be kept in sync between DOM and model:
                 </p>
-                <DocCodeBlock code={`// When user changes selection in DOM
+                <DocCodeBlock language="typescript" code={`// When user changes selection in DOM
 editor.addEventListener('selectionchange', () => {
   const domSelection = window.getSelection();
   const modelSelection = domToModelSelection(domSelection);
@@ -411,7 +438,7 @@ editor.on('modelChange', () => {
                 <li><strong>Plugins:</strong> Plugin state</li>
               </ul>
 
-              <DocCodeBlock code={`class EditorState {
+              <DocCodeBlock language="typescript" code={`class EditorState {
   constructor(schema) {
     this.schema = schema;
     this.doc = createEmptyDocument(schema);
@@ -452,7 +479,7 @@ editor.on('modelChange', () => {
                 <p class="m-0 mb-3">
                   Plugins extend editor functionality:
                 </p>
-                <DocCodeBlock code={`class Plugin {
+                <DocCodeBlock language="typescript" code={`class Plugin {
   constructor(editor) {
     this.editor = editor;
   }
@@ -483,7 +510,7 @@ editor.use(new ImagePlugin());`} />
                 <p class="m-0 mb-3">
                   Commands are high-level operations:
                 </p>
-                <DocCodeBlock code={`class Command {
+                <DocCodeBlock language="typescript" code={`class Command {
   constructor(editor) {
     this.editor = editor;
   }
@@ -522,7 +549,7 @@ class BoldCommand extends Command {
                 <p class="m-0 mb-3">
                   Transforms are low-level operations that modify the model:
                 </p>
-                <DocCodeBlock code={`class Transform {
+                <DocCodeBlock language="typescript" code={`class Transform {
   insertText(doc, position, text) {
     // Insert text at position
     // Update all positions after insertion
@@ -548,6 +575,94 @@ class BoldCommand extends Command {
               </DocSection>
             </DocSection>
 
+            <DocSection id="async-initialization" title="Asynchronous Initialization">
+              <p class="m-0 mb-4">
+                Modern editors often require asynchronous initialization for loading resources, parsing schemas, or setting up plugins. This is similar to how WebGPU requires async device initialization.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/architecture/async-initialization" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on Asynchronous Initialization →
+                </a>
+              </p>
+            </DocSection>
+
+            <DocSection id="hook-system" title="Hook System Implementation">
+              <p class="m-0 mb-4">
+                A hook system allows plugins to extend editor functionality at specific points in the lifecycle. This pattern is used by webpack, Vue, and other extensible systems.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/architecture/hook-system" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on Hook System Implementation →
+                </a>
+              </p>
+            </DocSection>
+
+            <DocSection id="event-system" title="Event System Architecture">
+              <p class="m-0 mb-4">
+                A well-designed event system enables plugins to react to editor state changes and user interactions.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/architecture/event-system" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on Event System Architecture →
+                </a>
+              </p>
+            </DocSection>
+
+            <DocSection id="performance-optimization" title="Performance Optimization">
+              <p class="m-0 mb-4">
+                Large documents require careful optimization to maintain smooth editing performance.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/architecture/performance-optimization" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on Performance Optimization →
+                </a>
+              </p>
+            </DocSection>
+
+            <DocSection id="rendering-pipeline" title="Rendering Pipeline">
+              <p class="m-0 mb-4">
+                A well-structured rendering pipeline ensures consistent updates and good performance.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/architecture/rendering-pipeline" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on Rendering Pipeline →
+                </a>
+              </p>
+            </DocSection>
+
+            <DocSection id="model-dom-synchronization" title="Model-DOM Synchronization">
+              <p class="m-0 mb-4">
+                Synchronizing between your abstract document model and the DOM is one of the most challenging aspects of building contenteditable editors. This includes handling <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements, preserving selection during updates, and dealing with external DOM manipulation.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/model-dom-synchronization" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on Model-DOM Synchronization →
+                </a>
+              </p>
+            </DocSection>
+
+            <DocSection id="history-management" title="History Management">
+              <p class="m-0 mb-4">
+                Managing undo/redo history in model-based editors requires careful coordination between your model state and browser's DOM history. This includes handling <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> conflicts, IME composition state mismatches, and programmatic changes that don't appear in browser history.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/history-management" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on History Management →
+                </a>
+              </p>
+            </DocSection>
+
+            <DocSection id="input-handling" title="Input Handling & IME">
+              <p class="m-0 mb-4">
+                Input handling is one of the most complex aspects of building contenteditable editors. It involves coordinating between browser events, IME composition states, keyboard shortcuts, and your document model. This includes handling iOS Safari's lack of composition events for Korean IME, mobile virtual keyboards, and text prediction.
+              </p>
+              <p class="m-0 mb-4">
+                <a href="/editor/input-handling" class="text-accent-primary hover:underline font-semibold">
+                  Read detailed guide on Input Handling & IME →
+                </a>
+              </p>
+            </DocSection>
+
             <DocSection id="editor-comparison" title="How Different Editors Approach This">
               <p class="m-0 mb-4">
                 Different editors implement these concepts differently:
@@ -560,6 +675,8 @@ class BoldCommand extends Command {
                   <li>Immutable document model</li>
                   <li>Transform-based operations</li>
                   <li>Separate state and view packages</li>
+                  <li>Plugin system with hooks</li>
+                  <li>Incremental DOM updates via DOMChange</li>
                 </ul>
               </div>
 
@@ -570,6 +687,8 @@ class BoldCommand extends Command {
                   <li>Immutable model with React state</li>
                   <li>Operation-based transforms</li>
                   <li>Normalization system</li>
+                  <li>Uses React's reconciliation</li>
+                  <li>Plugin system via middleware</li>
                 </ul>
               </div>
 
@@ -580,9 +699,24 @@ class BoldCommand extends Command {
                   <li>Mutable model with reconciliation</li>
                   <li>Event-driven updates</li>
                   <li>Decorator system for UI</li>
+                  <li>Incremental reconciliation</li>
+                  <li>Command system with listeners</li>
                 </ul>
               </div>
             </DocSection>
+
+            <DocNavigation
+              current="/editor/architecture"
+              pages={[
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Synchronizing model and DOM' },
+                { title: 'History Management', href: '/editor/history-management', description: 'Undo/redo history management' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Using transactions for atomic history' },
+                { title: 'Operations', href: '/editor/operations', description: 'Operation types and usage' },
+                { title: 'HTML Mapping', href: '/editor/html-mapping', description: 'HTML serialization and parsing' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
+                { title: 'Plugin Development', href: '/editor/plugin-development', description: 'Plugin development guide' },
+              ]}
+            />
           </article>
         </div>
         <TableOfContents headings={headings} />

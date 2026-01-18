@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Audio</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   audio: {
     group: 'block',
     attrs: {
@@ -70,7 +70,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'audio',
   attrs: {
     src: 'https://example.com/audio.mp3',
@@ -83,7 +83,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeAudio(node) {
+              <DocCodeBlock language="typescript" code={`function serializeAudio(node) {
   const attrs = {};
   if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
   if (node.attrs.controls) attrs.controls = true;
@@ -97,7 +97,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseAudio(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseAudio(domNode) {
   return {
     type: 'audio',
     attrs: {
@@ -117,7 +117,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering audio
+              <DocCodeBlock language="typescript" code={`// Rendering audio
 const audio = document.createElement('audio');
 audio.src = node.attrs.src;
 audio.controls = node.attrs.controls !== false;
@@ -133,7 +133,7 @@ audio.contentEditable = 'false'; // Audio is not editable`} />
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Audio format support
+              <DocCodeBlock language="typescript" code={`// Issue: Audio format support
 // Solution: Check format support
 function checkAudioSupport(format) {
   const audio = document.createElement('audio');
@@ -154,7 +154,7 @@ audio.addEventListener('canplay', () => {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class AudioNode {
+              <DocCodeBlock language="typescript" code={`class AudioNode {
   constructor(attrs) {
     this.type = 'audio';
     this.attrs = {

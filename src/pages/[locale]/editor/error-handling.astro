@@ -1,0 +1,334 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+import {
+  supportedLocales,
+  defaultLocale,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'error-types', text: '에러 타입' },
+  { depth: 2, slug: 'error-handling-strategies', text: '에러 처리 전략' },
+  { depth: 2, slug: 'recovery-mechanisms', text: '복구 메커니즘' },
+  { depth: 2, slug: 'error-logging', text: '에러 로깅' },
+  { depth: 2, slug: 'user-feedback', text: '사용자 피드백' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Error Handling & Recovery – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 contenteditable 에디터를 위한 에러 처리 및 복구 전략"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Error Handling & Recovery</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Error Handling & Recovery</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델 기반 contenteditable 에디터에서 에러 처리 및 복구 전략입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                에러 처리는 에디터 안정성을 유지하는 데 중요합니다. 모델 작업, DOM 동기화, 사용자 입력 처리 또는 외부 통합 중에 에러가 발생할 수 있습니다. 이 가이드는 에러 타입, 처리 전략 및 복구 메커니즘을 다룹니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>핵심 원칙:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">우아하게 실패 - 에디터가 크래시되지 않도록</li>
+                  <li class="mb-1">모델 일관성 유지 - 에러 시 롤백</li>
+                  <li class="mb-1">사용자 피드백 제공 - 문제를 사용자에게 알림</li>
+                  <li class="mb-1">디버깅을 위한 에러 로깅 - 에러 컨텍스트 캡처</li>
+                  <li class="mb-1">가능한 경우 자동 복구</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="error-types" title="에러 타입">
+              <p class="m-0 mb-4">
+                에디터에서 일반적인 에러 타입:
+              </p>
+              
+              <DocSection id="model-errors" title="Model Errors" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 잘못된 operation
+class ModelError extends Error {
+  constructor(
+    message: string,
+    public operation: Operation,
+    public model: DocumentModel
+  ) {
+    super(message);
+    this.name = 'ModelError';
+  }
+}
+
+// 스키마 검증 에러
+class SchemaError extends Error {
+  constructor(
+    message: string,
+    public node: Node,
+    public schema: Schema
+  ) {
+    super(message);
+    this.name = 'SchemaError';
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="dom-errors" title="DOM Errors" depth={3}>
+                <DocCodeBlock language="typescript" code={`// DOM 노드를 찾을 수 없음
+class DOMNodeError extends Error {
+  constructor(
+    message: string,
+    public expectedNode: Node | null,
+    public actualDOM: HTMLElement
+  ) {
+    super(message);
+    this.name = 'DOMNodeError';
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="error-handling-strategies" title="에러 처리 전략">
+              <p class="m-0 mb-4">
+                다른 에러 타입은 다른 처리 전략이 필요합니다:
+              </p>
+
+              <DocSection id="try-catch-blocks" title="Try-Catch 블록" depth={3}>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  applyOperation(operation: Operation) {
+    try {
+      // Operation 검증
+      this.validateOperation(operation);
+      
+      // 모델에 적용
+      const newModel = this.model.applyOperation(operation);
+      
+      // DOM 업데이트
+      this.renderer.update(newModel);
+      
+    } catch (error) {
+      // 에러 처리
+      this.handleError(error, operation);
+      
+      // 중요 에러면 재발생
+      if (error instanceof CriticalError) {
+        throw error;
+      }
+    }
+  }
+  
+  private handleError(error: Error, operation: Operation) {
+    // 에러 로깅
+    this.logger.error('Operation 실패', { error, operation });
+    
+    // 필요 시 롤백
+    if (this.model.isDirty) {
+      this.model.rollback();
+    }
+    
+    // 사용자에게 알림
+    this.notifyUser('Operation을 완료할 수 없습니다', 'error');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="recovery-mechanisms" title="복구 메커니즘">
+              <p class="m-0 mb-4">
+                복구 메커니즘은 에러 후 에디터 상태를 복원합니다:
+              </p>
+
+              <DocSection id="rollback" title="Rollback" depth={3}>
+                <DocCodeBlock language="typescript" code={`class Model {
+  private history: ModelSnapshot[] = [];
+  private currentSnapshot: ModelSnapshot;
+  
+  beginTransaction() {
+    // 현재 상태 저장
+    this.history.push(this.currentSnapshot.clone());
+  }
+  
+  rollback() {
+    if (this.history.length > 0) {
+      this.currentSnapshot = this.history.pop()!;
+      return true;
+    }
+    return false;
+  }
+}
+
+// 에러 처리에서 사용
+try {
+  editor.model.beginTransaction();
+  editor.applyOperation(operation);
+  editor.model.commit();
+} catch (error) {
+  // 에러 시 롤백
+  editor.model.rollback();
+  editor.renderer.update(editor.model);
+  throw error;
+}`} />
+              </DocSection>
+
+              <DocSection id="re-sync" title="재동기화" depth={3}>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  reSync() {
+    try {
+      // DOM에서 모델 재구축
+      const newModel = this.parser.parse(this.element);
+      
+      // 모델 검증
+      const validation = this.schema.validate(newModel);
+      if (!validation.valid) {
+        // 모델 수정 시도
+        const fixedModel = this.schema.fix(newModel);
+        this.model = fixedModel;
+      } else {
+        this.model = newModel;
+      }
+      
+      // 일관성 보장을 위해 재렌더링
+      this.renderer.fullRender(this.model);
+      
+    } catch (error) {
+      // 최후의 수단: 빈 상태로 리셋
+      this.reset();
+      this.notifyUser('에러로 인해 에디터가 리셋되었습니다', 'warning');
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="error-logging" title="에러 로깅">
+              <p class="m-0 mb-4">
+                포괄적인 에러 로깅은 디버깅 및 모니터링에 도움이 됩니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`interface ErrorLog {
+  timestamp: number;
+  error: Error;
+  context: {
+    operation?: Operation;
+    model?: DocumentModel;
+    selection?: Selection;
+    userAction?: string;
+  };
+  recovered: boolean;
+}
+
+class ErrorLogger {
+  private logs: ErrorLog[] = [];
+  
+  log(error: Error, context: ErrorContext, recovered: boolean = false) {
+    const log: ErrorLog = {
+      timestamp: Date.now(),
+      error,
+      context: {
+        operation: context.operation,
+        selection: context.selection,
+        userAction: context.userAction,
+      },
+      recovered,
+    };
+    
+    this.logs.push(log);
+    
+    // 프로덕션에서 모니터링 서비스로 전송
+    if (process.env.NODE_ENV === 'production') {
+      this.sendToMonitoring(log);
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="user-feedback" title="사용자 피드백">
+              <p class="m-0 mb-4">
+                사용자는 방해가 되지 않는 방식으로 에러에 대해 알림을 받아야 합니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`class ErrorNotifier {
+  notify(message: string, type: 'error' | 'warning' | 'info' = 'error') {
+    // 알림 생성 또는 업데이트
+    const element = document.createElement('div');
+    element.textContent = message;
+    element.className = 'error-notification error-notification-' + type;
+    element.style.cssText = \`
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 16px;
+      background: #f44336;
+      color: white;
+      border-radius: 4px;
+      z-index: 10000;
+    \`;
+    
+    document.body.appendChild(element);
+    
+    // 5초 후 자동 숨김
+    setTimeout(() => {
+      element.remove();
+    }, 5000);
+  }
+}
+
+// 사용
+try {
+  editor.applyOperation(operation);
+} catch (error) {
+  notifier.notify('Operation을 완료할 수 없습니다. 변경 사항이 되돌려졌습니다.', 'error');
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/error-handling"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+                { title: 'Debugging Techniques', href: '/editor/debugging', description: '디버깅 전략' },
+                { title: 'Testing Strategies', href: '/editor/testing-strategies', description: '테스트 전략' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Transaction 시스템' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

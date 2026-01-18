@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="북마크 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>북마크</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   bookmark: {
     group: 'block',
     attrs: {
@@ -90,7 +90,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'bookmark',
   attrs: {
     url: 'https://example.com',
@@ -105,7 +105,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeBookmark(node) {
+              <DocCodeBlock language="typescript" code={`function serializeBookmark(node) {
   return '<div data-type="bookmark" data-url="' + escapeHtml(node.attrs.url) + 
          '" data-title="' + escapeHtml(node.attrs.title) + 
          '" data-description="' + escapeHtml(node.attrs.description) + 
@@ -117,7 +117,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseBookmark(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseBookmark(domNode) {
   return {
     type: 'bookmark',
     attrs: {
@@ -137,7 +137,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 북마크 렌더링
+              <DocCodeBlock language="typescript" code={`// 북마크 렌더링
 const bookmark = document.createElement('div');
 bookmark.setAttribute('data-type', 'bookmark');
 bookmark.setAttribute('data-url', node.attrs.url);
@@ -154,7 +154,7 @@ bookmark.contentEditable = 'false'; // 북마크는 일반적으로 렌더링됨
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 북마크 메타데이터 가져오기
+              <DocCodeBlock language="typescript" code={`// 문제: 북마크 메타데이터 가져오기
 // 해결: Open Graph 메타데이터 가져오기
 async function fetchBookmarkMetadata(url) {
   // URL을 가져와서 Open Graph 태그 추출
@@ -180,7 +180,7 @@ function validateBookmarkUrl(url) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class BookmarkNode {
+              <DocCodeBlock language="typescript" code={`class BookmarkNode {
   constructor(attrs) {
     this.type = 'bookmark';
     this.attrs = {

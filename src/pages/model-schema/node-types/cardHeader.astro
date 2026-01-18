@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Card Header</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   cardHeader: {
     content: 'block+',
   }
@@ -64,7 +64,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'cardHeader',
   children: [
     {
@@ -79,7 +79,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeCardHeader(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCardHeader(node) {
   return '<div data-type="card-header" class="card-header">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseCardHeader(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCardHeader(domNode) {
   return {
     type: 'cardHeader',
     children: Array.from(domNode.childNodes)
@@ -106,7 +106,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering card header
+              <DocCodeBlock language="typescript" code={`// Rendering card header
 const header = document.createElement('div');
 header.setAttribute('data-type', 'card-header');
 header.className = 'card-header';
@@ -123,7 +123,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Empty header
+              <DocCodeBlock language="typescript" code={`// Issue: Empty header
 // Solution: Ensure at least one block
 function validateCardHeader(header) {
   if (!header.querySelector('p, h1, h2, h3, h4, h5, h6')) {
@@ -137,7 +137,7 @@ function validateCardHeader(header) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class CardHeaderNode {
+              <DocCodeBlock language="typescript" code={`class CardHeaderNode {
   constructor(children) {
     this.type = 'cardHeader';
     this.children = children || [];

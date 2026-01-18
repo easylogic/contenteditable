@@ -74,7 +74,7 @@ const draftCount = filteredCases.filter((c) => c.data.status === 'draft').length
 const localePath = (path: string) => `/${locale}${path}`;
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

@@ -1,0 +1,344 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'render-phases', text: '렌더 단계' },
+  { depth: 3, slug: 'phase-breakdown', text: '단계 분석' },
+  { depth: 3, slug: 'phase-ordering', text: '단계 순서' },
+  { depth: 2, slug: 'update-scheduling', text: '업데이트 스케줄링' },
+  { depth: 3, slug: 'priority-scheduling', text: '우선순위 스케줄링' },
+  { depth: 3, slug: 'frame-scheduling', text: '프레임 스케줄링' },
+  { depth: 2, slug: 'render-optimization', text: '렌더 최적화' },
+];
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="렌더링 파이프라인 – 에디터 아키텍처 – contenteditable.lab"
+      description="렌더링 파이프라인 이해: 렌더 단계, 업데이트 스케줄링, 최적화 전략"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor/architecture')} class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">렌더링 파이프라인</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              렌더링 파이프라인
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              잘 구조화된 렌더링 파이프라인은 일관된 업데이트와 좋은 성능을 보장합니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                렌더링 파이프라인은 문서 모델을 일련의 잘 정의된 단계를 통해 DOM 업데이트로 변환합니다. 이를 통해 예측 가능한 동작을 보장하고 각 단계에서 최적화를 가능하게 합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="render-phases" title="렌더 단계">
+              <DocSection id="phase-breakdown" title="단계 분석" depth={3}>
+                <p class="m-0 mb-3">
+                  렌더링을 구별되는 단계로 나눕니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class RenderPipeline {
+  render(document) {
+    // Phase 1: Prepare
+    const prepared = this.#prepare(document);
+    
+    // Phase 2: Transform
+    const transformed = this.#transform(prepared);
+    
+    // Phase 3: Validate
+    const validated = this.#validate(transformed);
+    
+    // Phase 4: Render
+    const dom = this.#renderToDOM(validated);
+    
+    // Phase 5: Update
+    this.#updateDOM(dom);
+    
+    // Phase 6: Post-process
+    this.#postProcess();
+  }
+  
+  #prepare(doc) {
+    // Normalize structure
+    // Resolve references
+    // Prepare data structures
+    return normalized;
+  }
+  
+  #transform(doc) {
+    // Apply transforms from plugins
+    // Convert model nodes to render nodes
+    return transformed;
+  }
+  
+  #validate(doc) {
+    // Ensure document is valid
+    // Fix any issues
+    return validated;
+  }
+  
+  #renderToDOM(doc) {
+    // Create DOM elements
+    // Set attributes
+    // Build tree
+    return dom;
+  }
+  
+  #updateDOM(newDOM) {
+    // Diff with current DOM
+    // Apply updates
+    // Preserve selection
+  }
+  
+  #postProcess() {
+    // Scroll into view
+    // Update selection
+    // Trigger events
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="phase-ordering" title="단계 순서" depth={3}>
+                <p class="m-0 mb-3">
+                  단계 순서는 정확성을 위해 중요합니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Prepare:</strong> 입력을 정규화하기 위해 먼저 실행되어야 함</li>
+                  <li><strong>Transform:</strong> Prepare 이후, Validate 이전에 실행</li>
+                  <li><strong>Validate:</strong> 변환된 문서가 유효한지 확인</li>
+                  <li><strong>Render:</strong> 유효한 문서에서 DOM 생성</li>
+                  <li><strong>Update:</strong> 기존 DOM에 변경 사항 적용</li>
+                  <li><strong>Post-process:</strong> 최종 정리 및 부작용</li>
+                </ul>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="update-scheduling" title="업데이트 스케줄링">
+              <DocSection id="priority-scheduling" title="우선순위 스케줄링" depth={3}>
+                <p class="m-0 mb-3">
+                  블로킹을 피하기 위해 업데이트를 효율적으로 스케줄링합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class UpdateScheduler {
+  #pendingUpdates = new Set();
+  #scheduled = false;
+  
+  scheduleUpdate(priority, update) {
+    this.#pendingUpdates.add({ update, priority });
+    
+    if (priority === 'high') {
+      // Immediate update
+      this.#flush();
+    } else {
+      // Schedule for next frame
+      this.#schedule();
+    }
+  }
+  
+  #schedule() {
+    if (this.#scheduled) return;
+    
+    this.#scheduled = true;
+    
+    // Use MessageChannel for immediate scheduling
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
+      this.#flush();
+      this.#scheduled = false;
+    };
+    channel.port2.postMessage(null);
+  }
+  
+  #flush() {
+    const updates = Array.from(this.#pendingUpdates);
+    this.#pendingUpdates.clear();
+    
+    // Group by priority
+    const high = updates.filter(u => u.priority === 'high');
+    const normal = updates.filter(u => u.priority === 'normal');
+    const low = updates.filter(u => u.priority === 'low');
+    
+    // Execute in priority order
+    high.forEach(({ update }) => update());
+    normal.forEach(({ update }) => update());
+    low.forEach(({ update }) => update());
+  }
+}
+
+// Usage
+scheduler.scheduleUpdate('high', () => {
+  // Critical update (e.g., selection)
+  updateSelection();
+});
+
+scheduler.scheduleUpdate('normal', () => {
+  // Normal update (e.g., content)
+  updateContent();
+});
+
+scheduler.scheduleUpdate('low', () => {
+  // Low priority (e.g., syntax highlighting)
+  updateSyntaxHighlighting();
+});`} />
+              </DocSection>
+
+              <DocSection id="frame-scheduling" title="프레임 스케줄링" depth={3}>
+                <p class="m-0 mb-3">
+                  부드러운 렌더링을 위해 requestAnimationFrame을 사용합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class FrameScheduler {
+  #pending = [];
+  #scheduled = false;
+  
+  schedule(update) {
+    this.#pending.push(update);
+    
+    if (!this.#scheduled) {
+      this.#scheduled = true;
+      requestAnimationFrame(() => {
+        this.#flush();
+        this.#scheduled = false;
+      });
+    }
+  }
+  
+  #flush() {
+    const updates = this.#pending;
+    this.#pending = [];
+    
+    updates.forEach(update => {
+      try {
+        update();
+      } catch (error) {
+        console.error('Update failed:', error);
+      }
+    });
+  }
+  
+  // Schedule with time budget
+  scheduleWithBudget(update, budget = 5) {
+    const start = performance.now();
+    
+    requestAnimationFrame(() => {
+      update();
+      
+      const elapsed = performance.now() - start;
+      if (elapsed > budget) {
+        console.warn('Update exceeded budget:', elapsed);
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="render-optimization" title="렌더 최적화">
+              <p class="m-0 mb-4">
+                성능을 위한 렌더링 최적화:
+              </p>
+              <DocCodeBlock language="typescript" code={`class OptimizedPipeline extends RenderPipeline {
+  #cache = new Map();
+  #dirtyNodes = new Set();
+  
+  render(document) {
+    // Only render dirty nodes
+    const nodesToRender = this.#getDirtyNodes(document);
+    
+    if (nodesToRender.size === 0) {
+      // No changes, return cached result
+      return this.#cache.get(this.#getDocumentKey(document));
+    }
+    
+    // Render only changed nodes
+    const rendered = {};
+    nodesToRender.forEach(nodeId => {
+      const node = this.#getNodeById(nodeId);
+      rendered[nodeId] = this.#renderNode(node);
+    });
+    
+    // Merge with cached results
+    const result = { ...this.#cache.get(this.#getDocumentKey(document)), ...rendered };
+    
+    // Update cache
+    this.#cache.set(this.#getDocumentKey(document), result);
+    this.#dirtyNodes.clear();
+    
+    return result;
+  }
+  
+  markDirty(nodeId) {
+    this.#dirtyNodes.add(nodeId);
+    // Mark ancestors as dirty too
+    this.#markAncestorsDirty(nodeId);
+  }
+  
+  #markAncestorsDirty(nodeId) {
+    let current = nodeId;
+    while (current) {
+      this.#dirtyNodes.add(current);
+      current = this.#getParentId(current);
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current={localePath('/editor/architecture/rendering-pipeline')}
+              pages={[
+                { title: '에디터 아키텍처', href: localePath('/editor/architecture'), description: '에디터 아키텍처 패턴 개요' },
+                { title: '비동기 초기화', href: localePath('/editor/architecture/async-initialization'), description: 'Promise 기반 초기화 및 생명주기' },
+                { title: '훅 시스템', href: localePath('/editor/architecture/hook-system'), description: '훅 시스템 구현 이해' },
+                { title: '이벤트 시스템', href: localePath('/editor/architecture/event-system'), description: '이벤트 시스템 아키텍처 및 패턴' },
+                { title: '성능 최적화', href: localePath('/editor/architecture/performance-optimization'), description: '대용량 문서를 위한 최적화 전략' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

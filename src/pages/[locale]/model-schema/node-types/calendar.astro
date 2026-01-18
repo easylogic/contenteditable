@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="캘린더 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>캘린더</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   calendar: {
     group: 'block',
     attrs: {
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'calendar',
   attrs: {
     view: 'month',
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeCalendar(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCalendar(node) {
   return '<div data-type="calendar" data-view="' + node.attrs.view + 
          '" data-date="' + (node.attrs.date || '') + '"></div>';
 }`} />
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseCalendar(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCalendar(domNode) {
   return {
     type: 'calendar',
     attrs: {
@@ -129,7 +129,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 캘린더 렌더링
+              <DocCodeBlock language="typescript" code={`// 캘린더 렌더링
 const calendar = document.createElement('div');
 calendar.setAttribute('data-type', 'calendar');
 calendar.setAttribute('data-view', node.attrs.view);
@@ -144,7 +144,7 @@ calendar.contentEditable = 'false'; // 캘린더는 일반적으로 렌더링됨
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 캘린더 날짜 형식
+              <DocCodeBlock language="typescript" code={`// 문제: 캘린더 날짜 형식
 // 해결: ISO 날짜 형식 사용
 function formatCalendarDate(date) {
   return date.toISOString().split('T')[0];
@@ -162,7 +162,7 @@ function switchCalendarView(calendar, view) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class CalendarNode {
+              <DocCodeBlock language="typescript" code={`class CalendarNode {
   constructor(attrs) {
     this.type = 'calendar';
     this.attrs = {

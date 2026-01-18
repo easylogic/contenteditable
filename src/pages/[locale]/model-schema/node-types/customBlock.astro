@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="커스텀 블록 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>커스텀 블록</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   customBlock: {
     content: 'block*',
     group: 'block',
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'customBlock',
   attrs: {
     type: 'my-custom-block',
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeCustomBlock(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCustomBlock(node) {
   return '<div data-type="custom-block" data-block-type="' + node.attrs.type + 
          '" data-block-data="' + escapeHtml(node.attrs.data) + '">' + 
          serializeChildren(node.children) + '</div>';
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseCustomBlock(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCustomBlock(domNode) {
   return {
     type: 'customBlock',
     attrs: {
@@ -135,7 +135,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 커스텀 블록 렌더링
+              <DocCodeBlock language="typescript" code={`// 커스텀 블록 렌더링
 const customBlock = document.createElement('div');
 customBlock.setAttribute('data-type', 'custom-block');
 customBlock.setAttribute('data-block-type', node.attrs.type);
@@ -153,7 +153,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 커스텀 블록 타입 등록
+              <DocCodeBlock language="typescript" code={`// 문제: 커스텀 블록 타입 등록
 // 해결: 커스텀 블록 렌더러 등록
 const customBlockRenderers = {
   'my-custom-block': (node, data) => {
@@ -173,7 +173,7 @@ function validateCustomBlockData(data, type) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class CustomBlockNode {
+              <DocCodeBlock language="typescript" code={`class CustomBlockNode {
   constructor(attrs, children) {
     this.type = 'customBlock';
     this.attrs = {

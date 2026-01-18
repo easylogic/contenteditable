@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="취소선 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>취소선</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   strikethrough: {
   }
 }`} />
@@ -83,7 +83,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '삭제된 텍스트',
   marks: [{ type: 'strikethrough' }]
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeStrikethroughMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeStrikethroughMark(text, mark) {
   return '<s>' + text + '</s>';
 }`} />
             </DocSection>
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractStrikethroughMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractStrikethroughMark(element) {
   if (element.tagName === 'S' || 
       element.tagName === 'STRIKE' || 
       element.tagName === 'DEL') {
@@ -120,7 +120,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 취소선 토글
+              <DocCodeBlock language="typescript" code={`// 취소선 토글
 function toggleStrikethrough() {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
@@ -143,7 +143,7 @@ function toggleStrikethrough() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: <s> vs <del> vs <strike>
+              <DocCodeBlock language="typescript" code={`// 문제: <s> vs <del> vs <strike>
 // 해결: <s>로 정규화
 function normalizeStrikethrough(element) {
   element.querySelectorAll('strike, del').forEach(el => {
@@ -162,7 +162,7 @@ function normalizeStrikethrough(element) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class StrikethroughMark {
+              <DocCodeBlock language="typescript" code={`class StrikethroughMark {
   constructor() {
     this.type = 'strikethrough';
   }

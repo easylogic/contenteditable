@@ -5,6 +5,7 @@ import TableOfContents from '../../components/TableOfContents.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
 import '../../styles/global.css';
 
 const headings = [
@@ -81,7 +82,7 @@ const headings = [
 
               <section id="node-serialization" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Node Serialization</h3>
-                <DocCodeBlock code={`function serializeNode(node) {
+                <DocCodeBlock language="typescript" code={`function serializeNode(node) {
   switch (node.type) {
     case 'document':
       return serializeChildren(node.children);
@@ -122,7 +123,7 @@ function serializeChildren(children) {
                 <p class="m-0 mb-3">
                   Apply marks to text nodes:
                 </p>
-                <DocCodeBlock code={`function serializeText(node) {
+                <DocCodeBlock language="typescript" code={`function serializeText(node) {
   let html = escapeHtml(node.text);
   
   // Apply marks in order
@@ -162,7 +163,7 @@ function wrapWithMark(html, mark) {
 
               <section id="attribute-serialization" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Attribute Serialization</h3>
-                <DocCodeBlock code={`function serializeAttrs(attrs) {
+                <DocCodeBlock language="typescript" code={`function serializeAttrs(attrs) {
   const parts = [];
   
   for (const [key, value] of Object.entries(attrs)) {
@@ -197,7 +198,7 @@ function escapeHtml(text) {
 
               <section id="html-parsing" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">HTML Parsing</h3>
-                <DocCodeBlock code={`function parseHTML(html) {
+                <DocCodeBlock language="typescript" code={`function parseHTML(html) {
   // Parse HTML string to DOM
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
@@ -250,7 +251,7 @@ function parseChildren(domNodes) {
 
               <section id="node-parsing" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Node Parsing</h3>
-                <DocCodeBlock code={`function getNodeType(tagName) {
+                <DocCodeBlock language="typescript" code={`function getNodeType(tagName) {
   const tagMap = {
     'P': 'paragraph',
     'H1': 'heading',
@@ -296,7 +297,7 @@ function extractAttributes(domElement, nodeType) {
 
               <section id="mark-extraction" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Mark Extraction</h3>
-                <DocCodeBlock code={`function extractMarks(textNode) {
+                <DocCodeBlock language="typescript" code={`function extractMarks(textNode) {
   const marks = [];
   let current = textNode.parentElement;
   
@@ -349,7 +350,7 @@ function getMarkFromElement(element) {
 
               <section id="element-normalization" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Element Normalization</h3>
-                <DocCodeBlock code={`function normalizeHTML(html) {
+                <DocCodeBlock language="typescript" code={`function normalizeHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
@@ -398,7 +399,7 @@ function normalizeElements(element) {
 
               <section id="structure-normalization" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Structure Normalization</h3>
-                <DocCodeBlock code={`function fixStructure(element) {
+                <DocCodeBlock language="typescript" code={`function fixStructure(element) {
   // Ensure blocks are direct children of body/document
   const blocks = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'BLOCKQUOTE'];
   
@@ -478,7 +479,7 @@ function removeEmptyNodes(element) {
 
               <section id="diff-algorithm" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Diff Algorithm</h3>
-                <DocCodeBlock code={`function updateDOM(oldModel, newModel, domRoot) {
+                <DocCodeBlock language="typescript" code={`function updateDOM(oldModel, newModel, domRoot) {
   // Compare models and find differences
   const diff = diffModels(oldModel, newModel);
   
@@ -544,7 +545,7 @@ function nodesEqual(node1, node2) {
 
               <section id="dom-patching" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">DOM Patching</h3>
-                <DocCodeBlock code={`function applyChange(change, domRoot) {
+                <DocCodeBlock language="typescript" code={`function applyChange(change, domRoot) {
   const domNode = findDOMNode(change.index, domRoot);
   
   switch (change.type) {
@@ -603,7 +604,7 @@ function updateDOMNode(domNode, oldNode, newNode) {
                 <p class="m-0 mb-3">
                   HTML can have nested formatting: <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;&lt;em&gt;text&lt;/em&gt;&lt;/strong&gt;</code>
                 </p>
-                <DocCodeBlock code={`// HTML: <strong><em>Bold italic</em></strong>
+                <DocCodeBlock language="typescript" code={`// HTML: <strong><em>Bold italic</em></strong>
 // Model: Single text node with both marks
 {
   type: 'text',
@@ -645,7 +646,7 @@ function serializeText(node) {
                 <p class="m-0 mb-3">
                   Handle empty paragraphs, empty lists, etc.:
                 </p>
-                <DocCodeBlock code={`// Empty paragraph
+                <DocCodeBlock language="typescript" code={`// Empty paragraph
 {
   type: 'paragraph',
   children: []
@@ -676,7 +677,7 @@ function parseNode(domNode) {
                 <p class="m-0 mb-3">
                   HTML collapses whitespace, but you might want to preserve it:
                 </p>
-                <DocCodeBlock code={`// Preserve whitespace in code blocks
+                <DocCodeBlock language="typescript" code={`// Preserve whitespace in code blocks
 {
   type: 'codeBlock',
   children: [
@@ -703,6 +704,16 @@ function parseNode(domNode) {
 }`} />
               </section>
             </section>
+
+            <DocNavigation
+              current="/editor/html-mapping"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Synchronizing model and DOM' },
+                { title: 'Model & Schema', href: '/model-schema', description: 'Model and schema design' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
+              ]}
+            />
           </article>
         </div>
         <TableOfContents headings={headings} />

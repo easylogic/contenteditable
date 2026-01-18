@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="링크 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>링크</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   link: {
     attrs: {
       href: { default: '' },
@@ -87,7 +87,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '여기를 클릭하세요',
   marks: [{
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeLinkMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeLinkMark(text, mark) {
   const href = escapeHtml(mark.attrs?.href || '');
   const title = mark.attrs?.title ? 
     ' title="' + escapeHtml(mark.attrs.title) + '"' : '';
@@ -113,7 +113,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractLinkMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractLinkMark(element) {
   if (element.tagName === 'A' && element.hasAttribute('href')) {
     return {
       type: 'link',
@@ -134,7 +134,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 링크 생성/편집
+              <DocCodeBlock language="typescript" code={`// 링크 생성/편집
 function createLink(url, text) {
   return {
     type: 'text',
@@ -173,7 +173,7 @@ function handleLinkClick(e) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 빈 href 링크
+              <DocCodeBlock language="typescript" code={`// 문제: 빈 href 링크
 // 해결: 링크 생성 전 href 검증
 function validateLink(link) {
   if (!link.attrs.href || link.attrs.href.trim() === '') {
@@ -216,7 +216,7 @@ function sanitizeUrl(url) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class LinkMark {
+              <DocCodeBlock language="typescript" code={`class LinkMark {
   constructor(attrs) {
     this.type = 'link';
     this.attrs = {

@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Annotation</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   annotation: {
     inline: true,
     attrs: {
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'annotation',
   attrs: {
     id: 'annotation123',
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeAnnotation(node) {
+              <DocCodeBlock language="typescript" code={`function serializeAnnotation(node) {
   return '<span data-type="annotation" data-id="' + escapeHtml(node.attrs.id) + 
          '" data-annotation-type="' + node.attrs.type + '"></span>';
 }`} />
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseAnnotation(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseAnnotation(domNode) {
   return {
     type: 'annotation',
     attrs: {
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering annotation
+              <DocCodeBlock language="typescript" code={`// Rendering annotation
 const annotation = document.createElement('span');
 annotation.setAttribute('data-type', 'annotation');
 annotation.setAttribute('data-id', node.attrs.id);
@@ -125,7 +125,7 @@ annotation.contentEditable = 'false'; // Annotations are typically not directly 
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Annotation display
+              <DocCodeBlock language="typescript" code={`// Issue: Annotation display
 // Solution: Show annotation on hover or click
 function showAnnotation(annotation) {
   const id = annotation.getAttribute('data-id');
@@ -144,7 +144,7 @@ function syncAnnotation(annotation, changes) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class AnnotationNode {
+              <DocCodeBlock language="typescript" code={`class AnnotationNode {
   constructor(attrs) {
     this.type = 'annotation';
     this.attrs = {

@@ -50,7 +50,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="에디터 아키텍처 – contenteditable.lab"
@@ -170,7 +170,7 @@ const headings = [
                   <li><strong>직렬화 가능:</strong> JSON, HTML, Markdown 등으로 변환 가능</li>
                 </ul>
 
-                <DocCodeBlock code={`// 문서 모델 예제
+                <DocCodeBlock language="typescript" code={`// 문서 모델 예제
 {
   type: 'document',
   children: [
@@ -205,7 +205,7 @@ const headings = [
                   뷰는 모델의 <strong>투영</strong>이며, 진실의 원천이 아닙니다. 모델이 변경되면 뷰가 업데이트됩니다. 사용자가 뷰와 상호작용하면 모델 작업이 트리거됩니다.
                 </p>
 
-                <DocCodeBlock code={`// 뷰 레이어 책임
+                <DocCodeBlock language="typescript" code={`// 뷰 레이어 책임
 class View {
   // 모델을 DOM으로 렌더링
   render(model) {
@@ -244,7 +244,7 @@ class View {
                   <li><strong>텍스트 노드:</strong> 마크가 있는 실제 텍스트 콘텐츠</li>
                 </ul>
 
-                <DocCodeBlock code={`// 완전한 문서 모델 예제
+                <DocCodeBlock language="typescript" code={`// 완전한 문서 모델 예제
 {
   type: 'document',
   children: [
@@ -294,7 +294,7 @@ class View {
                   <li>프레임워크 통합 (React 등)</li>
                 </ul>
 
-                <DocCodeBlock code={`// 불변 모델 업데이트
+                <DocCodeBlock language="typescript" code={`// 불변 모델 업데이트
 function insertText(model, position, text) {
   // 변경하지 않고 새 모델 생성
   return {
@@ -320,7 +320,7 @@ function insertText(model, position, text) {
                   <li>협업 편집 구현이 더 쉬움</li>
                 </ul>
 
-                <DocCodeBlock code={`// 버전 관리 모델
+                <DocCodeBlock language="typescript" code={`// 버전 관리 모델
 class Document {
   constructor() {
     this.nodes = [];
@@ -350,7 +350,7 @@ class Document {
                 <p class="m-0 mb-3">
                   렌더링은 모델 노드를 DOM 요소로 변환합니다:
                 </p>
-                <DocCodeBlock code={`function renderNode(node) {
+                <DocCodeBlock language="typescript" code={`function renderNode(node) {
   switch (node.type) {
     case 'paragraph':
       return createElement('p', renderChildren(node.children));
@@ -377,7 +377,7 @@ class Document {
                 <p class="m-0 mb-3">
                   뷰는 사용자 입력을 가로채고 모델 작업으로 변환합니다:
                 </p>
-                <DocCodeBlock code={`editor.addEventListener('beforeinput', (e) => {
+                <DocCodeBlock language="typescript" code={`editor.addEventListener('beforeinput', (e) => {
   if (e.inputType === 'insertText') {
     e.preventDefault();
     
@@ -403,7 +403,7 @@ class Document {
                 <p class="m-0 mb-3">
                   선택은 DOM과 모델 사이에서 동기화되어야 합니다:
                 </p>
-                <DocCodeBlock code={`// 사용자가 DOM에서 선택을 변경할 때
+                <DocCodeBlock language="typescript" code={`// 사용자가 DOM에서 선택을 변경할 때
 editor.addEventListener('selectionchange', () => {
   const domSelection = window.getSelection();
   const modelSelection = domToModelSelection(domSelection);
@@ -431,7 +431,7 @@ editor.on('modelChange', () => {
                 <li><strong>플러그인:</strong> 플러그인 상태</li>
               </ul>
 
-              <DocCodeBlock code={`class EditorState {
+              <DocCodeBlock language="typescript" code={`class EditorState {
   constructor(schema) {
     this.schema = schema;
     this.doc = createEmptyDocument(schema);
@@ -472,7 +472,7 @@ editor.on('modelChange', () => {
                 <p class="m-0 mb-3">
                   플러그인은 에디터 기능을 확장합니다:
                 </p>
-                <DocCodeBlock code={`class Plugin {
+                <DocCodeBlock language="typescript" code={`class Plugin {
   constructor(editor) {
     this.editor = editor;
   }
@@ -503,7 +503,7 @@ editor.use(new ImagePlugin());`} />
                 <p class="m-0 mb-3">
                   명령은 고수준 작업입니다:
                 </p>
-                <DocCodeBlock code={`class Command {
+                <DocCodeBlock language="typescript" code={`class Command {
   constructor(editor) {
     this.editor = editor;
   }
@@ -542,7 +542,7 @@ class BoldCommand extends Command {
                 <p class="m-0 mb-3">
                   변환은 모델을 수정하는 저수준 작업입니다:
                 </p>
-                <DocCodeBlock code={`class Transform {
+                <DocCodeBlock language="typescript" code={`class Transform {
   insertText(doc, position, text) {
     // 위치에 텍스트 삽입
     // 삽입 후 모든 위치 업데이트

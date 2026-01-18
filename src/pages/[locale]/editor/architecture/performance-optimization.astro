@@ -1,0 +1,482 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'incremental-updates', text: '증분 DOM 업데이트' },
+  { depth: 3, slug: 'diff-algorithm', text: 'Diff 알고리즘' },
+  { depth: 3, slug: 'patch-application', text: '패치 적용' },
+  { depth: 2, slug: 'batch-updates', text: '배치 업데이트' },
+  { depth: 3, slug: 'update-batching', text: '업데이트 배칭' },
+  { depth: 3, slug: 'debouncing', text: '디바운싱' },
+  { depth: 2, slug: 'virtual-dom', text: '가상 DOM 패턴' },
+  { depth: 3, slug: 'vdom-implementation', text: 'VDOM 구현' },
+  { depth: 3, slug: 'reconciliation', text: '재조정' },
+  { depth: 2, slug: 'lazy-rendering', text: '지연 렌더링' },
+];
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="성능 최적화 – 에디터 아키텍처 – contenteditable.lab"
+      description="성능 최적화 이해: 증분 업데이트, 배치 업데이트, 가상 DOM, 지연 렌더링"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor/architecture')} class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">성능 최적화</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              성능 최적화
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              대용량 문서는 부드러운 편집 성능을 유지하기 위해 신중한 최적화가 필요합니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                성능 최적화는 대용량 문서를 처리하는 에디터에 중요합니다. 주요 전략에는 증분 업데이트, 배칭, 가상 DOM, 지연 렌더링이 포함됩니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="incremental-updates" title="증분 DOM 업데이트">
+              <DocSection id="diff-algorithm" title="Diff 알고리즘" depth={3}>
+                <p class="m-0 mb-3">
+                  실제로 변경된 DOM 부분만 업데이트합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class IncrementalRenderer {
+  #nodeMap = new Map(); // nodeId -> DOM element
+  
+  update(document, previousDocument) {
+    // Find differences
+    const diff = this.#diff(previousDocument, document);
+    
+    // Apply only the changes
+    diff.forEach(change => {
+      switch (change.type) {
+        case 'insert':
+          this.#insertNode(change.node, change.path);
+          break;
+        case 'delete':
+          this.#deleteNode(change.path);
+          break;
+        case 'update':
+          this.#updateNode(change.path, change.attrs);
+          break;
+        case 'move':
+          this.#moveNode(change.path, change.newPath);
+          break;
+      }
+    });
+  }
+  
+  #diff(oldDoc, newDoc) {
+    const changes = [];
+    
+    // Compare node trees using longest common subsequence
+    const lcs = this.#longestCommonSubsequence(
+      oldDoc.children,
+      newDoc.children
+    );
+    
+    let oldIndex = 0;
+    let newIndex = 0;
+    let lcsIndex = 0;
+    
+    while (oldIndex < oldDoc.children.length || newIndex < newDoc.children.length) {
+      if (lcsIndex < lcs.length && 
+          oldDoc.children[oldIndex]?.id === lcs[lcsIndex].id) {
+        // Node unchanged, recurse into children
+        this.#compareNodes(
+          oldDoc.children[oldIndex],
+          newDoc.children[newIndex],
+          [oldIndex],
+          changes
+        );
+        oldIndex++;
+        newIndex++;
+        lcsIndex++;
+      } else if (oldIndex < oldDoc.children.length &&
+                 (lcsIndex >= lcs.length || 
+                  oldDoc.children[oldIndex].id !== lcs[lcsIndex].id)) {
+        // Node deleted
+        changes.push({
+          type: 'delete',
+          path: [oldIndex]
+        });
+        oldIndex++;
+      } else {
+        // Node inserted
+        changes.push({
+          type: 'insert',
+          node: newDoc.children[newIndex],
+          path: [newIndex]
+        });
+        newIndex++;
+      }
+    }
+    
+    return changes;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="patch-application" title="패치 적용" depth={3}>
+                <p class="m-0 mb-3">
+                  패치를 효율적으로 적용합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PatchApplier {
+  applyPatches(container, patches) {
+    // Sort patches by index (reverse order for deletions)
+    const sorted = patches.sort((a, b) => {
+      if (a.type === 'delete' && b.type === 'delete') {
+        return b.index - a.index; // Delete from end
+      }
+      return a.index - b.index;
+    });
+    
+    sorted.forEach(patch => {
+      switch (patch.type) {
+        case 'insert':
+          const newNode = this.#renderNode(patch.node);
+          container.insertBefore(newNode, container.children[patch.index]);
+          break;
+        case 'delete':
+          container.removeChild(container.children[patch.index]);
+          break;
+        case 'update':
+          this.#updateNodeAttributes(
+            container.children[patch.index],
+            patch.attrs
+          );
+          break;
+        case 'move':
+          const node = container.children[patch.from];
+          container.insertBefore(node, container.children[patch.to]);
+          break;
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="batch-updates" title="배치 업데이트">
+              <DocSection id="update-batching" title="업데이트 배칭" depth={3}>
+                <p class="m-0 mb-3">
+                  불필요한 렌더를 피하기 위해 여러 작업을 배치합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  #pendingOperations = [];
+  #renderScheduled = false;
+  
+  applyOperation(operation) {
+    // Add to pending operations
+    this.#pendingOperations.push(operation);
+    
+    // Schedule render (debounced)
+    this.#scheduleRender();
+  }
+  
+  #scheduleRender() {
+    if (this.#renderScheduled) return;
+    
+    this.#renderScheduled = true;
+    
+    // Use requestAnimationFrame for smooth updates
+    requestAnimationFrame(() => {
+      this.#flushOperations();
+      this.#renderScheduled = false;
+    });
+  }
+  
+  #flushOperations() {
+    if (this.#pendingOperations.length === 0) return;
+    
+    // Apply all pending operations
+    const operations = this.#pendingOperations;
+    this.#pendingOperations = [];
+    
+    // Batch apply
+    this.#batchApply(operations);
+    
+    // Single render for all operations
+    this.render();
+  }
+  
+  // Manual batching API
+  batch(callback) {
+    const wasBatching = this.#isBatching;
+    this.#isBatching = true;
+    
+    try {
+      callback();
+    } finally {
+      this.#isBatching = wasBatching;
+      if (!this.#isBatching) {
+        this.#flushOperations();
+      }
+    }
+  }
+}
+
+// Usage
+editor.batch(() => {
+  editor.insertText('Hello');
+  editor.insertText(' ');
+  editor.insertText('World');
+  // Single render after batch completes
+});`} />
+              </DocSection>
+
+              <DocSection id="debouncing" title="디바운싱" depth={3}>
+                <p class="m-0 mb-3">
+                  빈번한 업데이트를 디바운스합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DebouncedRenderer {
+  #pendingRender = null;
+  #delay = 16; // ~60fps
+  
+  scheduleRender() {
+    if (this.#pendingRender) {
+      clearTimeout(this.#pendingRender);
+    }
+    
+    this.#pendingRender = setTimeout(() => {
+      this.render();
+      this.#pendingRender = null;
+    }, this.#delay);
+  }
+  
+  // Throttle for critical updates
+  throttleRender() {
+    if (this.#lastRender && Date.now() - this.#lastRender < this.#delay) {
+      return;
+    }
+    
+    this.render();
+    this.#lastRender = Date.now();
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="virtual-dom" title="가상 DOM 패턴">
+              <DocSection id="vdom-implementation" title="VDOM 구현" depth={3}>
+                <p class="m-0 mb-3">
+                  DOM을 건드리기 전에 가상 표현을 사용하여 변경 사항을 계산합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class VirtualDOM {
+  #root = null;
+  
+  render(document) {
+    return this.#renderNode(document);
+  }
+  
+  #renderNode(node) {
+    return {
+      type: node.type,
+      props: node.attrs || {},
+      key: node.id,
+      children: node.children?.map(child => this.#renderNode(child)) || []
+    };
+  }
+  
+  patch(oldTree, newTree) {
+    // Compare virtual trees
+    const patches = this.#diff(oldTree, newTree);
+    
+    // Apply patches to actual DOM
+    this.#applyPatches(patches);
+  }
+  
+  #diff(oldNode, newNode) {
+    const patches = [];
+    
+    if (oldNode.type !== newNode.type) {
+      // Node type changed, replace
+      patches.push({
+        type: 'replace',
+        oldNode,
+        newNode
+      });
+    } else {
+      // Same type, check props and children
+      const propPatches = this.#diffProps(oldNode.props, newNode.props);
+      if (propPatches.length > 0) {
+        patches.push({
+          type: 'props',
+          node: oldNode,
+          patches: propPatches
+        });
+      }
+      
+      // Diff children
+      const childPatches = this.#diffChildren(oldNode.children, newNode.children);
+      patches.push(...childPatches);
+    }
+    
+    return patches;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="reconciliation" title="재조정" depth={3}>
+                <p class="m-0 mb-3">
+                  효율적인 재조정 알고리즘:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Reconciler {
+  reconcile(oldChildren, newChildren) {
+    // Use keys for efficient matching
+    const oldKeyMap = new Map(
+      oldChildren.map((child, i) => [child.key || i, i])
+    );
+    const newKeyMap = new Map(
+      newChildren.map((child, i) => [child.key || i, i])
+    );
+    
+    const patches = [];
+    
+    // Find moved nodes
+    for (const [key, newIndex] of newKeyMap) {
+      const oldIndex = oldKeyMap.get(key);
+      if (oldIndex !== undefined && oldIndex !== newIndex) {
+        patches.push({
+          type: 'move',
+          key,
+          from: oldIndex,
+          to: newIndex
+        });
+      }
+    }
+    
+    // Find inserted nodes
+    for (const [key, newIndex] of newKeyMap) {
+      if (!oldKeyMap.has(key)) {
+        patches.push({
+          type: 'insert',
+          node: newChildren[newIndex],
+          index: newIndex
+        });
+      }
+    }
+    
+    // Find deleted nodes
+    for (const [key, oldIndex] of oldKeyMap) {
+      if (!newKeyMap.has(key)) {
+        patches.push({
+          type: 'delete',
+          index: oldIndex
+        });
+      }
+    }
+    
+    return patches;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="lazy-rendering" title="지연 렌더링">
+              <p class="m-0 mb-4">
+                보이는 콘텐츠만 렌더링합니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`class LazyRenderer {
+  #viewport = { top: 0, bottom: window.innerHeight };
+  #renderedNodes = new Set();
+  
+  render(document) {
+    // Only render nodes in viewport
+    const visibleNodes = this.#getVisibleNodes(document);
+    
+    visibleNodes.forEach(node => {
+      if (!this.#renderedNodes.has(node.id)) {
+        this.#renderNode(node);
+        this.#renderedNodes.add(node.id);
+      }
+    });
+    
+    // Remove nodes outside viewport
+    this.#renderedNodes.forEach(nodeId => {
+      if (!visibleNodes.find(n => n.id === nodeId)) {
+        this.#removeNode(nodeId);
+        this.#renderedNodes.delete(nodeId);
+      }
+    });
+  }
+  
+  #getVisibleNodes(document) {
+    // Calculate which nodes are in viewport
+    const nodes = [];
+    this.#traverse(document, (node, rect) => {
+      if (this.#isInViewport(rect)) {
+        nodes.push(node);
+      }
+    });
+    return nodes;
+  }
+  
+  #isInViewport(rect) {
+    return rect.top < this.#viewport.bottom && 
+           rect.bottom > this.#viewport.top;
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current={localePath('/editor/architecture/performance-optimization')}
+              pages={[
+                { title: '에디터 아키텍처', href: localePath('/editor/architecture'), description: '에디터 아키텍처 패턴 개요' },
+                { title: '비동기 초기화', href: localePath('/editor/architecture/async-initialization'), description: 'Promise 기반 초기화 및 생명주기' },
+                { title: '훅 시스템', href: localePath('/editor/architecture/hook-system'), description: '훅 시스템 구현 이해' },
+                { title: '이벤트 시스템', href: localePath('/editor/architecture/event-system'), description: '이벤트 시스템 아키텍처 및 패턴' },
+                { title: '렌더링 파이프라인', href: localePath('/editor/architecture/rendering-pipeline'), description: '렌더링 파이프라인 및 업데이트 스케줄링' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

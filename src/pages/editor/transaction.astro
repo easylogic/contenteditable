@@ -1,0 +1,678 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'transaction-history', text: 'Transaction and History' },
+  { depth: 3, slug: 'atomic-history-entries', text: 'Atomic History Entries' },
+  { depth: 3, slug: 'transaction-boundaries', text: 'Transaction Boundaries' },
+  { depth: 2, slug: 'transaction-lifecycle', text: 'Transaction Lifecycle' },
+  { depth: 3, slug: 'begin-commit-rollback', text: 'Begin, Commit, Rollback' },
+  { depth: 3, slug: 'transaction-state', text: 'Transaction State Management' },
+  { depth: 2, slug: 'history-integration', text: 'History Integration' },
+  { depth: 3, slug: 'single-undo-entry', text: 'Single Undo Entry' },
+  { depth: 3, slug: 'operation-grouping', text: 'Operation Grouping' },
+  { depth: 2, slug: 'transaction-patterns', text: 'Transaction Patterns' },
+  { depth: 3, slug: 'user-action-transactions', text: 'User Action Transactions' },
+  { depth: 3, slug: 'formatting-transactions', text: 'Formatting Transactions' },
+  { depth: 3, slug: 'paste-transactions', text: 'Paste Transactions' },
+  { depth: 2, slug: 'nested-transactions', text: 'Nested Transactions' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Transaction System – Editor Architecture – contenteditable.lab"
+      description="Using transactions to manage history atomically in model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Transaction System</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Transaction System
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Using transactions to group operations into atomic units for consistent history management in model-based editors.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Transactions group multiple operations into atomic units that are recorded as a single history entry. This ensures that related operations are undone/redone together, maintaining document consistency and providing a better user experience.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Key benefits:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Atomic operations - all succeed or all fail</li>
+                  <li class="mb-1">Single undo entry for related operations</li>
+                  <li class="mb-1">Consistent document state</li>
+                  <li class="mb-1">Better undo/redo granularity</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="transaction-history" title="Transaction and History">
+              <p class="m-0 mb-4">
+                Transactions are the foundation of atomic history management. Each transaction becomes a single entry in the undo/redo stack.
+              </p>
+
+              <DocSection id="atomic-history-entries" title="Atomic History Entries" depth={3}>
+                <p class="m-0 mb-3">
+                  Group related operations into a single history entry:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  operations: Operation[]; // All operations in transaction
+  beforeModel: DocumentModel;
+  afterModel: DocumentModel;
+  beforeSelection: Selection | null;
+  afterSelection: Selection | null;
+}
+
+class Transaction {
+  #operations: Operation[] = [];
+  #editor: Editor;
+  #beforeModel: DocumentModel;
+  #beforeSelection: Selection | null;
+  #isCommitted = false;
+
+  constructor(editor: Editor) {
+    this.#editor = editor;
+    this.#beforeModel = editor.getModel();
+    this.#beforeSelection = editor.getSelection();
+  }
+
+  add(operation: Operation) {
+    if (this.#isCommitted) {
+      throw new Error('Cannot add to committed transaction');
+    }
+    this.#operations.push(operation);
+  }
+
+  async commit(): Promise<boolean> {
+    if (this.#isCommitted) {
+      return false;
+    }
+
+    // Validate all operations
+    for (const op of this.#operations) {
+      if (!this.#editor.canApply(op)) {
+        return false;
+      }
+    }
+
+    // Apply all operations
+    try {
+      for (const op of this.#operations) {
+        this.#editor.applyOperation(op);
+      }
+
+      // Record as single history entry
+      // Note: Store operations only, not full model snapshots for efficiency
+      // See history-management-optimization for details
+      const historyEntry: HistoryEntry = {
+        id: generateId(),
+        timestamp: Date.now(),
+        operations: [...this.#operations],
+        beforeSelection: this.#beforeSelection,
+        afterSelection: this.#editor.getSelection()
+        // beforeModel and afterModel are optional - only store if needed
+        // For operation-based undo, store inverse operations instead
+      };
+
+      this.#editor.getHistory().push(historyEntry);
+      this.#isCommitted = true;
+      return true;
+    } catch (error) {
+      // Rollback on error
+      this.rollback();
+      return false;
+    }
+  }
+
+  rollback() {
+    this.#editor.setModel(this.#beforeModel);
+    this.#editor.setSelection(this.#beforeSelection);
+    this.#operations = [];
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="transaction-boundaries" title="Transaction Boundaries" depth={3}>
+                <p class="m-0 mb-3">
+                  Define transaction boundaries based on user actions:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  #currentTransaction: Transaction | null = null;
+
+  beginTransaction(): Transaction {
+    if (this.#currentTransaction) {
+      throw new Error('Transaction already in progress');
+    }
+    this.#currentTransaction = new Transaction(this);
+    return this.#currentTransaction;
+  }
+
+  async commitTransaction(): Promise<boolean> {
+    if (!this.#currentTransaction) {
+      return false;
+    }
+    const success = await this.#currentTransaction.commit();
+    this.#currentTransaction = null;
+    return success;
+  }
+
+  rollbackTransaction() {
+    if (this.#currentTransaction) {
+      this.#currentTransaction.rollback();
+      this.#currentTransaction = null;
+    }
+  }
+
+  // Helper to add operation to current transaction
+  addOperation(operation: Operation) {
+    if (this.#currentTransaction) {
+      this.#currentTransaction.add(operation);
+    } else {
+      // No transaction, create one and commit immediately
+      const tx = this.beginTransaction();
+      tx.add(operation);
+      tx.commit();
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="transaction-lifecycle" title="Transaction Lifecycle">
+              <p class="m-0 mb-4">
+                Understanding the complete transaction lifecycle is crucial for proper implementation.
+              </p>
+
+              <DocSection id="begin-commit-rollback" title="Begin, Commit, Rollback" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Example: Formatting operation
+async function applyBoldFormatting(editor: Editor, selection: Selection) {
+  const tx = editor.beginTransaction();
+  
+  try {
+    // Multiple operations for formatting
+    tx.add({
+      type: 'format',
+      path: selection.start,
+      format: 'bold',
+      value: true
+    });
+    
+    tx.add({
+      type: 'format',
+      path: selection.end,
+      format: 'bold',
+      value: true
+    });
+    
+    // All operations committed as single history entry
+    const success = await tx.commit();
+    
+    if (!success) {
+      console.error('Formatting failed');
+    }
+  } catch (error) {
+    tx.rollback();
+    throw error;
+  }
+}
+
+// Example: Paste operation
+async function handlePaste(editor: Editor, pastedContent: string) {
+  const tx = editor.beginTransaction();
+  
+  try {
+    // Delete selected content
+    const selection = editor.getSelection();
+    if (!selection.isCollapsed) {
+      tx.add({
+        type: 'delete',
+        path: selection.start,
+        length: selection.length
+      });
+    }
+    
+    // Insert pasted content
+    tx.add({
+      type: 'insert',
+      path: selection.start,
+      content: pastedContent
+    });
+    
+    await tx.commit(); // Single undo entry for paste
+  } catch (error) {
+    tx.rollback();
+    throw error;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="transaction-state" title="Transaction State Management" depth={3}>
+                <DocCodeBlock language="typescript" code={`class TransactionManager {
+  #activeTransactions: Transaction[] = [];
+  #transactionStack: Transaction[] = []; // For nested transactions
+
+  beginTransaction(editor: Editor): Transaction {
+    const tx = new Transaction(editor);
+    this.#transactionStack.push(tx);
+    this.#activeTransactions.push(tx);
+    return tx;
+  }
+
+  async commitTransaction(tx: Transaction): Promise<boolean> {
+    const index = this.#activeTransactions.indexOf(tx);
+    if (index === -1) {
+      return false;
+    }
+
+    const success = await tx.commit();
+    
+    if (success) {
+      this.#activeTransactions.splice(index, 1);
+      const stackIndex = this.#transactionStack.indexOf(tx);
+      if (stackIndex !== -1) {
+        this.#transactionStack.splice(stackIndex, 1);
+      }
+    }
+    
+    return success;
+  }
+
+  rollbackTransaction(tx: Transaction) {
+    tx.rollback();
+    const index = this.#activeTransactions.indexOf(tx);
+    if (index !== -1) {
+      this.#activeTransactions.splice(index, 1);
+    }
+    const stackIndex = this.#transactionStack.indexOf(tx);
+    if (stackIndex !== -1) {
+      this.#transactionStack.splice(stackIndex, 1);
+    }
+  }
+
+  getCurrentTransaction(): Transaction | null {
+    return this.#transactionStack.length > 0
+      ? this.#transactionStack[this.#transactionStack.length - 1]
+      : null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="history-integration" title="History Integration">
+              <p class="m-0 mb-4">
+                Transactions integrate seamlessly with history management to provide atomic undo/redo.
+              </p>
+
+              <DocSection id="single-undo-entry" title="Single Undo Entry" depth={3}>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #redoStack: HistoryEntry[] = [];
+
+  recordTransaction(transaction: Transaction) {
+    if (!transaction.isCommitted()) {
+      return;
+    }
+
+    // Store operations only - no full model snapshots for efficiency
+    const entry: HistoryEntry = {
+      id: generateId(),
+      timestamp: Date.now(),
+      operations: transaction.getOperations(),
+      beforeSelection: transaction.getBeforeSelection(),
+      afterSelection: transaction.getAfterSelection()
+      // Use inverse operations for undo instead of model snapshots
+      // See history-management-optimization for details
+    };
+
+    this.#undoStack.push(entry);
+    this.#redoStack = []; // Clear redo stack on new action
+  }
+
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+
+    const entry = this.#undoStack.pop()!;
+    
+    // Apply inverse operations
+    for (let i = entry.operations.length - 1; i >= 0; i--) {
+      const op = entry.operations[i];
+      const inverse = this.#getInverseOperation(op);
+      this.#editor.applyOperation(inverse);
+    }
+
+    // Restore selection
+    this.#editor.setSelection(entry.beforeSelection);
+
+    // Move to redo stack
+    this.#redoStack.push(entry);
+    return true;
+  }
+
+  redo(): boolean {
+    if (this.#redoStack.length === 0) {
+      return false;
+    }
+
+    const entry = this.#redoStack.pop()!;
+    
+    // Re-apply operations
+    for (const op of entry.operations) {
+      this.#editor.applyOperation(op);
+    }
+
+    // Restore selection
+    this.#editor.setSelection(entry.afterSelection);
+
+    // Move to undo stack
+    this.#undoStack.push(entry);
+    return true;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="operation-grouping" title="Operation Grouping" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Example: User types "Hello" - should be single undo entry
+class InputHandler {
+  #transaction: Transaction | null = null;
+  #lastInputTime = 0;
+  #inputTimeout: number | null = null;
+
+  handleInput(e: InputEvent) {
+    // Group rapid inputs into single transaction
+    const now = Date.now();
+    const timeSinceLastInput = now - this.#lastInputTime;
+
+    if (timeSinceLastInput > 500 || !this.#transaction) {
+      // Start new transaction
+      this.#commitCurrentTransaction();
+      this.#transaction = this.#editor.beginTransaction();
+    }
+
+    this.#lastInputTime = now;
+
+    // Add operation to transaction
+    if (e.inputType === 'insertText') {
+      this.#transaction.add({
+        type: 'insert',
+        path: this.#editor.getSelection().start,
+        content: e.data
+      });
+    }
+
+    // Commit after delay (debounce)
+    if (this.#inputTimeout) {
+      clearTimeout(this.#inputTimeout);
+    }
+    this.#inputTimeout = setTimeout(() => {
+      this.#commitCurrentTransaction();
+    }, 500);
+  }
+
+  #commitCurrentTransaction() {
+    if (this.#transaction) {
+      this.#transaction.commit();
+      this.#transaction = null;
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="transaction-patterns" title="Transaction Patterns">
+              <p class="m-0 mb-4">
+                Common patterns for using transactions in different scenarios.
+              </p>
+
+              <DocSection id="user-action-transactions" title="User Action Transactions" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Pattern: Each user action is a transaction
+class UserActionHandler {
+  async handleUserAction(action: UserAction) {
+    const tx = this.#editor.beginTransaction();
+
+    try {
+      switch (action.type) {
+        case 'type':
+          tx.add({ type: 'insert', path: action.position, content: action.text });
+          break;
+        case 'delete':
+          tx.add({ type: 'delete', path: action.position, length: action.length });
+          break;
+        case 'format':
+          tx.add({ type: 'format', path: action.selection.start, format: action.format });
+          break;
+      }
+
+      await tx.commit();
+    } catch (error) {
+      tx.rollback();
+      throw error;
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="formatting-transactions" title="Formatting Transactions" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Pattern: Formatting operations grouped together
+async function applyFormatting(
+  editor: Editor,
+  selection: Selection,
+  format: Format
+) {
+  const tx = editor.beginTransaction();
+
+  // Apply format to entire selection
+  const nodes = editor.getNodesInRange(selection);
+  
+  for (const node of nodes) {
+    tx.add({
+      type: 'format',
+      path: node.path,
+      format: format.name,
+      value: format.value
+    });
+  }
+
+  await tx.commit(); // Single undo for entire formatting
+}
+
+// Pattern: Toggle formatting
+async function toggleFormatting(
+  editor: Editor,
+  selection: Selection,
+  format: string
+) {
+  const tx = editor.beginTransaction();
+  const hasFormat = editor.hasFormat(selection, format);
+
+  if (hasFormat) {
+    // Remove format
+    const nodes = editor.getNodesInRange(selection);
+    for (const node of nodes) {
+      tx.add({
+        type: 'format',
+        path: node.path,
+        format: format,
+        value: false
+      });
+    }
+  } else {
+    // Apply format
+    const nodes = editor.getNodesInRange(selection);
+    for (const node of nodes) {
+      tx.add({
+        type: 'format',
+        path: node.path,
+        format: format,
+        value: true
+      });
+    }
+  }
+
+  await tx.commit();
+}`} />
+              </DocSection>
+
+              <DocSection id="paste-transactions" title="Paste Transactions" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Pattern: Paste as single transaction
+async function handlePaste(
+  editor: Editor,
+  clipboardData: DataTransfer
+) {
+  const tx = editor.beginTransaction();
+  const selection = editor.getSelection();
+
+  try {
+    // 1. Delete selected content
+    if (!selection.isCollapsed) {
+      tx.add({
+        type: 'delete',
+        path: selection.start,
+        length: selection.length
+      });
+    }
+
+    // 2. Parse and insert pasted content
+    const pastedContent = await parseClipboardData(clipboardData);
+    
+    for (const item of pastedContent) {
+      if (item.type === 'text') {
+        tx.add({
+          type: 'insert',
+          path: selection.start,
+          content: item.text
+        });
+      } else if (item.type === 'node') {
+        tx.add({
+          type: 'insert',
+          path: selection.start,
+          node: item.node
+        });
+      }
+    }
+
+    await tx.commit(); // Single undo for entire paste
+  } catch (error) {
+    tx.rollback();
+    throw error;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="nested-transactions" title="Nested Transactions">
+              <p class="m-0 mb-4">
+                Support nested transactions for complex operations.
+              </p>
+              <DocCodeBlock language="typescript" code={`class NestedTransactionManager {
+  #transactionStack: Transaction[] = [];
+
+  beginTransaction(editor: Editor): Transaction {
+    const tx = new Transaction(editor);
+    this.#transactionStack.push(tx);
+    return tx;
+  }
+
+  async commitTransaction(tx: Transaction): Promise<boolean> {
+    const index = this.#transactionStack.indexOf(tx);
+    if (index === -1) {
+      return false;
+    }
+
+    // Only commit if it's the top-level transaction
+    if (index === this.#transactionStack.length - 1) {
+      const success = await tx.commit();
+      if (success) {
+        this.#transactionStack.pop();
+      }
+      return success;
+    } else {
+      // Nested transaction - just mark as committed
+      // Will be committed when parent commits
+      return true;
+    }
+  }
+
+  getCurrentTransaction(): Transaction | null {
+    return this.#transactionStack.length > 0
+      ? this.#transactionStack[this.#transactionStack.length - 1]
+      : null;
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>Group related operations:</strong> Operations that should be undone together should be in the same transaction
+                </li>
+                <li class="mb-2">
+                  <strong>User action boundaries:</strong> Each user action (keystroke, paste, format) should typically be its own transaction
+                </li>
+                <li class="mb-2">
+                  <strong>Debounce rapid inputs:</strong> Group rapid text input into single transactions for better undo granularity
+                </li>
+                <li class="mb-2">
+                  <strong>Always rollback on error:</strong> Ensure transaction state is restored if commit fails
+                </li>
+                <li class="mb-2">
+                  <strong>Validate before commit:</strong> Check all operations can be applied before committing
+                </li>
+                <li class="mb-2">
+                  <strong>Preserve selection:</strong> Store selection state in transaction for proper undo/redo
+                </li>
+                <li class="mb-2">
+                  <strong>Avoid nested transactions:</strong> Keep transaction structure simple unless necessary
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/transaction"
+              pages={[
+                { title: 'History Management', href: '/editor/history-management', description: 'Undo/redo history management' },
+                { title: 'History Optimization', href: '/editor/history-management-optimization', description: 'Optimizing history with operation-based undo' },
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Operations', href: '/editor/operations', description: 'Operation types and usage' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

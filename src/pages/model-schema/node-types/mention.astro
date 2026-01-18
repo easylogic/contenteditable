@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Mention</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   mention: {
     inline: true,
     attrs: {
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'mention',
   attrs: {
     id: 'user123',
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeMention(node) {
+              <DocCodeBlock language="typescript" code={`function serializeMention(node) {
   return '<span data-type="mention" data-id="' + escapeHtml(node.attrs.id) + 
          '">' + escapeHtml(node.attrs.label) + '</span>';
 }`} />
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseMention(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseMention(domNode) {
   return {
     type: 'mention',
     attrs: {
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering mention
+              <DocCodeBlock language="typescript" code={`// Rendering mention
 const mention = document.createElement('span');
 mention.setAttribute('data-type', 'mention');
 mention.setAttribute('data-id', node.attrs.id);
@@ -125,7 +125,7 @@ mention.contentEditable = 'false'; // Mentions are typically not directly editab
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Mention autocomplete
+              <DocCodeBlock language="typescript" code={`// Issue: Mention autocomplete
 // Solution: Implement mention autocomplete
 function handleMentionInput(e) {
   const query = e.target.value;
@@ -146,7 +146,7 @@ function handleMentionDeletion(mention) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class MentionNode {
+              <DocCodeBlock language="typescript" code={`class MentionNode {
   constructor(attrs) {
     this.type = 'mention';
     this.attrs = {

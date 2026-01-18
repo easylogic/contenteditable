@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="지도 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>지도</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   map: {
     group: 'block',
     attrs: {
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'map',
   attrs: {
     lat: 37.5665,
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeMap(node) {
+              <DocCodeBlock language="typescript" code={`function serializeMap(node) {
   return '<div data-type="map" data-lat="' + node.attrs.lat + 
          '" data-lng="' + node.attrs.lng + '" data-zoom="' + node.attrs.zoom + '"></div>';
 }`} />
@@ -113,7 +113,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseMap(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseMap(domNode) {
   return {
     type: 'map',
     attrs: {
@@ -132,7 +132,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 지도 렌더링
+              <DocCodeBlock language="typescript" code={`// 지도 렌더링
 const map = document.createElement('div');
 map.setAttribute('data-type', 'map');
 map.setAttribute('data-lat', node.attrs.lat);
@@ -158,7 +158,7 @@ function renderMap(element) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 지도 라이브러리 초기화
+              <DocCodeBlock language="typescript" code={`// 문제: 지도 라이브러리 초기화
 // 해결: 지도 라이브러리 초기화
 function initMapLibrary() {
   if (window.L) {
@@ -177,7 +177,7 @@ function validateCoordinates(lat, lng) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class MapNode {
+              <DocCodeBlock language="typescript" code={`class MapNode {
   constructor(attrs) {
     this.type = 'map';
     this.attrs = {

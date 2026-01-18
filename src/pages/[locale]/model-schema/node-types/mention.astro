@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="멘션 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>멘션</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   mention: {
     inline: true,
     attrs: {
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'mention',
   attrs: {
     id: 'user123',
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeMention(node) {
+              <DocCodeBlock language="typescript" code={`function serializeMention(node) {
   return '<span data-type="mention" data-id="' + escapeHtml(node.attrs.id) + 
          '">' + escapeHtml(node.attrs.label) + '</span>';
 }`} />
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseMention(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseMention(domNode) {
   return {
     type: 'mention',
     attrs: {
@@ -129,7 +129,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 멘션 렌더링
+              <DocCodeBlock language="typescript" code={`// 멘션 렌더링
 const mention = document.createElement('span');
 mention.setAttribute('data-type', 'mention');
 mention.setAttribute('data-id', node.attrs.id);
@@ -145,7 +145,7 @@ mention.contentEditable = 'false'; // 멘션은 일반적으로 직접 편집되
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 멘션 자동완성
+              <DocCodeBlock language="typescript" code={`// 문제: 멘션 자동완성
 // 해결: 멘션 자동완성 구현
 function handleMentionInput(e) {
   const query = e.target.value;
@@ -166,7 +166,7 @@ function handleMentionDeletion(mention) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class MentionNode {
+              <DocCodeBlock language="typescript" code={`class MentionNode {
   constructor(attrs) {
     this.type = 'mention';
     this.attrs = {

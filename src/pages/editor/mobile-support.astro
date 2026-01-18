@@ -1,0 +1,325 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'virtual-keyboard', text: 'Virtual Keyboard' },
+  { depth: 3, slug: 'keyboard-detection', text: 'Keyboard Detection' },
+  { depth: 3, slug: 'viewport-adjustment', text: 'Viewport Adjustment' },
+  { depth: 2, slug: 'touch-selection', text: 'Touch Selection' },
+  { depth: 2, slug: 'mobile-input', text: 'Mobile Input Handling' },
+  { depth: 3, slug: 'text-prediction', text: 'Text Prediction' },
+  { depth: 3, slug: 'autocorrect', text: 'Autocorrect' },
+  { depth: 2, slug: 'ios-specific', text: 'iOS-Specific Issues' },
+  { depth: 2, slug: 'android-specific', text: 'Android-Specific Issues' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Mobile Support – Editor Architecture – contenteditable.lab"
+      description="Mobile support guide for contenteditable editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Mobile Support</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Mobile Support</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Guide to supporting mobile devices in contenteditable editors.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Mobile devices present unique challenges: virtual keyboards, touch interactions, different IME behavior, and viewport constraints. This guide covers mobile-specific considerations.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Key challenges:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Virtual keyboard resizes viewport</li>
+                  <li class="mb-1">Touch selection is less precise than mouse</li>
+                  <li class="mb-1">IME composition events don't fire on iOS Safari for Korean</li>
+                  <li class="mb-1">Text prediction and autocorrect interfere with input</li>
+                  <li class="mb-1">Different keyboard apps have different behavior</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="virtual-keyboard" title="Virtual Keyboard">
+              <p class="m-0 mb-4">
+                Handle virtual keyboard appearance and viewport changes.
+              </p>
+
+              <DocSection id="keyboard-detection" title="Keyboard Detection" depth={3}>
+                <DocCodeBlock language="typescript" code={`class VirtualKeyboardDetector {
+  #viewportHeight = window.visualViewport?.height || window.innerHeight;
+  #isKeyboardVisible = false;
+
+  constructor(editor: Editor) {
+    this.#editor = editor;
+    this.#setupDetection();
+  }
+
+  #setupDetection() {
+    if (!window.visualViewport) {
+      // Fallback for browsers without visualViewport
+      window.addEventListener('resize', () => this.#detectKeyboard());
+      return;
+    }
+
+    window.visualViewport.addEventListener('resize', () => {
+      const newHeight = window.visualViewport.height;
+      const heightDiff = this.#viewportHeight - newHeight;
+
+      if (heightDiff > 150) {
+        // Keyboard appeared
+        this.#onKeyboardShow();
+      } else if (heightDiff < -150) {
+        // Keyboard hidden
+        this.#onKeyboardHide();
+      }
+
+      this.#viewportHeight = newHeight;
+    });
+  }
+
+  #onKeyboardShow() {
+    this.#isKeyboardVisible = true;
+    this.#scrollToCursor();
+    this.#adjustLayout();
+  }
+
+  #onKeyboardHide() {
+    this.#isKeyboardVisible = false;
+    this.#restoreLayout();
+  }
+
+  #scrollToCursor() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+
+    if (rect.bottom > viewportHeight) {
+      range.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="viewport-adjustment" title="Viewport Adjustment" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Adjust editor height when keyboard appears
+function adjustEditorForKeyboard(editor: HTMLElement) {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+
+  const keyboardHeight = window.innerHeight - viewport.height;
+  
+  if (keyboardHeight > 0) {
+    // Keyboard is visible
+    editor.style.maxHeight = (viewport.height - 100) + 'px';
+    editor.style.overflowY = 'auto';
+  } else {
+    // Keyboard is hidden
+    editor.style.maxHeight = '';
+    editor.style.overflowY = '';
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="touch-selection" title="Touch Selection">
+              <p class="m-0 mb-4">
+                Handle touch-based text selection.
+              </p>
+              <DocCodeBlock language="typescript" code={`// Improve touch selection accuracy
+class TouchSelectionHandler {
+  constructor(editor: Editor) {
+    this.#editor = editor;
+    this.#setupTouchHandlers();
+  }
+
+  #setupTouchHandlers() {
+    let touchStart: Touch | null = null;
+
+    this.#editor.element.addEventListener('touchstart', (e) => {
+      touchStart = e.touches[0];
+    });
+
+    this.#editor.element.addEventListener('touchend', (e) => {
+      if (!touchStart) return;
+
+      // Wait for selection to update
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          this.#adjustSelection(selection.getRangeAt(0));
+        }
+      }, 100);
+    });
+  }
+
+  #adjustSelection(range: Range) {
+    // Adjust selection boundaries if needed
+    // Touch selection can be imprecise
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="mobile-input" title="Mobile Input Handling">
+              <p class="m-0 mb-4">
+                Handle mobile-specific input behavior.
+              </p>
+
+              <DocSection id="text-prediction" title="Text Prediction" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Handle mobile text prediction
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPredictiveText') {
+    // Mobile keyboard text prediction
+    e.preventDefault();
+    this.#handlePredictiveText(e.data);
+  }
+});
+
+// Disable prediction for code blocks
+function disablePrediction(element: HTMLElement) {
+  element.setAttribute('autocorrect', 'off');
+  element.setAttribute('autocapitalize', 'off');
+  element.setAttribute('spellcheck', 'false');
+  element.setAttribute('inputmode', 'text');
+}`} />
+              </DocSection>
+
+              <DocSection id="autocorrect" title="Autocorrect" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Detect and handle autocorrect
+class AutocorrectHandler {
+  #lastInput = '';
+
+  handleInput(e: InputEvent) {
+    if (e.inputType === 'insertText') {
+      // Check if this might be autocorrect
+      if (this.#isLikelyAutocorrect(e.data)) {
+        // Handle autocorrect
+        this.#handleAutocorrect(e.data);
+      } else {
+        this.#lastInput = e.data;
+      }
+    }
+  }
+
+  #isLikelyAutocorrect(text: string): boolean {
+    // Heuristic: If text is very different from what was typed
+    // This is difficult to detect reliably
+    return false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="ios-specific" title="iOS-Specific Issues">
+              <p class="m-0 mb-4">
+                iOS Safari has unique behaviors.
+              </p>
+              <DocAlert type="error">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>iOS Safari Issues:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Composition events don't fire for Korean IME</li>
+                  <li class="mb-1">Selection can be lost when editor loses focus</li>
+                  <li class="mb-1">Virtual keyboard behavior differs from Android</li>
+                </ul>
+              </DocAlert>
+              <DocCodeBlock language="typescript" code={`// iOS Safari workaround for composition
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+function isSafari() {
+  return /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+}
+
+// Always allow default for certain keys on iOS Safari
+if (isIOS() && isSafari()) {
+  element.addEventListener('keydown', (e) => {
+    if (['Enter', 'Backspace', 'Delete'].includes(e.key)) {
+      // Allow browser default
+      return;
+    }
+  });
+}`} />
+            </DocSection>
+
+            <DocSection id="android-specific" title="Android-Specific Issues">
+              <p class="m-0 mb-4">
+                Android browsers have their own quirks.
+              </p>
+              <DocCodeBlock language="typescript" code={`// Android Chrome specific handling
+function isAndroid() {
+  return /Android/.test(navigator.userAgent);
+}
+
+// Handle different keyboard apps
+// Gboard, SwiftKey, Samsung Keyboard have different behaviors
+function handleAndroidKeyboard() {
+  // Some keyboards may interfere with input handling
+  // Test with different keyboard apps
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">Test on real devices, not just emulators</li>
+                <li class="mb-2">Handle viewport changes when keyboard appears</li>
+                <li class="mb-2">Scroll to keep cursor visible</li>
+                <li class="mb-2">Disable autocorrect for code blocks</li>
+                <li class="mb-2">Test with different keyboard apps</li>
+                <li class="mb-2">Handle touch selection imprecision</li>
+                <li class="mb-2">Consider mobile performance constraints</li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/mobile-support"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling guide' },
+                { title: 'Testing Strategies', href: '/editor/testing-strategies', description: 'Testing strategies' },
+                { title: 'Debugging Techniques', href: '/editor/debugging', description: 'Debugging strategies' },
+                { title: 'Accessibility', href: '/editor/accessibility', description: 'Accessibility best practices' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

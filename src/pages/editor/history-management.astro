@@ -1,0 +1,1182 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'model-based-history', text: 'Model-Based History Management' },
+  { depth: 3, slug: 'history-architecture', text: 'History Architecture' },
+  { depth: 3, slug: 'operation-tracking', text: 'Operation Tracking' },
+  { depth: 3, slug: 'state-snapshots', text: 'State Snapshots' },
+  { depth: 2, slug: 'dom-history-conflict', text: 'DOM History Conflict' },
+  { depth: 3, slug: 'browser-history-limitations', text: 'Browser History Limitations' },
+  { depth: 3, slug: 'preventdefault-impact', text: 'preventDefault() Impact' },
+  { depth: 3, slug: 'programmatic-changes', text: 'Programmatic Changes' },
+  { depth: 2, slug: 'ime-composition-history', text: 'IME Composition and History' },
+  { depth: 3, slug: 'composition-state-mismatch', text: 'Composition State Mismatch' },
+  { depth: 3, slug: 'preventdefault-composition', text: 'preventDefault() During Composition' },
+  { depth: 3, slug: 'composition-history-tracking', text: 'Composition History Tracking' },
+  { depth: 2, slug: 'history-synchronization', text: 'History Synchronization Strategies' },
+  { depth: 3, slug: 'disable-browser-history', text: 'Disable Browser History' },
+  { depth: 3, slug: 'hybrid-approach', text: 'Hybrid Approach' },
+  { depth: 3, slug: 'history-reconciliation', text: 'History Reconciliation' },
+  { depth: 2, slug: 'selection-in-history', text: 'Selection in History' },
+  { depth: 3, slug: 'selection-preservation', text: 'Selection Preservation' },
+  { depth: 3, slug: 'selection-transformation', text: 'Selection Transformation' },
+  { depth: 2, slug: 'transaction-history', text: 'Transaction and History' },
+  { depth: 3, slug: 'transaction-grouping', text: 'Transaction Grouping' },
+  { depth: 3, slug: 'undo-transaction', text: 'Undo Transaction Boundaries' },
+  { depth: 2, slug: 'edge-cases', text: 'Edge Cases and Pitfalls' },
+  { depth: 3, slug: 'focus-changes', text: 'Focus Changes' },
+  { depth: 3, slug: 'external-dom-changes', text: 'External DOM Changes' },
+  { depth: 3, slug: 'browser-extensions', text: 'Browser Extensions' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="History Management – Editor Architecture – contenteditable.lab"
+      description="Professional guide to history management in model-based editors: handling DOM conflicts, IME composition, and browser history synchronization"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">History Management</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              History Management
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Managing undo/redo history in model-based editors requires careful coordination between your model state and browser's DOM history. This guide covers the challenges and solutions for professional history management.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                History management in model-based editors is fundamentally different from browser's native undo/redo. Your model tracks operations, while the browser tracks DOM changes. These two systems can conflict, especially when using <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> or during IME composition.
+              </p>
+              <DocAlert type="error" title="⚠️ Core Challenge">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>The fundamental problem:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Browser history tracks DOM changes, not model operations</li>
+                  <li class="mb-1">Using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> prevents DOM changes but browser may still update internal state</li>
+                  <li class="mb-1">IME composition state can become corrupted when events are prevented</li>
+                  <li class="mb-1">Programmatic model changes don't appear in browser history</li>
+                  <li class="mb-1">Selection must be preserved across history operations</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="model-based-history" title="Model-Based History Management">
+              <p class="m-0 mb-4">
+                Model-based history tracks operations on your abstract document model, not DOM changes. This provides more control but requires careful synchronization.
+              </p>
+
+              <DocSection id="history-architecture" title="History Architecture" depth={3}>
+                <p class="m-0 mb-3">
+                  Design your history system around model operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  operations: Operation[];
+  inverseOperations?: Operation[]; // Pre-computed inverses for undo
+  // Note: beforeModel/afterModel are optional - avoid storing full snapshots
+  // Use operation-based undo instead (see history-management-optimization)
+  beforeModel?: DocumentModel; // Only if needed for specific use cases
+  afterModel?: DocumentModel;  // Only if needed for specific use cases
+  beforeSelection: Selection | null;
+  afterSelection: Selection | null;
+  metadata?: {
+    source: 'user' | 'programmatic' | 'undo' | 'redo';
+    compositionState?: CompositionState;
+  };
+}
+
+interface Operation {
+  type: 'insert' | 'delete' | 'format' | 'replace';
+  path: Path;
+  data?: any;
+  inverse?: Operation; // For efficient undo
+}
+
+class HistoryManager {
+  private undoStack: HistoryEntry[] = [];
+  private redoStack: HistoryEntry[] = [];
+  private maxSize: number = 50;
+  private currentEntry: HistoryEntry | null = null;
+  
+  constructor(private model: DocumentModel) {}
+  
+  // Record a new history entry
+  // Note: Avoid cloning full models - use operation-based approach instead
+  record(operations: Operation[], selection: Selection | null) {
+    const beforeSelection = selection;
+    
+    // Apply operations
+    operations.forEach(op => this.model.apply(op));
+    
+    const afterSelection = this.calculateSelectionAfterOperations(
+      beforeSelection,
+      operations
+    );
+    
+    // Compute inverse operations for efficient undo
+    const inverseOperations = this.computeInverseOperations(operations);
+    
+    const entry: HistoryEntry = {
+      id: this.generateId(),
+      timestamp: Date.now(),
+      operations,
+      inverseOperations, // Use inverses instead of model snapshots
+      beforeSelection,
+      afterSelection,
+      metadata: {
+        source: 'user'
+      }
+      // NO beforeModel/afterModel - too memory-intensive!
+    };
+    
+    this.undoStack.push(entry);
+    if (this.undoStack.length > this.maxSize) {
+      this.undoStack.shift();
+    }
+    this.redoStack = []; // Clear redo on new action
+  }
+  
+  // Compute inverse operations for undo
+  computeInverseOperations(operations: Operation[]): Operation[] {
+    // Reverse order and compute inverse for each
+    return operations
+      .slice()
+      .reverse()
+      .map(op => this.getInverseOperation(op));
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="operation-tracking" title="Operation Tracking" depth={3}>
+                <p class="m-0 mb-3">
+                  Track all operations that modify the model:
+                </p>
+                <DocCodeBlock language="typescript" code={`class OperationTracker {
+  private pendingOperations: Operation[] = [];
+  private isRecording = false;
+  
+  startRecording() {
+    this.isRecording = true;
+    this.pendingOperations = [];
+  }
+  
+  recordOperation(operation: Operation) {
+    if (this.isRecording) {
+      this.pendingOperations.push(operation);
+    }
+  }
+  
+  stopRecording(): Operation[] {
+    this.isRecording = false;
+    const operations = [...this.pendingOperations];
+    this.pendingOperations = [];
+    return operations;
+  }
+  
+  // Integrate with event handlers
+  handleBeforeInput(e: InputEvent) {
+    this.startRecording();
+    
+    // Convert DOM event to model operation
+    const operation = this.domEventToOperation(e);
+    this.recordOperation(operation);
+    
+    // Prevent default to handle in model
+    e.preventDefault();
+    
+    // Apply to model
+    this.model.apply(operation);
+    
+    // Stop recording and save to history
+    const operations = this.stopRecording();
+    this.historyManager.record(operations, this.saveSelection());
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="state-snapshots" title="State Snapshots" depth={3}>
+                <p class="m-0 mb-3">
+                  <strong>⚠️ Important:</strong> Storing full model snapshots is memory-intensive. Use operation-based history instead.
+                </p>
+                <DocAlert type="error">
+                  <p class="m-0 mb-2 text-sm">
+                    <strong>Avoid full model snapshots:</strong> Storing complete model clones for each history entry consumes excessive memory and is slow for large documents.
+                  </p>
+                  <p class="m-0 mt-2 text-sm">
+                    See <a href="/editor/history-management-optimization" class="text-accent-primary underline">History Management Optimization</a> for the recommended operation-based approach.
+                  </p>
+                </DocAlert>
+                <DocCodeBlock language="typescript" code={`// ❌ AVOID: Full model snapshots (memory-intensive)
+class HistoryManager {
+  // Option 1: Full model snapshots (simple but memory-intensive)
+  createSnapshot(model: DocumentModel): DocumentModel {
+    return model.clone(); // Deep clone - expensive!
+  }
+}
+
+// ✅ PREFERRED: Operation-based (memory-efficient)
+class HistoryManager {
+  // Store only operations, use inverse operations for undo
+  createSnapshot(operations: Operation[]): HistoryEntry {
+    return {
+      operations,
+      inverseOperations: this.computeInverses(operations),
+      // NO full model snapshots!
+    };
+  }
+  
+  // Apply inverse operations for undo
+  undo() {
+    const entry = this.#undoStack.pop()!;
+    entry.inverseOperations.forEach(op => this.model.apply(op));
+  }
+}
+
+// See history-management-optimization for complete implementation`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="dom-history-conflict" title="DOM History Conflict">
+              <p class="m-0 mb-4">
+                Browser's native history and your model history can conflict. Understanding these conflicts is crucial for reliable history management.
+              </p>
+
+              <DocSection id="browser-history-limitations" title="Browser History Limitations" depth={3}>
+                <p class="m-0 mb-3">
+                  Browser history has several limitations:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Only tracks DOM changes:</strong> Programmatic changes may not be included</li>
+                  <li><strong>Granularity varies:</strong> Some browsers undo per keystroke, others per operation</li>
+                  <li><strong>Can be cleared unexpectedly:</strong> Focus changes, programmatic DOM updates</li>
+                  <li><strong>No operation metadata:</strong> Can't distinguish user actions from programmatic changes</li>
+                  <li><strong>Selection not preserved:</strong> Undo may lose selection position</li>
+                </ul>
+                <DocCodeBlock language="typescript" code={`// Browser history behavior
+// ❌ Problem: Programmatic changes not in history
+element.innerHTML = newContent; // Not in browser undo stack
+
+// ❌ Problem: preventDefault() operations not in history
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+  // Custom operation - not in browser history
+  this.applyCustomOperation();
+});
+
+// ❌ Problem: History cleared on focus change
+element.addEventListener('blur', () => {
+  // Browser may clear undo stack
+});
+
+// ✅ Solution: Use custom history
+class HistoryManager {
+  recordOperation(operation) {
+    // Always track in custom history
+    this.undoStack.push({
+      operation,
+      beforeModel: this.model.clone(),
+      afterModel: this.applyOperation(operation)
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="preventdefault-impact" title="preventDefault() Impact" depth={3}>
+                <p class="m-0 mb-3">
+                  When you call <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>, you prevent DOM changes but browser's internal state may still update:
+                </p>
+                <DocCodeBlock language="typescript" code={`// The problem
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault(); // Prevent DOM change
+  
+  // Apply to model instead
+  const operation = this.domEventToOperation(e);
+  this.model.apply(operation);
+  
+  // ❌ Problem: Browser's internal state (IME, undo stack) may be updated
+  // even though DOM didn't change
+});
+
+// Browser's perspective:
+// 1. beforeinput fires → you preventDefault()
+// 2. Browser doesn't update DOM (because prevented)
+// 3. BUT browser may have already:
+//    - Updated internal IME state
+//    - Added entry to undo stack (in some browsers)
+//    - Updated selection tracking
+// 4. This creates mismatch between browser state and actual DOM`} />
+                <DocAlert type="error" title="⚠️ State Mismatch" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    <strong>Critical issue:</strong> Browser's internal state (IME composition, undo stack, selection tracking) may be updated even when <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> is called. This creates a mismatch between what the browser thinks happened and what actually happened in the DOM.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="programmatic-changes" title="Programmatic Changes" depth={3}>
+                <p class="m-0 mb-3">
+                  Programmatic model changes don't appear in browser history:
+                </p>
+                <DocCodeBlock language="typescript" code={`// User types "Hello" → Browser adds to undo stack
+// You programmatically insert "World" → Browser does NOT add to undo stack
+
+class Editor {
+  insertText(text: string) {
+    const operation = {
+      type: 'insert',
+      path: this.getSelection().anchor,
+      text: text
+    };
+    
+    // Apply to model
+    this.model.apply(operation);
+    
+    // Update DOM
+    this.renderModelToDOM();
+    
+    // ❌ Problem: This change is NOT in browser's undo stack
+    // User presses Ctrl+Z → Only "Hello" is undone, "World" remains
+    
+    // ✅ Solution: Always record in custom history
+    this.historyManager.record([operation], this.saveSelection());
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="ime-composition-history" title="IME Composition and History">
+              <p class="m-0 mb-4">
+                IME composition creates unique challenges for history management. Preventing events during composition can corrupt browser's IME state.
+              </p>
+
+              <DocSection id="composition-state-mismatch" title="Composition State Mismatch" depth={3}>
+                <p class="m-0 mb-3">
+                  When you prevent events during composition, browser's IME state can become corrupted:
+                </p>
+                <DocCodeBlock language="typescript" code={`// The critical problem
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault(); // Prevent paragraph insertion
+    
+    // ❌ Problem: If composition is active, browser's IME state becomes corrupted
+    // Browser thinks composition ended, but it's still active internally
+    // Next IME input fails because browser state is inconsistent
+  }
+});
+
+// What happens:
+// 1. User is composing Korean text (한글)
+// 2. User presses Enter → insertParagraph fires
+// 3. You call preventDefault()
+// 4. Browser's internal IME state thinks composition ended
+// 5. BUT composition is still active from IME's perspective
+// 6. Next character input fails because state mismatch`} />
+                <DocAlert type="error" title="⚠️ Safari Composition Corruption" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    <strong>Safari-specific issue:</strong> In Safari, preventing <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code> during or after IME composition corrupts the browser's IME state. Subsequent IME input fails completely. This affects Korean, Japanese, and Chinese IME.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="preventdefault-composition" title="preventDefault() During Composition" depth={3}>
+                <p class="m-0 mb-3">
+                  Always check composition state before preventing events:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionAwareHistory {
+  private isComposing = false;
+  private compositionState: CompositionState | null = null;
+  
+  init(editor: HTMLElement) {
+    // Track composition state
+    editor.addEventListener('compositionstart', () => {
+      this.isComposing = true;
+      this.compositionState = {
+        startTime: Date.now(),
+        text: ''
+      };
+    });
+    
+    editor.addEventListener('compositionend', (e) => {
+      this.isComposing = false;
+      // Record composition as single operation
+      this.recordCompositionOperation(e.data);
+      this.compositionState = null;
+    });
+    
+    // NEVER prevent events during composition
+    editor.addEventListener('beforeinput', (e) => {
+      if (this.isComposing) {
+        // Allow browser to handle composition
+        // Don't prevent default
+        return;
+      }
+      
+      // Only prevent when NOT composing
+      if (e.inputType === 'insertParagraph') {
+        e.preventDefault();
+        this.handleCustomParagraphInsertion();
+      }
+    });
+  }
+  
+  // Alternative: Check isComposing flag
+  handleBeforeInput(e: InputEvent) {
+    // Check both our state and browser's flag
+    if (this.isComposing || e.isComposing) {
+      // Don't prevent during composition
+      return;
+    }
+    
+    // Safe to prevent
+    if (e.inputType === 'insertParagraph') {
+      e.preventDefault();
+      this.handleCustomOperation();
+    }
+  }
+}`} />
+                <DocCodeBlock language="typescript" code={`// ✅ Safe pattern: Always check composition
+editor.addEventListener('beforeinput', (e) => {
+  // NEVER prevent during composition
+  if (e.isComposing || this.compositionHandler.isComposing) {
+    return; // Let browser handle
+  }
+  
+  // Safe to prevent
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault();
+    this.handleCustomParagraph();
+  }
+});
+
+// ✅ Alternative: Check in keydown
+editor.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    // Check composition state
+    if (e.isComposing || this.compositionHandler.isComposing) {
+      return; // Let browser handle Enter during composition
+    }
+    
+    e.preventDefault();
+    this.handleCustomEnter();
+  }
+});`} />
+              </DocSection>
+
+              <DocSection id="composition-history-tracking" title="Composition History Tracking" depth={3}>
+                <p class="m-0 mb-3">
+                  Track composition as a single history entry:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionHistory {
+  private compositionStartModel: DocumentModel | null = null;
+  private compositionStartSelection: Selection | null = null;
+  
+  handleCompositionStart() {
+    // Save state at composition start
+    this.compositionStartModel = this.model.clone();
+    this.compositionStartSelection = this.saveSelection();
+    
+    // Don't record intermediate updates
+    this.isRecordingComposition = true;
+  }
+  
+  handleCompositionUpdate(text: string) {
+    // Update model for visual feedback
+    // But don't record in history yet
+    this.updateCompositionDisplay(text);
+  }
+  
+  handleCompositionEnd(finalText: string) {
+    // Now record as single operation
+    const operation = {
+      type: 'insertText',
+      path: this.compositionStartSelection.anchor,
+      text: finalText,
+      metadata: {
+        source: 'ime',
+        composition: true
+      }
+    };
+    
+    // Record in history
+    this.historyManager.record(
+      [operation],
+      this.compositionStartSelection,
+      {
+        compositionState: {
+          startText: '',
+          endText: finalText
+        }
+      }
+    );
+    
+    this.isRecordingComposition = false;
+  }
+  
+  // Prevent recording intermediate composition updates
+  shouldRecordOperation(operation: Operation): boolean {
+    if (this.isRecordingComposition) {
+      // Don't record composition updates, only final result
+      return false;
+    }
+    return true;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="history-synchronization" title="History Synchronization Strategies">
+              <p class="m-0 mb-4">
+                You need to synchronize your model history with browser's DOM history, or disable browser history entirely.
+              </p>
+
+              <DocSection id="disable-browser-history" title="Disable Browser History" depth={3}>
+                <p class="m-0 mb-3">
+                  Completely disable browser history and use only custom history:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  disableBrowserHistory() {
+    // Prevent browser's undo/redo
+    this.editor.addEventListener('beforeinput', (e) => {
+      if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+        e.preventDefault();
+        
+        if (e.inputType === 'historyUndo') {
+          this.undo();
+        } else {
+          this.redo();
+        }
+      }
+    });
+    
+    // Also handle keyboard shortcuts
+    this.editor.addEventListener('keydown', (e) => {
+      const isUndo = (e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey;
+      const isRedo = (e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey));
+      
+      if (isUndo || isRedo) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (isUndo) {
+          this.undo();
+        } else {
+          this.redo();
+        }
+      }
+    });
+    
+    // Clear browser's undo stack by manipulating DOM
+    // (Browser clears stack when DOM is replaced)
+    this.clearBrowserStack();
+  }
+  
+  clearBrowserStack() {
+    // Force clear by replacing content
+    const content = this.editor.innerHTML;
+    this.editor.innerHTML = content; // Browser clears stack
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="hybrid-approach" title="Hybrid Approach" depth={3}>
+                <p class="m-0 mb-3">
+                  Use browser history for simple operations, custom history for complex ones:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HybridHistoryManager {
+  shouldUseBrowserHistory(operation: Operation): boolean {
+    // Use browser history for simple text insertions
+    if (operation.type === 'insertText' && operation.text.length === 1) {
+      return true; // Let browser handle
+    }
+    
+    // Use custom history for complex operations
+    if (operation.type === 'format' || 
+        operation.type === 'insertNode' ||
+        operation.complex) {
+      return false; // Use custom history
+    }
+    
+    return false; // Default to custom
+  }
+  
+  handleOperation(operation: Operation) {
+    if (this.shouldUseBrowserHistory(operation)) {
+      // Don't prevent default, let browser handle
+      // But still track in our history for consistency
+      this.recordInCustomHistory(operation);
+    } else {
+      // Prevent default, use custom history
+      this.preventDefaultAndRecord(operation);
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="history-reconciliation" title="History Reconciliation" depth={3}>
+                <p class="m-0 mb-3">
+                  Reconcile browser history with model history:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryReconciler {
+  reconcile() {
+    // Detect if browser history was used
+    const browserHistoryUsed = this.detectBrowserHistoryUse();
+    
+    if (browserHistoryUsed) {
+      // Browser undid something, sync model
+      const currentDOM = this.parseDOMToModel(this.editor);
+      
+      // Find matching history entry
+      const matchingEntry = this.findMatchingHistoryEntry(currentDOM);
+      
+      if (matchingEntry) {
+        // Restore model to this state
+        this.model = matchingEntry.beforeModel;
+      } else {
+        // No match, sync from DOM
+        this.model = currentDOM;
+      }
+    }
+  }
+  
+  detectBrowserHistoryUse(): boolean {
+    // Monitor for browser undo/redo
+    let browserHistoryUsed = false;
+    
+    this.editor.addEventListener('beforeinput', (e) => {
+      if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+        browserHistoryUsed = true;
+        // Don't prevent, let browser handle
+        // But sync model after
+        setTimeout(() => {
+          this.reconcile();
+        }, 0);
+      }
+    });
+    
+    return browserHistoryUsed;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="selection-in-history" title="Selection in History">
+              <p class="m-0 mb-4">
+                Selection must be preserved and transformed correctly across history operations.
+              </p>
+
+              <DocSection id="selection-preservation" title="Selection Preservation" depth={3}>
+                <p class="m-0 mb-3">
+                  Always save and restore selection with history entries:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  undo() {
+    if (this.undoStack.length === 0) return false;
+    
+    const entry = this.undoStack.pop();
+    
+    // Save current state for redo
+    const currentState = {
+      model: this.model.clone(),
+      selection: this.saveSelection()
+    };
+    this.redoStack.push(currentState);
+    
+    // Restore model
+    this.model = entry.beforeModel;
+    
+    // Update DOM from model
+    this.renderModelToDOM(this.model);
+    
+    // Restore selection in next frame (after DOM update)
+    requestAnimationFrame(() => {
+      this.restoreSelection(entry.beforeSelection);
+    });
+    
+    return true;
+  }
+  
+  saveSelection(): Selection {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return null;
+    
+    const range = selection.getRangeAt(0);
+    
+    // Convert to model selection
+    return {
+      anchor: this.domPositionToModelPath(range.startContainer, range.startOffset),
+      focus: this.domPositionToModelPath(range.endContainer, range.endOffset),
+      collapsed: range.collapsed
+    };
+  }
+  
+  restoreSelection(modelSelection: Selection) {
+    if (!modelSelection) return;
+    
+    // Convert model selection to DOM
+    const anchorPos = this.modelPathToDOMPosition(modelSelection.anchor);
+    const focusPos = this.modelPathToDOMPosition(modelSelection.focus);
+    
+    if (!anchorPos || !focusPos) {
+      // Selection invalid, find nearest valid position
+      const nearest = this.findNearestValidPosition(modelSelection.anchor);
+      if (nearest) {
+        this.restoreSelection({ anchor: nearest, focus: nearest, collapsed: true });
+      }
+      return;
+    }
+    
+    const range = document.createRange();
+    range.setStart(anchorPos.node, anchorPos.offset);
+    range.setEnd(focusPos.node, focusPos.offset);
+    
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="selection-transformation" title="Selection Transformation" depth={3}>
+                <p class="m-0 mb-3">
+                  Transform selection when operations affect it:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SelectionTransformer {
+  transformSelection(
+    selection: Selection,
+    operation: Operation
+  ): Selection {
+    // Transform selection based on operation
+    switch (operation.type) {
+      case 'insert':
+        return this.transformForInsert(selection, operation);
+      case 'delete':
+        return this.transformForDelete(selection, operation);
+      case 'replace':
+        return this.transformForReplace(selection, operation);
+      default:
+        return selection;
+    }
+  }
+  
+  transformForInsert(selection: Selection, operation: Operation): Selection {
+    const { path, data } = operation;
+    
+    // If insertion is before selection, shift selection
+    if (this.isBefore(path, selection.anchor.path)) {
+      return {
+        anchor: {
+          ...selection.anchor,
+          offset: selection.anchor.offset + data.length
+        },
+        focus: {
+          ...selection.focus,
+          offset: selection.focus.offset + data.length
+        }
+      };
+    }
+    
+    // If insertion is within selection, expand selection
+    if (this.isWithin(path, selection)) {
+      return {
+        ...selection,
+        // Selection expands to include inserted content
+      };
+    }
+    
+    return selection; // No change
+  }
+  
+  transformForDelete(selection: Selection, operation: Operation): Selection {
+    const { path, length } = operation;
+    
+    // If deletion is before selection, shift selection
+    if (this.isBefore(path, selection.anchor.path)) {
+      const shift = Math.min(length, selection.anchor.offset);
+      return {
+        anchor: {
+          ...selection.anchor,
+          offset: Math.max(0, selection.anchor.offset - shift)
+        },
+        focus: {
+          ...selection.focus,
+          offset: Math.max(0, selection.focus.offset - shift)
+        }
+      };
+    }
+    
+    // If deletion overlaps selection, adjust selection
+    if (this.overlaps(path, length, selection)) {
+      // Collapse to deletion start
+      return {
+        anchor: path,
+        focus: path,
+        collapsed: true
+      };
+    }
+    
+    return selection;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="transaction-history" title="Transaction and History">
+              <p class="m-0 mb-4">
+                Group related operations into transactions for atomic history entries.
+              </p>
+
+              <DocSection id="transaction-grouping" title="Transaction Grouping" depth={3}>
+                <p class="m-0 mb-3">
+                  Group operations into transactions:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TransactionHistory {
+  private currentTransaction: Operation[] = [];
+  private isInTransaction = false;
+  
+  startTransaction() {
+    this.isInTransaction = true;
+    this.currentTransaction = [];
+  }
+  
+  addToTransaction(operation: Operation) {
+    if (this.isInTransaction) {
+      this.currentTransaction.push(operation);
+    } else {
+      // Not in transaction, record immediately
+      this.record([operation]);
+    }
+  }
+  
+  commitTransaction() {
+    if (this.currentTransaction.length > 0) {
+      // Record all operations as single history entry
+      this.record(this.currentTransaction);
+      this.currentTransaction = [];
+    }
+    this.isInTransaction = false;
+  }
+  
+  rollbackTransaction() {
+    // Undo all operations in transaction
+    this.currentTransaction.forEach(op => {
+      this.model.apply(op.inverse);
+    });
+    this.currentTransaction = [];
+    this.isInTransaction = false;
+  }
+  
+  // Example: Formatting operation
+  applyFormatting(format: Format) {
+    this.startTransaction();
+    
+    // Multiple operations for formatting
+    this.addToTransaction({ type: 'format', format, start: selection.start });
+    this.addToTransaction({ type: 'format', format, end: selection.end });
+    
+    this.commitTransaction(); // Single undo entry
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="undo-transaction" title="Undo Transaction Boundaries" depth={3}>
+                <p class="m-0 mb-3">
+                  Define what constitutes a single undo operation:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  // Group operations within time window
+  private lastOperationTime = 0;
+  private operationWindow = 300; // 300ms
+  
+  shouldGroupWithPrevious(operation: Operation): boolean {
+    const now = Date.now();
+    const timeSinceLastOp = now - this.lastOperationTime;
+    
+    // Group if within time window
+    if (timeSinceLastOp < this.operationWindow) {
+      return true;
+    }
+    
+    this.lastOperationTime = now;
+    return false;
+  }
+  
+  recordOperation(operation: Operation) {
+    if (this.shouldGroupWithPrevious(operation)) {
+      // Add to previous entry
+      const lastEntry = this.undoStack[this.undoStack.length - 1];
+      lastEntry.operations.push(operation);
+      lastEntry.afterModel = this.applyOperation(operation, lastEntry.afterModel);
+    } else {
+      // New entry
+      this.record([operation]);
+    }
+  }
+  
+  // Group by operation type
+  shouldGroupByType(op1: Operation, op2: Operation): boolean {
+    // Group consecutive text insertions
+    if (op1.type === 'insertText' && op2.type === 'insertText') {
+      return this.areAdjacent(op1.path, op2.path);
+    }
+    
+    return false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="edge-cases" title="Edge Cases and Pitfalls">
+              <p class="m-0 mb-4">
+                Common edge cases that break history management:
+              </p>
+
+              <DocSection id="focus-changes" title="Focus Changes" depth={3}>
+                <p class="m-0 mb-3">
+                  Focus changes can clear browser history:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  handleFocusChange() {
+    this.editor.addEventListener('blur', () => {
+      // Browser may clear undo stack on blur
+      // Save current state before blur
+      this.saveStateBeforeBlur();
+    });
+    
+    this.editor.addEventListener('focus', () => {
+      // Browser may have cleared stack
+      // Restore if needed
+      this.restoreStateAfterFocus();
+    });
+  }
+  
+  // Prevent history loss on focus change
+  saveStateBeforeBlur() {
+    // Save to persistent storage or keep in memory
+    this.persistentState = {
+      model: this.model.clone(),
+      undoStack: this.undoStack,
+      redoStack: this.redoStack
+    };
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="external-dom-changes" title="External DOM Changes" depth={3}>
+                <p class="m-0 mb-3">
+                  External DOM changes can corrupt history:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  watchForExternalChanges() {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (!this.isExpectedChange(mutation)) {
+          // External change detected
+          // Option 1: Revert to model
+          this.revertToModel();
+          
+          // Option 2: Sync model from DOM
+          // this.syncModelFromDOM();
+          
+          // Option 3: Clear history (safest)
+          // this.clearHistory();
+        }
+      });
+    });
+    
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+  }
+  
+  isExpectedChange(mutation: MutationRecord): boolean {
+    // Check if this change was initiated by our code
+    return mutation.target.hasAttribute('data-expected-change') ||
+           this.isOurOperation(mutation);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="browser-extensions" title="Browser Extensions" depth={3}>
+                <p class="m-0 mb-3">
+                  Browser extensions can corrupt history:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  handleExtensionInterference() {
+    // Extensions (Grammarly, spell checkers) modify DOM
+    // This can corrupt browser history
+    
+    // Solution: Always use custom history
+    this.disableBrowserHistory();
+    
+    // Monitor for extension changes
+    this.watchForExternalChanges();
+    
+    // Revert extension changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (this.isExtensionChange(mutation)) {
+          // Revert to model
+          this.revertToModel();
+        }
+      });
+    });
+    
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true
+    });
+  }
+  
+  isExtensionChange(mutation: MutationRecord): boolean {
+    // Detect extension-specific markers
+    return mutation.target.classList?.contains('grammarly-') ||
+           mutation.target.hasAttribute('data-grammarly') ||
+           mutation.target.classList?.contains('spell-check-');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <p class="m-0 mb-4">
+                Best practices for professional history management:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Always disable browser history:</strong> Use custom history for full control</li>
+                <li><strong>Never prevent events during composition:</strong> Check <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">isComposing</code> before <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code></li>
+                <li><strong>Record composition as single operation:</strong> Don't record intermediate updates</li>
+                <li><strong>Always preserve selection:</strong> Save and restore selection with each history entry</li>
+                <li><strong>Use transactions for atomic operations:</strong> Group related operations</li>
+                <li><strong>Transform selection correctly:</strong> Adjust selection when operations affect it</li>
+                <li><strong>Handle external changes:</strong> Monitor and revert unexpected DOM modifications</li>
+                <li><strong>Validate history entries:</strong> Check model consistency after undo/redo</li>
+                <li><strong>Use efficient snapshots:</strong> Balance memory usage with reconstruction speed</li>
+                <li><strong>Test across browsers:</strong> History behavior varies significantly</li>
+              </ul>
+              <DocCodeBlock language="typescript" code={`class ProfessionalHistoryManager {
+  // Complete implementation
+  constructor(model: DocumentModel, editor: HTMLElement) {
+    this.model = model;
+    this.editor = editor;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.compositionHandler = new CompositionHandler();
+    
+    this.init();
+  }
+  
+  init() {
+    // 1. Disable browser history
+    this.disableBrowserHistory();
+    
+    // 2. Track composition state
+    this.compositionHandler.init(this.editor);
+    
+    // 3. Handle events
+    this.setupEventHandlers();
+    
+    // 4. Watch for external changes
+    this.watchForExternalChanges();
+  }
+  
+  handleBeforeInput(e: InputEvent) {
+    // NEVER prevent during composition
+    if (e.isComposing || this.compositionHandler.isComposing) {
+      return; // Let browser handle
+    }
+    
+    // Convert to operation
+    const operation = this.domEventToOperation(e);
+    
+    // Prevent default
+    e.preventDefault();
+    
+    // Apply to model
+    this.model.apply(operation);
+    
+    // Record in history
+    this.record([operation], this.saveSelection());
+    
+    // Update DOM
+    this.renderModelToDOM();
+    
+    // Restore selection
+    requestAnimationFrame(() => {
+      this.restoreSelection(this.calculateSelectionAfterOperation(operation));
+    });
+  }
+  
+  undo() {
+    if (this.undoStack.length === 0) return false;
+    
+    const entry = this.undoStack.pop();
+    
+    // Save for redo
+    this.redoStack.push({
+      model: this.model.clone(),
+      selection: this.saveSelection()
+    });
+    
+    // Restore model
+    this.model = entry.beforeModel;
+    
+    // Update DOM
+    this.renderModelToDOM();
+    
+    // Restore selection
+    requestAnimationFrame(() => {
+      this.restoreSelection(entry.beforeSelection);
+    });
+    
+    return true;
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/history-management"
+              pages={[
+                { title: 'History Optimization', href: '/editor/history-management-optimization', description: 'Operation-based history for better performance' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Using transactions for atomic history' },
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Operations', href: '/editor/operations', description: 'Operation types and usage' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

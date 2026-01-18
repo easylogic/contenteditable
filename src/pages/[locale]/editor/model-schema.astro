@@ -54,7 +54,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="모델 & 스키마 – contenteditable.lab"
@@ -108,7 +108,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   각 노드 타입은 해당 속성을 정의하는 스펙을 가집니다:
                 </p>
-                <DocCodeBlock code={`const schema = {
+                <DocCodeBlock language="typescript" code={`const schema = {
   nodes: {
     document: {
       content: 'block+',  // 하나 이상의 블록을 포함해야 함
@@ -144,7 +144,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   마크는 텍스트에 적용할 수 있는 포맷팅을 정의합니다:
                 </p>
-                <DocCodeBlock code={`const schema = {
+                <DocCodeBlock language="typescript" code={`const schema = {
   marks: {
     bold: {
       // 속성이 없는 단순 마크
@@ -177,7 +177,7 @@ const headings = [
                   <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'paragraph | heading'</code> - 단락 또는 제목</li>
                   <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'(paragraph | heading)+'</code> - 하나 이상의 단락 또는 제목</li>
                 </ul>
-                <DocCodeBlock code={`// 콘텐츠 규칙 예제
+                <DocCodeBlock language="typescript" code={`// 콘텐츠 규칙 예제
 {
   document: {
     content: 'block+'  // 문서는 최소 하나의 블록을 가져야 함
@@ -215,7 +215,7 @@ const headings = [
                   <li>인용구</li>
                   <li>테이블</li>
                 </ul>
-                <DocCodeBlock code={`// 블록 노드 예제
+                <DocCodeBlock language="typescript" code={`// 블록 노드 예제
 {
   type: 'paragraph',
   children: [
@@ -251,7 +251,7 @@ const headings = [
                   <li>멘션</li>
                   <li>사용자 정의 인라인 요소</li>
                 </ul>
-                <DocCodeBlock code={`// 인라인 노드 예제
+                <DocCodeBlock language="typescript" code={`// 인라인 노드 예제
 {
   type: 'link',
   attrs: { href: 'https://example.com' },
@@ -275,7 +275,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   텍스트 노드는 실제 텍스트 콘텐츠를 포함하며 마크를 가질 수 있습니다:
                 </p>
-                <DocCodeBlock code={`// 마크가 있는 텍스트 노드
+                <DocCodeBlock language="typescript" code={`// 마크가 있는 텍스트 노드
 {
   type: 'text',
   text: '볼드와 이탤릭',
@@ -304,7 +304,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   문서는 루트 문서 노드를 가진 트리입니다:
                 </p>
-                <DocCodeBlock code={`// 완전한 문서 구조
+                <DocCodeBlock language="typescript" code={`// 완전한 문서 구조
 {
   type: 'document',
   children: [
@@ -343,7 +343,7 @@ const headings = [
                   <li>텍스트 노드는 인라인 또는 블록 내부에만 존재할 수 있음</li>
                   <li>일부 노드는 특정 콘텐츠 요구사항을 가짐</li>
                 </ul>
-                <DocCodeBlock code={`// 유효한 구조
+                <DocCodeBlock language="typescript" code={`// 유효한 구조
 {
   type: 'paragraph',
   children: [
@@ -387,7 +387,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   마크는 텍스트 노드에 적용되는 포맷팅입니다:
                 </p>
-                <DocCodeBlock code={`// 단일 마크가 있는 텍스트
+                <DocCodeBlock language="typescript" code={`// 단일 마크가 있는 텍스트
 {
   type: 'text',
   text: '볼드 텍스트',
@@ -422,7 +422,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   일부 마크는 속성을 가집니다:
                 </p>
-                <DocCodeBlock code={`// 속성이 있는 링크 마크
+                <DocCodeBlock language="typescript" code={`// 속성이 있는 링크 마크
 {
   type: 'text',
   text: '예제',
@@ -455,7 +455,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   일부 마크는 다른 마크를 배제합니다 (예: 코드 마크는 포맷팅을 배제):
                 </p>
-                <DocCodeBlock code={`const schema = {
+                <DocCodeBlock language="typescript" code={`const schema = {
   marks: {
     code: {
       excludes: 'bold italic underline link'  // 코드는 다른 마크를 가질 수 없음
@@ -495,7 +495,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   문서 구조가 스키마와 일치하는지 검증합니다:
                 </p>
-                <DocCodeBlock code={`function validateDocument(doc, schema) {
+                <DocCodeBlock language="typescript" code={`function validateDocument(doc, schema) {
   // 루트 노드 타입 확인
   if (doc.type !== schema.topNode) {
     return { valid: false, error: '유효하지 않은 루트 노드' };
@@ -545,7 +545,7 @@ function validateNode(node, schema) {
                 <p class="m-0 mb-3">
                   노드 콘텐츠가 콘텐츠 규칙과 일치하는지 검증합니다:
                 </p>
-                <DocCodeBlock code={`function matchesContentRule(children, rule) {
+                <DocCodeBlock language="typescript" code={`function matchesContentRule(children, rule) {
   // 콘텐츠 규칙 파싱 (예: 'block+', 'inline*')
   const parsed = parseContentRule(rule);
   
@@ -581,7 +581,7 @@ function isInGroup(node, group) {
                 <p class="m-0 mb-3">
                   모델을 HTML로 직렬화합니다:
                 </p>
-                <DocCodeBlock code={`function serializeNode(node) {
+                <DocCodeBlock language="typescript" code={`function serializeNode(node) {
   switch (node.type) {
     case 'document':
       return serializeChildren(node.children);
@@ -632,7 +632,7 @@ function wrapWithMark(html, mark) {
                 <p class="m-0 mb-3">
                   HTML을 모델로 파싱합니다:
                 </p>
-                <DocCodeBlock code={`function parseHTML(html) {
+                <DocCodeBlock language="typescript" code={`function parseHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
@@ -698,7 +698,7 @@ function extractMarks(textNode) {
                   <li>유효하지 않은 속성 제거</li>
                   <li>중첩 위반 수정</li>
                 </ul>
-                <DocCodeBlock code={`function normalizeHTML(html) {
+                <DocCodeBlock language="typescript" code={`function normalizeHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   

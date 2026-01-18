@@ -5,6 +5,7 @@ import TableOfContents from '../../components/TableOfContents.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
 import '../../styles/global.css';
 
 const headings = [
@@ -88,7 +89,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Each node type has a spec that defines its properties:
                 </p>
-                <DocCodeBlock code={`const schema = {
+                <DocCodeBlock language="typescript" code={`const schema = {
   nodes: {
     document: {
       content: 'block+',  // Must contain one or more blocks
@@ -124,7 +125,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Marks define formatting that can be applied to text:
                 </p>
-                <DocCodeBlock code={`const schema = {
+                <DocCodeBlock language="typescript" code={`const schema = {
   marks: {
     bold: {
       // Simple mark with no attributes
@@ -157,7 +158,7 @@ const headings = [
                   <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'paragraph | heading'</code> - Paragraph or heading</li>
                   <li><code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">'(paragraph | heading)+'</code> - One or more paragraphs or headings</li>
                 </ul>
-                <DocCodeBlock code={`// Example content rules
+                <DocCodeBlock language="typescript" code={`// Example content rules
 {
   document: {
     content: 'block+'  // Document must have at least one block
@@ -195,7 +196,7 @@ const headings = [
                   <li>Blockquotes</li>
                   <li>Tables</li>
                 </ul>
-                <DocCodeBlock code={`// Block node examples
+                <DocCodeBlock language="typescript" code={`// Block node examples
 {
   type: 'paragraph',
   children: [
@@ -231,7 +232,7 @@ const headings = [
                   <li>Mentions</li>
                   <li>Custom inline elements</li>
                 </ul>
-                <DocCodeBlock code={`// Inline node examples
+                <DocCodeBlock language="typescript" code={`// Inline node examples
 {
   type: 'link',
   attrs: { href: 'https://example.com' },
@@ -255,7 +256,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Text nodes contain the actual text content and can have marks:
                 </p>
-                <DocCodeBlock code={`// Text node with marks
+                <DocCodeBlock language="typescript" code={`// Text node with marks
 {
   type: 'text',
   text: 'Bold and italic',
@@ -284,7 +285,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Documents are trees with a root document node:
                 </p>
-                <DocCodeBlock code={`// Complete document structure
+                <DocCodeBlock language="typescript" code={`// Complete document structure
 {
   type: 'document',
   children: [
@@ -323,7 +324,7 @@ const headings = [
                   <li>Text nodes can only be inside inlines or blocks</li>
                   <li>Some nodes have specific content requirements</li>
                 </ul>
-                <DocCodeBlock code={`// Valid structure
+                <DocCodeBlock language="typescript" code={`// Valid structure
 {
   type: 'paragraph',
   children: [
@@ -367,7 +368,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Marks are formatting applied to text nodes:
                 </p>
-                <DocCodeBlock code={`// Text with single mark
+                <DocCodeBlock language="typescript" code={`// Text with single mark
 {
   type: 'text',
   text: 'Bold text',
@@ -402,7 +403,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Some marks have attributes:
                 </p>
-                <DocCodeBlock code={`// Link mark with attributes
+                <DocCodeBlock language="typescript" code={`// Link mark with attributes
 {
   type: 'text',
   text: 'Example',
@@ -435,7 +436,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Some marks exclude others (e.g., code mark excludes formatting):
                 </p>
-                <DocCodeBlock code={`const schema = {
+                <DocCodeBlock language="typescript" code={`const schema = {
   marks: {
     code: {
       excludes: 'bold italic underline link'  // Code can't have other marks
@@ -475,7 +476,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Validate that document structure matches schema:
                 </p>
-                <DocCodeBlock code={`function validateDocument(doc, schema) {
+                <DocCodeBlock language="typescript" code={`function validateDocument(doc, schema) {
   // Check root node type
   if (doc.type !== schema.topNode) {
     return { valid: false, error: 'Invalid root node' };
@@ -525,7 +526,7 @@ function validateNode(node, schema) {
                 <p class="m-0 mb-3">
                   Validate that node content matches content rules:
                 </p>
-                <DocCodeBlock code={`function matchesContentRule(children, rule) {
+                <DocCodeBlock language="typescript" code={`function matchesContentRule(children, rule) {
   // Parse content rule (e.g., 'block+', 'inline*')
   const parsed = parseContentRule(rule);
   
@@ -561,7 +562,7 @@ function isInGroup(node, group) {
                 <p class="m-0 mb-3">
                   Serialize your model to HTML:
                 </p>
-                <DocCodeBlock code={`function serializeNode(node) {
+                <DocCodeBlock language="typescript" code={`function serializeNode(node) {
   switch (node.type) {
     case 'document':
       return serializeChildren(node.children);
@@ -612,7 +613,7 @@ function wrapWithMark(html, mark) {
                 <p class="m-0 mb-3">
                   Parse HTML into your model:
                 </p>
-                <DocCodeBlock code={`function parseHTML(html) {
+                <DocCodeBlock language="typescript" code={`function parseHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
@@ -678,7 +679,7 @@ function extractMarks(textNode) {
                   <li>Remove invalid attributes</li>
                   <li>Fix nesting violations</li>
                 </ul>
-                <DocCodeBlock code={`function normalizeHTML(html) {
+                <DocCodeBlock language="typescript" code={`function normalizeHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
@@ -720,6 +721,16 @@ function normalizeElements(element) {
 }`} />
               </section>
             </section>
+
+            <DocNavigation
+              current="/editor/model-schema"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Synchronizing model and DOM' },
+                { title: 'HTML Mapping', href: '/editor/html-mapping', description: 'HTML serialization and parsing' },
+                { title: 'Position & Selection', href: '/editor/position-selection', description: 'Position and selection management' },
+              ]}
+            />
           </article>
         </div>
         <TableOfContents headings={headings} />

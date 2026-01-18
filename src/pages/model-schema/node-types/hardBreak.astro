@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Hard Break</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   hardBreak: {
     group: 'inline',
     inline: true,
@@ -65,7 +65,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'hardBreak'
 }`} />
             </DocSection>
@@ -74,7 +74,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeHardBreak(node) {
+              <DocCodeBlock language="typescript" code={`function serializeHardBreak(node) {
   return '<br>';
 }`} />
             </DocSection>
@@ -83,7 +83,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseHardBreak(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseHardBreak(domNode) {
   return {
     type: 'hardBreak'
   };
@@ -97,7 +97,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering
+              <DocCodeBlock language="typescript" code={`// Rendering
 const br = document.createElement('br');
 // Hard breaks are self-closing elements
 
@@ -117,7 +117,7 @@ function handleEnterInInline(e) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Multiple consecutive <br> tags
+              <DocCodeBlock language="typescript" code={`// Issue: Multiple consecutive <br> tags
 // Solution: Normalize to single <br> or convert to paragraph
 function normalizeHardBreaks(element) {
   const brs = element.querySelectorAll('br');
@@ -163,7 +163,7 @@ function getPositionAroundBr(br) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class HardBreakNode {
+              <DocCodeBlock language="typescript" code={`class HardBreakNode {
   constructor() {
     this.type = 'hardBreak';
   }

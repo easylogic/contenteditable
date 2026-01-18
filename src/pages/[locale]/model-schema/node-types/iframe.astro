@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="아이프레임 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>아이프레임</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   iframe: {
     group: 'block',
     attrs: {
@@ -90,7 +90,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'iframe',
   attrs: {
     src: 'https://example.com/embed',
@@ -105,7 +105,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeIframe(node) {
+              <DocCodeBlock language="typescript" code={`function serializeIframe(node) {
   const attrs = {};
   if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
   if (node.attrs.width) attrs.width = node.attrs.width;
@@ -119,7 +119,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseIframe(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseIframe(domNode) {
   return {
     type: 'iframe',
     attrs: {
@@ -139,7 +139,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 아이프레임 렌더링
+              <DocCodeBlock language="typescript" code={`// 아이프레임 렌더링
 const iframe = document.createElement('iframe');
 iframe.src = node.attrs.src;
 if (node.attrs.width) iframe.width = node.attrs.width;
@@ -155,7 +155,7 @@ iframe.contentEditable = 'false'; // 아이프레임은 편집 불가`} />
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: XSS 보안
+              <DocCodeBlock language="typescript" code={`// 문제: XSS 보안
 // 해결: src URL 검증 및 정제
 function validateIframeSrc(src) {
   const allowedDomains = ['youtube.com', 'vimeo.com'];
@@ -190,7 +190,7 @@ function makeIframeResponsive(iframe) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class IframeNode {
+              <DocCodeBlock language="typescript" code={`class IframeNode {
   constructor(attrs) {
     this.type = 'iframe';
     this.attrs = {

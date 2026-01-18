@@ -1,0 +1,769 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'crdt-operation-format', text: 'CRDT Operation Format' },
+  { depth: 2, slug: 'position-mapping', text: 'Position Mapping' },
+  { depth: 2, slug: 'operation-conversion', text: 'Operation Conversion' },
+  { depth: 2, slug: 'applying-operations', text: 'Applying Operations' },
+  { depth: 2, slug: 'rendering-updates', text: 'Rendering Updates' },
+  { depth: 2, slug: 'selection-handling', text: 'Selection Handling' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="CRDT Operations & Rendering – Editor Architecture – contenteditable.lab"
+      description="Converting CRDT operations to editor operations and rendering updates"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">CRDT Operations & Rendering</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">CRDT Operations & Rendering</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Converting CRDT operations to editor operations and applying them for rendering.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                When using a CRDT library (like Yjs, Automerge, or custom CRDT), you receive operations in CRDT format. These operations need to be converted to your editor's operation format, then applied to the model and rendered.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Key points:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">CRDT operations use position IDs, not path/offset</li>
+                  <li class="mb-1">You need to map CRDT positions to editor paths</li>
+                  <li class="mb-1">Convert CRDT operations to editor operations</li>
+                  <li class="mb-1">Apply operations through your editor's transaction system</li>
+                  <li class="mb-1">Handle selection updates when remote operations arrive</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="crdt-operation-format" title="CRDT Operation Format">
+              <p class="m-0 mb-4">
+                CRDT libraries typically provide operations in a format like this:
+              </p>
+              <DocCodeBlock language="typescript" code={`// Example CRDT operation from Yjs, Automerge, etc.
+interface CRDTOperation {
+  type: 'insert' | 'delete' | 'update' | 'format';
+  position: PositionId; // Globally unique position identifier
+  after?: PositionId; // Insert after this position
+  positions?: PositionId[]; // Multiple positions for ranges
+  content?: string | Node;
+  attributes?: Record<string, any>;
+  siteId: string;
+  clock: number;
+}
+
+// Position identifier (varies by CRDT library)
+interface PositionId {
+  siteId: string;
+  clock: number;
+  offset?: number; // For fractional positions
+}
+
+// Example: Yjs operation
+const yjsOperation = {
+  type: 'insert',
+  after: { siteId: 'user1', clock: 42 },
+  positions: [
+    { siteId: 'user2', clock: 100, offset: 0.1 },
+    { siteId: 'user2', clock: 100, offset: 0.2 }
+  ],
+  content: 'hi',
+  siteId: 'user2',
+  clock: 100
+};
+
+// Example: Automerge operation
+const automergeOperation = {
+  type: 'splice',
+  path: ['text', 5], // Different format
+  value: 'hello',
+  actor: 'user1',
+  seq: 42
+};`} />
+            </DocSection>
+
+            <DocSection id="position-mapping" title="Position Mapping">
+              <p class="m-0 mb-4">
+                The core challenge is mapping CRDT position IDs to your editor's path/offset system. You need to maintain a bidirectional mapping.
+              </p>
+
+              <DocSection id="position-mapping-strategy" title="Position Mapping Strategy" depth={3}>
+                <DocCodeBlock language="typescript" code={`class CRDTPositionMapper {
+  // Map CRDT position to editor path/offset
+  private crdtToEditor = new Map<string, { path: number[], offset: number }>();
+  // Map editor path/offset to CRDT position
+  private editorToCrdt = new Map<string, PositionId>();
+  
+  // Convert CRDT position to editor path
+  toEditorPath(crdtPosition: PositionId, model: DocumentModel): { path: number[], offset: number } | null {
+    const key = this.positionKey(crdtPosition);
+    
+    // Check cache
+    if (this.crdtToEditor.has(key)) {
+      return this.crdtToEditor.get(key)!;
+    }
+    
+    // Find position in model by traversing and comparing
+    const result = this.findPositionInModel(crdtPosition, model);
+    
+    if (result) {
+      this.crdtToEditor.set(key, result);
+      const editorKey = this.editorPathKey(result.path, result.offset);
+      this.editorToCrdt.set(editorKey, crdtPosition);
+    }
+    
+    return result;
+  }
+  
+  // Convert editor path to CRDT position
+  toCrdtPosition(path: number[], offset: number): PositionId | null {
+    const key = this.editorPathKey(path, offset);
+    return this.editorToCrdt.get(key) || null;
+  }
+  
+  // Find CRDT position in model by traversing
+  private findPositionInModel(crdtPosition: PositionId, model: DocumentModel): { path: number[], offset: number } | null {
+    // Traverse model and find node with matching CRDT position
+    // This requires storing CRDT position IDs in your model nodes
+    return this.traverseModel(model, crdtPosition);
+  }
+  
+  private traverseModel(model: DocumentModel, targetPosition: PositionId, currentPath: number[] = []): { path: number[], offset: number } | null {
+    for (let i = 0; i < model.children.length; i++) {
+      const child = model.children[i];
+      const childPath = [...currentPath, i];
+      
+      // Check if node has CRDT position stored
+      if (child.crdtPosition && this.comparePositions(child.crdtPosition, targetPosition) === 0) {
+        return { path: childPath, offset: 0 };
+      }
+      
+      // For text nodes, check character positions
+      if (child.type === 'text') {
+        for (let j = 0; j < child.text.length; j++) {
+          const charPosition = child.charPositions?.[j];
+          if (charPosition && this.comparePositions(charPosition, targetPosition) === 0) {
+            return { path: childPath, offset: j };
+          }
+        }
+      }
+      
+      // Recurse into children
+      if (child.children) {
+        const result = this.traverseModel(child, targetPosition, childPath);
+        if (result) return result;
+      }
+    }
+    
+    return null;
+  }
+  
+  private comparePositions(a: PositionId, b: PositionId): number {
+    if (a.siteId < b.siteId) return -1;
+    if (a.siteId > b.siteId) return 1;
+    if (a.clock < b.clock) return -1;
+    if (a.clock > b.clock) return 1;
+    const aOffset = a.offset || 0;
+    const bOffset = b.offset || 0;
+    if (aOffset < bOffset) return -1;
+    if (aOffset > bOffset) return 1;
+    return 0;
+  }
+  
+  private positionKey(pos: PositionId): string {
+    return \`\${pos.siteId}:\${pos.clock}:\${pos.offset || 0}\`;
+  }
+  
+  private editorPathKey(path: number[], offset: number): string {
+    return \`\${path.join(',')}:\${offset}\`;
+  }
+  
+  // Invalidate cache when model changes
+  invalidate() {
+    this.crdtToEditor.clear();
+    this.editorToCrdt.clear();
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="storing-positions" title="Storing CRDT Positions in Model" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Extend your model to store CRDT positions
+interface TextNode {
+  type: 'text';
+  text: string;
+  charPositions?: PositionId[]; // CRDT position for each character
+  formats?: Record<string, any>;
+}
+
+interface BlockNode {
+  type: string;
+  crdtPosition?: PositionId; // CRDT position for the node
+  children: Node[];
+  attributes?: Record<string, any>;
+}
+
+// When applying local operations, store CRDT positions
+class EditorWithCRDT {
+  applyLocalOperation(operation: EditorOperation) {
+    const tx = this.beginTransaction();
+    
+    // Apply operation
+    tx.add(operation);
+    
+    // Generate and store CRDT positions
+    if (operation.type === 'insertText') {
+      const crdtPositions = this.generateCRDTPositions(operation.path, operation.text.length);
+      this.storeCRDTPositions(operation.path, crdtPositions);
+    }
+    
+    tx.commit();
+    
+    // Send to CRDT library
+    this.sendToCRDT(operation, crdtPositions);
+  }
+  
+  private generateCRDTPositions(path: number[], length: number): PositionId[] {
+    const node = this.getNodeAtPath(path);
+    const after = node?.crdtPosition || null;
+    
+    const positions: PositionId[] = [];
+    for (let i = 0; i < length; i++) {
+      positions.push({
+        siteId: this.siteId,
+        clock: this.clock++,
+        offset: i * 0.001
+      });
+    }
+    
+    return positions;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="operation-conversion" title="Operation Conversion">
+              <p class="m-0 mb-4">
+                Convert CRDT operations to your editor's operation format:
+              </p>
+
+              <DocSection id="insert-conversion" title="Insert Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`class CRDTOperationConverter {
+  constructor(
+    private positionMapper: CRDTPositionMapper,
+    private editor: Editor
+  ) {}
+  
+  convertInsert(crdtOp: CRDTOperation): EditorOperation | null {
+    // Map CRDT position to editor path
+    const editorPath = this.positionMapper.toEditorPath(crdtOp.after || crdtOp.position, this.editor.getModel());
+    
+    if (!editorPath) {
+      console.warn('Could not map CRDT position to editor path', crdtOp);
+      return null;
+    }
+    
+    if (typeof crdtOp.content === 'string') {
+      // Insert text
+      return {
+        type: 'insertText',
+        path: editorPath.path,
+        offset: editorPath.offset,
+        text: crdtOp.content
+      };
+    } else {
+      // Insert node
+      return {
+        type: 'insertNode',
+        path: editorPath.path,
+        node: this.convertCRDTNodeToEditorNode(crdtOp.content)
+      };
+    }
+  }
+  
+  convertCRDTNodeToEditorNode(crdtNode: any): Node {
+    // Convert CRDT node format to your editor's node format
+    return {
+      type: crdtNode.type,
+      children: crdtNode.children?.map((child: any) => this.convertCRDTNodeToEditorNode(child)) || [],
+      attributes: crdtNode.attributes || {}
+    };
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="delete-conversion" title="Delete Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`convertDelete(crdtOp: CRDTOperation): EditorOperation | null {
+  if (crdtOp.positions && crdtOp.positions.length > 0) {
+    // Delete range
+    const startPath = this.positionMapper.toEditorPath(crdtOp.positions[0], this.editor.getModel());
+    const endPath = this.positionMapper.toEditorPath(
+      crdtOp.positions[crdtOp.positions.length - 1],
+      this.editor.getModel()
+    );
+    
+    if (!startPath || !endPath) return null;
+    
+    // Calculate length
+    const length = this.calculateLength(startPath, endPath);
+    
+    return {
+      type: 'deleteContent',
+      path: startPath.path,
+      offset: startPath.offset,
+      length: length
+    };
+  } else if (crdtOp.position) {
+    // Delete single position
+    const editorPath = this.positionMapper.toEditorPath(crdtOp.position, this.editor.getModel());
+    if (!editorPath) return null;
+    
+    return {
+      type: 'deleteContent',
+      path: editorPath.path,
+      offset: editorPath.offset,
+      length: 1
+    };
+  }
+  
+  return null;
+}
+
+private calculateLength(start: { path: number[], offset: number }, end: { path: number[], offset: number }): number {
+  // Calculate length between two positions
+  if (this.pathsEqual(start.path, end.path)) {
+    return end.offset - start.offset;
+  }
+  
+  // Different paths - need to traverse
+  let length = 0;
+  const startNode = this.editor.getNodeAtPath(start.path);
+  const endNode = this.editor.getNodeAtPath(end.path);
+  
+  // Count characters from start to end of start node
+  if (startNode?.type === 'text') {
+    length += startNode.text.length - start.offset;
+  }
+  
+  // Count all nodes between
+  // ... traversal logic ...
+  
+  // Count characters from start of end node to end
+  if (endNode?.type === 'text') {
+    length += end.offset;
+  }
+  
+  return length;
+}`} />
+              </DocSection>
+
+              <DocSection id="format-conversion" title="Format Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`convertFormat(crdtOp: CRDTOperation): EditorOperation | null {
+  if (!crdtOp.positions || crdtOp.positions.length < 2) return null;
+  
+  const startPath = this.positionMapper.toEditorPath(crdtOp.positions[0], this.editor.getModel());
+  const endPath = this.positionMapper.toEditorPath(
+    crdtOp.positions[crdtOp.positions.length - 1],
+    this.editor.getModel()
+  );
+  
+  if (!startPath || !endPath) return null;
+  
+  const length = this.calculateLength(startPath, endPath);
+  
+  return {
+    type: 'applyFormat',
+    path: startPath.path,
+    offset: startPath.offset,
+    length: length,
+    format: Object.keys(crdtOp.attributes || {})[0],
+    value: Object.values(crdtOp.attributes || {})[0]
+  };
+}`} />
+              </DocSection>
+
+              <DocSection id="node-operations" title="Node Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`convertUpdateAttributes(crdtOp: CRDTOperation): EditorOperation | null {
+  const editorPath = this.positionMapper.toEditorPath(crdtOp.position, this.editor.getModel());
+  if (!editorPath) return null;
+  
+  return {
+    type: 'updateAttributes',
+    path: editorPath.path,
+    attributes: crdtOp.attributes || {}
+  };
+}
+
+convertSetNodeType(crdtOp: CRDTOperation): EditorOperation | null {
+  const editorPath = this.positionMapper.toEditorPath(crdtOp.position, this.editor.getModel());
+  if (!editorPath) return null;
+  
+  return {
+    type: 'setNodeType',
+    path: editorPath.path,
+    nodeType: crdtOp.content?.type || 'paragraph'
+  };
+}
+
+// Main conversion method
+convert(crdtOp: CRDTOperation): EditorOperation | EditorOperation[] | null {
+  switch (crdtOp.type) {
+    case 'insert':
+      return this.convertInsert(crdtOp);
+    case 'delete':
+      return this.convertDelete(crdtOp);
+    case 'format':
+      return this.convertFormat(crdtOp);
+    case 'update':
+      return this.convertUpdateAttributes(crdtOp);
+    case 'setType':
+      return this.convertSetNodeType(crdtOp);
+    default:
+      console.warn('Unknown CRDT operation type', crdtOp.type);
+      return null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="applying-operations" title="Applying Operations">
+              <p class="m-0 mb-4">
+                Once converted, apply operations through your editor's transaction system:
+              </p>
+              <DocCodeBlock language="typescript" code={`class CRDTEditorAdapter {
+  constructor(
+    private editor: Editor,
+    private converter: CRDTOperationConverter,
+    private positionMapper: CRDTPositionMapper
+  ) {}
+  
+  // Handle incoming CRDT operation
+  handleCRDTOperation(crdtOp: CRDTOperation) {
+    // Skip if this is our own operation
+    if (crdtOp.siteId === this.editor.getSiteId()) {
+      return;
+    }
+    
+    // Convert to editor operation
+    const editorOps = this.converter.convert(crdtOp);
+    
+    if (!editorOps) {
+      console.warn('Failed to convert CRDT operation', crdtOp);
+      return;
+    }
+    
+    // Normalize to array
+    const operations = Array.isArray(editorOps) ? editorOps : [editorOps];
+    
+    // Apply through transaction
+    const tx = this.editor.beginTransaction();
+    
+    for (const op of operations) {
+      tx.add(op);
+      
+      // Store CRDT positions in model for future mapping
+      this.storeCRDTPositions(op, crdtOp);
+    }
+    
+    // Commit transaction (this will trigger rendering)
+    tx.commit();
+    
+    // Invalidate position cache after model changes
+    this.positionMapper.invalidate();
+  }
+  
+  private storeCRDTPositions(editorOp: EditorOperation, crdtOp: CRDTOperation) {
+    if (editorOp.type === 'insertText' && crdtOp.positions) {
+      const node = this.editor.getNodeAtPath(editorOp.path);
+      if (node?.type === 'text') {
+        // Store CRDT positions for each character
+        if (!node.charPositions) {
+          node.charPositions = [];
+        }
+        // Insert positions at offset
+        node.charPositions.splice(editorOp.offset, 0, ...crdtOp.positions);
+      }
+    } else if (editorOp.type === 'insertNode' && crdtOp.position) {
+      const node = this.editor.getNodeAtPath(editorOp.path);
+      if (node) {
+        node.crdtPosition = crdtOp.position;
+      }
+    }
+  }
+  
+  // Handle batch of CRDT operations
+  handleCRDTOperations(crdtOps: CRDTOperation[]) {
+    // Group by transaction (same clock)
+    const transactions = this.groupByTransaction(crdtOps);
+    
+    for (const transactionOps of transactions) {
+      const tx = this.editor.beginTransaction();
+      
+      for (const crdtOp of transactionOps) {
+        const editorOps = this.converter.convert(crdtOp);
+        if (editorOps) {
+          const ops = Array.isArray(editorOps) ? editorOps : [editorOps];
+          for (const op of ops) {
+            tx.add(op);
+            this.storeCRDTPositions(op, crdtOp);
+          }
+        }
+      }
+      
+      tx.commit();
+    }
+    
+    this.positionMapper.invalidate();
+  }
+  
+  private groupByTransaction(ops: CRDTOperation[]): CRDTOperation[][] {
+    const groups = new Map<number, CRDTOperation[]>();
+    
+    for (const op of ops) {
+      const clock = op.clock;
+      if (!groups.has(clock)) {
+        groups.set(clock, []);
+      }
+      groups.get(clock)!.push(op);
+    }
+    
+    return Array.from(groups.values());
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="rendering-updates" title="Rendering Updates">
+              <p class="m-0 mb-4">
+                Your editor's rendering system should automatically update when operations are applied through transactions:
+              </p>
+              <DocCodeBlock language="typescript" code={`// Your editor should already handle rendering
+class Editor {
+  beginTransaction(): Transaction {
+    return new Transaction(this);
+  }
+  
+  // Transaction commits trigger rendering
+  commitTransaction(tx: Transaction) {
+    // Apply operations to model
+    for (const op of tx.operations) {
+      this.applyOperationToModel(op);
+    }
+    
+    // Trigger render update
+    this.renderer.update(this.model);
+    
+    // Update selection if needed
+    this.updateSelection(tx.afterSelection);
+  }
+}
+
+// The renderer updates DOM based on model changes
+class Renderer {
+  update(model: DocumentModel) {
+    // Diff model and DOM
+    const changes = this.diffModelAndDOM(model, this.currentDOM);
+    
+    // Apply changes incrementally
+    for (const change of changes) {
+      this.applyChange(change);
+    }
+    
+    this.currentDOM = this.serializeModel(model);
+  }
+  
+  private applyChange(change: ModelChange) {
+    switch (change.type) {
+      case 'insert':
+        this.insertNode(change.path, change.node);
+        break;
+      case 'delete':
+        this.deleteNode(change.path);
+        break;
+      case 'update':
+        this.updateNode(change.path, change.attributes);
+        break;
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="selection-handling" title="Selection Handling">
+              <p class="m-0 mb-4">
+                When remote operations arrive, you need to adjust the selection:
+              </p>
+              <DocCodeBlock language="typescript" code={`class CRDTSelectionManager {
+  constructor(private editor: Editor, private positionMapper: CRDTPositionMapper) {}
+  
+  // Adjust selection when remote operation arrives
+  adjustSelectionForRemoteOperation(
+    currentSelection: Selection,
+    crdtOp: CRDTOperation
+  ): Selection {
+    const editorOp = this.editor.getConverter().convert(crdtOp);
+    if (!editorOp) return currentSelection;
+    
+    // Check if operation affects selection
+    if (this.operationAffectsSelection(editorOp, currentSelection)) {
+      return this.adjustSelection(editorOp, currentSelection);
+    }
+    
+    return currentSelection;
+  }
+  
+  private operationAffectsSelection(op: EditorOperation, selection: Selection): boolean {
+    // Check if operation is before, within, or after selection
+    const opPath = op.path;
+    const opOffset = 'offset' in op ? op.offset : 0;
+    const opLength = 'length' in op ? op.length : 1;
+    
+    const selectionStart = selection.start;
+    const selectionEnd = selection.end;
+    
+    // Operation is before selection - no change needed
+    if (this.isBefore(opPath, opOffset, selectionStart.path, selectionStart.offset)) {
+      return false;
+    }
+    
+    // Operation is after selection - no change needed
+    if (this.isAfter(
+      opPath,
+      opOffset + opLength,
+      selectionEnd.path,
+      selectionEnd.offset
+    )) {
+      return false;
+    }
+    
+    // Operation affects selection
+    return true;
+  }
+  
+  private adjustSelection(op: EditorOperation, selection: Selection): Selection {
+    if (op.type === 'insertText') {
+      // If insertion is before selection start, shift selection
+      if (this.isBefore(op.path, op.offset, selection.start.path, selection.start.offset)) {
+        return {
+          start: {
+            path: selection.start.path,
+            offset: selection.start.offset + op.text.length
+          },
+          end: {
+            path: selection.end.path,
+            offset: selection.end.offset + op.text.length
+          }
+        };
+      }
+      // If insertion is within selection, extend selection
+      else if (this.isWithin(op.path, op.offset, selection)) {
+        return {
+          start: selection.start,
+          end: {
+            path: selection.end.path,
+            offset: selection.end.offset + op.text.length
+          }
+        };
+      }
+    } else if (op.type === 'deleteContent') {
+      // If deletion is before selection, shift selection back
+      if (this.isBefore(op.path, op.offset, selection.start.path, selection.start.offset)) {
+        const deletedLength = op.length;
+        return {
+          start: {
+            path: selection.start.path,
+            offset: Math.max(0, selection.start.offset - deletedLength)
+          },
+          end: {
+            path: selection.end.path,
+            offset: Math.max(0, selection.end.offset - deletedLength)
+          }
+        };
+      }
+      // If deletion overlaps with selection, adjust selection
+      else if (this.overlaps(op, selection)) {
+        // Collapse selection to deletion start
+        return {
+          start: { path: op.path, offset: op.offset },
+          end: { path: op.path, offset: op.offset }
+        };
+      }
+    }
+    
+    return selection;
+  }
+  
+  private isBefore(path1: number[], offset1: number, path2: number[], offset2: number): boolean {
+    // Compare paths and offsets
+    const pathCompare = this.comparePaths(path1, path2);
+    if (pathCompare < 0) return true;
+    if (pathCompare > 0) return false;
+    return offset1 < offset2;
+  }
+  
+  private isAfter(path1: number[], offset1: number, path2: number[], offset2: number): boolean {
+    return this.isBefore(path2, offset2, path1, offset1);
+  }
+  
+  private isWithin(path: number[], offset: number, selection: Selection): boolean {
+    return !this.isBefore(path, offset, selection.start.path, selection.start.offset) &&
+           !this.isAfter(path, offset, selection.end.path, selection.end.offset);
+  }
+  
+  private overlaps(op: EditorOperation, selection: Selection): boolean {
+    const opEnd = { path: op.path, offset: op.offset + (op.length || 1) };
+    return !this.isAfter(op.path, op.offset, selection.end.path, selection.end.offset) &&
+           !this.isBefore(opEnd.path, opEnd.offset, selection.start.path, selection.start.offset);
+  }
+  
+  private comparePaths(path1: number[], path2: number[]): number {
+    for (let i = 0; i < Math.min(path1.length, path2.length); i++) {
+      if (path1[i] < path2[i]) return -1;
+      if (path1[i] > path2[i]) return 1;
+    }
+    return path1.length - path2.length;
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/crdt-operations"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operation types overview' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Transaction system' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Model-DOM sync' },
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Editor architecture' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

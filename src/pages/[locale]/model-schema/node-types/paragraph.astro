@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="단락 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>단락</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   paragraph: {
     content: 'inline*',
     group: 'block'
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'paragraph',
   children: [
     { type: 'text', text: '이것은 단락입니다.' }
@@ -97,7 +97,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeParagraph(node) {
+              <DocCodeBlock language="typescript" code={`function serializeParagraph(node) {
   return '<p>' + serializeChildren(node.children) + '</p>';
 }`} />
             </DocSection>
@@ -106,7 +106,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseParagraph(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseParagraph(domNode) {
   return {
     type: 'paragraph',
     children: parseChildren(domNode.childNodes)
@@ -121,7 +121,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 렌더링
+              <DocCodeBlock language="typescript" code={`// 렌더링
 const p = document.createElement('p');
 p.contentEditable = 'true';
 node.children.forEach(child => {
@@ -149,7 +149,7 @@ function getParagraphPosition(selection) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 빈 단락이 축소됨
+              <DocCodeBlock language="typescript" code={`// 문제: 빈 단락이 축소됨
 // 해결: 항상 최소한 <br> 또는 &nbsp; 렌더링
 if (node.children.length === 0) {
   return '<p><br></p>';
@@ -178,7 +178,7 @@ function handlePaste(e) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class ParagraphNode {
+              <DocCodeBlock language="typescript" code={`class ParagraphNode {
   constructor(attrs, children) {
     this.type = 'paragraph';
     this.attrs = attrs || {};

@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="다이어그램 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>다이어그램</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   diagram: {
     group: 'block',
     attrs: {
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'diagram',
   attrs: {
     type: 'flowchart',
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeDiagram(node) {
+              <DocCodeBlock language="typescript" code={`function serializeDiagram(node) {
   return '<div data-type="diagram" data-diagram-type="' + node.attrs.type + '">' + 
          escapeHtml(node.attrs.data) + '</div>';
 }`} />
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseDiagram(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseDiagram(domNode) {
   return {
     type: 'diagram',
     attrs: {
@@ -129,7 +129,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 다이어그램 렌더링
+              <DocCodeBlock language="typescript" code={`// 다이어그램 렌더링
 const diagram = document.createElement('div');
 diagram.setAttribute('data-type', 'diagram');
 diagram.setAttribute('data-diagram-type', node.attrs.type);
@@ -154,7 +154,7 @@ function renderDiagram(element) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 다이어그램 라이브러리 초기화
+              <DocCodeBlock language="typescript" code={`// 문제: 다이어그램 라이브러리 초기화
 // 해결: 다이어그램 라이브러리 초기화
 function initDiagramLibrary() {
   if (window.mermaid) {
@@ -174,7 +174,7 @@ function validateDiagramData(data, type) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class DiagramNode {
+              <DocCodeBlock language="typescript" code={`class DiagramNode {
   constructor(attrs) {
     this.type = 'diagram';
     this.attrs = {

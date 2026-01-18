@@ -1,0 +1,618 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'problem', text: 'The Problem with Full Model Snapshots' },
+  { depth: 2, slug: 'operation-based', text: 'Operation-Based History' },
+  { depth: 3, slug: 'inverse-operations', text: 'Using Inverse Operations' },
+  { depth: 3, slug: 'memory-efficiency', text: 'Memory Efficiency' },
+  { depth: 2, slug: 'hybrid-approach', text: 'Hybrid Approach' },
+  { depth: 3, slug: 'periodic-snapshots', text: 'Periodic Snapshots' },
+  { depth: 3, slug: 'checkpoint-system', text: 'Checkpoint System' },
+  { depth: 2, slug: 'performance-comparison', text: 'Performance Comparison' },
+  { depth: 2, slug: 'implementation', text: 'Implementation' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="History Management Optimization – Editor Architecture – contenteditable.lab"
+      description="Optimizing history management: avoiding full model clones and using operation-based undo/redo"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/history-management" class="text-text-muted no-underline">History Management</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Optimization</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              History Management Optimization
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Avoiding full model clones: using operation-based undo/redo for better memory and performance.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Storing full model snapshots for every history entry is memory-intensive and slow. Operation-based history management stores only operations and their inverses, dramatically reducing memory usage and improving performance.
+              </p>
+              <DocAlert type="error">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Problem:</strong> Full model snapshots are expensive
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Large memory footprint (full document × history size)</li>
+                  <li class="mb-1">Slow clone operations for large documents</li>
+                  <li class="mb-1">Garbage collection pressure</li>
+                  <li class="mb-1">Poor scalability with document size</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="problem" title="The Problem with Full Model Snapshots">
+              <p class="m-0 mb-4">
+                Storing complete model clones for each history entry:
+              </p>
+              <DocCodeBlock language="typescript" code={`// ❌ BAD: Storing full model snapshots
+interface HistoryEntry {
+  operations: Operation[];
+  beforeModel: DocumentModel; // Full clone - expensive!
+  afterModel: DocumentModel;  // Full clone - expensive!
+  beforeSelection: Selection;
+  afterSelection: Selection;
+}
+
+class HistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  
+  record(operations: Operation[]) {
+    const beforeModel = this.model.clone(); // Expensive!
+    
+    // Apply operations
+    operations.forEach(op => this.model.apply(op));
+    
+    const afterModel = this.model.clone(); // Expensive!
+    
+    this.#undoStack.push({
+      operations,
+      beforeModel,  // Storing full document
+      afterModel,   // Storing full document
+      // ...
+    });
+  }
+  
+  undo() {
+    const entry = this.#undoStack.pop()!;
+    // Restore full model - also expensive
+    this.model = entry.beforeModel.clone();
+  }
+}
+
+// Memory usage: O(history_size × document_size)
+// For 50 history entries with 1MB document = 50MB+ memory`} />
+              <p class="m-0 mb-4 mt-4">
+                This approach doesn't scale. A document with 10,000 nodes and 50 history entries would require storing 500,000 node copies.
+              </p>
+            </DocSection>
+
+            <DocSection id="operation-based" title="Operation-Based History">
+              <p class="m-0 mb-4">
+                Store only operations and apply their inverses for undo:
+              </p>
+
+              <DocSection id="inverse-operations" title="Using Inverse Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`// ✅ GOOD: Operation-based history
+interface HistoryEntry {
+  operations: Operation[];
+  inverseOperations: Operation[]; // Pre-computed inverses
+  beforeSelection: Selection;
+  afterSelection: Selection;
+  // NO model snapshots!
+}
+
+class HistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #redoStack: HistoryEntry[] = [];
+  #model: DocumentModel; // Single current model
+  
+  record(operations: Operation[]) {
+    const beforeSelection = this.#model.getSelection();
+    
+    // Apply operations
+    operations.forEach(op => this.#model.apply(op));
+    
+    const afterSelection = this.#model.getSelection();
+    
+    // Compute inverse operations
+    const inverseOperations = operations
+      .slice()
+      .reverse()
+      .map(op => this.#getInverseOperation(op));
+    
+    this.#undoStack.push({
+      operations,
+      inverseOperations,
+      beforeSelection,
+      afterSelection
+    });
+    
+    this.#redoStack = []; // Clear redo on new action
+  }
+  
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#undoStack.pop()!;
+    
+    // Apply inverse operations (in reverse order)
+    for (let i = entry.inverseOperations.length - 1; i >= 0; i--) {
+      this.#model.apply(entry.inverseOperations[i]);
+    }
+    
+    this.#model.setSelection(entry.beforeSelection);
+    
+    // Move to redo stack
+    this.#redoStack.push(entry);
+    return true;
+  }
+  
+  redo(): boolean {
+    if (this.#redoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#redoStack.pop()!;
+    
+    // Re-apply operations
+    entry.operations.forEach(op => {
+      this.#model.apply(op);
+    });
+    
+    this.#model.setSelection(entry.afterSelection);
+    
+    // Move to undo stack
+    this.#undoStack.push(entry);
+    return true;
+  }
+  
+  #getInverseOperation(op: Operation): Operation {
+    switch (op.type) {
+      case 'insertText':
+        return {
+          type: 'deleteText',
+          path: op.path,
+          length: op.text.length,
+          deletedContent: op.text // Store for redo
+        };
+      
+      case 'deleteText':
+        return {
+          type: 'insertText',
+          path: op.path,
+          text: op.deletedContent || ''
+        };
+      
+      case 'insertNode':
+        return {
+          type: 'deleteNode',
+          path: op.path,
+          deletedNode: op.node // Store for redo
+        };
+      
+      case 'deleteNode':
+        return {
+          type: 'insertNode',
+          path: op.path,
+          node: op.deletedNode
+        };
+      
+      case 'applyFormat':
+        return {
+          type: 'removeFormat',
+          path: op.path,
+          length: op.length,
+          format: op.format,
+          previousValue: this.#model.getFormatAt(op.path, op.format)
+        };
+      
+      case 'removeFormat':
+        return {
+          type: 'applyFormat',
+          path: op.path,
+          length: op.length,
+          format: op.format,
+          value: op.previousValue
+        };
+      
+      default:
+        throw new Error(\`Unknown operation: \${op.type}\`);
+    }
+  }
+}
+
+// Memory usage: O(history_size × operation_size)
+// For 50 history entries with ~10 operations each = ~few KB
+// vs 50MB+ with full snapshots!`} />
+              </DocSection>
+
+              <DocSection id="memory-efficiency" title="Memory Efficiency" depth={3}>
+                <p class="m-0 mb-4">
+                  Operation-based approach is orders of magnitude more efficient:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Example: User types "Hello World"
+// Full snapshot approach:
+// - beforeModel: ~1MB (full document)
+// - afterModel: ~1MB (full document)
+// Total: ~2MB per entry
+
+// Operation-based approach:
+const entry = {
+  operations: [
+    { type: 'insertText', path: [0, 5], text: 'H' },
+    { type: 'insertText', path: [0, 6], text: 'e' },
+    { type: 'insertText', path: [0, 7], text: 'l' },
+    { type: 'insertText', path: [0, 8], text: 'l' },
+    { type: 'insertText', path: [0, 9], text: 'o' },
+    { type: 'insertText', path: [0, 10], text: ' ' },
+    { type: 'insertText', path: [0, 11], text: 'W' },
+    { type: 'insertText', path: [0, 12], text: 'o' },
+    { type: 'insertText', path: [0, 13], text: 'r' },
+    { type: 'insertText', path: [0, 14], text: 'l' },
+    { type: 'insertText', path: [0, 15], text: 'd' }
+  ],
+  inverseOperations: [/* 11 inverse operations */]
+};
+// Total: ~few hundred bytes vs 2MB!
+
+// Memory savings: 99.9%+ reduction`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="hybrid-approach" title="Hybrid Approach">
+              <p class="m-0 mb-4">
+                For very long undo chains, combine operation-based history with periodic snapshots:
+              </p>
+
+              <DocSection id="periodic-snapshots" title="Periodic Snapshots" depth={3}>
+                <DocCodeBlock language="typescript" code={`class HybridHistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #checkpoints: Map<number, DocumentModel> = new Map();
+  #checkpointInterval = 20; // Create snapshot every 20 entries
+  
+  record(operations: Operation[]) {
+    const entryIndex = this.#undoStack.length;
+    
+    // Create checkpoint periodically
+    if (entryIndex % this.#checkpointInterval === 0) {
+      this.#checkpoints.set(entryIndex, this.#model.clone());
+    }
+    
+    // Store operations (not full model)
+    const entry: HistoryEntry = {
+      operations,
+      inverseOperations: this.#computeInverses(operations),
+      checkpointIndex: entryIndex,
+      // ...
+    };
+    
+    this.#undoStack.push(entry);
+  }
+  
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#undoStack.pop()!;
+    
+    // Check if we have a checkpoint nearby
+    const nearestCheckpoint = this.#findNearestCheckpoint(entry.checkpointIndex);
+    
+    if (nearestCheckpoint && this.#shouldUseCheckpoint(entry, nearestCheckpoint)) {
+      // Restore from checkpoint and replay operations
+      this.#restoreFromCheckpoint(nearestCheckpoint, entry);
+    } else {
+      // Use inverse operations (normal case)
+      this.#applyInverseOperations(entry.inverseOperations);
+    }
+    
+    return true;
+  }
+  
+  #shouldUseCheckpoint(entry: HistoryEntry, checkpoint: number): boolean {
+    // Use checkpoint if we need to undo many operations
+    const distance = entry.checkpointIndex - checkpoint;
+    return distance > 10; // Threshold for checkpoint usage
+  }
+  
+  #restoreFromCheckpoint(checkpointIndex: number, targetEntry: HistoryEntry) {
+    const checkpoint = this.#checkpoints.get(checkpointIndex)!;
+    this.#model = checkpoint.clone();
+    
+    // Replay operations from checkpoint to target
+    const entries = this.#undoStack.slice(checkpointIndex, targetEntry.checkpointIndex);
+    entries.forEach(e => {
+      e.operations.forEach(op => this.#model.apply(op));
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="checkpoint-system" title="Checkpoint System" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Checkpoint strategy: Store snapshots at strategic points
+class CheckpointManager {
+  #checkpoints: Map<number, DocumentModel> = new Map();
+  #maxCheckpoints = 5; // Limit number of checkpoints
+  
+  createCheckpoint(index: number, model: DocumentModel) {
+    // Remove oldest checkpoint if limit reached
+    if (this.#checkpoints.size >= this.#maxCheckpoints) {
+      const oldest = Math.min(...this.#checkpoints.keys());
+      this.#checkpoints.delete(oldest);
+    }
+    
+    this.#checkpoints.set(index, model.clone());
+  }
+  
+  getNearestCheckpoint(targetIndex: number): [number, DocumentModel] | null {
+    let nearest: [number, DocumentModel] | null = null;
+    let minDistance = Infinity;
+    
+    for (const [index, model] of this.#checkpoints) {
+      if (index <= targetIndex) {
+        const distance = targetIndex - index;
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearest = [index, model];
+        }
+      }
+    }
+    
+    return nearest;
+  }
+  
+  // Cleanup old checkpoints
+  cleanup(beforeIndex: number) {
+    for (const index of this.#checkpoints.keys()) {
+      if (index < beforeIndex) {
+        this.#checkpoints.delete(index);
+      }
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="performance-comparison" title="Performance Comparison">
+              <table class="w-full border-collapse border border-border-light my-4">
+                <thead>
+                  <tr class="bg-bg-muted">
+                    <th class="border border-border-light p-3 text-left">Metric</th>
+                    <th class="border border-border-light p-3 text-left">Full Snapshots</th>
+                    <th class="border border-border-light p-3 text-left">Operation-Based</th>
+                    <th class="border border-border-light p-3 text-left">Hybrid</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-border-light p-3">Memory per entry</td>
+                    <td class="border border-border-light p-3">~1-10MB</td>
+                    <td class="border border-border-light p-3">~1-10KB</td>
+                    <td class="border border-border-light p-3">~1-10KB + periodic snapshots</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-border-light p-3">Record time</td>
+                    <td class="border border-border-light p-3">Slow (clone)</td>
+                    <td class="border border-border-light p-3">Fast (operations only)</td>
+                    <td class="border border-border-light p-3">Fast (periodic clone)</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-border-light p-3">Undo time</td>
+                    <td class="border border-border-light p-3">Fast (restore)</td>
+                    <td class="border border-border-light p-3">Fast (apply inverses)</td>
+                    <td class="border border-border-light p-3">Fast (checkpoint or inverses)</td>
+                  </tr>
+                  <tr>
+                    <td class="border border-border-light p-3">Scalability</td>
+                    <td class="border border-border-light p-3">Poor (O(n×m))</td>
+                    <td class="border border-border-light p-3">Excellent (O(n))</td>
+                    <td class="border border-border-light p-3">Excellent (O(n))</td>
+                  </tr>
+                </tbody>
+              </table>
+            </DocSection>
+
+            <DocSection id="implementation" title="Implementation">
+              <p class="m-0 mb-4">
+                Complete implementation example:
+              </p>
+              <DocCodeBlock language="typescript" code={`class OptimizedHistoryManager {
+  #undoStack: HistoryEntry[] = [];
+  #redoStack: HistoryEntry[] = [];
+  #model: DocumentModel;
+  #maxSize = 100;
+  
+  constructor(model: DocumentModel) {
+    this.#model = model;
+  }
+  
+  recordTransaction(transaction: Transaction) {
+    const operations = transaction.getOperations();
+    const beforeSelection = transaction.getBeforeSelection();
+    const afterSelection = transaction.getAfterSelection();
+    
+    // Compute inverse operations
+    const inverseOperations = this.#computeInverseOperations(operations);
+    
+    const entry: HistoryEntry = {
+      id: generateId(),
+      timestamp: Date.now(),
+      operations,
+      inverseOperations,
+      beforeSelection,
+      afterSelection
+      // NO model snapshots!
+    };
+    
+    this.#undoStack.push(entry);
+    
+    // Limit stack size
+    if (this.#undoStack.length > this.#maxSize) {
+      this.#undoStack.shift();
+    }
+    
+    this.#redoStack = [];
+  }
+  
+  undo(): boolean {
+    if (this.#undoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#undoStack.pop()!;
+    
+    // Apply inverse operations in reverse order
+    for (let i = entry.inverseOperations.length - 1; i >= 0; i--) {
+      const inverseOp = entry.inverseOperations[i];
+      this.#model.apply(inverseOp);
+    }
+    
+    this.#model.setSelection(entry.beforeSelection);
+    this.#redoStack.push(entry);
+    
+    return true;
+  }
+  
+  redo(): boolean {
+    if (this.#redoStack.length === 0) {
+      return false;
+    }
+    
+    const entry = this.#redoStack.pop()!;
+    
+    // Re-apply operations
+    for (const op of entry.operations) {
+      this.#model.apply(op);
+    }
+    
+    this.#model.setSelection(entry.afterSelection);
+    this.#undoStack.push(entry);
+    
+    return true;
+  }
+  
+  #computeInverseOperations(operations: Operation[]): Operation[] {
+    // Need to compute inverses in reverse order
+    // and capture state before each operation
+    const inverses: Operation[] = [];
+    
+    for (let i = operations.length - 1; i >= 0; i--) {
+      const op = operations[i];
+      const inverse = this.#getInverseOperation(op);
+      inverses.unshift(inverse); // Add to beginning
+    }
+    
+    return inverses;
+  }
+  
+  #getInverseOperation(op: Operation): Operation {
+    // Implementation depends on operation type
+    // Must capture necessary state (e.g., deleted content)
+    switch (op.type) {
+      case 'insertText':
+        return {
+          type: 'deleteText',
+          path: op.path,
+          length: op.text.length
+        };
+      
+      case 'deleteText':
+        // Must have stored deletedContent in original operation
+        return {
+          type: 'insertText',
+          path: op.path,
+          text: op.deletedContent!
+        };
+      
+      // ... other operation types
+    }
+  }
+  
+  // Optional: Get current model state (for debugging)
+  getCurrentModel(): DocumentModel {
+    return this.#model;
+  }
+  
+  // Optional: Clear history
+  clear() {
+    this.#undoStack = [];
+    this.#redoStack = [];
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>Always store inverse operations:</strong> Pre-compute inverses when recording to avoid computation during undo
+                </li>
+                <li class="mb-2">
+                  <strong>Store deleted content:</strong> Delete operations must store deleted content for proper undo
+                </li>
+                <li class="mb-2">
+                  <strong>Store previous values:</strong> Format operations should store previous format values
+                </li>
+                <li class="mb-2">
+                  <strong>Limit history size:</strong> Remove old entries to prevent unbounded memory growth
+                </li>
+                <li class="mb-2">
+                  <strong>Use checkpoints for long chains:</strong> For very long undo chains, use hybrid approach with periodic snapshots
+                </li>
+                <li class="mb-2">
+                  <strong>Validate operations:</strong> Ensure operations are valid before applying inverses
+                </li>
+                <li class="mb-2">
+                  <strong>Handle edge cases:</strong> Consider empty operations, invalid paths, and boundary conditions
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/history-management-optimization"
+              pages={[
+                { title: 'History Management', href: '/editor/history-management', description: 'History management overview' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Using transactions' },
+                { title: 'Operations', href: '/editor/operations', description: 'Operation types' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,357 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+import {
+  supportedLocales,
+  defaultLocale,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'debugging-tools', text: '디버깅 도구' },
+  { depth: 3, slug: 'devtools', text: '브라우저 DevTools' },
+  { depth: 3, slug: 'event-logging', text: '이벤트 로깅' },
+  { depth: 2, slug: 'common-issues', text: '일반적인 문제' },
+  { depth: 3, slug: 'selection-issues', text: '선택 영역 문제' },
+  { depth: 3, slug: 'dom-sync-issues', text: 'DOM 동기화 문제' },
+  { depth: 3, slug: 'ime-issues', text: 'IME 문제' },
+  { depth: 2, slug: 'debugging-techniques', text: '디버깅 기법' },
+  { depth: 3, slug: 'breakpoints', text: '중단점' },
+  { depth: 3, slug: 'state-inspection', text: '상태 검사' },
+  { depth: 2, slug: 'performance-debugging', text: '성능 디버깅' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="디버깅 기법 – 에디터 아키텍처 – contenteditable.lab"
+      description="contenteditable 에디터를 위한 디버깅 전략 및 기법"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">디버깅</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">디버깅 기법</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              contenteditable 에디터를 위한 디버깅 전략 및 기법입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                contenteditable 에디터 디버깅은 브라우저 차이, 이벤트 타이밍, DOM 복잡성으로 인해 어렵습니다. 이 가이드는 효과적인 디버깅 기법을 다룹니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="debugging-tools" title="디버깅 도구">
+              <p class="m-0 mb-4">
+                contenteditable 에디터 디버깅을 위한 필수 도구입니다.
+              </p>
+
+              <DocSection id="devtools" title="브라우저 DevTools" depth={3}>
+                <p class="m-0 mb-3">
+                  브라우저 DevTools를 효과적으로 사용:
+                </p>
+                <DocCodeBlock language="javascript" code={`// Chrome DevTools: 포커스된 페이지 에뮬레이션
+// 요소 검사 시 blur 이벤트 방지
+// Rendering 패널 → "Emulate a focused page"
+
+// DOM 변형에 중단점 설정
+// Elements 패널 → 우클릭 → Break on → Subtree modifications
+
+// 이벤트 모니터링
+monitorEvents(element, ['input', 'beforeinput', 'compositionstart']);
+
+// 이벤트 리스너 가져오기
+getEventListeners(element);`} />
+                <DocAlert type="info" class="mt-4">
+                  <p class="m-0 text-sm">
+                    <strong>팁:</strong> Chrome DevTools에서 "Emulate a focused page"를 사용하면 DevTools를 클릭할 때 요소가 사라지는 것을 방지할 수 있습니다.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="event-logging" title="이벤트 로깅" depth={3}>
+                <DocCodeBlock language="typescript" code={`class EventLogger {
+  #logs: EventLog[] = [];
+
+  log(event: Event) {
+    this.#logs.push({
+      type: event.type,
+      timestamp: Date.now(),
+      target: event.target,
+      data: this.#extractEventData(event)
+    });
+  }
+
+  #extractEventData(event: Event) {
+    if (event instanceof InputEvent) {
+      return {
+        inputType: event.inputType,
+        data: event.data,
+        isComposing: event.isComposing
+      };
+    }
+    if (event instanceof CompositionEvent) {
+      return {
+        data: event.data
+      };
+    }
+    return {};
+  }
+
+  getLogs() {
+    return this.#logs;
+  }
+
+  clear() {
+    this.#logs = [];
+  }
+}
+
+// 사용법
+const logger = new EventLogger();
+editor.element.addEventListener('*', (e) => logger.log(e));`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="common-issues" title="일반적인 문제">
+              <p class="m-0 mb-4">
+                일반적인 디버깅 시나리오 및 해결책입니다.
+              </p>
+
+              <DocSection id="selection-issues" title="선택 영역 문제" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 선택 영역 문제 디버깅
+function debugSelection() {
+  const selection = window.getSelection();
+  console.log('선택 영역:', {
+    rangeCount: selection.rangeCount,
+    isCollapsed: selection.isCollapsed,
+    anchorNode: selection.anchorNode,
+    anchorOffset: selection.anchorOffset,
+    focusNode: selection.focusNode,
+    focusOffset: selection.focusOffset
+  });
+
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    console.log('범위:', {
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset,
+      collapsed: range.collapsed
+    });
+  }
+}
+
+// 선택 영역 변경 모니터링
+document.addEventListener('selectionchange', () => {
+  debugSelection();
+});`} />
+              </DocSection>
+
+              <DocSection id="dom-sync-issues" title="DOM 동기화 문제" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 모델과 DOM 비교
+function compareModelAndDOM(editor) {
+  const modelContent = editor.getModelContent();
+  const domContent = editor.element.textContent;
+  
+  if (modelContent !== domContent) {
+    console.error('불일치:', {
+      model: modelContent,
+      dom: domContent
+    });
+  }
+}
+
+// DOM 변형 모니터링
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    console.log('DOM 변형:', {
+      type: mutation.type,
+      target: mutation.target,
+      addedNodes: Array.from(mutation.addedNodes),
+      removedNodes: Array.from(mutation.removedNodes)
+    });
+  });
+});
+
+observer.observe(editor.element, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});`} />
+              </DocSection>
+
+              <DocSection id="ime-issues" title="IME 문제" depth={3}>
+                <DocCodeBlock language="typescript" code={`// IME 조합 디버깅
+function debugIME() {
+  const element = editor.element;
+  
+  element.addEventListener('compositionstart', (e) => {
+    console.log('조합 시작:', e.data);
+  });
+  
+  element.addEventListener('compositionupdate', (e) => {
+    console.log('조합 업데이트:', e.data);
+  });
+  
+  element.addEventListener('compositionend', (e) => {
+    console.log('조합 종료:', e.data);
+  });
+  
+  element.addEventListener('beforeinput', (e) => {
+    console.log('입력 전:', {
+      inputType: e.inputType,
+      data: e.data,
+      isComposing: e.isComposing
+    });
+  });
+}
+
+// 조합이 활성화되어 있는지 확인
+function isComposing() {
+  return document.activeElement === editor.element &&
+         (editor.element as any).isComposing;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="debugging-techniques" title="디버깅 기법">
+              <p class="m-0 mb-4">
+                효과적인 디버깅 기법입니다.
+              </p>
+
+              <DocSection id="breakpoints" title="중단점" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 조건부 중단점
+editor.on('operation', (operation) => {
+  if (operation.type === 'insert' && operation.data === 'problem') {
+    debugger; // 여기서 중단
+  }
+});
+
+// 특정 조건에서 중단
+function breakOnCondition(condition: () => boolean) {
+  if (condition()) {
+    debugger;
+  }
+}
+
+// 선택 영역 변경 시 중단
+document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+  if (selection?.rangeCount === 0) {
+    debugger; // 선택 영역이 손실될 때 중단
+  }
+});`} />
+              </DocSection>
+
+              <DocSection id="state-inspection" title="상태 검사" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 에디터 상태 검사
+function inspectEditor(editor) {
+  return {
+    model: editor.getModel(),
+    selection: editor.getSelection(),
+    history: editor.getHistory(),
+    isComposing: editor.isComposing,
+    dom: {
+      content: editor.element.innerHTML,
+      textContent: editor.element.textContent
+    }
+  };
+}
+
+// 콘솔에서 에디터 상태 사용 가능하게 만들기
+(window as any).editor = editor;
+(window as any).inspectEditor = () => console.log(inspectEditor(editor));`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="performance-debugging" title="성능 디버깅">
+              <p class="m-0 mb-4">
+                성능 문제 디버깅입니다.
+              </p>
+              <DocCodeBlock language="typescript" code={`// 작업 성능 측정
+function measurePerformance(fn: () => void) {
+  const start = performance.now();
+  fn();
+  const end = performance.now();
+  console.log(\`작업이 \${end - start}ms 걸렸습니다\`);
+}
+
+// 렌더링 프로파일링
+function profileRender(editor: Editor) {
+  console.profile('render');
+  editor.render();
+  console.profileEnd('render');
+}
+
+// 메모리 사용량 모니터링
+function checkMemory() {
+  if ('memory' in performance) {
+    console.log('메모리:', (performance as any).memory);
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">이벤트 로깅을 사용하여 이벤트 시퀀스 추적</li>
+                <li class="mb-2">동기화 문제 디버깅 시 모델과 DOM 상태 비교</li>
+                <li class="mb-2">특정 시나리오에 집중하기 위해 조건부 중단점 사용</li>
+                <li class="mb-2">선택 영역 문제 디버깅을 위해 선택 영역 변경 모니터링</li>
+                <li class="mb-2">브라우저별 문제 식별을 위해 여러 브라우저에서 테스트</li>
+                <li class="mb-2">병목 현상 식별을 위해 성능 프로파일링 사용</li>
+                <li class="mb-2">디버깅 코드를 프로덕션 코드와 분리</li>
+              </ul>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+
+    <DocNavigation
+      current="/editor/debugging"
+      pages={[
+        { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+        { title: '테스트 전략', href: '/editor/testing-strategies', description: '테스트 전략' },
+        { title: '모바일 지원', href: '/editor/mobile-support', description: '모바일 지원 가이드' },
+      ]}
+    />
+  </body>
+</html>

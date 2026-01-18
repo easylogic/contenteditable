@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="하드 브레이크 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>하드 브레이크</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   hardBreak: {
     group: 'inline',
     inline: true,
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'hardBreak'
 }`} />
             </DocSection>
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeHardBreak(node) {
+              <DocCodeBlock language="typescript" code={`function serializeHardBreak(node) {
   return '<br>';
 }`} />
             </DocSection>
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseHardBreak(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseHardBreak(domNode) {
   return {
     type: 'hardBreak'
   };
@@ -117,7 +117,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 렌더링
+              <DocCodeBlock language="typescript" code={`// 렌더링
 const br = document.createElement('br');
 // 하드 브레이크는 자체 닫는 요소임
 
@@ -137,7 +137,7 @@ function handleEnterInInline(e) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 여러 개의 연속된 <br> 태그
+              <DocCodeBlock language="typescript" code={`// 문제: 여러 개의 연속된 <br> 태그
 // 해결: 단일 <br>로 정규화하거나 단락으로 변환
 function normalizeHardBreaks(element) {
   const brs = element.querySelectorAll('br');
@@ -183,7 +183,7 @@ function getPositionAroundBr(br) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class HardBreakNode {
+              <DocCodeBlock language="typescript" code={`class HardBreakNode {
   constructor() {
     this.type = 'hardBreak';
   }

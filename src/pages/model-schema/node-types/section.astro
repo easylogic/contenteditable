@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Section</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   section: {
     content: 'block+',
     group: 'block',
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'section',
   attrs: { level: 1 },
   children: [
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeSection(node) {
+              <DocCodeBlock language="typescript" code={`function serializeSection(node) {
   return '<section data-level="' + node.attrs.level + '">' + 
          serializeChildren(node.children) + '</section>';
 }`} />
@@ -99,7 +99,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseSection(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseSection(domNode) {
   return {
     type: 'section',
     attrs: { level: parseInt(domNode.getAttribute('data-level')) || 1 },
@@ -117,7 +117,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering section
+              <DocCodeBlock language="typescript" code={`// Rendering section
 const section = document.createElement('section');
 section.setAttribute('data-level', node.attrs.level);
 section.contentEditable = 'true';
@@ -133,7 +133,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Section nesting
+              <DocCodeBlock language="typescript" code={`// Issue: Section nesting
 // Solution: Handle nested sections
 function validateSectionNesting(section, parent) {
   const level = parseInt(section.getAttribute('data-level'));
@@ -153,7 +153,7 @@ function validateSectionStructure(section) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class SectionNode {
+              <DocCodeBlock language="typescript" code={`class SectionNode {
   constructor(attrs, children) {
     this.type = 'section';
     this.attrs = { level: attrs?.level || 1 };

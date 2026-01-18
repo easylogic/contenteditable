@@ -1,0 +1,1185 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'model-based-history', text: '모델 기반 History 관리' },
+  { depth: 3, slug: 'history-architecture', text: 'History 아키텍처' },
+  { depth: 3, slug: 'operation-tracking', text: 'Operation 추적' },
+  { depth: 3, slug: 'state-snapshots', text: 'State 스냅샷' },
+  { depth: 2, slug: 'dom-history-conflict', text: 'DOM History 충돌' },
+  { depth: 3, slug: 'browser-history-limitations', text: '브라우저 History 한계' },
+  { depth: 3, slug: 'preventdefault-impact', text: 'preventDefault() 영향' },
+  { depth: 3, slug: 'programmatic-changes', text: '프로그래밍적 변경사항' },
+  { depth: 2, slug: 'ime-composition-history', text: 'IME Composition과 History' },
+  { depth: 3, slug: 'composition-state-mismatch', text: 'Composition 상태 불일치' },
+  { depth: 3, slug: 'preventdefault-composition', text: 'Composition 중 preventDefault()' },
+  { depth: 3, slug: 'composition-history-tracking', text: 'Composition History 추적' },
+  { depth: 2, slug: 'history-synchronization', text: 'History 동기화 전략' },
+  { depth: 3, slug: 'disable-browser-history', text: '브라우저 History 비활성화' },
+  { depth: 3, slug: 'hybrid-approach', text: '하이브리드 접근법' },
+  { depth: 3, slug: 'history-reconciliation', text: 'History 조정' },
+  { depth: 2, slug: 'selection-in-history', text: 'History의 Selection' },
+  { depth: 3, slug: 'selection-preservation', text: 'Selection 보존' },
+  { depth: 3, slug: 'selection-transformation', text: 'Selection 변환' },
+  { depth: 2, slug: 'transaction-history', text: 'Transaction과 History' },
+  { depth: 3, slug: 'transaction-grouping', text: 'Transaction 그룹화' },
+  { depth: 3, slug: 'undo-transaction', text: 'Undo Transaction 경계' },
+  { depth: 2, slug: 'edge-cases', text: '엣지 케이스와 함정' },
+  { depth: 3, slug: 'focus-changes', text: 'Focus 변경' },
+  { depth: 3, slug: 'external-dom-changes', text: '외부 DOM 변경' },
+  { depth: 3, slug: 'browser-extensions', text: '브라우저 확장 프로그램' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title="History 관리 – Editor 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터에서 history 관리 전문 가이드: DOM 충돌, IME composition, 브라우저 history 동기화 처리"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath('/')} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor')} class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath('/editor/architecture')} class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">History 관리</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              History 관리
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델 기반 에디터에서 undo/redo history 관리는 모델 상태와 브라우저의 DOM history 간의 신중한 조정이 필요합니다. 이 가이드는 전문적인 history 관리의 도전과제와 해결 방법을 다룹니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                모델 기반 에디터에서 history 관리는 브라우저의 기본 undo/redo와 근본적으로 다릅니다. 모델은 operation을 추적하고, 브라우저는 DOM 변경을 추적합니다. 이 두 시스템은 특히 <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>를 사용하거나 IME composition 중에 충돌할 수 있습니다.
+              </p>
+              <DocAlert type="error" title="⚠️ 핵심 도전과제">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>근본적인 문제:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">브라우저 history는 DOM 변경을 추적하며, model operation을 추적하지 않습니다</li>
+                  <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>를 사용하면 DOM 변경은 막지만 브라우저는 여전히 내부 상태를 업데이트할 수 있습니다</li>
+                  <li class="mb-1">이벤트를 막을 때 IME composition 상태가 손상될 수 있습니다</li>
+                  <li class="mb-1">프로그래밍적 model 변경사항은 브라우저 history에 나타나지 않습니다</li>
+                  <li class="mb-1">Selection은 history operation 전반에 걸쳐 보존되어야 합니다</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="model-based-history" title="모델 기반 History 관리">
+              <p class="m-0 mb-4">
+                모델 기반 history는 DOM 변경이 아닌 추상 문서 모델의 operation을 추적합니다. 이는 더 많은 제어를 제공하지만 신중한 동기화가 필요합니다.
+              </p>
+
+              <DocSection id="history-architecture" title="History 아키텍처" depth={3}>
+                <p class="m-0 mb-3">
+                  모델 operation을 중심으로 history 시스템을 설계합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  operations: Operation[];
+  beforeModel: DocumentModel;
+  afterModel: DocumentModel;
+  beforeSelection: Selection | null;
+  afterSelection: Selection | null;
+  metadata?: {
+    source: 'user' | 'programmatic' | 'undo' | 'redo';
+    compositionState?: CompositionState;
+  };
+}
+
+interface Operation {
+  type: 'insert' | 'delete' | 'format' | 'replace';
+  path: Path;
+  data?: any;
+  inverse?: Operation; // 효율적인 undo를 위해
+}
+
+class HistoryManager {
+  private undoStack: HistoryEntry[] = [];
+  private redoStack: HistoryEntry[] = [];
+  private maxSize: number = 50;
+  private currentEntry: HistoryEntry | null = null;
+  
+  constructor(private model: DocumentModel) {}
+  
+  // 새로운 history entry 기록
+  record(operations: Operation[], selection: Selection | null) {
+    const beforeModel = this.model.clone();
+    const beforeSelection = selection;
+    
+    // operation 적용
+    operations.forEach(op => this.model.apply(op));
+    
+    const afterModel = this.model.clone();
+    const afterSelection = this.calculateSelectionAfterOperations(
+      beforeSelection,
+      operations
+    );
+    
+    const entry: HistoryEntry = {
+      id: this.generateId(),
+      timestamp: Date.now(),
+      operations,
+      beforeModel,
+      afterModel,
+      beforeSelection,
+      afterSelection,
+      metadata: {
+        source: 'user'
+      }
+    };
+    
+    this.undoStack.push(entry);
+    if (this.undoStack.length > this.maxSize) {
+      this.undoStack.shift();
+    }
+    this.redoStack = []; // 새 작업 시 redo 스택 지우기
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="operation-tracking" title="Operation 추적" depth={3}>
+                <p class="m-0 mb-3">
+                  모델을 수정하는 모든 operation을 추적합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class OperationTracker {
+  private pendingOperations: Operation[] = [];
+  private isRecording = false;
+  
+  startRecording() {
+    this.isRecording = true;
+    this.pendingOperations = [];
+  }
+  
+  recordOperation(operation: Operation) {
+    if (this.isRecording) {
+      this.pendingOperations.push(operation);
+    }
+  }
+  
+  stopRecording(): Operation[] {
+    this.isRecording = false;
+    const operations = [...this.pendingOperations];
+    this.pendingOperations = [];
+    return operations;
+  }
+  
+  // 이벤트 핸들러와 통합
+  handleBeforeInput(e: InputEvent) {
+    this.startRecording();
+    
+    // DOM 이벤트를 model operation으로 변환
+    const operation = this.domEventToOperation(e);
+    this.recordOperation(operation);
+    
+    // 모델에서 처리하기 위해 기본 동작 방지
+    e.preventDefault();
+    
+    // 모델에 적용
+    this.model.apply(operation);
+    
+    // 기록 중지 및 history에 저장
+    const operations = this.stopRecording();
+    this.historyManager.record(operations, this.saveSelection());
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="state-snapshots" title="State 스냅샷" depth={3}>
+                <p class="m-0 mb-3">
+                  history entry를 위한 효율적인 스냅샷을 사용합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  // 옵션 1: 전체 모델 스냅샷 (간단하지만 메모리 집약적)
+  createSnapshot(model: DocumentModel): DocumentModel {
+    return model.clone(); // 깊은 복사
+  }
+  
+  // 옵션 2: Operation 기반 (메모리 효율적)
+  createSnapshot(operations: Operation[]): HistoryEntry {
+    // operation만 저장, 필요할 때 모델 재구성
+    return {
+      operations,
+      // 전체 모델 저장하지 않음, operation에서 재구성
+    };
+  }
+  
+  // 옵션 3: 하이브리드 (메모리와 속도 균형)
+  createSnapshot(model: DocumentModel, operations: Operation[]): HistoryEntry {
+    // operation + 검증용 체크섬 저장
+    return {
+      operations,
+      modelChecksum: this.calculateChecksum(model),
+      // operation에서 모델 재구성, 체크섬으로 검증
+    };
+  }
+  
+  // operation에서 모델 재구성
+  reconstructModel(baseModel: DocumentModel, operations: Operation[]): DocumentModel {
+    const model = baseModel.clone();
+    operations.forEach(op => model.apply(op));
+    return model;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="dom-history-conflict" title="DOM History 충돌">
+              <p class="m-0 mb-4">
+                브라우저의 기본 history와 모델 history가 충돌할 수 있습니다. 이러한 충돌을 이해하는 것은 신뢰할 수 있는 history 관리에 중요합니다.
+              </p>
+
+              <DocSection id="browser-history-limitations" title="브라우저 History 한계" depth={3}>
+                <p class="m-0 mb-3">
+                  브라우저 history에는 여러 한계가 있습니다:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>DOM 변경만 추적:</strong> 프로그래밍적 변경사항이 포함되지 않을 수 있습니다</li>
+                  <li><strong>세분성 다양:</strong> 일부 브라우저는 키 입력마다, 다른 브라우저는 operation마다 undo합니다</li>
+                  <li><strong>예상치 못하게 지워질 수 있음:</strong> Focus 변경, 프로그래밍적 DOM 업데이트</li>
+                  <li><strong>Operation 메타데이터 없음:</strong> 사용자 작업과 프로그래밍적 변경을 구분할 수 없습니다</li>
+                  <li><strong>Selection 보존 안 됨:</strong> Undo 시 selection 위치를 잃을 수 있습니다</li>
+                </ul>
+                <DocCodeBlock language="typescript" code={`// 브라우저 history 동작
+// ❌ 문제: 프로그래밍적 변경사항이 history에 없음
+element.innerHTML = newContent; // 브라우저 undo 스택에 없음
+
+// ❌ 문제: preventDefault() 작업이 history에 없음
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault();
+  // 사용자 정의 작업 - 브라우저 history에 없음
+  this.applyCustomOperation();
+});
+
+// ❌ 문제: Focus 변경 시 history 지워짐
+element.addEventListener('blur', () => {
+  // 브라우저가 undo 스택을 지울 수 있음
+});
+
+// ✅ 해결: 사용자 정의 history 사용
+class HistoryManager {
+  recordOperation(operation) {
+    // 항상 사용자 정의 history에 추적
+    this.undoStack.push({
+      operation,
+      beforeModel: this.model.clone(),
+      afterModel: this.applyOperation(operation)
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="preventdefault-impact" title="preventDefault() 영향" depth={3}>
+                <p class="m-0 mb-3">
+                  <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>를 호출하면 DOM 변경은 막지만 브라우저의 내부 상태는 여전히 업데이트될 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`// 문제
+element.addEventListener('beforeinput', (e) => {
+  e.preventDefault(); // DOM 변경 방지
+  
+  // 대신 모델에 적용
+  const operation = this.domEventToOperation(e);
+  this.model.apply(operation);
+  
+  // ❌ 문제: 브라우저의 내부 상태(IME, undo 스택)가 업데이트될 수 있음
+  // DOM이 변경되지 않았음에도 불구하고
+});
+
+// 브라우저의 관점:
+// 1. beforeinput 발생 → preventDefault() 호출
+// 2. 브라우저는 DOM을 업데이트하지 않음 (방지되었으므로)
+// 3. 하지만 브라우저는 이미 다음을 수행했을 수 있음:
+//    - 내부 IME 상태 업데이트
+//    - undo 스택에 entry 추가 (일부 브라우저에서)
+//    - selection 추적 업데이트
+// 4. 이것은 브라우저 상태와 실제 DOM 간의 불일치를 만듭니다`} />
+                <DocAlert type="error" title="⚠️ 상태 불일치" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    <strong>중요한 문제:</strong> <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code>가 호출되어도 브라우저의 내부 상태(IME composition, undo 스택, selection 추적)가 업데이트될 수 있습니다. 이것은 브라우저가 생각하는 것과 실제 DOM에서 일어난 것 사이의 불일치를 만듭니다.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="programmatic-changes" title="프로그래밍적 변경사항" depth={3}>
+                <p class="m-0 mb-3">
+                  프로그래밍적 model 변경사항은 브라우저 history에 나타나지 않습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`// 사용자가 "Hello" 입력 → 브라우저가 undo 스택에 추가
+// 프로그래밍적으로 "World" 삽입 → 브라우저가 undo 스택에 추가하지 않음
+
+class Editor {
+  insertText(text: string) {
+    const operation = {
+      type: 'insert',
+      path: this.getSelection().anchor,
+      text: text
+    };
+    
+    // 모델에 적용
+    this.model.apply(operation);
+    
+    // DOM 업데이트
+    this.renderModelToDOM();
+    
+    // ❌ 문제: 이 변경사항은 브라우저의 undo 스택에 없음
+    // 사용자가 Ctrl+Z 누름 → "Hello"만 undo, "World"는 남음
+    
+    // ✅ 해결: 항상 사용자 정의 history에 기록
+    this.historyManager.record([operation], this.saveSelection());
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="ime-composition-history" title="IME Composition과 History">
+              <p class="m-0 mb-4">
+                IME composition은 history 관리에 고유한 도전과제를 만듭니다. Composition 중 이벤트를 막으면 브라우저의 IME 상태가 손상될 수 있습니다.
+              </p>
+
+              <DocSection id="composition-state-mismatch" title="Composition 상태 불일치" depth={3}>
+                <p class="m-0 mb-3">
+                  Composition 중 이벤트를 막으면 브라우저의 IME 상태가 손상될 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`// 중요한 문제
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault(); // 단락 삽입 방지
+    
+    // ❌ 문제: Composition이 활성화되어 있으면 브라우저의 IME 상태가 손상됨
+    // 브라우저는 composition이 끝났다고 생각하지만, 내부적으로는 여전히 활성화됨
+    // 다음 IME 입력이 실패함 (브라우저 상태가 일관되지 않기 때문)
+  }
+});
+
+// 발생하는 일:
+// 1. 사용자가 한글 텍스트를 조합 중 (한글)
+// 2. 사용자가 Enter 누름 → insertParagraph 발생
+// 3. preventDefault() 호출
+// 4. 브라우저의 내부 IME 상태는 composition이 끝났다고 생각함
+// 5. 하지만 IME 관점에서는 composition이 여전히 활성화됨
+// 6. 다음 문자 입력이 실패함 (상태 불일치)`} />
+                <DocAlert type="error" title="⚠️ Safari Composition 손상" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    <strong>Safari 특정 문제:</strong> Safari에서 IME composition 중 또는 이후에 <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">insertParagraph</code>를 막으면 브라우저의 IME 상태가 손상됩니다. 후속 IME 입력이 완전히 실패합니다. 이것은 한국어, 일본어, 중국어 IME에 영향을 줍니다.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="preventdefault-composition" title="Composition 중 preventDefault()" depth={3}>
+                <p class="m-0 mb-3">
+                  이벤트를 막기 전에 항상 composition 상태를 확인합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionAwareHistory {
+  private isComposing = false;
+  private compositionState: CompositionState | null = null;
+  
+  init(editor: HTMLElement) {
+    // Composition 상태 추적
+    editor.addEventListener('compositionstart', () => {
+      this.isComposing = true;
+      this.compositionState = {
+        startTime: Date.now(),
+        text: ''
+      };
+    });
+    
+    editor.addEventListener('compositionend', (e) => {
+      this.isComposing = false;
+      // Composition을 단일 operation으로 기록
+      this.recordCompositionOperation(e.data);
+      this.compositionState = null;
+    });
+    
+    // Composition 중에는 절대 이벤트를 막지 않음
+    editor.addEventListener('beforeinput', (e) => {
+      if (this.isComposing) {
+        // 브라우저가 composition을 처리하도록 허용
+        // 기본 동작을 막지 않음
+        return;
+      }
+      
+      // Composition 중이 아닐 때만 막기
+      if (e.inputType === 'insertParagraph') {
+        e.preventDefault();
+        this.handleCustomParagraphInsertion();
+      }
+    });
+  }
+  
+  // 대안: isComposing 플래그 확인
+  handleBeforeInput(e: InputEvent) {
+    // 우리 상태와 브라우저 플래그 모두 확인
+    if (this.isComposing || e.isComposing) {
+      // Composition 중에는 막지 않음
+      return;
+    }
+    
+    // 막아도 안전함
+    if (e.inputType === 'insertParagraph') {
+      e.preventDefault();
+      this.handleCustomOperation();
+    }
+  }
+}`} />
+                <DocCodeBlock language="typescript" code={`// ✅ 안전한 패턴: 항상 composition 확인
+editor.addEventListener('beforeinput', (e) => {
+  // Composition 중에는 절대 막지 않음
+  if (e.isComposing || this.compositionHandler.isComposing) {
+    return; // 브라우저가 처리하도록
+  }
+  
+  // 막아도 안전함
+  if (e.inputType === 'insertParagraph') {
+    e.preventDefault();
+    this.handleCustomParagraph();
+  }
+});
+
+// ✅ 대안: keydown에서 확인
+editor.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    // Composition 상태 확인
+    if (e.isComposing || this.compositionHandler.isComposing) {
+      return; // Composition 중 Enter를 브라우저가 처리하도록
+    }
+    
+    e.preventDefault();
+    this.handleCustomEnter();
+  }
+});`} />
+              </DocSection>
+
+              <DocSection id="composition-history-tracking" title="Composition History 추적" depth={3}>
+                <p class="m-0 mb-3">
+                  Composition을 단일 history entry로 추적합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionHistory {
+  private compositionStartModel: DocumentModel | null = null;
+  private compositionStartSelection: Selection | null = null;
+  
+  handleCompositionStart() {
+    // Composition 시작 시 상태 저장
+    this.compositionStartModel = this.model.clone();
+    this.compositionStartSelection = this.saveSelection();
+    
+    // 중간 업데이트 기록하지 않음
+    this.isRecordingComposition = true;
+  }
+  
+  handleCompositionUpdate(text: string) {
+    // 시각적 피드백을 위해 모델 업데이트
+    // 하지만 아직 history에 기록하지 않음
+    this.updateCompositionDisplay(text);
+  }
+  
+  handleCompositionEnd(finalText: string) {
+    // 이제 단일 operation으로 기록
+    const operation = {
+      type: 'insertText',
+      path: this.compositionStartSelection.anchor,
+      text: finalText,
+      metadata: {
+        source: 'ime',
+        composition: true
+      }
+    };
+    
+    // History에 기록
+    this.historyManager.record(
+      [operation],
+      this.compositionStartSelection,
+      {
+        compositionState: {
+          startText: '',
+          endText: finalText
+        }
+      }
+    );
+    
+    this.isRecordingComposition = false;
+  }
+  
+  // 중간 composition 업데이트 기록 방지
+  shouldRecordOperation(operation: Operation): boolean {
+    if (this.isRecordingComposition) {
+      // Composition 업데이트 기록하지 않음, 최종 결과만
+      return false;
+    }
+    return true;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="history-synchronization" title="History 동기화 전략">
+              <p class="m-0 mb-4">
+                모델 history를 브라우저의 DOM history와 동기화하거나, 브라우저 history를 완전히 비활성화해야 합니다.
+              </p>
+
+              <DocSection id="disable-browser-history" title="브라우저 History 비활성화" depth={3}>
+                <p class="m-0 mb-3">
+                  브라우저 history를 완전히 비활성화하고 사용자 정의 history만 사용합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  disableBrowserHistory() {
+    // 브라우저의 undo/redo 방지
+    this.editor.addEventListener('beforeinput', (e) => {
+      if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+        e.preventDefault();
+        
+        if (e.inputType === 'historyUndo') {
+          this.undo();
+        } else {
+          this.redo();
+        }
+      }
+    });
+    
+    // 키보드 단축키도 처리
+    this.editor.addEventListener('keydown', (e) => {
+      const isUndo = (e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey;
+      const isRedo = (e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey));
+      
+      if (isUndo || isRedo) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (isUndo) {
+          this.undo();
+        } else {
+          this.redo();
+        }
+      }
+    });
+    
+    // DOM 조작으로 브라우저의 undo 스택 지우기
+    // (브라우저는 DOM이 교체되면 스택을 지움)
+    this.clearBrowserStack();
+  }
+  
+  clearBrowserStack() {
+    // 내용 교체로 강제 지우기
+    const content = this.editor.innerHTML;
+    this.editor.innerHTML = content; // 브라우저가 스택을 지움
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="hybrid-approach" title="하이브리드 접근법" depth={3}>
+                <p class="m-0 mb-3">
+                  간단한 작업에는 브라우저 history를, 복잡한 작업에는 사용자 정의 history를 사용합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HybridHistoryManager {
+  shouldUseBrowserHistory(operation: Operation): boolean {
+    // 간단한 텍스트 삽입에는 브라우저 history 사용
+    if (operation.type === 'insertText' && operation.text.length === 1) {
+      return true; // 브라우저가 처리하도록
+    }
+    
+    // 복잡한 작업에는 사용자 정의 history 사용
+    if (operation.type === 'format' || 
+        operation.type === 'insertNode' ||
+        operation.complex) {
+      return false; // 사용자 정의 history 사용
+    }
+    
+    return false; // 기본값은 사용자 정의
+  }
+  
+  handleOperation(operation: Operation) {
+    if (this.shouldUseBrowserHistory(operation)) {
+      // 기본 동작을 막지 않음, 브라우저가 처리하도록
+      // 일관성을 위해 여전히 우리 history에 추적
+      this.recordInCustomHistory(operation);
+    } else {
+      // 기본 동작을 막고, 사용자 정의 history 사용
+      this.preventDefaultAndRecord(operation);
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="history-reconciliation" title="History 조정" depth={3}>
+                <p class="m-0 mb-3">
+                  브라우저 history와 모델 history를 조정합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryReconciler {
+  reconcile() {
+    // 브라우저 history가 사용되었는지 감지
+    const browserHistoryUsed = this.detectBrowserHistoryUse();
+    
+    if (browserHistoryUsed) {
+      // 브라우저가 무언가를 undo했음, 모델 동기화
+      const currentDOM = this.parseDOMToModel(this.editor);
+      
+      // 일치하는 history entry 찾기
+      const matchingEntry = this.findMatchingHistoryEntry(currentDOM);
+      
+      if (matchingEntry) {
+        // 모델을 이 상태로 복원
+        this.model = matchingEntry.beforeModel;
+      } else {
+        // 일치 없음, DOM에서 모델 동기화
+        this.model = currentDOM;
+      }
+    }
+  }
+  
+  detectBrowserHistoryUse(): boolean {
+    // 브라우저 undo/redo 모니터링
+    let browserHistoryUsed = false;
+    
+    this.editor.addEventListener('beforeinput', (e) => {
+      if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+        browserHistoryUsed = true;
+        // 막지 않음, 브라우저가 처리하도록
+        // 하지만 이후에 모델 동기화
+        setTimeout(() => {
+          this.reconcile();
+        }, 0);
+      }
+    });
+    
+    return browserHistoryUsed;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="selection-in-history" title="History의 Selection">
+              <p class="m-0 mb-4">
+                Selection은 history operation 전반에 걸쳐 올바르게 보존되고 변환되어야 합니다.
+              </p>
+
+              <DocSection id="selection-preservation" title="Selection 보존" depth={3}>
+                <p class="m-0 mb-3">
+                  history entry와 함께 항상 selection을 저장하고 복원합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  undo() {
+    if (this.undoStack.length === 0) return false;
+    
+    const entry = this.undoStack.pop();
+    
+    // redo를 위해 현재 상태 저장
+    const currentState = {
+      model: this.model.clone(),
+      selection: this.saveSelection()
+    };
+    this.redoStack.push(currentState);
+    
+    // 모델 복원
+    this.model = entry.beforeModel;
+    
+    // 모델에서 DOM 업데이트
+    this.renderModelToDOM(this.model);
+    
+    // 다음 프레임에서 selection 복원 (DOM 업데이트 후)
+    requestAnimationFrame(() => {
+      this.restoreSelection(entry.beforeSelection);
+    });
+    
+    return true;
+  }
+  
+  saveSelection(): Selection {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return null;
+    
+    const range = selection.getRangeAt(0);
+    
+    // 모델 selection으로 변환
+    return {
+      anchor: this.domPositionToModelPath(range.startContainer, range.startOffset),
+      focus: this.domPositionToModelPath(range.endContainer, range.endOffset),
+      collapsed: range.collapsed
+    };
+  }
+  
+  restoreSelection(modelSelection: Selection) {
+    if (!modelSelection) return;
+    
+    // 모델 selection을 DOM으로 변환
+    const anchorPos = this.modelPathToDOMPosition(modelSelection.anchor);
+    const focusPos = this.modelPathToDOMPosition(modelSelection.focus);
+    
+    if (!anchorPos || !focusPos) {
+      // Selection이 유효하지 않음, 가장 가까운 유효한 위치 찾기
+      const nearest = this.findNearestValidPosition(modelSelection.anchor);
+      if (nearest) {
+        this.restoreSelection({ anchor: nearest, focus: nearest, collapsed: true });
+      }
+      return;
+    }
+    
+    const range = document.createRange();
+    range.setStart(anchorPos.node, anchorPos.offset);
+    range.setEnd(focusPos.node, focusPos.offset);
+    
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="selection-transformation" title="Selection 변환" depth={3}>
+                <p class="m-0 mb-3">
+                  operation이 영향을 줄 때 selection을 변환합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SelectionTransformer {
+  transformSelection(
+    selection: Selection,
+    operation: Operation
+  ): Selection {
+    // operation에 따라 selection 변환
+    switch (operation.type) {
+      case 'insert':
+        return this.transformForInsert(selection, operation);
+      case 'delete':
+        return this.transformForDelete(selection, operation);
+      case 'replace':
+        return this.transformForReplace(selection, operation);
+      default:
+        return selection;
+    }
+  }
+  
+  transformForInsert(selection: Selection, operation: Operation): Selection {
+    const { path, data } = operation;
+    
+    // 삽입이 selection 앞에 있으면 selection 이동
+    if (this.isBefore(path, selection.anchor.path)) {
+      return {
+        anchor: {
+          ...selection.anchor,
+          offset: selection.anchor.offset + data.length
+        },
+        focus: {
+          ...selection.focus,
+          offset: selection.focus.offset + data.length
+        }
+      };
+    }
+    
+    // 삽입이 selection 내부에 있으면 selection 확장
+    if (this.isWithin(path, selection)) {
+      return {
+        ...selection,
+        // 삽입된 내용을 포함하도록 selection 확장
+      };
+    }
+    
+    return selection; // 변경 없음
+  }
+  
+  transformForDelete(selection: Selection, operation: Operation): Selection {
+    const { path, length } = operation;
+    
+    // 삭제가 selection 앞에 있으면 selection 이동
+    if (this.isBefore(path, selection.anchor.path)) {
+      const shift = Math.min(length, selection.anchor.offset);
+      return {
+        anchor: {
+          ...selection.anchor,
+          offset: Math.max(0, selection.anchor.offset - shift)
+        },
+        focus: {
+          ...selection.focus,
+          offset: Math.max(0, selection.focus.offset - shift)
+        }
+      };
+    }
+    
+    // 삭제가 selection과 겹치면 selection 조정
+    if (this.overlaps(path, length, selection)) {
+      // 삭제 시작 위치로 축소
+      return {
+        anchor: path,
+        focus: path,
+        collapsed: true
+      };
+    }
+    
+    return selection;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="transaction-history" title="Transaction과 History">
+              <p class="m-0 mb-4">
+                관련 operation을 transaction으로 그룹화하여 원자적 history entry를 만듭니다.
+              </p>
+
+              <DocSection id="transaction-grouping" title="Transaction 그룹화" depth={3}>
+                <p class="m-0 mb-3">
+                  operation을 transaction으로 그룹화합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TransactionHistory {
+  private currentTransaction: Operation[] = [];
+  private isInTransaction = false;
+  
+  startTransaction() {
+    this.isInTransaction = true;
+    this.currentTransaction = [];
+  }
+  
+  addToTransaction(operation: Operation) {
+    if (this.isInTransaction) {
+      this.currentTransaction.push(operation);
+    } else {
+      // Transaction이 아니면 즉시 기록
+      this.record([operation]);
+    }
+  }
+  
+  commitTransaction() {
+    if (this.currentTransaction.length > 0) {
+      // 모든 operation을 단일 history entry로 기록
+      this.record(this.currentTransaction);
+      this.currentTransaction = [];
+    }
+    this.isInTransaction = false;
+  }
+  
+  rollbackTransaction() {
+    // Transaction의 모든 operation undo
+    this.currentTransaction.forEach(op => {
+      this.model.apply(op.inverse);
+    });
+    this.currentTransaction = [];
+    this.isInTransaction = false;
+  }
+  
+  // 예: 포맷팅 작업
+  applyFormatting(format: Format) {
+    this.startTransaction();
+    
+    // 포맷팅을 위한 여러 operation
+    this.addToTransaction({ type: 'format', format, start: selection.start });
+    this.addToTransaction({ type: 'format', format, end: selection.end });
+    
+    this.commitTransaction(); // 단일 undo entry
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="undo-transaction" title="Undo Transaction 경계" depth={3}>
+                <p class="m-0 mb-3">
+                  단일 undo 작업을 구성하는 것을 정의합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  // 시간 창 내의 operation 그룹화
+  private lastOperationTime = 0;
+  private operationWindow = 300; // 300ms
+  
+  shouldGroupWithPrevious(operation: Operation): boolean {
+    const now = Date.now();
+    const timeSinceLastOp = now - this.lastOperationTime;
+    
+    // 시간 창 내에 있으면 그룹화
+    if (timeSinceLastOp < this.operationWindow) {
+      return true;
+    }
+    
+    this.lastOperationTime = now;
+    return false;
+  }
+  
+  recordOperation(operation: Operation) {
+    if (this.shouldGroupWithPrevious(operation)) {
+      // 이전 entry에 추가
+      const lastEntry = this.undoStack[this.undoStack.length - 1];
+      lastEntry.operations.push(operation);
+      lastEntry.afterModel = this.applyOperation(operation, lastEntry.afterModel);
+    } else {
+      // 새 entry
+      this.record([operation]);
+    }
+  }
+  
+  // operation 타입별 그룹화
+  shouldGroupByType(op1: Operation, op2: Operation): boolean {
+    // 연속된 텍스트 삽입 그룹화
+    if (op1.type === 'insertText' && op2.type === 'insertText') {
+      return this.areAdjacent(op1.path, op2.path);
+    }
+    
+    return false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="edge-cases" title="엣지 케이스와 함정">
+              <p class="m-0 mb-4">
+                history 관리를 깨뜨리는 일반적인 엣지 케이스:
+              </p>
+
+              <DocSection id="focus-changes" title="Focus 변경" depth={3}>
+                <p class="m-0 mb-3">
+                  Focus 변경이 브라우저 history를 지울 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  handleFocusChange() {
+    this.editor.addEventListener('blur', () => {
+      // 브라우저가 blur 시 undo 스택을 지울 수 있음
+      // blur 전에 현재 상태 저장
+      this.saveStateBeforeBlur();
+    });
+    
+    this.editor.addEventListener('focus', () => {
+      // 브라우저가 스택을 지웠을 수 있음
+      // 필요하면 복원
+      this.restoreStateAfterFocus();
+    });
+  }
+  
+  // Focus 변경 시 history 손실 방지
+  saveStateBeforeBlur() {
+    // 영구 저장소에 저장하거나 메모리에 보관
+    this.persistentState = {
+      model: this.model.clone(),
+      undoStack: this.undoStack,
+      redoStack: this.redoStack
+    };
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="external-dom-changes" title="외부 DOM 변경" depth={3}>
+                <p class="m-0 mb-3">
+                  외부 DOM 변경이 history를 손상시킬 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  watchForExternalChanges() {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (!this.isExpectedChange(mutation)) {
+          // 외부 변경 감지
+          // 옵션 1: 모델로 되돌리기
+          this.revertToModel();
+          
+          // 옵션 2: DOM에서 모델 동기화
+          // this.syncModelFromDOM();
+          
+          // 옵션 3: History 지우기 (가장 안전)
+          // this.clearHistory();
+        }
+      });
+    });
+    
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+  }
+  
+  isExpectedChange(mutation: MutationRecord): boolean {
+    // 이 변경이 우리 코드에 의해 시작되었는지 확인
+    return mutation.target.hasAttribute('data-expected-change') ||
+           this.isOurOperation(mutation);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="browser-extensions" title="브라우저 확장 프로그램" depth={3}>
+                <p class="m-0 mb-3">
+                  브라우저 확장 프로그램이 history를 손상시킬 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  handleExtensionInterference() {
+    // 확장 프로그램(Grammarly, 맞춤법 검사기)이 DOM 수정
+    // 이것은 브라우저 history를 손상시킬 수 있음
+    
+    // 해결: 항상 사용자 정의 history 사용
+    this.disableBrowserHistory();
+    
+    // 확장 프로그램 변경 모니터링
+    this.watchForExternalChanges();
+    
+    // 확장 프로그램 변경 되돌리기
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (this.isExtensionChange(mutation)) {
+          // 모델로 되돌리기
+          this.revertToModel();
+        }
+      });
+    });
+    
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true
+    });
+  }
+  
+  isExtensionChange(mutation: MutationRecord): boolean {
+    // 확장 프로그램 특정 마커 감지
+    return mutation.target.classList?.contains('grammarly-') ||
+           mutation.target.hasAttribute('data-grammarly') ||
+           mutation.target.classList?.contains('spell-check-');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <p class="m-0 mb-4">
+                전문적인 history 관리를 위한 모범 사례:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>항상 브라우저 history 비활성화:</strong> 완전한 제어를 위해 사용자 정의 history 사용</li>
+                <li><strong>Composition 중에는 절대 이벤트를 막지 않음:</strong> <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> 전에 <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">isComposing</code> 확인</li>
+                <li><strong>Composition을 단일 operation으로 기록:</strong> 중간 업데이트 기록하지 않음</li>
+                <li><strong>항상 selection 보존:</strong> 각 history entry와 함께 selection 저장 및 복원</li>
+                <li><strong>원자적 작업을 위해 transaction 사용:</strong> 관련 operation 그룹화</li>
+                <li><strong>Selection을 올바르게 변환:</strong> operation이 영향을 줄 때 selection 조정</li>
+                <li><strong>외부 변경 처리:</strong> 예상치 못한 DOM 수정 모니터링 및 되돌리기</li>
+                <li><strong>History entry 검증:</strong> undo/redo 후 모델 일관성 확인</li>
+                <li><strong>효율적인 스냅샷 사용:</strong> 메모리 사용과 재구성 속도 균형</li>
+                <li><strong>브라우저 간 테스트:</strong> History 동작이 크게 다름</li>
+              </ul>
+              <DocCodeBlock language="typescript" code={`class ProfessionalHistoryManager {
+  // 완전한 구현
+  constructor(model: DocumentModel, editor: HTMLElement) {
+    this.model = model;
+    this.editor = editor;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.compositionHandler = new CompositionHandler();
+    
+    this.init();
+  }
+  
+  init() {
+    // 1. 브라우저 history 비활성화
+    this.disableBrowserHistory();
+    
+    // 2. Composition 상태 추적
+    this.compositionHandler.init(this.editor);
+    
+    // 3. 이벤트 처리
+    this.setupEventHandlers();
+    
+    // 4. 외부 변경 감시
+    this.watchForExternalChanges();
+  }
+  
+  handleBeforeInput(e: InputEvent) {
+    // Composition 중에는 절대 막지 않음
+    if (e.isComposing || this.compositionHandler.isComposing) {
+      return; // 브라우저가 처리하도록
+    }
+    
+    // Operation으로 변환
+    const operation = this.domEventToOperation(e);
+    
+    // 기본 동작 방지
+    e.preventDefault();
+    
+    // 모델에 적용
+    this.model.apply(operation);
+    
+    // History에 기록
+    this.record([operation], this.saveSelection());
+    
+    // DOM 업데이트
+    this.renderModelToDOM();
+    
+    // Selection 복원
+    requestAnimationFrame(() => {
+      this.restoreSelection(this.calculateSelectionAfterOperation(operation));
+    });
+  }
+  
+  undo() {
+    if (this.undoStack.length === 0) return false;
+    
+    const entry = this.undoStack.pop();
+    
+    // Redo를 위해 저장
+    this.redoStack.push({
+      model: this.model.clone(),
+      selection: this.saveSelection()
+    });
+    
+    // 모델 복원
+    this.model = entry.beforeModel;
+    
+    // DOM 업데이트
+    this.renderModelToDOM();
+    
+    // Selection 복원
+    requestAnimationFrame(() => {
+      this.restoreSelection(entry.beforeSelection);
+    });
+    
+    return true;
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current={localePath('/editor/history-management')}
+              pages={[
+                { title: 'Editor 아키텍처', href: localePath('/editor/architecture'), description: '에디터 아키텍처 패턴 개요' },
+                { title: 'Model-DOM 동기화', href: localePath('/editor/model-dom-synchronization'), description: '모델과 DOM 동기화' },
+                { title: 'Transaction 시스템', href: localePath('/model-schema/transaction'), description: '원자적 작업을 위한 Transaction 시스템' },
+                { title: 'Position & Selection', href: localePath('/editor/position-selection'), description: 'Position 및 Selection 관리' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

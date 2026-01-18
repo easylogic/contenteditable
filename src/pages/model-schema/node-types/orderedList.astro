@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Ordered List</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   orderedList: {
     content: 'listItem+',
     group: 'block',
@@ -69,7 +69,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'orderedList',
   attrs: { start: 1 },
   children: [
@@ -90,7 +90,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeOrderedList(node) {
+              <DocCodeBlock language="typescript" code={`function serializeOrderedList(node) {
   const attrs = node.attrs?.start !== 1 ? { start: node.attrs.start } : {};
   return '<ol' + serializeAttrs(attrs) + '>' + 
          serializeChildren(node.children) + '</ol>';
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseOrderedList(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseOrderedList(domNode) {
   const start = parseInt(domNode.getAttribute('start')) || 1;
   return {
     type: 'orderedList',
@@ -120,7 +120,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering ordered list
+              <DocCodeBlock language="typescript" code={`// Rendering ordered list
 const ol = document.createElement('ol');
 ol.contentEditable = 'true';
 if (node.attrs?.start !== 1) {
@@ -153,7 +153,7 @@ function createOrderedList() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Nested lists
+              <DocCodeBlock language="typescript" code={`// Issue: Nested lists
 // Solution: Handle nested list items properly
 function handleNestedList(list, nestedList) {
   // Ensure proper nesting structure
@@ -186,7 +186,7 @@ function validateListItem(item) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class OrderedListNode {
+              <DocCodeBlock language="typescript" code={`class OrderedListNode {
   constructor(attrs, children) {
     this.type = 'orderedList';
     this.attrs = { start: attrs?.start || 1 };

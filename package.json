@@ -23,6 +23,7 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "reactflow": "^11.11.4",
+    "shiki": "^3.21.0",
     "sigma": "^3.0.2",
     "vis-network": "^10.0.2"
   },

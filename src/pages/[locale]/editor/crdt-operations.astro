@@ -1,0 +1,501 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+import {
+  supportedLocales,
+  defaultLocale,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'crdt-operation-format', text: 'CRDT Operation 형식' },
+  { depth: 2, slug: 'position-mapping', text: '위치 매핑' },
+  { depth: 2, slug: 'operation-conversion', text: 'Operation 변환' },
+  { depth: 2, slug: 'applying-operations', text: 'Operation 적용' },
+  { depth: 2, slug: 'rendering-updates', text: '렌더링 업데이트' },
+  { depth: 2, slug: 'selection-handling', text: '선택 영역 처리' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="CRDT Operations & Rendering – 에디터 아키텍처 – contenteditable.lab"
+      description="CRDT operation을 에디터 operation으로 변환하고 렌더링 업데이트 적용"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">CRDT Operations & Rendering</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">CRDT Operations & Rendering</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              CRDT operation을 에디터 operation으로 변환하고 렌더링을 위해 적용하는 방법입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                CRDT 라이브러리(Yjs, Automerge 등)를 사용할 때 CRDT 형식의 operation을 받게 됩니다. 이러한 operation을 에디터의 operation 형식으로 변환한 후 모델에 적용하고 렌더링해야 합니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>핵심 포인트:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">CRDT operation은 path/offset이 아닌 position ID 사용</li>
+                  <li class="mb-1">CRDT position을 에디터 path로 매핑 필요</li>
+                  <li class="mb-1">CRDT operation을 에디터 operation으로 변환</li>
+                  <li class="mb-1">에디터의 transaction 시스템을 통해 operation 적용</li>
+                  <li class="mb-1">원격 operation 도착 시 선택 영역 업데이트 처리</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="crdt-operation-format" title="CRDT Operation 형식">
+              <p class="m-0 mb-4">
+                CRDT 라이브러리는 일반적으로 다음과 같은 형식의 operation을 제공합니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`// Yjs, Automerge 등에서 받는 CRDT operation 예제
+interface CRDTOperation {
+  type: 'insert' | 'delete' | 'update' | 'format';
+  position: PositionId; // 전역 고유 위치 식별자
+  after?: PositionId; // 이 위치 뒤에 삽입
+  positions?: PositionId[]; // 범위에 대한 여러 위치
+  content?: string | Node;
+  attributes?: Record<string, any>;
+  siteId: string;
+  clock: number;
+}
+
+// 위치 식별자 (CRDT 라이브러리마다 다름)
+interface PositionId {
+  siteId: string;
+  clock: number;
+  offset?: number; // 분수 위치용
+}
+
+// 예제: Yjs operation
+const yjsOperation = {
+  type: 'insert',
+  after: { siteId: 'user1', clock: 42 },
+  positions: [
+    { siteId: 'user2', clock: 100, offset: 0.1 },
+    { siteId: 'user2', clock: 100, offset: 0.2 }
+  ],
+  content: 'hi',
+  siteId: 'user2',
+  clock: 100
+};`} />
+            </DocSection>
+
+            <DocSection id="position-mapping" title="위치 매핑">
+              <p class="m-0 mb-4">
+                핵심 과제는 CRDT position ID를 에디터의 path/offset 시스템으로 매핑하는 것입니다. 양방향 매핑을 유지해야 합니다.
+              </p>
+
+              <DocSection id="position-mapping-strategy" title="위치 매핑 전략" depth={3}>
+                <DocCodeBlock language="typescript" code={`class CRDTPositionMapper {
+  // CRDT position을 에디터 path/offset으로 매핑
+  private crdtToEditor = new Map<string, { path: number[], offset: number }>();
+  // 에디터 path/offset을 CRDT position으로 매핑
+  private editorToCrdt = new Map<string, PositionId>();
+  
+  // CRDT position을 에디터 path로 변환
+  toEditorPath(crdtPosition: PositionId, model: DocumentModel): { path: number[], offset: number } | null {
+    const key = this.positionKey(crdtPosition);
+    
+    // 캐시 확인
+    if (this.crdtToEditor.has(key)) {
+      return this.crdtToEditor.get(key)!;
+    }
+    
+    // 모델을 순회하며 위치 찾기
+    const result = this.findPositionInModel(crdtPosition, model);
+    
+    if (result) {
+      this.crdtToEditor.set(key, result);
+      const editorKey = this.editorPathKey(result.path, result.offset);
+      this.editorToCrdt.set(editorKey, crdtPosition);
+    }
+    
+    return result;
+  }
+  
+  // 모델에 CRDT position 저장
+  private findPositionInModel(crdtPosition: PositionId, model: DocumentModel): { path: number[], offset: number } | null {
+    // 모델을 순회하며 일치하는 CRDT position을 가진 노드 찾기
+    // 모델 노드에 CRDT position ID를 저장해야 함
+    return this.traverseModel(model, crdtPosition);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="storing-positions" title="모델에 CRDT Position 저장" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 모델을 확장하여 CRDT position 저장
+interface TextNode {
+  type: 'text';
+  text: string;
+  charPositions?: PositionId[]; // 각 문자에 대한 CRDT position
+  formats?: Record<string, any>;
+}
+
+interface BlockNode {
+  type: string;
+  crdtPosition?: PositionId; // 노드의 CRDT position
+  children: Node[];
+  attributes?: Record<string, any>;
+}
+
+// 로컬 operation 적용 시 CRDT position 저장
+class EditorWithCRDT {
+  applyLocalOperation(operation: EditorOperation) {
+    const tx = this.beginTransaction();
+    
+    // Operation 적용
+    tx.add(operation);
+    
+    // CRDT position 생성 및 저장
+    if (operation.type === 'insertText') {
+      const crdtPositions = this.generateCRDTPositions(operation.path, operation.text.length);
+      this.storeCRDTPositions(operation.path, crdtPositions);
+    }
+    
+    tx.commit();
+    
+    // CRDT 라이브러리로 전송
+    this.sendToCRDT(operation, crdtPositions);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="operation-conversion" title="Operation 변환">
+              <p class="m-0 mb-4">
+                CRDT operation을 에디터의 operation 형식으로 변환합니다:
+              </p>
+
+              <DocSection id="insert-conversion" title="Insert Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`class CRDTOperationConverter {
+  constructor(
+    private positionMapper: CRDTPositionMapper,
+    private editor: Editor
+  ) {}
+  
+  convertInsert(crdtOp: CRDTOperation): EditorOperation | null {
+    // CRDT position을 에디터 path로 매핑
+    const editorPath = this.positionMapper.toEditorPath(crdtOp.after || crdtOp.position, this.editor.getModel());
+    
+    if (!editorPath) {
+      console.warn('CRDT position을 에디터 path로 매핑할 수 없음', crdtOp);
+      return null;
+    }
+    
+    if (typeof crdtOp.content === 'string') {
+      // 텍스트 삽입
+      return {
+        type: 'insertText',
+        path: editorPath.path,
+        offset: editorPath.offset,
+        text: crdtOp.content
+      };
+    } else {
+      // 노드 삽입
+      return {
+        type: 'insertNode',
+        path: editorPath.path,
+        node: this.convertCRDTNodeToEditorNode(crdtOp.content)
+      };
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="delete-conversion" title="Delete Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`convertDelete(crdtOp: CRDTOperation): EditorOperation | null {
+  if (crdtOp.positions && crdtOp.positions.length > 0) {
+    // 범위 삭제
+    const startPath = this.positionMapper.toEditorPath(crdtOp.positions[0], this.editor.getModel());
+    const endPath = this.positionMapper.toEditorPath(
+      crdtOp.positions[crdtOp.positions.length - 1],
+      this.editor.getModel()
+    );
+    
+    if (!startPath || !endPath) return null;
+    
+    // 길이 계산
+    const length = this.calculateLength(startPath, endPath);
+    
+    return {
+      type: 'deleteContent',
+      path: startPath.path,
+      offset: startPath.offset,
+      length: length
+    };
+  }
+  
+  return null;
+}`} />
+              </DocSection>
+
+              <DocSection id="format-conversion" title="Format Operations" depth={3}>
+                <DocCodeBlock language="typescript" code={`convertFormat(crdtOp: CRDTOperation): EditorOperation | null {
+  if (!crdtOp.positions || crdtOp.positions.length < 2) return null;
+  
+  const startPath = this.positionMapper.toEditorPath(crdtOp.positions[0], this.editor.getModel());
+  const endPath = this.positionMapper.toEditorPath(
+    crdtOp.positions[crdtOp.positions.length - 1],
+    this.editor.getModel()
+  );
+  
+  if (!startPath || !endPath) return null;
+  
+  const length = this.calculateLength(startPath, endPath);
+  
+  return {
+    type: 'applyFormat',
+    path: startPath.path,
+    offset: startPath.offset,
+    length: length,
+    format: Object.keys(crdtOp.attributes || {})[0],
+    value: Object.values(crdtOp.attributes || {})[0]
+  };
+}
+
+// 메인 변환 메서드
+convert(crdtOp: CRDTOperation): EditorOperation | EditorOperation[] | null {
+  switch (crdtOp.type) {
+    case 'insert':
+      return this.convertInsert(crdtOp);
+    case 'delete':
+      return this.convertDelete(crdtOp);
+    case 'format':
+      return this.convertFormat(crdtOp);
+    case 'update':
+      return this.convertUpdateAttributes(crdtOp);
+    default:
+      console.warn('알 수 없는 CRDT operation 타입', crdtOp.type);
+      return null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="applying-operations" title="Operation 적용">
+              <p class="m-0 mb-4">
+                변환 후 에디터의 transaction 시스템을 통해 operation을 적용합니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`class CRDTEditorAdapter {
+  constructor(
+    private editor: Editor,
+    private converter: CRDTOperationConverter,
+    private positionMapper: CRDTPositionMapper
+  ) {}
+  
+  // 들어오는 CRDT operation 처리
+  handleCRDTOperation(crdtOp: CRDTOperation) {
+    // 우리 자신의 operation이면 건너뛰기
+    if (crdtOp.siteId === this.editor.getSiteId()) {
+      return;
+    }
+    
+    // 에디터 operation으로 변환
+    const editorOps = this.converter.convert(crdtOp);
+    
+    if (!editorOps) {
+      console.warn('CRDT operation 변환 실패', crdtOp);
+      return;
+    }
+    
+    // 배열로 정규화
+    const operations = Array.isArray(editorOps) ? editorOps : [editorOps];
+    
+    // Transaction을 통해 적용
+    const tx = this.editor.beginTransaction();
+    
+    for (const op of operations) {
+      tx.add(op);
+      
+      // 향후 매핑을 위해 모델에 CRDT position 저장
+      this.storeCRDTPositions(op, crdtOp);
+    }
+    
+    // Transaction 커밋 (렌더링 트리거)
+    tx.commit();
+    
+    // 모델 변경 후 위치 캐시 무효화
+    this.positionMapper.invalidate();
+  }
+  
+  // CRDT operation 배치 처리
+  handleCRDTOperations(crdtOps: CRDTOperation[]) {
+    // Transaction별로 그룹화 (같은 clock)
+    const transactions = this.groupByTransaction(crdtOps);
+    
+    for (const transactionOps of transactions) {
+      const tx = this.editor.beginTransaction();
+      
+      for (const crdtOp of transactionOps) {
+        const editorOps = this.converter.convert(crdtOp);
+        if (editorOps) {
+          const ops = Array.isArray(editorOps) ? editorOps : [editorOps];
+          for (const op of ops) {
+            tx.add(op);
+            this.storeCRDTPositions(op, crdtOp);
+          }
+        }
+      }
+      
+      tx.commit();
+    }
+    
+    this.positionMapper.invalidate();
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="rendering-updates" title="렌더링 업데이트">
+              <p class="m-0 mb-4">
+                에디터의 렌더링 시스템은 transaction을 통해 operation이 적용될 때 자동으로 업데이트됩니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`// 에디터는 이미 렌더링을 처리해야 함
+class Editor {
+  beginTransaction(): Transaction {
+    return new Transaction(this);
+  }
+  
+  // Transaction 커밋이 렌더링 트리거
+  commitTransaction(tx: Transaction) {
+    // 모델에 operation 적용
+    for (const op of tx.operations) {
+      this.applyOperationToModel(op);
+    }
+    
+    // 렌더 업데이트 트리거
+    this.renderer.update(this.model);
+    
+    // 필요 시 선택 영역 업데이트
+    this.updateSelection(tx.afterSelection);
+  }
+}
+
+// 렌더러는 모델 변경에 따라 DOM 업데이트
+class Renderer {
+  update(model: DocumentModel) {
+    // 모델과 DOM 차이 계산
+    const changes = this.diffModelAndDOM(model, this.currentDOM);
+    
+    // 변경 사항을 증분적으로 적용
+    for (const change of changes) {
+      this.applyChange(change);
+    }
+    
+    this.currentDOM = this.serializeModel(model);
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="selection-handling" title="선택 영역 처리">
+              <p class="m-0 mb-4">
+                원격 operation이 도착하면 선택 영역을 조정해야 합니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`class CRDTSelectionManager {
+  constructor(private editor: Editor, private positionMapper: CRDTPositionMapper) {}
+  
+  // 원격 operation 도착 시 선택 영역 조정
+  adjustSelectionForRemoteOperation(
+    currentSelection: Selection,
+    crdtOp: CRDTOperation
+  ): Selection {
+    const editorOp = this.editor.getConverter().convert(crdtOp);
+    if (!editorOp) return currentSelection;
+    
+    // Operation이 선택 영역에 영향을 주는지 확인
+    if (this.operationAffectsSelection(editorOp, currentSelection)) {
+      return this.adjustSelection(editorOp, currentSelection);
+    }
+    
+    return currentSelection;
+  }
+  
+  private adjustSelection(op: EditorOperation, selection: Selection): Selection {
+    if (op.type === 'insertText') {
+      // 삽입이 선택 시작 전이면 선택 영역 이동
+      if (this.isBefore(op.path, op.offset, selection.start.path, selection.start.offset)) {
+        return {
+          start: {
+            path: selection.start.path,
+            offset: selection.start.offset + op.text.length
+          },
+          end: {
+            path: selection.end.path,
+            offset: selection.end.offset + op.text.length
+          }
+        };
+      }
+    } else if (op.type === 'deleteContent') {
+      // 삭제가 선택 전이면 선택 영역을 뒤로 이동
+      if (this.isBefore(op.path, op.offset, selection.start.path, selection.start.offset)) {
+        const deletedLength = op.length;
+        return {
+          start: {
+            path: selection.start.path,
+            offset: Math.max(0, selection.start.offset - deletedLength)
+          },
+          end: {
+            path: selection.end.path,
+            offset: Math.max(0, selection.end.offset - deletedLength)
+          }
+        };
+      }
+    }
+    
+    return selection;
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/crdt-operations"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operation 타입 개요' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Transaction 시스템' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Model-DOM 동기화' },
+                { title: 'Editor Architecture', href: '/editor/architecture', description: '에디터 아키텍처' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

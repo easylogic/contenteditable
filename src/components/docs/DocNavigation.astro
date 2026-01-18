@@ -1,0 +1,35 @@
+---
+interface Props {
+  current: string;
+  pages: Array<{ title: string; href: string; description?: string }>;
+  title?: string;
+  class?: string;
+}
+
+const { current, pages, title = 'Related Pages', class: className = '' } = Astro.props;
+
+const filteredPages = pages.filter(page => page.href !== current);
+---
+
+{filteredPages.length > 0 && (
+  <div class={`mt-12 pt-8 border-t-2 border-border-light ${className}`}>
+    <h3 class="text-lg font-semibold mb-4 text-text-primary">{title}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {filteredPages.map((page) => (
+        <a
+          href={page.href}
+          class="block p-4 rounded-lg border border-border-light bg-bg-surface hover:bg-bg-muted transition-colors no-underline"
+        >
+          <h4 class="text-base font-medium m-0 mb-2 text-text-primary">
+            {page.title}
+          </h4>
+          {page.description && (
+            <p class="text-sm m-0 text-text-secondary">
+              {page.description}
+            </p>
+          )}
+        </a>
+      ))}
+    </div>
+  </div>
+)}

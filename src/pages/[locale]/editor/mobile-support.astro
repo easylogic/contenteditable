@@ -1,0 +1,331 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'virtual-keyboard', text: '가상 키보드' },
+  { depth: 3, slug: 'keyboard-detection', text: '키보드 감지' },
+  { depth: 3, slug: 'viewport-adjustment', text: '뷰포트 조정' },
+  { depth: 2, slug: 'touch-selection', text: '터치 선택' },
+  { depth: 2, slug: 'mobile-input', text: '모바일 입력 처리' },
+  { depth: 3, slug: 'text-prediction', text: '텍스트 예측' },
+  { depth: 3, slug: 'autocorrect', text: '자동 수정' },
+  { depth: 2, slug: 'ios-specific', text: 'iOS 특수 문제' },
+  { depth: 2, slug: 'android-specific', text: 'Android 특수 문제' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="모바일 지원 – 에디터 아키텍처 – contenteditable.lab"
+      description="contenteditable 에디터를 위한 모바일 지원 가이드"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">모바일 지원</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">모바일 지원</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              contenteditable 에디터에서 모바일 기기 지원 가이드입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                모바일 기기는 가상 키보드, 터치 상호작용, 다른 IME 동작, 뷰포트 제약으로 인해 고유한 도전과제를 제시합니다. 이 가이드는 모바일 특수 고려사항을 다룹니다.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>주요 도전과제:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">가상 키보드가 뷰포트 크기 조정</li>
+                  <li class="mb-1">터치 선택이 마우스보다 덜 정확함</li>
+                  <li class="mb-1">iOS Safari에서 한국어 IME의 경우 조합 이벤트가 발생하지 않음</li>
+                  <li class="mb-1">텍스트 예측과 자동 수정이 입력을 방해함</li>
+                  <li class="mb-1">다른 키보드 앱이 다른 동작을 함</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="virtual-keyboard" title="가상 키보드">
+              <p class="m-0 mb-4">
+                가상 키보드 표시 및 뷰포트 변경을 처리합니다.
+              </p>
+
+              <DocSection id="keyboard-detection" title="키보드 감지" depth={3}>
+                <DocCodeBlock language="typescript" code={`class VirtualKeyboardDetector {
+  #viewportHeight = window.visualViewport?.height || window.innerHeight;
+  #isKeyboardVisible = false;
+
+  constructor(editor: Editor) {
+    this.#editor = editor;
+    this.#setupDetection();
+  }
+
+  #setupDetection() {
+    if (!window.visualViewport) {
+      // visualViewport가 없는 브라우저를 위한 대체
+      window.addEventListener('resize', () => this.#detectKeyboard());
+      return;
+    }
+
+    window.visualViewport.addEventListener('resize', () => {
+      const newHeight = window.visualViewport.height;
+      const heightDiff = this.#viewportHeight - newHeight;
+
+      if (heightDiff > 150) {
+        // 키보드 표시됨
+        this.#onKeyboardShow();
+      } else if (heightDiff < -150) {
+        // 키보드 숨김
+        this.#onKeyboardHide();
+      }
+
+      this.#viewportHeight = newHeight;
+    });
+  }
+
+  #onKeyboardShow() {
+    this.#isKeyboardVisible = true;
+    this.#scrollToCursor();
+    this.#adjustLayout();
+  }
+
+  #onKeyboardHide() {
+    this.#isKeyboardVisible = false;
+    this.#restoreLayout();
+  }
+
+  #scrollToCursor() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+
+    if (rect.bottom > viewportHeight) {
+      range.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="viewport-adjustment" title="뷰포트 조정" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 키보드가 나타날 때 에디터 높이 조정
+function adjustEditorForKeyboard(editor: HTMLElement) {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+
+  const keyboardHeight = window.innerHeight - viewport.height;
+  
+  if (keyboardHeight > 0) {
+    // 키보드가 보임
+    editor.style.maxHeight = \`\${viewport.height - 100}px\`;
+    editor.style.overflowY = 'auto';
+  } else {
+    // 키보드가 숨김
+    editor.style.maxHeight = '';
+    editor.style.overflowY = '';
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="touch-selection" title="터치 선택">
+              <p class="m-0 mb-4">
+                터치 기반 텍스트 선택을 처리합니다.
+              </p>
+              <DocCodeBlock language="typescript" code={`// 터치 선택 정확도 개선
+class TouchSelectionHandler {
+  constructor(editor: Editor) {
+    this.#editor = editor;
+    this.#setupTouchHandlers();
+  }
+
+  #setupTouchHandlers() {
+    let touchStart: Touch | null = null;
+
+    this.#editor.element.addEventListener('touchstart', (e) => {
+      touchStart = e.touches[0];
+    });
+
+    this.#editor.element.addEventListener('touchend', (e) => {
+      if (!touchStart) return;
+
+      // 선택 영역 업데이트 대기
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          this.#adjustSelection(selection.getRangeAt(0));
+        }
+      }, 100);
+    });
+  }
+
+  #adjustSelection(range: Range) {
+    // 필요시 선택 영역 경계 조정
+    // 터치 선택은 부정확할 수 있음
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="mobile-input" title="모바일 입력 처리">
+              <p class="m-0 mb-4">
+                모바일 특수 입력 동작을 처리합니다.
+              </p>
+
+              <DocSection id="text-prediction" title="텍스트 예측" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 모바일 텍스트 예측 처리
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'insertFromPredictiveText') {
+    // 모바일 키보드 텍스트 예측
+    e.preventDefault();
+    this.#handlePredictiveText(e.data);
+  }
+});
+
+// 코드 블록에 대한 예측 비활성화
+function disablePrediction(element: HTMLElement) {
+  element.setAttribute('autocorrect', 'off');
+  element.setAttribute('autocapitalize', 'off');
+  element.setAttribute('spellcheck', 'false');
+  element.setAttribute('inputmode', 'text');
+}`} />
+              </DocSection>
+
+              <DocSection id="autocorrect" title="자동 수정" depth={3}>
+                <DocCodeBlock language="typescript" code={`// 자동 수정 감지 및 처리
+class AutocorrectHandler {
+  #lastInput = '';
+
+  handleInput(e: InputEvent) {
+    if (e.inputType === 'insertText') {
+      // 이것이 자동 수정일 수 있는지 확인
+      if (this.#isLikelyAutocorrect(e.data)) {
+        // 자동 수정 처리
+        this.#handleAutocorrect(e.data);
+      } else {
+        this.#lastInput = e.data;
+      }
+    }
+  }
+
+  #isLikelyAutocorrect(text: string): boolean {
+    // 휴리스틱: 텍스트가 입력한 것과 매우 다르면
+    // 이를 신뢰할 수 있게 감지하는 것은 어려움
+    return false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="ios-specific" title="iOS 특수 문제">
+              <p class="m-0 mb-4">
+                iOS Safari는 고유한 동작을 가집니다.
+              </p>
+              <DocAlert type="error">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>iOS Safari 문제:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">한국어 IME에 대해 조합 이벤트가 발생하지 않음</li>
+                  <li class="mb-1">에디터가 포커스를 잃을 때 선택 영역이 손실될 수 있음</li>
+                  <li class="mb-1">가상 키보드 동작이 Android와 다름</li>
+                </ul>
+              </DocAlert>
+              <DocCodeBlock language="typescript" code={`// iOS Safari 조합 해결책
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+function isSafari() {
+  return /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+}
+
+// iOS Safari에서 특정 키에 대해 항상 기본 동작 허용
+if (isIOS() && isSafari()) {
+  element.addEventListener('keydown', (e) => {
+    if (['Enter', 'Backspace', 'Delete'].includes(e.key)) {
+      // 브라우저 기본 동작 허용
+      return;
+    }
+  });
+}`} />
+            </DocSection>
+
+            <DocSection id="android-specific" title="Android 특수 문제">
+              <p class="m-0 mb-4">
+                Android 브라우저는 고유한 특성을 가집니다.
+              </p>
+              <DocCodeBlock language="typescript" code={`// Android Chrome 특수 처리
+function isAndroid() {
+  return /Android/.test(navigator.userAgent);
+}
+
+// 다른 키보드 앱 처리
+// Gboard, SwiftKey, Samsung Keyboard는 다른 동작을 가짐
+function handleAndroidKeyboard() {
+  // 일부 키보드는 입력 처리를 방해할 수 있음
+  // 다른 키보드 앱으로 테스트
+}`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">에뮬레이터뿐만 아니라 실제 기기에서 테스트</li>
+                <li class="mb-2">키보드가 나타날 때 뷰포트 변경 처리</li>
+                <li class="mb-2">커서를 보이게 스크롤</li>
+                <li class="mb-2">코드 블록에 대한 자동 수정 비활성화</li>
+                <li class="mb-2">다른 키보드 앱으로 테스트</li>
+                <li class="mb-2">터치 선택 부정확도 처리</li>
+                <li class="mb-2">모바일 성능 제약 고려</li>
+              </ul>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+
+    <DocNavigation
+      current="/editor/mobile-support"
+      pages={[
+        { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+        { title: '입력 처리 & IME', href: '/editor/input-handling', description: '입력 처리 가이드' },
+        { title: '디버깅 기법', href: '/editor/debugging', description: '디버깅 전략' },
+      ]}
+    />
+  </body>
+</html>

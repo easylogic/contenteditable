@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="순서 없는 목록 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>순서 없는 목록</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   bulletList: {
     content: 'listItem+',
     group: 'block',
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'bulletList',
   children: [
     {
@@ -105,7 +105,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeBulletList(node) {
+              <DocCodeBlock language="typescript" code={`function serializeBulletList(node) {
   return '<ul>' + serializeChildren(node.children) + '</ul>';
 }`} />
             </DocSection>
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseBulletList(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseBulletList(domNode) {
   return {
     type: 'bulletList',
     children: Array.from(domNode.children)
@@ -131,7 +131,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 순서 없는 목록 렌더링
+              <DocCodeBlock language="typescript" code={`// 순서 없는 목록 렌더링
 const ul = document.createElement('ul');
 ul.contentEditable = 'true';
 node.children.forEach(item => {
@@ -160,7 +160,7 @@ function createBulletList() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 중첩된 목록
+              <DocCodeBlock language="typescript" code={`// 문제: 중첩된 목록
 // 해결: 중첩된 목록 항목을 올바르게 처리
 function handleNestedList(list, nestedList) {
   const lastItem = list.lastElementChild;
@@ -189,7 +189,7 @@ function validateListItem(item) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class BulletListNode {
+              <DocCodeBlock language="typescript" code={`class BulletListNode {
   constructor(children) {
     this.type = 'bulletList';
     this.children = children || [];

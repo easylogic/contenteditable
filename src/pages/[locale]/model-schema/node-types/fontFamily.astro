@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="글꼴 패밀리 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>글꼴 패밀리</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   fontFamily: {
     attrs: {
       family: { default: 'Arial' }
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '고정폭 텍스트',
   marks: [{
@@ -102,7 +102,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeFontFamilyMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeFontFamilyMark(text, mark) {
   const family = mark.attrs?.family || 'Arial';
   return '<span style="font-family: ' + escapeHtml(family) + '">' + 
          text + '</span>';
@@ -113,7 +113,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractFontFamilyMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractFontFamilyMark(element) {
   if (element.tagName === 'SPAN' && element.style.fontFamily) {
     const family = extractFontFamily(element.style.fontFamily);
     return {
@@ -138,7 +138,7 @@ function extractFontFamily(fontFamilyString) {
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 글꼴 패밀리 설정
+              <DocCodeBlock language="typescript" code={`// 글꼴 패밀리 설정
 function setFontFamily(family) {
   addMark({
     type: 'fontFamily',
@@ -160,7 +160,7 @@ function showFontFamilyPicker() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 따옴표가 있는 글꼴 패밀리
+              <DocCodeBlock language="typescript" code={`// 문제: 따옴표가 있는 글꼴 패밀리
 // 해결: 따옴표가 있는 글꼴 이름 처리
 function normalizeFontFamily(family) {
   return family.replace(/['"]/g, '');
@@ -187,7 +187,7 @@ function validateFontFamily(family) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class FontFamilyMark {
+              <DocCodeBlock language="typescript" code={`class FontFamilyMark {
   constructor(attrs) {
     this.type = 'fontFamily';
     this.attrs = { family: attrs?.family || 'Arial' };

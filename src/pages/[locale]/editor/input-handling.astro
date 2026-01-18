@@ -1,0 +1,761 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'ime-composition', text: 'IME 조합 처리' },
+  { depth: 3, slug: 'composition-events', text: '조합 이벤트' },
+  { depth: 3, slug: 'composition-state', text: '조합 상태 관리' },
+  { depth: 3, slug: 'ios-safari-issues', text: 'iOS Safari 특수 케이스' },
+  { depth: 2, slug: 'keyboard-events', text: '키보드 이벤트 처리' },
+  { depth: 3, slug: 'beforeinput-api', text: 'beforeinput API' },
+  { depth: 3, slug: 'keyboard-shortcuts', text: '키보드 단축키' },
+  { depth: 3, slug: 'special-keys', text: '특수 키 처리' },
+  { depth: 2, slug: 'text-input', text: '텍스트 입력 처리' },
+  { depth: 3, slug: 'input-types', text: '입력 타입 감지' },
+  { depth: 3, slug: 'text-normalization', text: '텍스트 정규화' },
+  { depth: 2, slug: 'paste-handling', text: '붙여넣기 작업 처리' },
+  { depth: 3, slug: 'paste-events', text: '붙여넣기 이벤트' },
+  { depth: 3, slug: 'paste-filtering', text: '붙여넣기 필터링' },
+  { depth: 2, slug: 'mobile-input', text: '모바일 입력 처리' },
+  { depth: 3, slug: 'virtual-keyboard', text: '가상 키보드' },
+  { depth: 3, slug: 'text-prediction', text: '텍스트 예측' },
+  { depth: 2, slug: 'edge-cases', text: '엣지 케이스와 함정' },
+  { depth: 3, slug: 'composition-during-paste', text: '붙여넣기 중 조합' },
+  { depth: 3, slug: 'composition-during-undo', text: '실행 취소 중 조합' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="입력 처리 & IME – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터에서 입력 처리, IME 조합, 키보드 이벤트, 텍스트 처리에 대한 포괄적인 가이드"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">입력 처리 & IME</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              입력 처리 & IME
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델 기반 에디터에서 사용자 입력, IME 조합, 키보드 이벤트, 텍스트 처리를 다루는 포괄적인 가이드입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                입력 처리는 contenteditable 에디터를 구축하는 가장 복잡한 측면 중 하나입니다. 브라우저 이벤트, IME 조합 상태, 키보드 단축키, 문서 모델 간의 조정이 필요합니다. 이 가이드는 견고한 입력 처리를 위한 도전과제와 해결책을 다룹니다.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>주요 도전과제:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">iOS Safari에서 한국어 IME의 경우 조합 이벤트가 발생하지 않음</li>
+                  <li class="mb-1">키보드 핸들러는 조합 중 브라우저 기본 동작을 허용해야 함</li>
+                  <li class="mb-1">활성 조합 중에 붙여넣기 작업이 발생할 수 있음</li>
+                  <li class="mb-1">모바일 키보드는 데스크톱과 다른 동작을 함</li>
+                  <li class="mb-1">텍스트 예측과 자동 수정이 사용자 정의 핸들러를 방해함</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="ime-composition" title="IME 조합 처리">
+              <p class="m-0 mb-4">
+                입력기(IME)는 사용자가 간단한 구성 요소로부터 복잡한 문자(한국어, 일본어, 중국어 등)를 조합하여 입력할 수 있게 합니다. IME 조합을 올바르게 처리하는 것은 국제 사용자를 지원하는 데 중요합니다.
+              </p>
+
+              <DocSection id="composition-events" title="조합 이벤트" depth={3}>
+                <p class="m-0 mb-3">
+                  표준 조합 이벤트 생명주기:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionManager {
+  #isComposing = false;
+  #compositionData = '';
+
+  constructor(editor) {
+    this.#editor = editor;
+    this.#setupCompositionHandlers();
+  }
+
+  #setupCompositionHandlers() {
+    const element = this.#editor.element;
+
+    element.addEventListener('compositionstart', (e) => {
+      this.#isComposing = true;
+      this.#compositionData = '';
+      // 조합 중 사용자 정의 키보드 핸들러 방지
+      this.#editor.setCompositionMode(true);
+    });
+
+    element.addEventListener('compositionupdate', (e) => {
+      this.#compositionData = e.data;
+      // 조합 텍스트로 모델 업데이트
+      this.#updateCompositionText(e.data);
+    });
+
+    element.addEventListener('compositionend', (e) => {
+      this.#isComposing = false;
+      this.#compositionData = '';
+      // 조합을 모델에 커밋
+      this.#commitComposition(e.data);
+      this.#editor.setCompositionMode(false);
+    });
+  }
+
+  #updateCompositionText(data) {
+    // 임시 조합 텍스트로 모델 업데이트
+    // 이 텍스트는 변경되거나 취소될 수 있음
+  }
+
+  #commitComposition(data) {
+    // 모델에서 조합 텍스트 최종화
+    // 임시 조합 텍스트를 최종 텍스트로 교체
+  }
+
+  get isComposing() {
+    return this.#isComposing;
+  }
+}`} />
+                <DocAlert type="error" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    <strong>iOS Safari 문제:</strong> iOS Safari에서 한국어 IME의 경우 조합 이벤트가 발생하지 않습니다. <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">isComposing</code> 플래그는 항상 <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">false</code>입니다.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="composition-state" title="조합 상태 관리" depth={3}>
+                <p class="m-0 mb-3">
+                  사용자 정의 핸들러가 방해하지 않도록 조합 상태 추적:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  #isComposing = false;
+  #compositionMode = false;
+
+  setCompositionMode(enabled) {
+    this.#compositionMode = enabled;
+  }
+
+  handleKeyDown(e) {
+    // 조합 중에는 항상 브라우저 기본 동작 허용
+    if (this.#isComposing || this.#compositionMode) {
+      return; // 기본 동작 방지하지 않음
+    }
+
+    // 사용자 정의 키보드 핸들러
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.#handleEnter();
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      this.#handleBackspace();
+    }
+  }
+
+  // iOS Safari 해결책: 특정 키에 대해 항상 기본 동작 허용
+  handleKeyDownIOS(e) {
+    // iOS Safari의 경우 isComposing이 신뢰할 수 없으므로
+    // Enter/Backspace/Delete에 대해 항상 기본 동작 허용
+    if (this.#isIOS() && ['Enter', 'Backspace', 'Delete'].includes(e.key)) {
+      return; // 브라우저 기본 동작 허용
+    }
+
+    // 다른 키에 대한 사용자 정의 핸들러
+    this.handleKeyDown(e);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="ios-safari-issues" title="iOS Safari 특수 케이스" depth={3}>
+                <p class="m-0 mb-3">
+                  iOS Safari는 한국어 IME에 대해 조합 이벤트가 발생하지 않으므로 특별한 처리가 필요합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class IOSCompositionDetector {
+  #isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  #isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+  #lastInputTime = 0;
+  #inputPattern = /[가-힣]/; // 한국어 문자 패턴
+
+  detectComposition(inputText) {
+    if (!this.#isIOS || !this.#isSafari) {
+      return false; // 표준 조합 이벤트 사용
+    }
+
+    // 휴리스틱: 입력에 한국어 문자가 포함되고
+    // 입력 이벤트가 빠르게 발생하면 조합일 가능성이 높음
+    const hasKorean = this.#inputPattern.test(inputText);
+    const timeSinceLastInput = Date.now() - this.#lastInputTime;
+    this.#lastInputTime = Date.now();
+
+    // 한국어 입력과 빠른 이벤트(< 100ms)인 경우 조합일 가능성
+    return hasKorean && timeSinceLastInput < 100;
+  }
+
+  // 대안: iOS Safari에서 항상 브라우저 기본 동작 허용
+  shouldAllowDefault(key) {
+    if (this.#isIOS && this.#isSafari) {
+      // Enter/Backspace/Delete에 대해 항상 기본 동작 허용
+      return ['Enter', 'Backspace', 'Delete'].includes(key);
+    }
+    return false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="keyboard-events" title="키보드 이벤트 처리">
+              <p class="m-0 mb-4">
+                키보드 이벤트는 조합 중 사용자 정의 단축키와 브라우저 기본 동작을 모두 지원하도록 주의 깊게 처리해야 합니다.
+              </p>
+
+              <DocSection id="beforeinput-api" title="beforeinput API" depth={3}>
+                <p class="m-0 mb-3">
+                  <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> 이벤트는 입력 작업에 대한 구조화된 정보를 제공합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`element.addEventListener('beforeinput', (e) => {
+  // 조합이 활성화되어 있는지 확인
+  if (e.isComposing) {
+    // 조합 중에는 브라우저 기본 동작 허용
+    return;
+  }
+
+  // 다양한 입력 타입 처리
+  switch (e.inputType) {
+    case 'insertText':
+      e.preventDefault();
+      this.#handleInsertText(e.data);
+      break;
+
+    case 'insertParagraph':
+      e.preventDefault();
+      this.#handleInsertParagraph();
+      break;
+
+    case 'deleteContentBackward':
+      e.preventDefault();
+      this.#handleDeleteBackward();
+      break;
+
+    case 'formatBold':
+      e.preventDefault();
+      this.#handleFormatBold();
+      break;
+
+    // ... 기타 입력 타입
+  }
+});`} />
+                <DocAlert type="info" class="mt-4">
+                  <p class="m-0 text-sm">
+                    <strong>참고:</strong> iOS Safari에서 한국어 IME의 경우 <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code>의 <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">isComposing</code>은 신뢰할 수 없습니다. 항상 조합 상태를 별도로 확인하세요.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="keyboard-shortcuts" title="키보드 단축키" depth={3}>
+                <p class="m-0 mb-3">
+                  조합 상태를 존중하면서 키보드 단축키 처리:
+                </p>
+                <DocCodeBlock language="typescript" code={`class KeyboardShortcutHandler {
+  handleKeyDown(e) {
+    // 수정자 키 확인
+    const isModifier = e.ctrlKey || e.metaKey || e.altKey;
+
+    // 조합 중에는 단축키 처리하지 않음
+    if (this.#isComposing) {
+      return;
+    }
+
+    // 단축키 처리
+    if (isModifier && e.key === 'b') {
+      e.preventDefault();
+      this.#toggleBold();
+    } else if (isModifier && e.key === 'i') {
+      e.preventDefault();
+      this.#toggleItalic();
+    } else if (isModifier && e.key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        this.#redo();
+      } else {
+        this.#undo();
+      }
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="special-keys" title="특수 키 처리" depth={3}>
+                <p class="m-0 mb-3">
+                  특수 키(Enter, Backspace, Delete, Tab)는 주의 깊은 처리가 필요합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SpecialKeyHandler {
+  handleEnter(e) {
+    if (this.#isComposing) {
+      return; // 브라우저 기본 동작 허용
+    }
+
+    e.preventDefault();
+    
+    // Shift가 눌렸는지 확인
+    if (e.shiftKey) {
+      this.#insertLineBreak();
+    } else {
+      this.#insertParagraph();
+    }
+  }
+
+  handleBackspace(e) {
+    if (this.#isComposing) {
+      return; // 브라우저 기본 동작 허용
+    }
+
+    e.preventDefault();
+    
+    const selection = this.#getSelection();
+    if (selection.isCollapsed) {
+      // 커서 앞의 문자 삭제
+      this.#deleteBackward();
+    } else {
+      // 선택 영역 삭제
+      this.#deleteSelection();
+    }
+  }
+
+  handleTab(e) {
+    if (this.#isComposing) {
+      return; // 브라우저 기본 동작 허용 (IME에서 사용될 수 있음)
+    }
+
+    e.preventDefault();
+    
+    if (e.shiftKey) {
+      this.#outdent();
+    } else {
+      this.#indent();
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="text-input" title="텍스트 입력 처리">
+              <p class="m-0 mb-4">
+                텍스트 입력을 처리하고 문서 모델 요구사항에 따라 정규화합니다.
+              </p>
+
+              <DocSection id="input-types" title="입력 타입 감지" depth={3}>
+                <p class="m-0 mb-3">
+                  다양한 입력 타입은 다른 처리가 필요합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class InputProcessor {
+  processInput(e) {
+    switch (e.inputType) {
+      case 'insertText':
+        this.#handleInsertText(e.data);
+        break;
+
+      case 'insertCompositionText':
+        // IME 조합 텍스트
+        this.#handleCompositionText(e.data);
+        break;
+
+      case 'insertFromPaste':
+        // 붙여넣기 작업
+        this.#handlePaste();
+        break;
+
+      case 'insertFromDrop':
+        // 드래그 앤 드롭
+        this.#handleDrop();
+        break;
+
+      case 'insertFromPredictiveText':
+        // 모바일 텍스트 예측
+        this.#handlePredictiveText(e.data);
+        break;
+
+      default:
+        // 알 수 없는 입력 타입
+        this.#handleUnknownInput(e);
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="text-normalization" title="텍스트 정규화" depth={3}>
+                <p class="m-0 mb-3">
+                  모델 요구사항에 맞게 텍스트 입력 정규화:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TextNormalizer {
+  normalize(text) {
+    // 제로 너비 문자 제거
+    text = text.replace(/[\\u200B-\\u200D\\uFEFF]/g, '');
+
+    // 줄바꿈 정규화
+    text = text.replace(/\\r\\n/g, '\\n');
+    text = text.replace(/\\r/g, '\\n');
+
+    // 공백 정규화 (선택사항, 요구사항에 따라 다름)
+    // text = text.replace(/[ \\t]+/g, ' ');
+
+    // 제어 문자 제거 (줄바꿈, 탭 제외)
+    text = text.replace(/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/g, '');
+
+    return text;
+  }
+
+  // 브라우저가 삽입하는 보이지 않는 문자 처리
+  cleanInvisibleChars(text) {
+    // 제로 너비 비분리 공백
+    text = text.replace(/\\uFEFF/g, '');
+    
+    // 제로 너비 공백
+    text = text.replace(/\\u200B/g, '');
+    
+    // 제로 너비 조인/비조인
+    text = text.replace(/[\\u200C\\u200D]/g, '');
+
+    return text;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="paste-handling" title="붙여넣기 작업 처리">
+              <p class="m-0 mb-4">
+                붙여넣기 작업에는 문서 모델로 변환해야 하는 서식, 이미지 및 기타 콘텐츠가 포함될 수 있습니다.
+              </p>
+
+              <DocSection id="paste-events" title="붙여넣기 이벤트" depth={3}>
+                <p class="m-0 mb-3">
+                  붙여넣기 이벤트 처리 및 클립보드 데이터 추출:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PasteHandler {
+  constructor(editor) {
+    this.#editor = editor;
+    this.#setupPasteHandlers();
+  }
+
+  #setupPasteHandlers() {
+    this.#editor.element.addEventListener('paste', async (e) => {
+      e.preventDefault();
+
+      // 조합이 활성화되어 있는지 확인
+      if (this.#editor.isComposing) {
+        // 조합이 끝날 때까지 대기
+        await this.#waitForCompositionEnd();
+      }
+
+      // 클립보드 데이터 가져오기
+      const clipboardData = e.clipboardData || window.clipboardData;
+      const items = clipboardData.items;
+
+      // 다양한 데이터 타입 처리
+      for (const item of items) {
+        if (item.type.startsWith('text/')) {
+          const text = await this.#getTextFromItem(item);
+          this.#handleTextPaste(text);
+        } else if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          this.#handleImagePaste(file);
+        }
+      }
+    });
+  }
+
+  async #getTextFromItem(item) {
+    return new Promise((resolve) => {
+      item.getAsString(resolve);
+    });
+  }
+
+  #handleTextPaste(text) {
+    // HTML/텍스트를 모델로 변환
+    const model = this.#parsePastedContent(text);
+    this.#editor.insertModel(model);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="paste-filtering" title="붙여넣기 필터링" depth={3}>
+                <p class="m-0 mb-3">
+                  붙여넣은 콘텐츠 필터링 및 정리:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PasteFilter {
+  filterHTML(html) {
+    // 원하지 않는 태그 제거
+    const allowedTags = ['p', 'br', 'strong', 'em', 'u', 'code'];
+    const cleaned = this.#removeDisallowedTags(html, allowedTags);
+
+    // 속성 제거
+    const sanitized = this.#removeAttributes(cleaned);
+
+    // 구조 정규화
+    const normalized = this.#normalizeStructure(sanitized);
+
+    return normalized;
+  }
+
+  #removeDisallowedTags(html, allowed) {
+    // DOMParser를 사용하여 안전하게 파싱 및 필터링
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // 허용되지 않은 태그 제거
+    const allElements = doc.querySelectorAll('*');
+    allElements.forEach((el) => {
+      if (!allowed.includes(el.tagName.toLowerCase())) {
+        // 텍스트 콘텐츠로 교체
+        const text = document.createTextNode(el.textContent);
+        el.parentNode?.replaceChild(text, el);
+      }
+    });
+
+    return doc.body.innerHTML;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="mobile-input" title="모바일 입력 처리">
+              <p class="m-0 mb-4">
+                모바일 기기는 가상 키보드, 텍스트 예측, 터치 상호작용으로 인해 고유한 도전과제를 제시합니다.
+              </p>
+
+              <DocSection id="virtual-keyboard" title="가상 키보드" depth={3}>
+                <p class="m-0 mb-3">
+                  가상 키보드 표시 및 뷰포트 변경 처리:
+                </p>
+                <DocCodeBlock language="typescript" code={`class MobileKeyboardHandler {
+  constructor(editor) {
+    this.#editor = editor;
+    this.#setupKeyboardHandlers();
+  }
+
+  #setupKeyboardHandlers() {
+    // 뷰포트 크기 조정 감지 (키보드 표시)
+    let viewportHeight = window.visualViewport?.height || window.innerHeight;
+    
+    window.visualViewport?.addEventListener('resize', () => {
+      const newHeight = window.visualViewport.height;
+      const heightDiff = viewportHeight - newHeight;
+
+      if (heightDiff > 150) {
+        // 키보드 표시됨
+        this.#onKeyboardShow();
+      } else if (heightDiff < -150) {
+        // 키보드 숨김
+        this.#onKeyboardHide();
+      }
+
+      viewportHeight = newHeight;
+    });
+  }
+
+  #onKeyboardShow() {
+    // 커서를 보이게 스크롤
+    this.#scrollToCursor();
+    
+    // 에디터 레이아웃 조정
+    this.#adjustLayoutForKeyboard();
+  }
+
+  #onKeyboardHide() {
+    // 레이아웃 복원
+    this.#restoreLayout();
+  }
+
+  #scrollToCursor() {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    
+    // 커서가 보이는 영역 아래에 있으면 스크롤
+    if (rect.bottom > window.visualViewport.height) {
+      range.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="text-prediction" title="텍스트 예측" depth={3}>
+                <p class="m-0 mb-3">
+                  모바일 텍스트 예측 및 자동 수정 처리:
+                </p>
+                <DocCodeBlock language="typescript" code={`class MobileTextPredictionHandler {
+  handleInput(e) {
+    if (e.inputType === 'insertFromPredictiveText') {
+      // 모바일 키보드 텍스트 예측
+      this.#handlePredictiveText(e.data);
+    } else if (e.inputType === 'insertText') {
+      // 이것이 자동 수정일 수 있는지 확인
+      if (this.#isLikelyAutocorrect(e.data)) {
+        this.#handleAutocorrect(e.data);
+      } else {
+        this.#handleNormalInput(e.data);
+      }
+    }
+  }
+
+  #isLikelyAutocorrect(text) {
+    // 휴리스틱: 텍스트가 입력한 것과 매우 다르면
+    // 자동 수정일 수 있음
+    // 이를 신뢰할 수 있게 감지하는 것은 어려움
+    return false;
+  }
+
+  // 코드 블록에 대한 자동 수정 비활성화
+  disableAutocorrect(element) {
+    element.setAttribute('autocorrect', 'off');
+    element.setAttribute('autocapitalize', 'off');
+    element.setAttribute('spellcheck', 'false');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="edge-cases" title="엣지 케이스와 함정">
+              <p class="m-0 mb-4">
+                입력 처리를 깨뜨릴 수 있는 일반적인 엣지 케이스:
+              </p>
+
+              <DocSection id="composition-during-paste" title="붙여넣기 중 조합" depth={3}>
+                <p class="m-0 mb-3">
+                  활성 조합 중에 붙여넣기가 발생할 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionPasteHandler {
+  async handlePaste(e) {
+    // 조합이 활성화되어 있는지 확인
+    if (this.#isComposing) {
+      // 먼저 조합 취소
+      await this.#cancelComposition();
+    }
+
+    // 그런 다음 붙여넣기 처리
+    this.#processPaste(e);
+  }
+
+  async #cancelComposition() {
+    // 조합 종료 강제
+    // 이것은 조합 텍스트를 잃을 수 있지만 붙여넣기가 우선순위
+    const event = new CompositionEvent('compositionend', {
+      bubbles: true,
+      cancelable: true,
+      data: ''
+    });
+    this.#editor.element.dispatchEvent(event);
+    
+    // 조합이 완전히 끝날 때까지 틱 대기
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="composition-during-undo" title="실행 취소 중 조합" depth={3}>
+                <p class="m-0 mb-3">
+                  조합 중에 실행 취소/다시 실행이 발생할 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionUndoHandler {
+  handleUndo(e) {
+    // 조합 중에는 실행 취소 허용하지 않음
+    if (this.#isComposing) {
+      e.preventDefault();
+      return;
+    }
+
+    // 일반 실행 취소 처리
+    this.#performUndo();
+  }
+
+  handleRedo(e) {
+    // 조합 중에는 다시 실행 허용하지 않음
+    if (this.#isComposing) {
+      e.preventDefault();
+      return;
+    }
+
+    // 일반 다시 실행 처리
+    this.#performRedo();
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <p class="m-0 mb-4">
+                견고한 입력 처리를 위한 핵심 원칙:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>항상 조합 상태 확인:</strong> 활성 조합 중에는 기본 동작을 방지하지 마세요
+                </li>
+                <li class="mb-2">
+                  <strong>iOS Safari 특별 처리:</strong> 한국어 IME에 대해 조합 이벤트가 발생하지 않음
+                </li>
+                <li class="mb-2">
+                  <strong>가능하면 beforeinput 사용:</strong> keydown/keypress보다 더 신뢰할 수 있음
+                </li>
+                <li class="mb-2">
+                  <strong>텍스트 입력 정규화:</strong> 보이지 않는 문자 제거 및 공백 정규화
+                </li>
+                <li class="mb-2">
+                  <strong>붙여넣은 콘텐츠 필터링:</strong> HTML 정리 및 모델 형식으로 변환
+                </li>
+                <li class="mb-2">
+                  <strong>모바일 별도 처리:</strong> 가상 키보드와 텍스트 예측은 특별한 처리가 필요함
+                </li>
+                <li class="mb-2">
+                  <strong>실제 IME로 테스트:</strong> 다양한 플랫폼에서 한국어, 일본어, 중국어 IME로 테스트
+                </li>
+              </ul>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+
+    <DocNavigation
+      current="/editor/input-handling"
+      pages={[
+        { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 패턴 개요' },
+        { title: '모델-DOM 동기화', href: '/editor/model-dom-synchronization', description: '모델과 DOM 동기화' },
+        { title: '히스토리 관리', href: '/editor/history-management', description: '실행 취소/다시 실행 히스토리 관리' },
+        { title: 'HTML 매핑', href: '/editor/html-mapping', description: 'HTML 직렬화 및 파싱' },
+      ]}
+    />
+  </body>
+</html>

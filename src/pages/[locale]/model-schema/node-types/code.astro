@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="코드 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>코드</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   code: {
     excludes: 'bold italic underline link'
     // 코드 마크는 다른 포맷팅 마크를 배제함
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '인라인 코드',
   marks: [{ type: 'code' }]
@@ -96,7 +96,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeCodeMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeCodeMark(text, mark) {
   return '<code>' + escapeHtml(text) + '</code>';
 }`} />
             </DocSection>
@@ -105,7 +105,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractCodeMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractCodeMark(element) {
   if (element.tagName === 'CODE') {
     return { type: 'code' };
   }
@@ -120,7 +120,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 코드 토글
+              <DocCodeBlock language="typescript" code={`// 코드 토글
 function toggleCode() {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
@@ -145,7 +145,7 @@ function toggleCode() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 코드 마크가 다른 마크를 배제함
+              <DocCodeBlock language="typescript" code={`// 문제: 코드 마크가 다른 마크를 배제함
 // 해결: 코드 적용 시 충돌하는 마크 제거
 function applyCodeMark(textNode) {
   // 볼드, 이탤릭, 밑줄, 링크 제거
@@ -176,7 +176,7 @@ function escapeHtml(text) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class CodeMark {
+              <DocCodeBlock language="typescript" code={`class CodeMark {
   constructor() {
     this.type = 'code';
   }

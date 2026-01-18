@@ -1,0 +1,197 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'interface', text: 'Interface' },
+  { depth: 2, slug: 'usage', text: 'Usage' },
+  { depth: 2, slug: 'inverse', text: 'Inverse Operation' },
+  { depth: 2, slug: 'examples', text: 'Examples' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Insert Node Operation – Editor Architecture – contenteditable.lab"
+      description="Insert node operation for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Insert Node</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Insert Node Operation
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Insert block or inline nodes into the document model.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The insert node operation adds block or inline nodes to the document at a specific path. Used for inserting paragraphs, headings, lists, and other structured content.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="Interface">
+              <DocCodeBlock language="typescript" code={`interface InsertNodeOperation extends Operation {
+  type: 'insertNode';
+  path: Path;
+  node: Node;
+}
+
+interface Node {
+  type: string;
+  children?: Node[];
+  attributes?: Record<string, any>;
+  text?: string; // For text nodes
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="Usage">
+              <DocCodeBlock language="typescript" code={`// Insert paragraph
+function insertParagraph(editor: Editor, position: Path) {
+  const operation: InsertNodeOperation = {
+    type: 'insertNode',
+    path: position,
+    node: {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '' }
+      ]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Insert heading
+function insertHeading(editor: Editor, position: Path, level: number, text: string) {
+  const operation: InsertNodeOperation = {
+    type: 'insertNode',
+    path: position,
+    node: {
+      type: 'heading',
+      attributes: { level },
+      children: [
+        { type: 'text', text: text }
+      ]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Insert list item
+function insertListItem(editor: Editor, position: Path, text: string) {
+  const operation: InsertNodeOperation = {
+    type: 'insertNode',
+    path: position,
+    node: {
+      type: 'listItem',
+      children: [
+        {
+          type: 'paragraph',
+          children: [
+            { type: 'text', text: text }
+          ]
+        }
+      ]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}`} />
+            </DocSection>
+
+            <DocSection id="inverse" title="Inverse Operation">
+              <p class="m-0 mb-4">
+                The inverse of insert node is delete node:
+              </p>
+              <DocCodeBlock language="typescript" code={`function getInverse(operation: InsertNodeOperation): DeleteNodeOperation {
+  return {
+    type: 'deleteNode',
+    path: operation.path,
+    deletedNode: operation.node // Store for undo
+  };
+}`} />
+            </DocSection>
+
+            <DocSection id="examples" title="Examples">
+              <DocCodeBlock language="typescript" code={`// Example: Insert paragraph at cursor
+function insertParagraphAtCursor(editor: Editor) {
+  const selection = editor.getSelection();
+  const position = [selection.start[0] + 1]; // After current block
+  
+  const operation: InsertNodeOperation = {
+    type: 'insertNode',
+    path: position,
+    node: {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '' }
+      ]
+    }
+  };
+  
+  editor.applyOperation(operation);
+  
+  // Move cursor to new paragraph
+  editor.setSelection({
+    start: [position[0], 0],
+    end: [position[0], 0]
+  });
+}
+
+// Example: Insert image
+function insertImage(editor: Editor, position: Path, url: string) {
+  const operation: InsertNodeOperation = {
+    type: 'insertNode',
+    path: position,
+    node: {
+      type: 'image',
+      attributes: { src: url, alt: '' }
+    }
+  };
+  
+  editor.applyOperation(operation);
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/insert-node"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations overview' },
+                { title: 'Insert Text', href: '/editor/operations/insert-text', description: 'Insert text operation' },
+                { title: 'Delete Content', href: '/editor/operations/delete-content', description: 'Delete content operation' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Using transactions' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

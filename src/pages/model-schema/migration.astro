@@ -1,0 +1,366 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'version-management', text: 'Version Management' },
+  { depth: 3, slug: 'schema-registry', text: 'Schema Registry' },
+  { depth: 3, slug: 'version-tracking', text: 'Version Tracking' },
+  { depth: 2, slug: 'migration-strategies', text: 'Migration Strategies' },
+  { depth: 3, slug: 'transform-on-load', text: 'Transform on Load' },
+  { depth: 3, slug: 'lazy-migration', text: 'Lazy Migration' },
+  { depth: 3, slug: 'background-migration', text: 'Background Migration' },
+  { depth: 2, slug: 'backward-compatibility', text: 'Backward Compatibility' },
+  { depth: 3, slug: 'multi-version-support', text: 'Multi-Version Support' },
+  { depth: 3, slug: 'node-type-mapping', text: 'Node Type Mapping' },
+  { depth: 2, slug: 'migration-examples', text: 'Migration Examples' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Schema Migration – Model & Schema – contenteditable.lab"
+      description="Understanding schema migration: version management, migration strategies, and backward compatibility"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Schema Migration</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Schema Migration
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              As your editor evolves, the schema may change. Migrating existing documents to new schemas requires careful planning and implementation.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Schema migration is the process of updating documents from an older schema version to a newer one. This is essential when you need to add new features, change node structures, or fix design issues.
+              </p>
+              <p class="m-0 mb-4">
+                Without proper migration, users with old documents won't be able to use new features, and the editor may fail to parse or render old documents correctly.
+              </p>
+            </DocSection>
+
+            <DocSection id="version-management" title="Version Management">
+              <DocSection id="schema-registry" title="Schema Registry" depth={3}>
+                <p class="m-0 mb-3">
+                  Track schema versions and provide migration paths:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Schema version definition
+const schemaVersion = {
+  version: '1.0.0',
+  nodes: {},
+  marks: {},
+  migrations: []
+};
+
+class SchemaRegistry {
+  #schemas = new Map();
+  #migrations = new Map();
+  
+  register(version, schema) {
+    this.#schemas.set(version, schema);
+  }
+  
+  addMigration(fromVersion, toVersion, migration) {
+    const key = fromVersion + '->' + toVersion;
+    if (!this.#migrations.has(key)) {
+      this.#migrations.set(key, []);
+    }
+    const migrations = this.#migrations.get(key);
+    if (migrations) {
+      migrations.push(migration);
+    }
+  }
+  
+  migrate(document, fromVersion, toVersion) {
+    if (fromVersion === toVersion) {
+      return document;
+    }
+    
+    // Find migration path
+    const path = this.#findMigrationPath(fromVersion, toVersion);
+    
+    // Apply migrations in sequence
+    let currentDoc = document;
+    for (const migration of path) {
+      currentDoc = migration.apply(currentDoc);
+    }
+    
+    return currentDoc;
+  }
+  
+  #findMigrationPath(from, to) {
+    // Use graph search to find shortest path
+    // Handle direct migrations and multi-step paths
+    const migrations = [];
+    // ... path finding logic
+    return migrations;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="version-tracking" title="Version Tracking" depth={3}>
+                <p class="m-0 mb-3">
+                  Store version information with documents:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Document with version metadata
+const document = {
+  schemaVersion: '1.0.0',
+  document: {
+    type: 'document',
+    children: [...]
+  }
+};
+
+// When loading document
+function loadDocument(data) {
+  const version = data.schemaVersion || '1.0.0';
+  const currentVersion = '1.2.0';
+  
+  if (version !== currentVersion) {
+    // Migrate to current version
+    return schemaRegistry.migrate(
+      data.document,
+      version,
+      currentVersion
+    );
+  }
+  
+  return data.document;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="migration-strategies" title="Migration Strategies">
+              <DocSection id="transform-on-load" title="Transform on Load" depth={3}>
+                <p class="m-0 mb-3">
+                  Migrate documents when they are loaded:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DocumentLoader {
+  async load(data) {
+    const parsed = JSON.parse(data);
+    
+    // Check version
+    if (parsed.schemaVersion !== CURRENT_SCHEMA_VERSION) {
+      // Migrate to current version
+      return schemaRegistry.migrate(
+        parsed.document,
+        parsed.schemaVersion,
+        CURRENT_SCHEMA_VERSION
+      );
+    }
+    
+    return parsed.document;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="lazy-migration" title="Lazy Migration" depth={3}>
+                <p class="m-0 mb-3">
+                  Migrate on access rather than on load:
+                </p>
+                <DocCodeBlock language="typescript" code={`class LazyDocument {
+  #raw = null;
+  #migrated = null;
+  
+  constructor(raw) {
+    this.#raw = raw;
+  }
+  
+  get document() {
+    if (!this.#migrated) {
+      this.#migrated = schemaRegistry.migrate(
+        this.#raw.document,
+        this.#raw.schemaVersion,
+        CURRENT_SCHEMA_VERSION
+      );
+    }
+    return this.#migrated;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="background-migration" title="Background Migration" depth={3}>
+                <p class="m-0 mb-3">
+                  Migrate documents in the background:
+                </p>
+                <DocCodeBlock language="typescript" code={`class BackgroundMigrator {
+  async migrateInBackground(documents) {
+    // Migrate documents in background
+    const promises = documents.map(doc => {
+      return this.#migrateDocument(doc);
+    });
+    
+    await Promise.all(promises);
+  }
+  
+  async #migrateDocument(doc) {
+    // Perform migration
+    const migrated = schemaRegistry.migrate(
+      doc.document,
+      doc.schemaVersion,
+      CURRENT_SCHEMA_VERSION
+    );
+    
+    // Save migrated version
+    await this.#saveDocument(migrated);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="backward-compatibility" title="Backward Compatibility">
+              <DocSection id="multi-version-support" title="Multi-Version Support" depth={3}>
+                <p class="m-0 mb-3">
+                  Support multiple schema versions simultaneously:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Support multiple schema versions simultaneously
+class MultiVersionSchema {
+  #versions = new Map();
+  
+  parse(data) {
+    const version = data.schemaVersion || '1.0.0';
+    const schema = this.#versions.get(version);
+    
+    if (!schema) {
+      // Try to migrate
+      return this.migrate(data, version);
+    }
+    
+    return schema.parse(data.document);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="node-type-mapping" title="Node Type Mapping" depth={3}>
+                <p class="m-0 mb-3">
+                  Map old node types to new ones:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Support old node types by mapping to new ones
+function mapOldNodeType(oldType) {
+  const mapping = {
+    'oldHeading': 'heading',
+    'oldParagraph': 'paragraph',
+    'oldList': 'list'
+  };
+  return mapping[oldType] || oldType;
+}
+
+// Use in migration
+const migration = {
+  fromVersion: '1.0.0',
+  toVersion: '1.1.0',
+  apply(doc) {
+    return transformDocument(doc, (node) => {
+      const newType = mapOldNodeType(node.type);
+      if (newType !== node.type) {
+        return { ...node, type: newType };
+      }
+      return node;
+    });
+  }
+};`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="migration-examples" title="Migration Examples">
+              <p class="m-0 mb-4">
+                Common migration patterns:
+              </p>
+              <DocCodeBlock language="typescript" code={`// Example: Migrate old heading format to new
+const headingMigration = {
+  fromVersion: '1.0.0',
+  toVersion: '1.1.0',
+  apply(doc) {
+    return transformDocument(doc, (node) => {
+      if (node.type === 'heading' && typeof node.level === 'string') {
+        // Old format: level as string "h1", "h2"
+        // New format: level as number 1, 2
+        const newNode = Object.assign({}, node);
+        newNode.attrs = Object.assign({}, node.attrs);
+        newNode.attrs.level = parseInt(node.level.replace('h', ''));
+        return newNode;
+      }
+      return node;
+    });
+  }
+};
+
+// Example: Add default attributes
+const addDefaultsMigration = {
+  fromVersion: '1.1.0',
+  toVersion: '1.2.0',
+  apply(doc) {
+    return transformDocument(doc, (node) => {
+      if (node.type === 'link' && !node.attrs.target) {
+        return {
+          ...node,
+          attrs: {
+            ...node.attrs,
+            target: '_blank'
+          }
+        };
+      }
+      return node;
+    });
+  }
+};
+
+// Example: Remove deprecated node type
+const removeDeprecatedMigration = {
+  fromVersion: '1.2.0',
+  toVersion: '1.3.0',
+  apply(doc) {
+    return transformDocument(doc, (node) => {
+      if (node.type === 'deprecatedNode') {
+        // Convert to paragraph
+        return {
+          type: 'paragraph',
+          children: node.children
+        };
+      }
+      return node;
+    });
+  }
+};`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/model-schema/migration"
+              pages={[
+                { title: 'Model & Schema', href: '/model-schema', description: 'Overview of model and schema concepts' },
+                { title: 'Collaborative Editing', href: '/model-schema/collaborative-editing', description: 'Operational Transformation and CRDTs' },
+                { title: 'Indexing Strategies', href: '/model-schema/indexing', description: 'Document, position, and content indexing' },
+                { title: 'Advanced Validation', href: '/model-schema/validation', description: 'Recursive validation and performance optimization' },
+                { title: 'Transaction System', href: '/model-schema/transaction', description: 'Atomic operations and rollback mechanisms' },
+                { title: 'Node Types', href: '/model-schema/node-types', description: 'Comprehensive node type examples' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

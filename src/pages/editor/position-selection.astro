@@ -5,6 +5,7 @@ import TableOfContents from '../../components/TableOfContents.astro';
 import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
 import DocAlert from '../../components/docs/DocAlert.astro';
 import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
 import '../../styles/global.css';
 
 const headings = [
@@ -109,7 +110,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   Positions in the model use paths (array of indices) to navigate the document tree:
                 </p>
-                <DocCodeBlock code={`// Path structure: [blockIndex, inlineIndex, textOffset]
+                <DocCodeBlock language="typescript" code={`// Path structure: [blockIndex, inlineIndex, textOffset]
 // Example document:
 {
   type: 'document',
@@ -139,7 +140,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   The offset represents the character position within the target node:
                 </p>
-                <DocCodeBlock code={`// For text nodes, offset is character position
+                <DocCodeBlock language="typescript" code={`// For text nodes, offset is character position
 {
   path: [0, 0],  // First paragraph, first inline
   offset: 5      // 5th character in the text node
@@ -175,7 +176,7 @@ function findPosition(path, offset) {
                 <p class="m-0 mb-3">
                   Path-based positions remain valid even when DOM changes:
                 </p>
-                <DocCodeBlock code={`// Position before edit
+                <DocCodeBlock language="typescript" code={`// Position before edit
 const position = { path: [0, 0], offset: 10 };
 
 // User inserts text at position [0, 0], offset: 5
@@ -200,7 +201,7 @@ const newPosition = { path: [0, 0], offset: 15 };  // 10 + 5 inserted chars
                 <p class="m-0 mb-3">
                   Selection is represented by two positions: anchor (where selection started) and focus (where selection ended):
                 </p>
-                <DocCodeBlock code={`// Model selection
+                <DocCodeBlock language="typescript" code={`// Model selection
 {
   anchor: { path: [0, 0], offset: 5 },
   focus: { path: [0, 2], offset: 3 },
@@ -236,7 +237,7 @@ const newPosition = { path: [0, 0], offset: 15 };  // 10 + 5 inserted chars
                 <p class="m-0 mb-3">
                   A collapsed selection represents a cursor (no text selected):
                 </p>
-                <DocCodeBlock code={`// Collapsed selection
+                <DocCodeBlock language="typescript" code={`// Collapsed selection
 {
   anchor: { path: [0, 1], offset: 10 },
   focus: { path: [0, 1], offset: 10 },
@@ -271,7 +272,7 @@ function getCursorPosition(selection) {
 
               <section id="dom-position-to-path" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">DOM Position to Path</h3>
-                <DocCodeBlock code={`function domPositionToPath(domNode, domOffset, model) {
+                <DocCodeBlock language="typescript" code={`function domPositionToPath(domNode, domOffset, model) {
   // Find the model node that corresponds to DOM node
   const modelNode = findModelNodeForDOM(domNode, model);
   
@@ -320,7 +321,7 @@ function findModelNodeForDOM(domNode, model) {
 
               <section id="dom-range-to-selection" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">DOM Range to Selection</h3>
-                <DocCodeBlock code={`function domSelectionToModel(domSelection) {
+                <DocCodeBlock language="typescript" code={`function domSelectionToModel(domSelection) {
   if (domSelection.rangeCount === 0) {
     return null;
   }
@@ -380,7 +381,7 @@ function comparePositions(pos1, pos2) {
 
               <section id="path-to-dom-position" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Path to DOM Position</h3>
-                <DocCodeBlock code={`function pathToDOMPosition(path, offset, model) {
+                <DocCodeBlock language="typescript" code={`function pathToDOMPosition(path, offset, model) {
   // Navigate model tree using path
   let node = model;
   for (let i = 0; i < path.length; i++) {
@@ -428,7 +429,7 @@ function findDOMNodeForModel(modelNode) {
 
               <section id="selection-to-dom-range" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Selection to DOM Range</h3>
-                <DocCodeBlock code={`function modelSelectionToDOM(modelSelection) {
+                <DocCodeBlock language="typescript" code={`function modelSelectionToDOM(modelSelection) {
   // Convert anchor position
   const anchorDOM = pathToDOMPosition(
     modelSelection.anchor.path,
@@ -478,7 +479,7 @@ function findDOMNodeForModel(modelNode) {
 
               <section id="normalize-invalid" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Normalize Invalid Selections</h3>
-                <DocCodeBlock code={`function normalizeSelection(selection, model) {
+                <DocCodeBlock language="typescript" code={`function normalizeSelection(selection, model) {
   // Check if anchor is valid
   const anchorValid = isValidPosition(selection.anchor, model);
   if (!anchorValid) {
@@ -543,7 +544,7 @@ function findNearestValidPosition(position, model) {
                 <p class="m-0 mb-3">
                   Sometimes you need to expand selection to include full nodes:
                 </p>
-                <DocCodeBlock code={`function expandSelectionToNodes(selection, model) {
+                <DocCodeBlock language="typescript" code={`function expandSelectionToNodes(selection, model) {
   // Expand anchor to start of node
   const anchorNode = getNodeAtPath(model, selection.anchor.path);
   if (anchorNode && selection.anchor.offset > 0) {
@@ -584,7 +585,7 @@ function findNearestValidPosition(position, model) {
                 <p class="m-0 mb-3">
                   Track positions that need updating after operations:
                 </p>
-                <DocCodeBlock code={`class PositionTracker {
+                <DocCodeBlock language="typescript" code={`class PositionTracker {
   constructor() {
     this.positions = new Map();
   }
@@ -640,7 +641,7 @@ function findNearestValidPosition(position, model) {
 
               <section id="updating-positions" class="mb-6">
                 <h3 class="text-xl font-semibold mb-3">Updating Positions After Edits</h3>
-                <DocCodeBlock code={`function updateSelectionAfterEdit(selection, operation) {
+                <DocCodeBlock language="typescript" code={`function updateSelectionAfterEdit(selection, operation) {
   // Update anchor
   selection.anchor = updatePosition(selection.anchor, operation);
   
@@ -667,6 +668,16 @@ function updatePosition(position, operation) {
 }`} />
               </section>
             </section>
+
+            <DocNavigation
+              current="/editor/position-selection"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Synchronizing model and DOM' },
+                { title: 'Model & Schema', href: '/model-schema', description: 'Model and schema design' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
+              ]}
+            />
           </article>
         </div>
         <TableOfContents headings={headings} />

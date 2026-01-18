@@ -1,0 +1,324 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'render-phases', text: 'Render Phases' },
+  { depth: 3, slug: 'phase-breakdown', text: 'Phase Breakdown' },
+  { depth: 3, slug: 'phase-ordering', text: 'Phase Ordering' },
+  { depth: 2, slug: 'update-scheduling', text: 'Update Scheduling' },
+  { depth: 3, slug: 'priority-scheduling', text: 'Priority Scheduling' },
+  { depth: 3, slug: 'frame-scheduling', text: 'Frame Scheduling' },
+  { depth: 2, slug: 'render-optimization', text: 'Render Optimization' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Rendering Pipeline – Editor Architecture – contenteditable.lab"
+      description="Understanding rendering pipeline: render phases, update scheduling, and optimization strategies"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Rendering Pipeline</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Rendering Pipeline
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              A well-structured rendering pipeline ensures consistent updates and good performance.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The rendering pipeline transforms the document model into DOM updates through a series of well-defined phases. This ensures predictable behavior and enables optimization at each stage.
+              </p>
+            </DocSection>
+
+            <DocSection id="render-phases" title="Render Phases">
+              <DocSection id="phase-breakdown" title="Phase Breakdown" depth={3}>
+                <p class="m-0 mb-3">
+                  Break rendering into distinct phases:
+                </p>
+                <DocCodeBlock language="typescript" code={`class RenderPipeline {
+  render(document) {
+    // Phase 1: Prepare
+    const prepared = this.#prepare(document);
+    
+    // Phase 2: Transform
+    const transformed = this.#transform(prepared);
+    
+    // Phase 3: Validate
+    const validated = this.#validate(transformed);
+    
+    // Phase 4: Render
+    const dom = this.#renderToDOM(validated);
+    
+    // Phase 5: Update
+    this.#updateDOM(dom);
+    
+    // Phase 6: Post-process
+    this.#postProcess();
+  }
+  
+  #prepare(doc) {
+    // Normalize structure
+    // Resolve references
+    // Prepare data structures
+    return normalized;
+  }
+  
+  #transform(doc) {
+    // Apply transforms from plugins
+    // Convert model nodes to render nodes
+    return transformed;
+  }
+  
+  #validate(doc) {
+    // Ensure document is valid
+    // Fix any issues
+    return validated;
+  }
+  
+  #renderToDOM(doc) {
+    // Create DOM elements
+    // Set attributes
+    // Build tree
+    return dom;
+  }
+  
+  #updateDOM(newDOM) {
+    // Diff with current DOM
+    // Apply updates
+    // Preserve selection
+  }
+  
+  #postProcess() {
+    // Scroll into view
+    // Update selection
+    // Trigger events
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="phase-ordering" title="Phase Ordering" depth={3}>
+                <p class="m-0 mb-3">
+                  Phase ordering is critical for correctness:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Prepare:</strong> Must run first to normalize input</li>
+                  <li><strong>Transform:</strong> Runs after prepare, before validation</li>
+                  <li><strong>Validate:</strong> Ensures transformed document is valid</li>
+                  <li><strong>Render:</strong> Creates DOM from validated document</li>
+                  <li><strong>Update:</strong> Applies changes to existing DOM</li>
+                  <li><strong>Post-process:</strong> Final cleanup and side effects</li>
+                </ul>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="update-scheduling" title="Update Scheduling">
+              <DocSection id="priority-scheduling" title="Priority Scheduling" depth={3}>
+                <p class="m-0 mb-3">
+                  Schedule updates efficiently to avoid blocking:
+                </p>
+                <DocCodeBlock language="typescript" code={`class UpdateScheduler {
+  #pendingUpdates = new Set();
+  #scheduled = false;
+  
+  scheduleUpdate(priority, update) {
+    this.#pendingUpdates.add({ update, priority });
+    
+    if (priority === 'high') {
+      // Immediate update
+      this.#flush();
+    } else {
+      // Schedule for next frame
+      this.#schedule();
+    }
+  }
+  
+  #schedule() {
+    if (this.#scheduled) return;
+    
+    this.#scheduled = true;
+    
+    // Use MessageChannel for immediate scheduling
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
+      this.#flush();
+      this.#scheduled = false;
+    };
+    channel.port2.postMessage(null);
+  }
+  
+  #flush() {
+    const updates = Array.from(this.#pendingUpdates);
+    this.#pendingUpdates.clear();
+    
+    // Group by priority
+    const high = updates.filter(u => u.priority === 'high');
+    const normal = updates.filter(u => u.priority === 'normal');
+    const low = updates.filter(u => u.priority === 'low');
+    
+    // Execute in priority order
+    high.forEach(({ update }) => update());
+    normal.forEach(({ update }) => update());
+    low.forEach(({ update }) => update());
+  }
+}
+
+// Usage
+scheduler.scheduleUpdate('high', () => {
+  // Critical update (e.g., selection)
+  updateSelection();
+});
+
+scheduler.scheduleUpdate('normal', () => {
+  // Normal update (e.g., content)
+  updateContent();
+});
+
+scheduler.scheduleUpdate('low', () => {
+  // Low priority (e.g., syntax highlighting)
+  updateSyntaxHighlighting();
+});`} />
+              </DocSection>
+
+              <DocSection id="frame-scheduling" title="Frame Scheduling" depth={3}>
+                <p class="m-0 mb-3">
+                  Use requestAnimationFrame for smooth rendering:
+                </p>
+                <DocCodeBlock language="typescript" code={`class FrameScheduler {
+  #pending = [];
+  #scheduled = false;
+  
+  schedule(update) {
+    this.#pending.push(update);
+    
+    if (!this.#scheduled) {
+      this.#scheduled = true;
+      requestAnimationFrame(() => {
+        this.#flush();
+        this.#scheduled = false;
+      });
+    }
+  }
+  
+  #flush() {
+    const updates = this.#pending;
+    this.#pending = [];
+    
+    updates.forEach(update => {
+      try {
+        update();
+      } catch (error) {
+        console.error('Update failed:', error);
+      }
+    });
+  }
+  
+  // Schedule with time budget
+  scheduleWithBudget(update, budget = 5) {
+    const start = performance.now();
+    
+    requestAnimationFrame(() => {
+      update();
+      
+      const elapsed = performance.now() - start;
+      if (elapsed > budget) {
+        console.warn('Update exceeded budget:', elapsed);
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="render-optimization" title="Render Optimization">
+              <p class="m-0 mb-4">
+                Optimize rendering for performance:
+              </p>
+              <DocCodeBlock language="typescript" code={`class OptimizedPipeline extends RenderPipeline {
+  #cache = new Map();
+  #dirtyNodes = new Set();
+  
+  render(document) {
+    // Only render dirty nodes
+    const nodesToRender = this.#getDirtyNodes(document);
+    
+    if (nodesToRender.size === 0) {
+      // No changes, return cached result
+      return this.#cache.get(this.#getDocumentKey(document));
+    }
+    
+    // Render only changed nodes
+    const rendered = {};
+    nodesToRender.forEach(nodeId => {
+      const node = this.#getNodeById(nodeId);
+      rendered[nodeId] = this.#renderNode(node);
+    });
+    
+    // Merge with cached results
+    const result = { ...this.#cache.get(this.#getDocumentKey(document)), ...rendered };
+    
+    // Update cache
+    this.#cache.set(this.#getDocumentKey(document), result);
+    this.#dirtyNodes.clear();
+    
+    return result;
+  }
+  
+  markDirty(nodeId) {
+    this.#dirtyNodes.add(nodeId);
+    // Mark ancestors as dirty too
+    this.#markAncestorsDirty(nodeId);
+  }
+  
+  #markAncestorsDirty(nodeId) {
+    let current = nodeId;
+    while (current) {
+      this.#dirtyNodes.add(current);
+      current = this.#getParentId(current);
+    }
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/architecture/rendering-pipeline"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Asynchronous Initialization', href: '/editor/architecture/async-initialization', description: 'Promise-based initialization and lifecycle' },
+                { title: 'Hook System', href: '/editor/architecture/hook-system', description: 'Understanding hook system implementation' },
+                { title: 'Event System', href: '/editor/architecture/event-system', description: 'Event system architecture and patterns' },
+                { title: 'Performance Optimization', href: '/editor/architecture/performance-optimization', description: 'Optimization strategies for large documents' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

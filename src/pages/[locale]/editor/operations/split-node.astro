@@ -1,0 +1,122 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'interface', text: '인터페이스' },
+  { depth: 2, slug: 'usage', text: '사용법' },
+  { depth: 2, slug: 'inverse', text: '역 Operation' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Split Node Operation – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터를 위한 노드 분할 operation"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Split Node</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Split Node Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              특정 위치에서 노드를 두 개의 노드로 분할합니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                Split node operation은 특정 위치에서 노드를 두 개의 별도 노드로 나눕니다. 사용자가 Enter 키를 눌러 단락을 분할할 때 일반적으로 사용됩니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="인터페이스">
+              <DocCodeBlock language="typescript" code={`interface SplitNodeOperation extends Operation {
+  type: 'splitNode';
+  path: Path;
+  position: number; // 분할할 노드 내 위치
+  depth?: number; // 분할 깊이 (기본값: 0, 최상위 레벨에서 분할)
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="사용법">
+              <DocCodeBlock language="typescript" code={`// 커서 위치에서 단락 분할
+function splitParagraph(editor: Editor, position: Path) {
+  const operation: SplitNodeOperation = {
+    type: 'splitNode',
+    path: position,
+    position: position[1] // 단락 내 오프셋
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// 특정 오프셋에서 분할
+function splitAtOffset(editor: Editor, nodePath: Path, offset: number) {
+  const operation: SplitNodeOperation = {
+    type: 'splitNode',
+    path: nodePath,
+    position: offset
+  };
+  
+  editor.applyOperation(operation);
+}`} />
+            </DocSection>
+
+            <DocSection id="inverse" title="역 Operation">
+              <p class="m-0 mb-4">
+                Split node의 역 operation은 merge nodes입니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`function getInverse(operation: SplitNodeOperation): MergeNodesOperation {
+  return {
+    type: 'mergeNodes',
+    path: operation.path,
+    targetPath: [operation.path[0] + 1], // 다음 형제
+    position: operation.position
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/split-node"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations 개요' },
+                { title: 'Merge Nodes', href: '/editor/operations/merge-nodes', description: 'Merge nodes operation' },
+                { title: 'Insert Paragraph', href: '/editor/operations/insert-paragraph', description: 'Insert paragraph operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

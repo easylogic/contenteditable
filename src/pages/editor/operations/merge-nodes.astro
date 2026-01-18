@@ -1,0 +1,142 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'interface', text: 'Interface' },
+  { depth: 2, slug: 'usage', text: 'Usage' },
+  { depth: 2, slug: 'inverse', text: 'Inverse Operation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Merge Nodes Operation – Editor Architecture – contenteditable.lab"
+      description="Merge nodes operation for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Merge Nodes</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Merge Nodes Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Merge two adjacent nodes into a single node.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The merge nodes operation combines two adjacent nodes into one. Commonly used when user presses Backspace at the start of a paragraph to merge with previous paragraph.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="Interface">
+              <DocCodeBlock language="typescript" code={`interface MergeNodesOperation extends Operation {
+  type: 'mergeNodes';
+  path: Path; // Path to first node
+  targetPath: Path; // Path to second node (usually next sibling)
+  position?: number; // Position in first node where to merge
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="Usage">
+              <DocCodeBlock language="typescript" code={`// Merge current paragraph with previous
+function mergeWithPrevious(editor: Editor, currentPath: Path) {
+  const previousPath = [currentPath[0] - 1];
+  
+  const operation: MergeNodesOperation = {
+    type: 'mergeNodes',
+    path: previousPath,
+    targetPath: currentPath
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Merge at specific position
+function mergeAtPosition(editor: Editor, firstPath: Path, secondPath: Path, position: number) {
+  const operation: MergeNodesOperation = {
+    type: 'mergeNodes',
+    path: firstPath,
+    targetPath: secondPath,
+    position: position
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// In transaction (can be decomposed into operations)
+function mergeInTransaction(editor: Editor, firstPath: Path, secondPath: Path) {
+  const tx = editor.beginTransaction();
+  const firstNode = editor.getNodeAtPath(firstPath);
+  const secondNode = editor.getNodeAtPath(secondPath);
+  
+  // Combine content
+  const mergedText = firstNode.text + secondNode.text;
+  
+  // Update first node
+  tx.add({
+    type: 'replace',
+    path: firstPath,
+    length: firstNode.text.length,
+    content: mergedText
+  });
+  
+  // Delete second node
+  tx.add({
+    type: 'deleteNode',
+    path: secondPath
+  });
+  
+  tx.commit();
+}`} />
+            </DocSection>
+
+            <DocSection id="inverse" title="Inverse Operation">
+              <p class="m-0 mb-4">
+                The inverse of merge nodes is split node:
+              </p>
+              <DocCodeBlock language="typescript" code={`function getInverse(operation: MergeNodesOperation): SplitNodeOperation {
+  return {
+    type: 'splitNode',
+    path: operation.path,
+    position: operation.position || editor.getNodeAtPath(operation.path).text.length
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/merge-nodes"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations overview' },
+                { title: 'Split Node', href: '/editor/operations/split-node', description: 'Split node operation' },
+                { title: 'Delete Backward', href: '/editor/operations/delete-backward', description: 'Delete backward operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="구분선 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>구분선</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   divider: {
     group: 'block',
     attrs: {
@@ -87,7 +87,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'divider',
   attrs: { style: 'solid' }
 }`} />
@@ -97,7 +97,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeDivider(node) {
+              <DocCodeBlock language="typescript" code={`function serializeDivider(node) {
   return '<div data-type="divider" data-style="' + node.attrs.style + '"></div>';
 }`} />
             </DocSection>
@@ -106,7 +106,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseDivider(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseDivider(domNode) {
   return {
     type: 'divider',
     attrs: { style: domNode.getAttribute('data-style') || 'solid' }
@@ -121,7 +121,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 구분선 렌더링
+              <DocCodeBlock language="typescript" code={`// 구분선 렌더링
 const divider = document.createElement('div');
 divider.setAttribute('data-type', 'divider');
 divider.setAttribute('data-style', node.attrs.style);
@@ -136,7 +136,7 @@ divider.contentEditable = 'false'; // 구분선은 일반적으로 편집 불가
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 구분선 스타일링
+              <DocCodeBlock language="typescript" code={`// 문제: 구분선 스타일링
 // 해결: 일관된 스타일 적용
 function styleDivider(divider, style) {
   divider.className = 'divider divider-' + style;
@@ -160,7 +160,7 @@ function selectDivider(divider) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class DividerNode {
+              <DocCodeBlock language="typescript" code={`class DividerNode {
   constructor(attrs) {
     this.type = 'divider';
     this.attrs = { style: attrs?.style || 'solid' };

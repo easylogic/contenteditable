@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="테이블 헤더 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>테이블 헤더</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tableHeader: {
     content: 'block+',
     tableRole: 'header_cell',
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tableHeader',
   attrs: { colspan: 1, rowspan: 1 },
   children: [
@@ -107,7 +107,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeTableHeader(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTableHeader(node) {
   const attrs = {};
   if (node.attrs.colspan > 1) attrs.colspan = node.attrs.colspan;
   if (node.attrs.rowspan > 1) attrs.rowspan = node.attrs.rowspan;
@@ -120,7 +120,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseTableHeader(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTableHeader(domNode) {
   return {
     type: 'tableHeader',
     attrs: {
@@ -141,7 +141,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 테이블 헤더 렌더링
+              <DocCodeBlock language="typescript" code={`// 테이블 헤더 렌더링
 const th = document.createElement('th');
 th.contentEditable = 'true';
 if (node.attrs.colspan > 1) th.colSpan = node.attrs.colspan;
@@ -158,7 +158,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 헤더 스타일링
+              <DocCodeBlock language="typescript" code={`// 문제: 헤더 스타일링
 // 해결: 일관된 헤더 스타일 적용
 function styleTableHeader(th) {
   th.style.fontWeight = 'bold';
@@ -176,7 +176,7 @@ function setHeaderScope(th, scope) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class TableHeaderNode {
+              <DocCodeBlock language="typescript" code={`class TableHeaderNode {
   constructor(attrs, children) {
     this.type = 'tableHeader';
     this.attrs = {

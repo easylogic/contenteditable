@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="글꼴 크기 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>글꼴 크기</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   fontSize: {
     attrs: {
       size: { default: 16 }
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '큰 텍스트',
   marks: [{
@@ -102,7 +102,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeFontSizeMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeFontSizeMark(text, mark) {
   const size = mark.attrs?.size || 16;
   return '<span style="font-size: ' + size + 'px">' + text + '</span>';
 }`} />
@@ -112,7 +112,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractFontSizeMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractFontSizeMark(element) {
   if (element.tagName === 'SPAN' && element.style.fontSize) {
     const size = parseInt(element.style.fontSize) || 16;
     return {
@@ -131,7 +131,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 글꼴 크기 설정
+              <DocCodeBlock language="typescript" code={`// 글꼴 크기 설정
 function setFontSize(size) {
   addMark({
     type: 'fontSize',
@@ -153,7 +153,7 @@ function showFontSizePicker() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 글꼴 크기 단위 (px, em, rem)
+              <DocCodeBlock language="typescript" code={`// 문제: 글꼴 크기 단위 (px, em, rem)
 // 해결: px로 정규화
 function normalizeFontSize(size) {
   if (typeof size === 'string') {
@@ -178,7 +178,7 @@ function validateFontSize(size) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class FontSizeMark {
+              <DocCodeBlock language="typescript" code={`class FontSizeMark {
   constructor(attrs) {
     this.type = 'fontSize';
     this.attrs = { size: attrs?.size || 16 };

@@ -1,0 +1,376 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'recursive-validation', text: 'Recursive Validation' },
+  { depth: 3, slug: 'memoization', text: 'Memoization' },
+  { depth: 3, slug: 'validation-rules', text: 'Validation Rules' },
+  { depth: 2, slug: 'circular-reference', text: 'Circular Reference Handling' },
+  { depth: 3, slug: 'cycle-detection', text: 'Cycle Detection' },
+  { depth: 3, slug: 'reference-counting', text: 'Reference Counting' },
+  { depth: 2, slug: 'performance-validation', text: 'Performance Optimization' },
+  { depth: 3, slug: 'incremental-validation', text: 'Incremental Validation' },
+  { depth: 3, slug: 'caching', text: 'Caching' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Advanced Validation – Model & Schema – contenteditable.lab"
+      description="Understanding advanced validation: recursive validation, circular reference handling, and performance optimization"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Advanced Validation</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Advanced Validation
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Complex validation algorithms ensure document integrity while maintaining performance.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Advanced validation goes beyond basic schema checking. It includes recursive validation with memoization, circular reference detection, and performance optimizations for large documents.
+              </p>
+            </DocSection>
+
+            <DocSection id="recursive-validation" title="Recursive Validation">
+              <DocSection id="memoization" title="Memoization" depth={3}>
+                <p class="m-0 mb-3">
+                  Validate document structure recursively with memoization:
+                </p>
+                <DocCodeBlock language="typescript" code={`class RecursiveValidator {
+  #memo = new Map(); // nodeId -> isValid
+  
+  validate(document, schema) {
+    return this.#validateNode(document, schema, []);
+  }
+  
+  #validateNode(node, schema, path) {
+    const nodeId = this.#getNodeId(node, path);
+    
+    // Check memo
+    if (this.#memo.has(nodeId)) {
+      const isValid = this.#memo.get(nodeId);
+      return { valid: isValid, errors: [] };
+    }
+    
+    const spec = schema.nodes[node.type];
+    if (!spec) {
+      return { valid: false, errors: ['Unknown node type: ' + node.type] };
+    }
+    
+    // Validate attributes
+    const attrErrors = this.#validateAttributes(node.attrs, spec.attrs);
+    if (attrErrors.length > 0) {
+      this.#memo.set(nodeId, false);
+      return { valid: false, errors: attrErrors };
+    }
+    
+    // Validate content
+    const contentErrors = this.#validateContent(node.children, spec.content, schema);
+    if (contentErrors.length > 0) {
+      this.#memo.set(nodeId, false);
+      return { valid: false, errors: contentErrors };
+    }
+    
+    // Recursively validate children
+    const childErrors = [];
+    if (node.children) {
+      node.children.forEach((child, index) => {
+        const childResult = this.#validateNode(child, schema, [...path, index]);
+        if (!childResult.valid) {
+          childErrors.push(...childResult.errors);
+        }
+      });
+    }
+    
+    const valid = childErrors.length === 0;
+    this.#memo.set(nodeId, valid);
+    
+    return { valid, errors: childErrors };
+  }
+  
+  #validateContent(children, rule, schema) {
+    // Parse content rule (e.g., "block+", "inline*")
+    const parsed = this.#parseContentRule(rule);
+    
+    // Validate against rule
+    return this.#checkContentRule(children, parsed, schema);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="validation-rules" title="Validation Rules" depth={3}>
+                <p class="m-0 mb-3">
+                  Support complex validation rules:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ValidationRules {
+  validateContent(children, rule, schema) {
+    // Parse rule: "block+", "inline*", "paragraph | heading"
+    const parsed = this.#parseRule(rule);
+    
+    switch (parsed.type) {
+      case 'sequence':
+        return this.#validateSequence(children, parsed, schema);
+      case 'choice':
+        return this.#validateChoice(children, parsed, schema);
+      case 'group':
+        return this.#validateGroup(children, parsed, schema);
+    }
+  }
+  
+  #validateSequence(children, rule, schema) {
+    // Validate sequence of nodes matching rule
+    let index = 0;
+    const errors = [];
+    
+    rule.items.forEach(item => {
+      const count = this.#getCount(item);
+      for (let i = 0; i < count; i++) {
+        if (index >= children.length) {
+          if (item.required) {
+            errors.push('Missing required node');
+          }
+          break;
+        }
+        
+        const child = children[index];
+        if (!this.#matchesRule(child, item, schema)) {
+          errors.push('Node does not match rule');
+        }
+        index++;
+      }
+    });
+    
+    return errors;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="circular-reference" title="Circular Reference Handling">
+              <DocSection id="cycle-detection" title="Cycle Detection" depth={3}>
+                <p class="m-0 mb-3">
+                  Detect and handle circular references in document structure:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CircularReferenceDetector {
+  #visited = new Set();
+  #path = [];
+  
+  detect(document) {
+    return this.#hasCycle(document, []);
+  }
+  
+  #hasCycle(node, path) {
+    const nodeId = this.#getNodeId(node, path);
+    
+    // Check if we've seen this node before
+    if (this.#visited.has(nodeId)) {
+      // Check if it's in current path (cycle)
+      if (this.#path.includes(nodeId)) {
+        return true; // Cycle detected
+      }
+      return false; // Already visited, no cycle
+    }
+    
+    // Mark as visited
+    this.#visited.add(nodeId);
+    this.#path.push(nodeId);
+    
+    // Check children
+    const hasCycle = node.children?.some((child, index) => {
+      return this.#hasCycle(child, [...path, index]);
+    }) || false;
+    
+    // Remove from path
+    this.#path.pop();
+    
+    return hasCycle;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="reference-counting" title="Reference Counting" depth={3}>
+                <p class="m-0 mb-3">
+                  Alternative approach using reference counting:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ReferenceCounter {
+  #refCount = new Map();
+  
+  detectCycles(document) {
+    // Count references
+    this.#countReferences(document);
+    
+    // Check for cycles
+    return this.#checkCycles(document, []);
+  }
+  
+  #countReferences(node, path) {
+    const nodeId = this.#getNodeId(node, path);
+    
+    if (!this.#refCount.has(nodeId)) {
+      this.#refCount.set(nodeId, 0);
+    }
+    
+    this.#refCount.set(nodeId, this.#refCount.get(nodeId) + 1);
+    
+    // Count children
+    node.children?.forEach((child, index) => {
+      this.#countReferences(child, [...path, index]);
+    });
+  }
+  
+  #checkCycles(node, path) {
+    const nodeId = this.#getNodeId(node, path);
+    const count = this.#refCount.get(nodeId);
+    
+    // If referenced more than once in same path, it's a cycle
+    if (count > 1 && path.includes(nodeId)) {
+      return true;
+    }
+    
+    // Check children
+    return node.children?.some((child, index) => {
+      return this.#checkCycles(child, [...path, index]);
+    }) || false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="performance-validation" title="Performance Optimization">
+              <DocSection id="incremental-validation" title="Incremental Validation" depth={3}>
+                <p class="m-0 mb-3">
+                  Optimize validation for large documents:
+                </p>
+                <DocCodeBlock language="typescript" code={`class OptimizedValidator {
+  #cache = new Map();
+  #dirtyNodes = new Set();
+  
+  validate(document, schema) {
+    // Only validate dirty nodes
+    const nodesToValidate = this.#getDirtyNodes(document);
+    
+    if (nodesToValidate.size === 0) {
+      // No changes, return cached result
+      return this.#cache.get(this.#getDocumentKey(document)) || { valid: true, errors: [] };
+    }
+    
+    // Validate only changed nodes
+    const errors = [];
+    nodesToValidate.forEach(nodeId => {
+      const result = this.#validateNode(nodeId, document, schema);
+      if (!result.valid) {
+        errors.push(...result.errors);
+      }
+    });
+    
+    // Cache result
+    const result = { valid: errors.length === 0, errors };
+    this.#cache.set(this.#getDocumentKey(document), result);
+    this.#dirtyNodes.clear();
+    
+    return result;
+  }
+  
+  markDirty(nodeId) {
+    this.#dirtyNodes.add(nodeId);
+    // Mark ancestors as dirty too
+    this.#markAncestorsDirty(nodeId);
+  }
+  
+  // Incremental validation
+  validateIncremental(change, schema) {
+    // Only validate affected subtree
+    const affectedNodes = this.#getAffectedNodes(change);
+    
+    const errors = [];
+    affectedNodes.forEach(nodeId => {
+      const result = this.#validateNode(nodeId, this.#document, schema);
+      if (!result.valid) {
+        errors.push(...result.errors);
+      }
+    });
+    
+    return { valid: errors.length === 0, errors };
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="caching" title="Caching" depth={3}>
+                <p class="m-0 mb-3">
+                  Cache validation results:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CachedValidator {
+  #cache = new LRUCache(1000);
+  
+  validate(document, schema) {
+    const key = this.#getDocumentKey(document);
+    
+    // Check cache
+    if (this.#cache.has(key)) {
+      return this.#cache.get(key);
+    }
+    
+    // Perform validation
+    const result = this.#doValidate(document, schema);
+    
+    // Cache result
+    this.#cache.set(key, result);
+    
+    return result;
+  }
+  
+  invalidateCache(nodeId) {
+    // Remove all cache entries for this node
+    this.#cache.forEach((value, key) => {
+      if (key.includes(nodeId)) {
+        this.#cache.delete(key);
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocNavigation
+              current="/model-schema/validation"
+              pages={[
+                { title: 'Model & Schema', href: '/model-schema', description: 'Overview of model and schema concepts' },
+                { title: 'Collaborative Editing', href: '/model-schema/collaborative-editing', description: 'Operational Transformation and CRDTs' },
+                { title: 'Schema Migration', href: '/model-schema/migration', description: 'Version management and migration strategies' },
+                { title: 'Indexing Strategies', href: '/model-schema/indexing', description: 'Document, position, and content indexing' },
+                { title: 'Transaction System', href: '/model-schema/transaction', description: 'Atomic operations and rollback mechanisms' },
+                { title: 'Node Types', href: '/model-schema/node-types', description: 'Comprehensive node type examples' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

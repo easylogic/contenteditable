@@ -1,0 +1,395 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'operational-transformation', text: 'Operational Transformation' },
+  { depth: 3, slug: 'transform-algorithm', text: 'Transform Algorithm' },
+  { depth: 3, slug: 'ot-editor', text: 'OT Editor Implementation' },
+  { depth: 2, slug: 'crdt-implementation', text: 'CRDT Implementation' },
+  { depth: 3, slug: 'logoot-crdt', text: 'Logoot CRDT' },
+  { depth: 3, slug: 'crdt-merge', text: 'CRDT Merge' },
+  { depth: 2, slug: 'conflict-resolution', text: 'Conflict Resolution' },
+  { depth: 3, slug: 'resolution-strategies', text: 'Resolution Strategies' },
+  { depth: 2, slug: 'position-mapping', text: 'Position Mapping' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Collaborative Editing – Model & Schema – contenteditable.lab"
+      description="Understanding collaborative editing: Operational Transformation, CRDTs, and conflict resolution"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Collaborative Editing</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Collaborative Editing
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Collaborative editing requires transforming operations to handle concurrent edits. Two main approaches are Operational Transformation (OT) and CRDTs.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Collaborative editing allows multiple users to edit the same document simultaneously. The challenge is ensuring that all users see a consistent view of the document, even when operations happen concurrently.
+              </p>
+              <p class="m-0 mb-4">
+                Two main approaches exist: <strong>Operational Transformation (OT)</strong> and <strong>CRDTs (Conflict-free Replicated Data Types)</strong>. Each has different trade-offs in terms of complexity, performance, and consistency guarantees.
+              </p>
+            </DocSection>
+
+            <DocSection id="operational-transformation" title="Operational Transformation">
+              <DocSection id="transform-algorithm" title="Transform Algorithm" depth={3}>
+                <p class="m-0 mb-3">
+                  OT transforms operations to account for concurrent changes:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Transform two operations: op1' = T(op1, op2)
+function transform(op1, op2) {
+  // If operations don't overlap, no transformation needed
+  if (!operationsOverlap(op1, op2)) {
+    return op1;
+  }
+  
+  // Handle different operation pairs
+  if (op1.type === 'insert' && op2.type === 'insert') {
+    return transformInsertInsert(op1, op2);
+  }
+  
+  if (op1.type === 'insert' && op2.type === 'delete') {
+    return transformInsertDelete(op1, op2);
+  }
+  
+  if (op1.type === 'delete' && op2.type === 'insert') {
+    return transformDeleteInsert(op1, op2);
+  }
+  
+  if (op1.type === 'delete' && op2.type === 'delete') {
+    return transformDeleteDelete(op1, op2);
+  }
+  
+  return op1;
+}
+
+function transformInsertInsert(op1, op2) {
+  // Both inserting at same position
+  if (pathsEqual(op1.path, op2.path) && op1.offset === op2.offset) {
+    // Tie-breaking: op1 goes after op2
+    return {
+      ...op1,
+      offset: op1.offset + (typeof op2.content === 'string' ? op2.content.length : 1)
+    };
+  }
+  
+  // op2 is before op1
+  if (pathBefore(op2.path, op1.path) || 
+      (pathsEqual(op2.path, op1.path) && op2.offset < op1.offset)) {
+    return {
+      ...op1,
+      offset: op1.offset + (typeof op2.content === 'string' ? op2.content.length : 1)
+    };
+  }
+  
+  return op1;
+}
+
+function transformInsertDelete(op1, op2) {
+  // op2 deletes content before op1's insert position
+  if (pathBefore(op2.path, op1.path)) {
+    // Adjust op1's path
+    return {
+      ...op1,
+      path: adjustPathForDeletion(op1.path, op2.path)
+    };
+  }
+  
+  // op2 deletes at same position as op1 inserts
+  if (pathsEqual(op1.path, op2.path) && op1.offset === op2.offset) {
+    // Insert happens after deletion
+    return op1;
+  }
+  
+  return op1;
+}`} />
+              </DocSection>
+
+              <DocSection id="ot-editor" title="OT Editor Implementation" depth={3}>
+                <p class="m-0 mb-3">
+                  Apply operations with transformation:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Apply operation with transformation
+class OTEditor {
+  #operations = [];
+  #pendingRemoteOps = [];
+  
+  applyLocalOperation(op) {
+    // Transform against all pending remote operations
+    let transformedOp = op;
+    for (const remoteOp of this.#pendingRemoteOps) {
+      transformedOp = transform(transformedOp, remoteOp);
+    }
+    
+    // Apply transformed operation
+    this.#applyOperation(transformedOp);
+    this.#operations.push(transformedOp);
+  }
+  
+  applyRemoteOperation(op) {
+    // Transform against all local operations that happened after this
+    let transformedOp = op;
+    const localOpsAfter = this.#getOperationsAfter(op.timestamp);
+    
+    for (const localOp of localOpsAfter) {
+      transformedOp = transform(transformedOp, localOp);
+    }
+    
+    // Apply transformed operation
+    this.#applyOperation(transformedOp);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="crdt-implementation" title="CRDT Implementation">
+              <DocSection id="logoot-crdt" title="Logoot CRDT" depth={3}>
+                <p class="m-0 mb-3">
+                  CRDTs provide eventual consistency without transformation:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Logoot-style CRDT for text editing
+class LogootCRDT {
+  #chars = [];
+  #siteId = null;
+  #clock = 0;
+  
+  constructor(siteId) {
+    this.#siteId = siteId;
+  }
+  
+  insert(position, content) {
+    const newChars = [];
+    
+    // Generate positions for each character
+    for (let i = 0; i < content.length; i++) {
+      const charPosition = this.#generatePosition(position, i);
+      const char = {
+        position: charPosition,
+        content: content[i],
+        deleted: false
+      };
+      newChars.push(char);
+    }
+    
+    // Insert in sorted order
+    this.#chars.push(...newChars);
+    this.#chars.sort(this.#comparePositions);
+    
+    return newChars;
+  }
+  
+  #generatePosition(after, offset) {
+    // Generate position between 'after' and next position
+    const next = this.#findNextPosition(after);
+    
+    if (!next) {
+      // Insert at end
+      return {
+        siteId: this.#siteId,
+        clock: ++this.#clock,
+        offset: 0
+      };
+    }
+    
+    // Generate position between after and next
+    return this.#interpolatePosition(after, next);
+  }
+  
+  delete(position) {
+    const char = this.#findChar(position);
+    if (char) {
+      char.deleted = true;
+    }
+  }
+  
+  merge(remoteChars) {
+    // Merge remote characters into local state
+    for (const char of remoteChars) {
+      const existing = this.#findChar(char.position);
+      if (!existing) {
+        this.#chars.push(char);
+      }
+    }
+    
+    // Re-sort
+    this.#chars.sort(this.#comparePositions);
+  }
+  
+  getDocument() {
+    return this.#chars
+      .filter(char => !char.deleted)
+      .map(char => char.content)
+      .join('');
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="crdt-merge" title="CRDT Merge" depth={3}>
+                <p class="m-0 mb-3">
+                  Merging CRDT states:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Merge two CRDT states
+function mergeCRDT(local, remote) {
+  // Combine all characters
+  const merged = new Set();
+  
+  // Add local characters
+  local.#chars.forEach(char => {
+    merged.add(char);
+  });
+  
+  // Add remote characters
+  remote.#chars.forEach(char => {
+    merged.add(char);
+  });
+  
+  // Sort by position
+  const sorted = Array.from(merged).sort((a, b) => {
+    return comparePositions(a.position, b.position);
+  });
+  
+  return sorted;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="conflict-resolution" title="Conflict Resolution">
+              <DocSection id="resolution-strategies" title="Resolution Strategies" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle conflicts when operations cannot be automatically resolved:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ConflictResolver {
+  resolve(op1, op2) {
+    // Check if operations conflict
+    if (!this.#conflicts(op1, op2)) {
+      return [op1, op2];
+    }
+    
+    // Apply conflict resolution strategy
+    switch (this.#strategy) {
+      case 'last-write-wins':
+        return this.#lastWriteWins(op1, op2);
+      case 'first-write-wins':
+        return this.#firstWriteWins(op1, op2);
+      case 'merge':
+        return this.#merge(op1, op2);
+      case 'user-choice':
+        return this.#requestUserChoice(op1, op2);
+    }
+  }
+  
+  #lastWriteWins(op1, op2) {
+    // Operation with later timestamp wins
+    if (op1.timestamp > op2.timestamp) {
+      return [op1];
+    }
+    return [op2];
+  }
+  
+  #merge(op1, op2) {
+    // Try to merge operations
+    if (op1.type === 'update' && op2.type === 'update') {
+      // Merge attribute updates
+      return [{
+        ...op1,
+        attrs: { ...op1.attrs, ...op2.attrs }
+      }];
+    }
+    
+    // Cannot merge, use last-write-wins
+    return this.#lastWriteWins(op1, op2);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="position-mapping" title="Position Mapping">
+              <p class="m-0 mb-4">
+                Map positions across different document versions:
+              </p>
+              <DocCodeBlock language="typescript" code={`// Map position across document versions
+function mapPosition(position, operations) {
+  let mappedPosition = position;
+  operations.forEach(op => {
+    mappedPosition = transformPosition(mappedPosition, op);
+  });
+  return mappedPosition;
+}
+
+function transformPosition(position, operation) {
+  if (operation.type === 'insert') {
+    // If insert is before position, adjust
+    if (pathBefore(operation.path, position.path) ||
+        (pathsEqual(operation.path, position.path) && 
+         operation.offset <= position.offset)) {
+      return {
+        ...position,
+        offset: position.offset + (typeof operation.content === 'string' 
+          ? operation.content.length 
+          : 1)
+      };
+    }
+  }
+  
+  if (operation.type === 'delete') {
+    // If delete is before position, adjust
+    if (pathBefore(operation.path, position.path) ||
+        (pathsEqual(operation.path, position.path) && 
+         operation.offset < position.offset)) {
+      return {
+        ...position,
+        offset: Math.max(0, position.offset - operation.length)
+      };
+    }
+  }
+  
+  return position;
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/model-schema/collaborative-editing"
+              pages={[
+                { title: 'Model & Schema', href: '/model-schema', description: 'Overview of model and schema concepts' },
+                { title: 'Schema Migration', href: '/model-schema/migration', description: 'Version management and migration strategies' },
+                { title: 'Indexing Strategies', href: '/model-schema/indexing', description: 'Document, position, and content indexing' },
+                { title: 'Advanced Validation', href: '/model-schema/validation', description: 'Recursive validation and performance optimization' },
+                { title: 'Transaction System', href: '/model-schema/transaction', description: 'Atomic operations and rollback mechanisms' },
+                { title: 'Node Types', href: '/model-schema/node-types', description: 'Comprehensive node type examples' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

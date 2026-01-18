@@ -1,0 +1,423 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'event-bubbling', text: 'Event Bubbling and Capturing' },
+  { depth: 3, slug: 'bubbling-implementation', text: 'Bubbling Implementation' },
+  { depth: 3, slug: 'capture-phase', text: 'Capture Phase' },
+  { depth: 2, slug: 'event-delegation', text: 'Event Delegation Pattern' },
+  { depth: 3, slug: 'delegation-benefits', text: 'Delegation Benefits' },
+  { depth: 3, slug: 'delegation-implementation', text: 'Delegation Implementation' },
+  { depth: 2, slug: 'custom-events', text: 'Custom Event System' },
+  { depth: 3, slug: 'typed-events', text: 'Typed Events' },
+  { depth: 3, slug: 'event-priority', text: 'Event Priority' },
+  { depth: 2, slug: 'event-lifecycle', text: 'Event Lifecycle' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Event System Architecture – Editor Architecture – contenteditable.lab"
+      description="Understanding event system architecture: event bubbling, delegation, and custom event systems"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Event System</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Event System Architecture
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              A well-designed event system enables plugins to react to editor state changes and user interactions.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The event system is the communication layer between the editor core and plugins. It allows plugins to listen to and react to editor state changes, user interactions, and lifecycle events.
+              </p>
+              <p class="m-0 mb-4">
+                A well-designed event system provides type safety, efficient event propagation, and flexible event handling patterns.
+              </p>
+            </DocSection>
+
+            <DocSection id="event-bubbling" title="Event Bubbling and Capturing">
+              <DocSection id="bubbling-implementation" title="Bubbling Implementation" depth={3}>
+                <p class="m-0 mb-3">
+                  Implement event bubbling similar to DOM events, allowing parent handlers to process events before children:
+                </p>
+                <DocCodeBlock language="typescript" code={`class EventEmitter {
+  #listeners = new Map();
+  
+  on(event, handler, options) {
+    if (!this.#listeners.has(event)) {
+      this.#listeners.set(event, new Set());
+    }
+    this.#listeners.get(event).add(handler);
+  }
+  
+  emit(event, data, bubbles = true) {
+    const handlers = this.#listeners.get(event);
+    if (handlers) {
+      handlers.forEach(handler => {
+        handler(data);
+      });
+    }
+    
+    // Bubble up to parent
+    if (bubbles && this.#parent) {
+      this.#parent.emit(event, data, true);
+    }
+  }
+}
+
+// Usage: Node-level events bubble to document
+class DocumentNode {
+  constructor(parent) {
+    this.#parent = parent;
+    this.#emitter = new EventEmitter();
+  }
+  
+  emit(event, data) {
+    // Emit on this node
+    this.#emitter.emit(event, data, false);
+    
+    // Bubble to parent
+    if (this.#parent) {
+      this.#parent.emit(event, data);
+    }
+  }
+}
+
+// Handler on document receives all node events
+document.on('textInsert', (data) => {
+  console.log('Text inserted anywhere in document:', data);
+});`} />
+              </DocSection>
+
+              <DocSection id="capture-phase" title="Capture Phase" depth={3}>
+                <p class="m-0 mb-3">
+                  Support capture phase for events that need to be handled before bubbling:
+                </p>
+                <DocCodeBlock language="typescript" code={`class EventEmitter {
+  #captureListeners = new Map();
+  #bubbleListeners = new Map();
+  
+  on(event, handler, options = {}) {
+    const listeners = options.capture 
+      ? this.#captureListeners 
+      : this.#bubbleListeners;
+    
+    if (!listeners.has(event)) {
+      listeners.set(event, new Set());
+    }
+    listeners.get(event).add(handler);
+  }
+  
+  emit(event, data) {
+    // Capture phase: parent to child
+    this.#emitCapture(event, data);
+    
+    // Target phase: current node
+    this.#emitTarget(event, data);
+    
+    // Bubble phase: child to parent
+    this.#emitBubble(event, data);
+  }
+  
+  #emitCapture(event, data) {
+    // Emit to capture listeners
+    const handlers = this.#captureListeners.get(event);
+    if (handlers) {
+      handlers.forEach(handler => handler(data));
+    }
+    
+    // Continue to children
+    this.#children.forEach(child => {
+      child.#emitCapture(event, data);
+    });
+  }
+  
+  #emitBubble(event, data) {
+    // Emit to bubble listeners
+    const handlers = this.#bubbleListeners.get(event);
+    if (handlers) {
+      handlers.forEach(handler => handler(data));
+    }
+    
+    // Continue to parent
+    if (this.#parent) {
+      this.#parent.#emitBubble(event, data);
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="event-delegation" title="Event Delegation Pattern">
+              <DocSection id="delegation-benefits" title="Delegation Benefits" depth={3}>
+                <p class="m-0 mb-3">
+                  Event delegation reduces memory usage and improves performance:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Single listener on container instead of many on individual nodes</li>
+                  <li>Works with dynamically added nodes</li>
+                  <li>Reduces event listener overhead</li>
+                  <li>Simplifies event management</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="delegation-implementation" title="Delegation Implementation" depth={3}>
+                <p class="m-0 mb-3">
+                  Use event delegation to handle events efficiently:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  constructor(container) {
+    this.#container = container;
+    
+    // Single listener on container
+    this.#container.addEventListener('click', (e) => {
+      this.#handleClick(e);
+    });
+    
+    this.#container.addEventListener('input', (e) => {
+      this.#handleInput(e);
+    });
+  }
+  
+  #handleClick(e) {
+    const target = e.target;
+    
+    // Find the model node for this DOM element
+    const node = this.#findNodeForElement(target);
+    if (!node) return;
+    
+    // Dispatch to appropriate handler based on node type
+    switch (node.type) {
+      case 'link':
+        this.#handleLinkClick(node, e);
+        break;
+      case 'image':
+        this.#handleImageClick(node, e);
+        break;
+    }
+  }
+  
+  #handleInput(e) {
+    // Convert DOM input to model operation
+    const operation = this.#domToOperation(e);
+    this.applyOperation(operation);
+  }
+  
+  #findNodeForElement(element) {
+    // Walk up DOM tree to find node marker
+    let current = element;
+    while (current && current !== this.#container) {
+      const nodeId = current.getAttribute('data-node-id');
+      if (nodeId) {
+        return this.#getNodeById(nodeId);
+      }
+      current = current.parentElement;
+    }
+    return null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="custom-events" title="Custom Event System">
+              <DocSection id="typed-events" title="Typed Events" depth={3}>
+                <p class="m-0 mb-3">
+                  Implement a custom event system with typed events:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Define event types
+const EditorEvents = {
+  OPERATION: 'operation',
+  SELECTION_CHANGE: 'selectionChange',
+  DOCUMENT_CHANGE: 'documentChange',
+  ERROR: 'error'
+};
+
+// Typed event emitter
+class TypedEventEmitter {
+  #listeners = new Map();
+  
+  on(event, handler) {
+    if (!this.#listeners.has(event)) {
+      this.#listeners.set(event, new Set());
+    }
+    this.#listeners.get(event).add(handler);
+  }
+  
+  off(event, handler) {
+    const handlers = this.#listeners.get(event);
+    if (handlers) {
+      handlers.delete(handler);
+    }
+  }
+  
+  emit(event, data) {
+    const handlers = this.#listeners.get(event);
+    if (handlers) {
+      handlers.forEach(handler => handler(data));
+    }
+  }
+}
+
+// Usage
+const editor = new TypedEventEmitter();
+
+editor.on(EditorEvents.OPERATION, (data) => {
+  console.log('Operation:', data.operation);
+});
+
+editor.on(EditorEvents.ERROR, (data) => {
+  console.error('Error:', data.error);
+});
+
+editor.emit(EditorEvents.OPERATION, { 
+  operation: { type: 'insertText', text: 'Hello' } 
+});`} />
+              </DocSection>
+
+              <DocSection id="event-priority" title="Event Priority" depth={3}>
+                <p class="m-0 mb-3">
+                  Support event priority for ordered event handling:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PriorityEventEmitter {
+  #listeners = new Map();
+  
+  on(event, handler, priority = 0) {
+    if (!this.#listeners.has(event)) {
+      this.#listeners.set(event, []);
+    }
+    
+    const listeners = this.#listeners.get(event);
+    listeners.push({ handler, priority });
+    
+    // Sort by priority (higher priority first)
+    listeners.sort((a, b) => b.priority - a.priority);
+  }
+  
+  emit(event, data) {
+    const listeners = this.#listeners.get(event);
+    if (listeners) {
+      listeners.forEach(({ handler }) => {
+        handler(data);
+      });
+    }
+  }
+}
+
+// Usage
+const emitter = new PriorityEventEmitter();
+
+// High priority handler (runs first)
+emitter.on('operation', (data) => {
+  console.log('High priority:', data);
+}, 100);
+
+// Normal priority handler
+emitter.on('operation', (data) => {
+  console.log('Normal priority:', data);
+}, 0);
+
+// Low priority handler (runs last)
+emitter.on('operation', (data) => {
+  console.log('Low priority:', data);
+}, -100);`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="event-lifecycle" title="Event Lifecycle">
+              <p class="m-0 mb-4">
+                Complete event lifecycle management:
+              </p>
+              <DocCodeBlock language="typescript" code={`class EventLifecycle {
+  #preHandlers = new Map();
+  #handlers = new Map();
+  #postHandlers = new Map();
+  
+  on(event, handler, phase = 'main') {
+    const map = phase === 'pre' 
+      ? this.#preHandlers 
+      : phase === 'post' 
+        ? this.#postHandlers 
+        : this.#handlers;
+    
+    if (!map.has(event)) {
+      map.set(event, new Set());
+    }
+    map.get(event).add(handler);
+  }
+  
+  emit(event, data) {
+    // Pre-handlers
+    this.#callHandlers(this.#preHandlers, event, data);
+    
+    // Main handlers
+    const result = this.#callHandlers(this.#handlers, event, data);
+    
+    // Post-handlers
+    this.#callHandlers(this.#postHandlers, event, data);
+    
+    return result;
+  }
+  
+  #callHandlers(map, event, data) {
+    const handlers = map.get(event);
+    if (handlers) {
+      handlers.forEach(handler => handler(data));
+    }
+  }
+  
+  // Prevent default behavior
+  preventDefault(event) {
+    event.defaultPrevented = true;
+  }
+  
+  // Stop propagation
+  stopPropagation(event) {
+    event.propagationStopped = true;
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/architecture/event-system"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Asynchronous Initialization', href: '/editor/architecture/async-initialization', description: 'Promise-based initialization and lifecycle' },
+                { title: 'Hook System', href: '/editor/architecture/hook-system', description: 'Understanding hook system implementation' },
+                { title: 'Performance Optimization', href: '/editor/architecture/performance-optimization', description: 'Optimization strategies for large documents' },
+                { title: 'Rendering Pipeline', href: '/editor/architecture/rendering-pipeline', description: 'Rendering pipeline and update scheduling' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

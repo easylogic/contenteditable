@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Table Cell</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tableCell: {
     content: 'block+',
     tableRole: 'cell',
@@ -71,7 +71,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tableCell',
   attrs: { colspan: 1, rowspan: 1 },
   children: [
@@ -87,7 +87,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeTableCell(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTableCell(node) {
   const attrs = {};
   if (node.attrs.colspan > 1) attrs.colspan = node.attrs.colspan;
   if (node.attrs.rowspan > 1) attrs.rowspan = node.attrs.rowspan;
@@ -100,7 +100,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseTableCell(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTableCell(domNode) {
   return {
     type: 'tableCell',
     attrs: {
@@ -121,7 +121,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering table cell
+              <DocCodeBlock language="typescript" code={`// Rendering table cell
 const td = document.createElement('td');
 td.contentEditable = 'true';
 if (node.attrs.colspan > 1) td.colSpan = node.attrs.colspan;
@@ -146,7 +146,7 @@ function handleEnterInTableCell(e) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Empty cells
+              <DocCodeBlock language="typescript" code={`// Issue: Empty cells
 // Solution: Ensure at least one block
 function validateTableCell(cell) {
   if (!cell.querySelector('p, ul, ol, h1, h2, h3, h4, h5, h6')) {
@@ -176,7 +176,7 @@ function validateCellSpan(cell, table) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class TableCellNode {
+              <DocCodeBlock language="typescript" code={`class TableCellNode {
   constructor(attrs, children) {
     this.type = 'tableCell';
     this.attrs = {

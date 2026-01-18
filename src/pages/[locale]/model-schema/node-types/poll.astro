@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="투표 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>투표</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   poll: {
     group: 'block',
     attrs: {
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'poll',
   attrs: {
     question: '좋아하는 색상은?',
@@ -103,7 +103,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializePoll(node) {
+              <DocCodeBlock language="typescript" code={`function serializePoll(node) {
   return '<div data-type="poll" data-question="' + escapeHtml(node.attrs.question) + 
          '" data-options="' + escapeHtml(node.attrs.options) + 
          '" data-multiple="' + node.attrs.multiple + '"></div>';
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parsePoll(domNode) {
+              <DocCodeBlock language="typescript" code={`function parsePoll(domNode) {
   return {
     type: 'poll',
     attrs: {
@@ -133,7 +133,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 투표 렌더링
+              <DocCodeBlock language="typescript" code={`// 투표 렌더링
 const poll = document.createElement('div');
 poll.setAttribute('data-type', 'poll');
 poll.setAttribute('data-question', node.attrs.question);
@@ -149,7 +149,7 @@ poll.contentEditable = 'false'; // 투표는 일반적으로 상호작용하지�
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 투표 처리
+              <DocCodeBlock language="typescript" code={`// 문제: 투표 처리
 // 해결: 투표 제출 처리
 function handlePollVote(poll, selectedOptions) {
   // 서버에 투표 제출
@@ -167,7 +167,7 @@ function displayPollResults(poll, results) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class PollNode {
+              <DocCodeBlock language="typescript" code={`class PollNode {
   constructor(attrs) {
     this.type = 'poll';
     this.attrs = {

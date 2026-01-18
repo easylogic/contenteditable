@@ -1,0 +1,94 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'interface', text: 'Interface' },
+  { depth: 2, slug: 'usage', text: 'Usage' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Delete Forward Operation – Editor Architecture – contenteditable.lab"
+      description="Delete forward operation for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Delete Forward</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Delete Forward Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Delete content after the cursor position.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The delete forward operation removes content after the cursor. Typically triggered by Delete key.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="Interface">
+              <DocCodeBlock language="typescript" code={`interface DeleteForwardOperation extends Operation {
+  type: 'deleteForward';
+  path: Path;
+  unit: 'character' | 'word' | 'line';
+  deletedContent?: any;
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="Usage">
+              <DocCodeBlock language="typescript" code={`function deleteForward(editor: Editor, position: Path, unit: 'character' | 'word' = 'character') {
+  const operation: DeleteForwardOperation = {
+    type: 'deleteForward',
+    path: position,
+    unit,
+    deletedContent: editor.getContentAfter(position, unit)
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Inverse: Re-insert deleted content
+const inverse = {
+  type: 'insertText',
+  path: position,
+  text: operation.deletedContent
+};`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/delete-forward"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations overview' },
+                { title: 'Delete Backward', href: '/editor/operations/delete-backward', description: 'Delete backward operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

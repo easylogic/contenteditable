@@ -1,0 +1,544 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'plugin-architecture', text: '플러그인 아키텍처' },
+  { depth: 3, slug: 'plugin-interface', text: '플러그인 인터페이스' },
+  { depth: 3, slug: 'plugin-lifecycle', text: '플러그인 생명주기' },
+  { depth: 2, slug: 'creating-plugins', text: '플러그인 생성' },
+  { depth: 3, slug: 'basic-plugin', text: '기본 플러그인 구조' },
+  { depth: 3, slug: 'plugin-hooks', text: '훅 사용' },
+  { depth: 3, slug: 'plugin-commands', text: '명령 추가' },
+  { depth: 2, slug: 'plugin-examples', text: '플러그인 예제' },
+  { depth: 3, slug: 'formatting-plugin', text: '서식 플러그인' },
+  { depth: 3, slug: 'link-plugin', text: '링크 플러그인' },
+  { depth: 3, slug: 'image-plugin', text: '이미지 플러그인' },
+  { depth: 2, slug: 'plugin-api', text: '플러그인 API' },
+  { depth: 3, slug: 'editor-api', text: '에디터 API' },
+  { depth: 3, slug: 'model-api', text: '모델 API' },
+  { depth: 3, slug: 'view-api', text: '뷰 API' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="플러그인 개발 가이드 – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 contenteditable 에디터용 플러그인 개발 가이드"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">플러그인 개발</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              플러그인 개발 가이드
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              사용자 정의 기능으로 모델 기반 contenteditable 에디터를 확장하는 플러그인 개발 가이드입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                플러그인을 사용하면 핵심 코드를 수정하지 않고도 에디터 기능을 확장할 수 있습니다. 서식 추가, 특수 콘텐츠 타입 처리, 외부 서비스 통합, 에디터 동작 사용자 정의가 가능합니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>플러그인의 장점:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">모듈식 아키텍처 - 기능을 독립적으로 추가/제거 가능</li>
+                  <li class="mb-1">프로젝트 간 재사용 가능</li>
+                  <li class="mb-1">격리된 테스트 용이</li>
+                  <li class="mb-1">커뮤니티 기여</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="plugin-architecture" title="플러그인 아키텍처">
+              <p class="m-0 mb-4">
+                플러그인은 훅, 명령, 에디터 API를 통해 에디터와 통합됩니다.
+              </p>
+
+              <DocSection id="plugin-interface" title="플러그인 인터페이스" depth={3}>
+                <p class="m-0 mb-3">
+                  모든 플러그인은 표준 인터페이스를 구현합니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface Plugin {
+  name: string;
+  version?: string;
+  
+  // 생명주기 메서드
+  install(editor: Editor): void | Promise<void>;
+  uninstall?(editor: Editor): void | Promise<void>;
+  
+  // 선택사항: 플러그인 구성
+  configure?(config: PluginConfig): void;
+}
+
+class MyPlugin implements Plugin {
+  name = 'my-plugin';
+  version = '1.0.0';
+  
+  install(editor: Editor) {
+    // 훅, 명령 등 등록
+  }
+  
+  uninstall(editor: Editor) {
+    // 정리
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="plugin-lifecycle" title="플러그인 생명주기" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인은 다음 생명주기를 거칩니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`// 1. 플러그인 인스턴스화
+const plugin = new MyPlugin();
+
+// 2. 플러그인 설치 (에디터에 의해 호출됨)
+await editor.use(plugin);
+// 또는
+await plugin.install(editor);
+
+// 3. 플러그인 활성화 (이벤트, 명령 등 처리)
+
+// 4. 플러그인 제거 (선택사항)
+await plugin.uninstall?.(editor);
+// 또는
+editor.removePlugin(plugin);`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="creating-plugins" title="플러그인 생성">
+              <p class="m-0 mb-4">
+                Plugin 인터페이스를 구현하고 훅이나 명령을 등록하여 플러그인을 생성합니다.
+              </p>
+
+              <DocSection id="basic-plugin" title="기본 플러그인 구조" depth={3}>
+                <p class="m-0 mb-3">
+                  최소한의 플러그인:
+                </p>
+                <DocCodeBlock language="typescript" code={`class BasicPlugin implements Plugin {
+  name = 'basic-plugin';
+  #editor: Editor | null = null;
+
+  install(editor: Editor) {
+    this.#editor = editor;
+    
+    // 이벤트 리스너 등록
+    editor.on('operation', this.#handleOperation.bind(this));
+    
+    // 명령 등록
+    editor.registerCommand('basic:action', this.#handleCommand.bind(this));
+  }
+
+  uninstall(editor: Editor) {
+    // 이벤트 리스너 제거
+    editor.off('operation', this.#handleOperation);
+    
+    // 명령 등록 해제
+    editor.unregisterCommand('basic:action');
+    
+    this.#editor = null;
+  }
+
+  #handleOperation(operation: Operation) {
+    // 작업 처리
+  }
+
+  #handleCommand() {
+    // 명령 처리
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="plugin-hooks" title="훅 사용" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인은 에디터 생명주기와 작업에 훅을 걸 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HookPlugin implements Plugin {
+  name = 'hook-plugin';
+
+  install(editor: Editor) {
+    // 작업 생명주기에 훅
+    editor.hooks.beforeOperation.tap((operation) => {
+      // 적용 전 작업 수정
+      if (operation.type === 'insert') {
+        // 작업 변환
+      }
+    });
+
+    editor.hooks.afterOperation.tap((operation) => {
+      // 적용 후 작업에 반응
+    });
+
+    // 렌더링에 훅
+    editor.hooks.beforeRender.tap(() => {
+      // 렌더 준비
+    });
+
+    editor.hooks.afterRender.tap(() => {
+      // 렌더 후 정리
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="plugin-commands" title="명령 추가" depth={3}>
+                <p class="m-0 mb-3">
+                  플러그인은 프로그래밍 방식으로 또는 키보드 단축키를 통해 호출할 수 있는 명령을 등록할 수 있습니다:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CommandPlugin implements Plugin {
+  name = 'command-plugin';
+
+  install(editor: Editor) {
+    // 명령 등록
+    editor.registerCommand('format:bold', () => {
+      const selection = editor.getSelection();
+      if (selection.isCollapsed) {
+        // 현재 단어나 선택 영역에 서식 적용
+        editor.toggleFormat('bold', selection);
+      }
+    });
+
+    // 키보드 단축키 등록
+    editor.registerShortcut('Mod-b', 'format:bold');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="plugin-examples" title="플러그인 예제">
+              <p class="m-0 mb-4">
+                실제 플러그인 예제:
+              </p>
+
+              <DocSection id="formatting-plugin" title="서식 플러그인" depth={3}>
+                <p class="m-0 mb-3">
+                  텍스트 서식을 추가하는 플러그인:
+                </p>
+                <DocCodeBlock language="typescript" code={`class FormattingPlugin implements Plugin {
+  name = 'formatting';
+  #editor: Editor | null = null;
+
+  install(editor: Editor) {
+    this.#editor = editor;
+
+    // 서식 명령 등록
+    editor.registerCommand('format:bold', () => this.#toggleBold());
+    editor.registerCommand('format:italic', () => this.#toggleItalic());
+    editor.registerCommand('format:underline', () => this.#toggleUnderline());
+
+    // 단축키 등록
+    editor.registerShortcut('Mod-b', 'format:bold');
+    editor.registerShortcut('Mod-i', 'format:italic');
+    editor.registerShortcut('Mod-u', 'format:underline');
+  }
+
+  #toggleBold() {
+    if (!this.#editor) return;
+    const selection = this.#editor.getSelection();
+    this.#editor.toggleFormat('bold', selection);
+  }
+
+  #toggleItalic() {
+    if (!this.#editor) return;
+    const selection = this.#editor.getSelection();
+    this.#editor.toggleFormat('italic', selection);
+  }
+
+  #toggleUnderline() {
+    if (!this.#editor) return;
+    const selection = this.#editor.getSelection();
+    this.#editor.toggleFormat('underline', selection);
+  }
+
+  uninstall(editor: Editor) {
+    editor.unregisterCommand('format:bold');
+    editor.unregisterCommand('format:italic');
+    editor.unregisterCommand('format:underline');
+    this.#editor = null;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="link-plugin" title="링크 플러그인" depth={3}>
+                <p class="m-0 mb-3">
+                  링크를 처리하는 플러그인:
+                </p>
+                <DocCodeBlock language="typescript" code={`class LinkPlugin implements Plugin {
+  name = 'link';
+  #editor: Editor | null = null;
+
+  install(editor: Editor) {
+    this.#editor = editor;
+
+    // 링크 명령 등록
+    editor.registerCommand('link:insert', (url: string) => {
+      const selection = editor.getSelection();
+      if (selection.isCollapsed) {
+        // 커서 위치에 링크 삽입
+        editor.insertLink(url, selection);
+      } else {
+        // 선택 영역을 링크로 감싸기
+        editor.wrapWithLink(selection, url);
+      }
+    });
+
+    // 링크 클릭 처리
+    editor.element.addEventListener('click', (e) => {
+      const link = (e.target as HTMLElement).closest('a');
+      if (link && e.ctrlKey) {
+        // 기본 동작 허용 (링크 열기)
+        return;
+      }
+      if (link) {
+        e.preventDefault();
+        // 링크 편집
+        this.#editLink(link);
+      }
+    });
+  }
+
+  #editLink(link: HTMLElement) {
+    const url = prompt('URL 편집:', link.getAttribute('href') || '');
+    if (url !== null) {
+      link.setAttribute('href', url);
+    }
+  }
+
+  uninstall(editor: Editor) {
+    editor.unregisterCommand('link:insert');
+    this.#editor = null;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="image-plugin" title="이미지 플러그인" depth={3}>
+                <p class="m-0 mb-3">
+                  이미지를 처리하는 플러그인:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ImagePlugin implements Plugin {
+  name = 'image';
+  #editor: Editor | null = null;
+  #uploadUrl: string;
+
+  constructor(uploadUrl: string) {
+    this.#uploadUrl = uploadUrl;
+  }
+
+  install(editor: Editor) {
+    this.#editor = editor;
+
+    // 붙여넣기 처리
+    editor.element.addEventListener('paste', async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            await this.#handleImagePaste(file);
+          }
+        }
+      }
+    });
+
+    // 명령 등록
+    editor.registerCommand('image:insert', async (file: File) => {
+      await this.#uploadAndInsert(file);
+    });
+  }
+
+  async #handleImagePaste(file: File) {
+    await this.#uploadAndInsert(file);
+  }
+
+  async #uploadAndInsert(file: File) {
+    if (!this.#editor) return;
+
+    // 이미지 업로드
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await fetch(this.#uploadUrl, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const { url } = await response.json();
+
+    // 에디터에 삽입
+    const selection = this.#editor.getSelection();
+    this.#editor.insertImage(url, selection);
+  }
+
+  uninstall(editor: Editor) {
+    editor.unregisterCommand('image:insert');
+    this.#editor = null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="plugin-api" title="플러그인 API">
+              <p class="m-0 mb-4">
+                플러그인은 콘텐츠, 선택 영역, 상태를 조작하기 위한 에디터 API에 액세스할 수 있습니다.
+              </p>
+
+              <DocSection id="editor-api" title="에디터 API" depth={3}>
+                <p class="m-0 mb-3">
+                  핵심 에디터 메서드:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface Editor {
+  // 선택 영역
+  getSelection(): Selection;
+  setSelection(selection: Selection): void;
+
+  // 콘텐츠 조작
+  insertText(text: string, selection?: Selection): void;
+  insertNode(node: Node, selection?: Selection): void;
+  deleteContent(selection: Selection): void;
+  
+  // 서식
+  toggleFormat(format: string, selection: Selection): void;
+  hasFormat(format: string, selection: Selection): boolean;
+  
+  // 명령
+  registerCommand(name: string, handler: Function): void;
+  unregisterCommand(name: string): void;
+  executeCommand(name: string, ...args: any[]): void;
+  
+  // 이벤트
+  on(event: string, handler: Function): void;
+  off(event: string, handler: Function): void;
+  emit(event: string, data?: any): void;
+  
+  // 훅
+  hooks: {
+    beforeOperation: Hook;
+    afterOperation: Hook;
+    beforeRender: Hook;
+    afterRender: Hook;
+  };
+}`} />
+              </DocSection>
+
+              <DocSection id="model-api" title="모델 API" depth={3}>
+                <p class="m-0 mb-3">
+                  문서 모델 액세스:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface Model {
+  // 읽기 작업
+  getNode(path: Path): Node | null;
+  getText(range?: Range): string;
+  
+  // 쓰기 작업
+  applyOperation(operation: Operation): void;
+  
+  // 순회
+  walk(callback: (node: Node, path: Path) => void): void;
+  
+  // 쿼리
+  findNodes(predicate: (node: Node) => boolean): Node[];
+}`} />
+              </DocSection>
+
+              <DocSection id="view-api" title="뷰 API" depth={3}>
+                <p class="m-0 mb-3">
+                  DOM 뷰 액세스:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface View {
+  // DOM 액세스
+  element: HTMLElement;
+  getNodeElement(node: Node): HTMLElement | null;
+  
+  // 렌더링
+  render(): void;
+  updateNode(node: Node): void;
+  
+  // 선택 영역
+  getDOMSelection(): Selection | null;
+  setDOMSelection(selection: Selection): void;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <p class="m-0 mb-4">
+                플러그인 개발의 핵심 원칙:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>플러그인을 집중적으로 유지:</strong> 각 플러그인은 단일하고 명확한 목적을 가져야 합니다
+                </li>
+                <li class="mb-2">
+                  <strong>제거 시 정리:</strong> 모든 이벤트 리스너, 명령, 참조를 제거하세요
+                </li>
+                <li class="mb-2">
+                  <strong>가능하면 훅 사용:</strong> 확장성을 위해 직접 API 호출보다 훅을 선호하세요
+                </li>
+                <li class="mb-2">
+                  <strong>오류를 우아하게 처리:</strong> 플러그인 오류가 에디터를 중단시키지 않도록 하세요
+                </li>
+                <li class="mb-2">
+                  <strong>플러그인 문서화:</strong> 명확한 API 문서와 예제를 제공하세요
+                </li>
+                <li class="mb-2">
+                  <strong>철저히 테스트:</strong> 다양한 브라우저, IME, 엣지 케이스로 테스트하세요
+                </li>
+                <li class="mb-2">
+                  <strong>성능 고려:</strong> 핫 패스에서 비용이 큰 작업을 피하세요
+                </li>
+              </ul>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+
+    <DocNavigation
+      current="/editor/plugin-development"
+      pages={[
+        { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 패턴 개요' },
+        { title: '입력 처리 & IME', href: '/editor/input-handling', description: '입력 처리 및 IME 조합' },
+        { title: '모델-DOM 동기화', href: '/editor/model-dom-synchronization', description: '모델과 DOM 동기화' },
+      ]}
+    />
+  </body>
+</html>

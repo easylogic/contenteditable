@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="주석 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>주석</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   annotation: {
     inline: true,
     attrs: {
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'annotation',
   attrs: {
     id: 'annotation123',
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeAnnotation(node) {
+              <DocCodeBlock language="typescript" code={`function serializeAnnotation(node) {
   return '<span data-type="annotation" data-id="' + escapeHtml(node.attrs.id) + 
          '" data-annotation-type="' + node.attrs.type + '"></span>';
 }`} />
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseAnnotation(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseAnnotation(domNode) {
   return {
     type: 'annotation',
     attrs: {
@@ -129,7 +129,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 주석 렌더링
+              <DocCodeBlock language="typescript" code={`// 주석 렌더링
 const annotation = document.createElement('span');
 annotation.setAttribute('data-type', 'annotation');
 annotation.setAttribute('data-id', node.attrs.id);
@@ -145,7 +145,7 @@ annotation.contentEditable = 'false'; // 주석은 일반적으로 직접 편집
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 주석 표시
+              <DocCodeBlock language="typescript" code={`// 문제: 주석 표시
 // 해결: 호버 또는 클릭 시 주석 표시
 function showAnnotation(annotation) {
   const id = annotation.getAttribute('data-id');
@@ -164,7 +164,7 @@ function syncAnnotation(annotation, changes) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class AnnotationNode {
+              <DocCodeBlock language="typescript" code={`class AnnotationNode {
   constructor(attrs) {
     this.type = 'annotation';
     this.attrs = {

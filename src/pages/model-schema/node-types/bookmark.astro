@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Bookmark</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   bookmark: {
     group: 'block',
     attrs: {
@@ -70,7 +70,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'bookmark',
   attrs: {
     url: 'https://example.com',
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeBookmark(node) {
+              <DocCodeBlock language="typescript" code={`function serializeBookmark(node) {
   return '<div data-type="bookmark" data-url="' + escapeHtml(node.attrs.url) + 
          '" data-title="' + escapeHtml(node.attrs.title) + 
          '" data-description="' + escapeHtml(node.attrs.description) + 
@@ -97,7 +97,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseBookmark(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseBookmark(domNode) {
   return {
     type: 'bookmark',
     attrs: {
@@ -117,7 +117,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering bookmark
+              <DocCodeBlock language="typescript" code={`// Rendering bookmark
 const bookmark = document.createElement('div');
 bookmark.setAttribute('data-type', 'bookmark');
 bookmark.setAttribute('data-url', node.attrs.url);
@@ -134,7 +134,7 @@ bookmark.contentEditable = 'false'; // Bookmarks are typically rendered`} />
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Bookmark metadata fetching
+              <DocCodeBlock language="typescript" code={`// Issue: Bookmark metadata fetching
 // Solution: Fetch Open Graph metadata
 async function fetchBookmarkMetadata(url) {
   // Fetch URL and extract Open Graph tags
@@ -160,7 +160,7 @@ function validateBookmarkUrl(url) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class BookmarkNode {
+              <DocCodeBlock language="typescript" code={`class BookmarkNode {
   constructor(attrs) {
     this.type = 'bookmark';
     this.attrs = {

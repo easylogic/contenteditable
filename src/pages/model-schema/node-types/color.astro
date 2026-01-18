@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Color</strong> mark type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   color: {
     attrs: {
       color: { default: '#000000' }
@@ -66,7 +66,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: 'Colored text',
   marks: [{
@@ -80,7 +80,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeColorMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeColorMark(text, mark) {
   const color = mark.attrs?.color || '#000000';
   return '<span style="color: ' + escapeHtml(color) + '">' + text + '</span>';
 }`} />
@@ -90,7 +90,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function extractColorMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractColorMark(element) {
   if (element.tagName === 'SPAN' && element.style.color) {
     return {
       type: 'color',
@@ -113,7 +113,7 @@ function extractColorFromStyle(colorString) {
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Applying color
+              <DocCodeBlock language="typescript" code={`// Applying color
 function applyColor(color) {
   addMark({
     type: 'color',
@@ -137,7 +137,7 @@ function showColorPicker() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Color format normalization
+              <DocCodeBlock language="typescript" code={`// Issue: Color format normalization
 // Solution: Normalize to hex format
 function normalizeColor(color) {
   if (color.startsWith('rgb')) {
@@ -162,7 +162,7 @@ function applyColorWithMarks(text, color, otherMarks) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class ColorMark {
+              <DocCodeBlock language="typescript" code={`class ColorMark {
   constructor(attrs) {
     this.type = 'color';
     this.attrs = { color: attrs?.color || '#000000' };

@@ -1,0 +1,291 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+import {
+  initializationPatternCode,
+  errorHandlingCode,
+  hookIntegrationCode,
+  pluginInitializationCode,
+  schemaLoaderCode,
+  pluginLoaderCode,
+  lifecyclePhasesCode,
+  dependencyResolutionCode,
+  timeoutRetryCode,
+  bestPracticesCode
+} from './code-examples';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'promise-based-api', text: 'Promise-Based API Design' },
+  { depth: 3, slug: 'initialization-pattern', text: 'Initialization Pattern' },
+  { depth: 3, slug: 'error-handling', text: 'Error Handling' },
+  { depth: 2, slug: 'initialization-lifecycle', text: 'Initialization Lifecycle' },
+  { depth: 3, slug: 'lifecycle-phases', text: 'Lifecycle Phases' },
+  { depth: 3, slug: 'state-transitions', text: 'State Transitions' },
+  { depth: 2, slug: 'dependency-resolution', text: 'Dependency Resolution' },
+  { depth: 3, slug: 'dependency-graph', text: 'Dependency Graph' },
+  { depth: 3, slug: 'topological-sort', text: 'Topological Sort' },
+  { depth: 2, slug: 'initialization-hooks', text: 'Initialization Hooks' },
+  { depth: 3, slug: 'hook-integration', text: 'Hook Integration' },
+  { depth: 3, slug: 'plugin-initialization', text: 'Plugin Initialization' },
+  { depth: 2, slug: 'resource-loading', text: 'Resource Loading' },
+  { depth: 3, slug: 'schema-loading', text: 'Schema Loading' },
+  { depth: 3, slug: 'plugin-loading', text: 'Plugin Loading' },
+  { depth: 2, slug: 'timeout-retry', text: 'Timeout and Retry Strategies' },
+  { depth: 3, slug: 'timeout-handling', text: 'Timeout Handling' },
+  { depth: 3, slug: 'retry-mechanisms', text: 'Retry Mechanisms' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Asynchronous Initialization – Editor Architecture – contenteditable.lab"
+      description="Understanding asynchronous initialization patterns in rich text editors: Promise-based APIs, initialization hooks, and resource loading"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Asynchronous Initialization</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Asynchronous Initialization
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Modern editors often require asynchronous initialization for loading resources, parsing schemas, or setting up plugins. This is similar to how WebGPU requires async device initialization.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Unlike traditional synchronous APIs, modern editors need to handle asynchronous operations during initialization. This includes loading schemas from network, initializing plugins that may need to fetch data, and setting up view layers that require DOM manipulation.
+              </p>
+              <p class="m-0 mb-4">
+                The challenge is providing a clean API that doesn't block the main thread while ensuring the editor is fully ready before use. This pattern is similar to how WebGPU requires async device initialization, or how modern frameworks handle component mounting.
+              </p>
+            </DocSection>
+
+            <DocSection id="promise-based-api" title="Promise-Based API Design">
+              <p class="m-0 mb-4">
+                Instead of synchronous initialization, use a Promise-based API that resolves when the editor is ready:
+              </p>
+
+              <DocSection id="initialization-pattern" title="Initialization Pattern" depth={3}>
+                <p class="m-0 mb-3">
+                  The core pattern is to return a Promise from the constructor and expose it via a getter:
+                </p>
+                <DocCodeBlock code={initializationPatternCode} />
+                <p class="m-0 mb-3">
+                  <strong>Key points:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>The promise is created immediately in the constructor</li>
+                  <li>Multiple async operations can run in parallel using <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Promise.all</code></li>
+                  <li>The editor instance is returned from the promise for chaining</li>
+                  <li>All initialization happens before the promise resolves</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="error-handling" title="Error Handling" depth={3}>
+                <p class="m-0 mb-3">
+                  Proper error handling is crucial for async initialization:
+                </p>
+                <DocCodeBlock code={errorHandlingCode} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="initialization-lifecycle" title="Initialization Lifecycle">
+              <p class="m-0 mb-4">
+                Understanding the initialization lifecycle helps manage state transitions and provides hooks for monitoring progress:
+              </p>
+
+              <DocSection id="lifecycle-phases" title="Lifecycle Phases" depth={3}>
+                <p class="m-0 mb-3">
+                  Break initialization into distinct phases with clear state transitions:
+                </p>
+                <DocCodeBlock code={lifecyclePhasesCode} />
+                <p class="m-0 mb-3">
+                  <strong>Phase breakdown:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Pre-initialization:</strong> Configuration validation, internal structure setup</li>
+                  <li><strong>Resource loading:</strong> Schemas, assets, external dependencies</li>
+                  <li><strong>Plugin initialization:</strong> Initialize plugins in dependency order</li>
+                  <li><strong>View setup:</strong> DOM manipulation, event listeners, rendering</li>
+                  <li><strong>Post-initialization:</strong> Final validation, ready event emission</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="state-transitions" title="State Transitions" depth={3}>
+                <p class="m-0 mb-3">
+                  State machine pattern ensures predictable transitions and prevents invalid states:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>idle → loading:</strong> Initialization starts</li>
+                  <li><strong>loading → ready:</strong> All phases complete successfully</li>
+                  <li><strong>loading → error:</strong> Any phase fails</li>
+                  <li><strong>error → loading:</strong> Retry initialization</li>
+                </ul>
+                <p class="m-0 mb-4">
+                  State transitions emit events that plugins can listen to for lifecycle management.
+                </p>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="dependency-resolution" title="Dependency Resolution">
+              <p class="m-0 mb-4">
+                Plugins often depend on other plugins. Resolving dependencies correctly ensures proper initialization order:
+              </p>
+
+              <DocSection id="dependency-graph" title="Dependency Graph" depth={3}>
+                <p class="m-0 mb-3">
+                  Build a dependency graph from plugin declarations:
+                </p>
+                <DocCodeBlock code={dependencyResolutionCode} />
+                <p class="m-0 mb-3">
+                  <strong>Key concepts:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Dependency graph:</strong> Directed graph where edges represent dependencies</li>
+                  <li><strong>Cycle detection:</strong> Prevent circular dependencies that would cause infinite loops</li>
+                  <li><strong>Topological sort:</strong> Order plugins so dependencies are initialized first</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="topological-sort" title="Topological Sort" depth={3}>
+                <p class="m-0 mb-3">
+                  Topological sorting ensures plugins are initialized in the correct order:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Plugins with no dependencies are initialized first</li>
+                  <li>Dependent plugins are initialized after their dependencies</li>
+                  <li>Multiple independent plugins can be initialized in parallel</li>
+                  <li>Circular dependencies are detected and reported as errors</li>
+                </ul>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="initialization-hooks" title="Initialization Hooks">
+              <p class="m-0 mb-4">
+                Use hooks to allow plugins to participate in initialization:
+              </p>
+
+              <DocSection id="hook-integration" title="Hook Integration" depth={3}>
+                <p class="m-0 mb-3">
+                  Integrate hooks into the initialization process:
+                </p>
+                <DocCodeBlock code={hookIntegrationCode} />
+              </DocSection>
+
+              <DocSection id="plugin-initialization" title="Plugin Initialization" depth={3}>
+                <p class="m-0 mb-3">
+                  Plugins can perform async initialization:
+                </p>
+                <DocCodeBlock code={pluginInitializationCode} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="resource-loading" title="Resource Loading">
+              <p class="m-0 mb-4">
+                Loading resources efficiently during initialization:
+              </p>
+
+              <DocSection id="schema-loading" title="Schema Loading" depth={3}>
+                <p class="m-0 mb-3">
+                  Load schemas from various sources:
+                </p>
+                <DocCodeBlock code={schemaLoaderCode} />
+              </DocSection>
+
+              <DocSection id="plugin-loading" title="Plugin Loading" depth={3}>
+                <p class="m-0 mb-3">
+                  Load plugins dynamically:
+                </p>
+                <DocCodeBlock code={pluginLoaderCode} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="timeout-retry" title="Timeout and Retry Strategies">
+              <p class="m-0 mb-4">
+                Network requests and external resources can fail or timeout. Implement robust retry and timeout mechanisms:
+              </p>
+
+              <DocSection id="timeout-handling" title="Timeout Handling" depth={3}>
+                <p class="m-0 mb-3">
+                  Prevent initialization from hanging indefinitely:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Set reasonable timeouts for each initialization phase</li>
+                  <li>Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Promise.race</code> to enforce timeouts</li>
+                  <li>Provide different timeout values for different operations</li>
+                  <li>Emit timeout events for monitoring and debugging</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="retry-mechanisms" title="Retry Mechanisms" depth={3}>
+                <p class="m-0 mb-3">
+                  Implement exponential backoff retry strategy:
+                </p>
+                <DocCodeBlock code={timeoutRetryCode} />
+                <p class="m-0 mb-3">
+                  <strong>Retry strategies:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Exponential backoff:</strong> Increase delay between retries exponentially</li>
+                  <li><strong>Max retries:</strong> Limit number of attempts to prevent infinite loops</li>
+                  <li><strong>Selective retry:</strong> Only retry on transient errors (network, timeout)</li>
+                  <li><strong>Jitter:</strong> Add randomness to prevent thundering herd problem</li>
+                </ul>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <p class="m-0 mb-4">
+                Best practices for async initialization:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Always await initialization:</strong> Never use the editor before initialization completes</li>
+                <li><strong>Handle errors gracefully:</strong> Provide meaningful error messages and cleanup on failure</li>
+                <li><strong>Load resources in parallel:</strong> Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">Promise.all</code> when possible</li>
+                <li><strong>Provide loading states:</strong> Show progress to users during initialization</li>
+                <li><strong>Cache initialized state:</strong> Don't re-initialize if already initialized</li>
+                <li><strong>Support lazy initialization:</strong> Allow deferring initialization until needed</li>
+              </ul>
+              <DocCodeBlock code={bestPracticesCode} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/architecture/async-initialization"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Hook System', href: '/editor/architecture/hook-system', description: 'Understanding hook system implementation' },
+                { title: 'Event System', href: '/editor/architecture/event-system', description: 'Event system architecture and patterns' },
+                { title: 'Performance Optimization', href: '/editor/architecture/performance-optimization', description: 'Optimization strategies for large documents' },
+                { title: 'Rendering Pipeline', href: '/editor/architecture/rendering-pipeline', description: 'Rendering pipeline and update scheduling' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

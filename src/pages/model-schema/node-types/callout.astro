@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Callout</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   callout: {
     content: 'block+',
     group: 'block',
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'callout',
   attrs: { type: 'info' },
   children: [
@@ -84,7 +84,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeCallout(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCallout(node) {
   return '<div data-type="callout" data-callout-type="' + node.attrs.type + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseCallout(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCallout(domNode) {
   return {
     type: 'callout',
     attrs: { type: domNode.getAttribute('data-callout-type') || 'info' },
@@ -112,7 +112,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering callout
+              <DocCodeBlock language="typescript" code={`// Rendering callout
 const callout = document.createElement('div');
 callout.setAttribute('data-type', 'callout');
 callout.setAttribute('data-callout-type', node.attrs.type);
@@ -130,7 +130,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Callout type validation
+              <DocCodeBlock language="typescript" code={`// Issue: Callout type validation
 // Solution: Validate callout type
 function validateCalloutType(type) {
   const validTypes = ['info', 'warning', 'error', 'success'];
@@ -149,7 +149,7 @@ function styleCallout(callout, type) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class CalloutNode {
+              <DocCodeBlock language="typescript" code={`class CalloutNode {
   constructor(attrs, children) {
     this.type = 'callout';
     this.attrs = { type: attrs?.type || 'info' };

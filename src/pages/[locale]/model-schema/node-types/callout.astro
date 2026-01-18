@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="콜아웃 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>콜아웃</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   callout: {
     content: 'block+',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'callout',
   attrs: { type: 'info' },
   children: [
@@ -104,7 +104,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeCallout(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCallout(node) {
   return '<div data-type="callout" data-callout-type="' + node.attrs.type + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseCallout(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCallout(domNode) {
   return {
     type: 'callout',
     attrs: { type: domNode.getAttribute('data-callout-type') || 'info' },
@@ -132,7 +132,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 콜아웃 렌더링
+              <DocCodeBlock language="typescript" code={`// 콜아웃 렌더링
 const callout = document.createElement('div');
 callout.setAttribute('data-type', 'callout');
 callout.setAttribute('data-callout-type', node.attrs.type);
@@ -150,7 +150,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 콜아웃 타입 검증
+              <DocCodeBlock language="typescript" code={`// 문제: 콜아웃 타입 검증
 // 해결: 콜아웃 타입 검증
 function validateCalloutType(type) {
   const validTypes = ['info', 'warning', 'error', 'success'];
@@ -169,7 +169,7 @@ function styleCallout(callout, type) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class CalloutNode {
+              <DocCodeBlock language="typescript" code={`class CalloutNode {
   constructor(attrs, children) {
     this.type = 'callout';
     this.attrs = { type: attrs?.type || 'info' };

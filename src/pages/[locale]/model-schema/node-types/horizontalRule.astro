@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="수평선 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>수평선</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   horizontalRule: {
     group: 'block',
   }
@@ -84,7 +84,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'horizontalRule'
 }`} />
             </DocSection>
@@ -93,7 +93,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeHorizontalRule(node) {
+              <DocCodeBlock language="typescript" code={`function serializeHorizontalRule(node) {
   return '<hr>';
 }`} />
             </DocSection>
@@ -102,7 +102,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseHorizontalRule(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseHorizontalRule(domNode) {
   return {
     type: 'horizontalRule'
   };
@@ -116,7 +116,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 렌더링
+              <DocCodeBlock language="typescript" code={`// 렌더링
 const hr = document.createElement('hr');
 // 수평선은 자체 닫는 블록 요소임
 
@@ -136,7 +136,7 @@ function insertHorizontalRule() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 수평선 스타일링
+              <DocCodeBlock language="typescript" code={`// 문제: 수평선 스타일링
 // 해결: 일관된 스타일 적용
 function styleHorizontalRule(hr) {
   hr.style.border = 'none';
@@ -169,7 +169,7 @@ function validateHorizontalRule(hr) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class HorizontalRuleNode {
+              <DocCodeBlock language="typescript" code={`class HorizontalRuleNode {
   constructor() {
     this.type = 'horizontalRule';
   }

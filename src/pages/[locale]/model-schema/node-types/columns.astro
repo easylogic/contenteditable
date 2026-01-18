@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="컬럼 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>컬럼</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   columns: {
     content: 'block+',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'columns',
   attrs: { count: 2 },
   children: [
@@ -108,7 +108,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeColumns(node) {
+              <DocCodeBlock language="typescript" code={`function serializeColumns(node) {
   return '<div data-type="columns" data-count="' + node.attrs.count + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -118,7 +118,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseColumns(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseColumns(domNode) {
   return {
     type: 'columns',
     attrs: { count: parseInt(domNode.getAttribute('data-count')) || 2 },
@@ -136,7 +136,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 컬럼 렌더링
+              <DocCodeBlock language="typescript" code={`// 컬럼 렌더링
 const columns = document.createElement('div');
 columns.setAttribute('data-type', 'columns');
 columns.setAttribute('data-count', node.attrs.count);
@@ -156,7 +156,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 컬럼 개수 불일치
+              <DocCodeBlock language="typescript" code={`// 문제: 컬럼 개수 불일치
 // 해결: 자식이 컬럼 개수와 일치하도록 보장
 function validateColumns(columns, count) {
   const children = columns.children;
@@ -182,7 +182,7 @@ function makeColumnsResponsive(columns) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class ColumnsNode {
+              <DocCodeBlock language="typescript" code={`class ColumnsNode {
   constructor(attrs, children) {
     this.type = 'columns';
     this.attrs = { count: attrs?.count || 2 };

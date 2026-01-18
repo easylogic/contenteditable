@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Poll</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   poll: {
     group: 'block',
     attrs: {
@@ -69,7 +69,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'poll',
   attrs: {
     question: 'What is your favorite color?',
@@ -83,7 +83,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializePoll(node) {
+              <DocCodeBlock language="typescript" code={`function serializePoll(node) {
   return '<div data-type="poll" data-question="' + escapeHtml(node.attrs.question) + 
          '" data-options="' + escapeHtml(node.attrs.options) + 
          '" data-multiple="' + node.attrs.multiple + '"></div>';
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parsePoll(domNode) {
+              <DocCodeBlock language="typescript" code={`function parsePoll(domNode) {
   return {
     type: 'poll',
     attrs: {
@@ -113,7 +113,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering poll
+              <DocCodeBlock language="typescript" code={`// Rendering poll
 const poll = document.createElement('div');
 poll.setAttribute('data-type', 'poll');
 poll.setAttribute('data-question', node.attrs.question);
@@ -129,7 +129,7 @@ poll.contentEditable = 'false'; // Polls are typically interactive but not direc
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Poll vote handling
+              <DocCodeBlock language="typescript" code={`// Issue: Poll vote handling
 // Solution: Handle vote submission
 function handlePollVote(poll, selectedOptions) {
   // Submit vote to server
@@ -147,7 +147,7 @@ function displayPollResults(poll, results) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class PollNode {
+              <DocCodeBlock language="typescript" code={`class PollNode {
   constructor(attrs) {
     this.type = 'poll';
     this.attrs = {

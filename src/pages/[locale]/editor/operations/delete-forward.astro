@@ -1,0 +1,102 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'interface', text: '인터페이스' },
+  { depth: 2, slug: 'usage', text: '사용법' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Delete Forward Operation – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터를 위한 앞으로 삭제 operation"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Delete Forward</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Delete Forward Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              커서 위치 뒤의 콘텐츠를 삭제합니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                Delete forward operation은 커서 뒤의 콘텐츠를 제거합니다. 일반적으로 Delete 키로 트리거됩니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="인터페이스">
+              <DocCodeBlock language="typescript" code={`interface DeleteForwardOperation extends Operation {
+  type: 'deleteForward';
+  path: Path;
+  unit: 'character' | 'word' | 'line';
+  deletedContent?: any;
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="사용법">
+              <DocCodeBlock language="typescript" code={`function deleteForward(editor: Editor, position: Path, unit: 'character' | 'word' = 'character') {
+  const operation: DeleteForwardOperation = {
+    type: 'deleteForward',
+    path: position,
+    unit,
+    deletedContent: editor.getContentAfter(position, unit)
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// 역: 삭제된 콘텐츠 재삽입
+const inverse = {
+  type: 'insertText',
+  path: position,
+  text: operation.deletedContent
+};`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/delete-forward"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations 개요' },
+                { title: 'Delete Backward', href: '/editor/operations/delete-backward', description: 'Delete backward operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,98 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'interface', text: 'Interface' },
+  { depth: 2, slug: 'usage', text: 'Usage' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Remove Format Operation – Editor Architecture – contenteditable.lab"
+      description="Remove format operation for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Remove Format</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Remove Format Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Remove formatting from text range.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The remove format operation removes formatting from a text range, storing the previous value for undo.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="Interface">
+              <DocCodeBlock language="typescript" code={`interface RemoveFormatOperation extends Operation {
+  type: 'removeFormat';
+  path: Path;
+  length: number;
+  format: string;
+  previousValue?: any; // Store previous value for undo
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="Usage">
+              <DocCodeBlock language="typescript" code={`function removeBold(editor: Editor, selection: Selection) {
+  const operation: RemoveFormatOperation = {
+    type: 'removeFormat',
+    path: selection.start,
+    length: selection.length,
+    format: 'bold',
+    previousValue: editor.hasFormat(selection, 'bold')
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Inverse: Re-apply format
+const inverse = {
+  type: 'applyFormat',
+  path: selection.start,
+  length: selection.length,
+  format: 'bold',
+  value: operation.previousValue
+};`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/remove-format"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations overview' },
+                { title: 'Apply Format', href: '/editor/operations/apply-format', description: 'Apply format operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,306 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+import {
+  supportedLocales,
+  defaultLocale,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'screen-readers', text: '스크린 리더 지원' },
+  { depth: 2, slug: 'aria-attributes', text: 'ARIA 속성' },
+  { depth: 2, slug: 'keyboard-navigation', text: '키보드 탐색' },
+  { depth: 2, slug: 'focus-management', text: '포커스 관리' },
+  { depth: 2, slug: 'announcements', text: '라이브 알림' },
+  { depth: 2, slug: 'platform-issues', text: '플랫폼별 문제' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="접근성 – 에디터 아키텍처 – contenteditable.lab"
+      description="contenteditable 에디터를 위한 접근성 고려사항 및 모범 사례"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">접근성</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">접근성</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              contenteditable 에디터를 위한 접근성 고려사항 및 모범 사례입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code>을 접근 가능하게 만드는 것은 어렵습니다. 스크린 리더가 변경사항을 제대로 알리지 않을 수 있고, ARIA 속성이 존중되지 않을 수 있으며, 키보드 탐색이 일관되지 않을 수 있습니다. 이 가이드는 접근성 문제와 해결책을 다룹니다.
+              </p>
+              <DocAlert type="error">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>contenteditable의 접근성 도전과제:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">스크린 리더가 콘텐츠 변경을 자동으로 알리지 않음</li>
+                  <li class="mb-1">ARIA 속성이 제대로 알려지지 않을 수 있음 (특히 Safari)</li>
+                  <li class="mb-1">키보드 탐색이 일관되지 않을 수 있음</li>
+                  <li class="mb-1">포커스 관리가 복잡함</li>
+                  <li class="mb-1">서식 변경이 알려지지 않음</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="screen-readers" title="스크린 리더 지원">
+              <DocAlert type="error" class="mb-4">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>문제:</strong> contenteditable 영역에서 콘텐츠가 변경될 때(텍스트 입력, 삭제, 서식 적용), 스크린 리더가 이러한 변경사항을 사용자에게 알리지 않습니다. 이로 인해 보조 기술에 의존하는 사용자가 에디터에서 무슨 일이 일어나고 있는지 이해하기 어렵습니다.
+                </p>
+                <DocCodeBlock code={`// ❌ 나쁨: 콘텐츠 변경에 대한 알림 없음
+<div contenteditable>
+  <!-- 스크린 리더에 변경사항이 알려지지 않음 -->
+</div>
+
+// ✅ 좋음: 알림을 위해 aria-live 영역 사용
+<div contenteditable
+     role="textbox"
+     aria-label="리치 텍스트 에디터"
+     aria-live="polite"
+     aria-atomic="false">
+  <!-- 콘텐츠 -->
+</div>
+
+// 또는 별도의 라이브 영역 사용
+<div id="announcements" 
+     aria-live="polite" 
+     aria-atomic="false"
+     class="sr-only">
+</div>
+
+function announceChange(message) {
+  const announcements = document.getElementById('announcements');
+  announcements.textContent = message;
+  // 알림 후 지우기
+  setTimeout(() => {
+    announcements.textContent = '';
+  }, 1000);
+}`} />
+              </DocAlert>
+              <DocCodeBlock code={`// 예제: 서식 변경 알림
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    e.preventDefault();
+    applyBold();
+    announceChange('굵게 서식이 적용되었습니다');
+  } else if (e.inputType === 'formatRemove') {
+    e.preventDefault();
+    removeFormatting();
+    announceChange('서식이 제거되었습니다');
+  }
+});
+
+// 예제: 선택 영역 변경 알림
+document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) {
+      const text = range.toString();
+      const wordCount = text.split(/\\s+/).filter(w => w.length > 0).length;
+      announceChange(\`\${wordCount}개 단어가 선택되었습니다\`);
+    }
+  }
+});`} />
+            </DocSection>
+
+            <DocSection id="aria-attributes" title="ARIA 속성">
+              <DocAlert type="error" class="mb-4">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>문제:</strong> contenteditable 영역에 ARIA 속성(<code class="bg-bg-surface px-1 py-0.5 rounded text-xs">role</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">aria-label</code>, <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">aria-describedby</code>)을 적용할 때, 스크린 리더가 이를 제대로 알리지 않을 수 있으며, 특히 Safari에서 그렇습니다. 접근성 정보가 손실됩니다.
+                </p>
+                <DocCodeBlock code={`// ❌ 나쁨: Safari에서 ARIA 속성이 알려지지 않을 수 있음
+<div contenteditable role="textbox" aria-label="에디터">
+  <!-- ARIA 정보가 손실될 수 있음 -->
+</div>
+
+// ✅ 좋음: 여러 ARIA 속성 사용 및 스크린 리더 간 테스트
+<div contenteditable
+     role="textbox"
+     aria-label="리치 텍스트 에디터"
+     aria-describedby="editor-help"
+     aria-multiline="true"
+     aria-haspopup="false"
+     tabindex="0">
+  <!-- 콘텐츠 -->
+</div>
+<div id="editor-help" class="sr-only">
+  텍스트 서식을 위해 키보드 단축키를 사용하세요. Ctrl+B는 굵게, Ctrl+I는 기울임꼴입니다.
+</div>`} />
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="keyboard-navigation" title="키보드 탐색">
+              <DocAlert type="warning" class="mb-4">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>문제:</strong> 여러 contenteditable 영역에 <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">tabindex</code> 속성이 있을 때, 일부 브라우저에서 탭 순서가 <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">tabindex</code> 값을 올바르게 따르지 않을 수 있습니다. 포커스 순서가 일관되지 않거나 잘못될 수 있습니다.
+                </p>
+                <DocCodeBlock code={`// ❌ 나쁨: tabindex가 올바르게 작동하지 않을 수 있음
+<div contenteditable tabindex="3">세 번째</div>
+<div contenteditable tabindex="1">첫 번째</div>
+<div contenteditable tabindex="2">두 번째</div>
+// 포커스 순서가 잘못될 수 있음!
+
+// ✅ 좋음: 순차적 tabindex 사용 또는 프로그래밍 방식으로 포커스 관리
+<div contenteditable tabindex="0">첫 번째</div>
+<div contenteditable tabindex="0">두 번째</div>
+<div contenteditable tabindex="0">세 번째</div>
+// 자연스러운 DOM 순서`} />
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="focus-management" title="포커스 관리">
+              <DocAlert type="warning" class="mb-4">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>문제:</strong> 페이지 로드 시 폼 입력을 자동으로 포커스하는 <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">autofocus</code> 속성은 contenteditable 요소에서 작동하지 않습니다. 페이지가 로드될 때 contenteditable 영역을 자동으로 포커스하는 내장 방법이 없습니다.
+                </p>
+                <DocCodeBlock code={`// ❌ 나쁨: contenteditable에서 autofocus가 작동하지 않음
+<div contenteditable autofocus>
+  <!-- 자동으로 포커스를 받지 않음 -->
+</div>
+
+// ✅ 좋음: JavaScript를 사용하여 포커스
+<div contenteditable id="editor">
+  <!-- 콘텐츠 -->
+</div>
+
+<script>
+  // 페이지 로드 시 포커스
+  window.addEventListener('load', () => {
+    const editor = document.getElementById('editor');
+    editor.focus();
+  });
+  
+  // 또는 더 나은 타이밍을 위해 requestAnimationFrame 사용
+  requestAnimationFrame(() => {
+    editor.focus();
+  });
+</script>`} />
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="announcements" title="라이브 알림">
+              <DocCodeBlock code={`// 전용 라이브 영역 생성
+<div id="live-region" 
+     aria-live="polite" 
+     aria-atomic="false"
+     class="sr-only">
+</div>
+
+// 변경사항 알림
+function announce(message, priority = 'polite') {
+  const liveRegion = document.getElementById('live-region');
+  liveRegion.setAttribute('aria-live', priority);
+  liveRegion.textContent = message;
+  
+  // 알림 후 지우기
+  setTimeout(() => {
+    liveRegion.textContent = '';
+  }, 1000);
+}
+
+// 서식 알림
+element.addEventListener('beforeinput', (e) => {
+  if (e.inputType === 'formatBold') {
+    announce('굵게 서식이 적용되었습니다');
+  } else if (e.inputType === 'formatItalic') {
+    announce('기울임꼴 서식이 적용되었습니다');
+  }
+});
+
+// 선택 영역 알림
+document.addEventListener('selectionchange', debounce(() => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) {
+      const text = range.toString();
+      const words = text.split(/\\s+/).filter(w => w.length > 0);
+      announce(\`\${words.length}개 단어가 선택되었습니다\`);
+    }
+  }
+}, 300));`} />
+              <p class="m-0 mb-3 mt-4">
+                스크린 리더 전용 CSS:
+              </p>
+              <DocCodeBlock code={`.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}`} />
+            </DocSection>
+
+            <DocSection id="platform-issues" title="플랫폼별 문제">
+              <p class="m-0 mb-4">
+                브라우저 및 스크린 리더별 접근성 문제:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2"><strong>Safari:</strong> contenteditable 요소의 ARIA 속성이 스크린 리더(VoiceOver)에 의해 제대로 알려지지 않을 수 있음. 해결책으로 라이브 영역 사용</li>
+                <li class="mb-2"><strong>Chrome/Edge:</strong> 일반적으로 더 나은 ARIA 지원이지만, 동적 콘텐츠 변경에는 여전히 라이브 영역 사용</li>
+                <li class="mb-2"><strong>Firefox:</strong> 키보드 탐색이 다르게 동작할 수 있음. NVDA로 철저히 테스트</li>
+                <li class="mb-2"><strong>VoiceOver:</strong> 콘텐츠 변경을 자동으로 알리지 않을 수 있음. 모든 중요한 변경에 <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">aria-live</code> 영역 사용</li>
+                <li class="mb-2"><strong>NVDA:</strong> 일반적으로 더 나은 지원이지만, 여전히 라이브 영역으로 테스트</li>
+              </ul>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+
+    <DocNavigation
+      current="/editor/accessibility"
+      pages={[
+        { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+        { title: '입력 처리 & IME', href: '/editor/input-handling', description: '입력 처리 가이드' },
+        { title: '모바일 지원', href: '/editor/mobile-support', description: '모바일 지원 가이드' },
+      ]}
+    />
+  </body>
+</html>

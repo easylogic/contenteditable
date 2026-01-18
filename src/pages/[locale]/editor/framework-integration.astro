@@ -1,0 +1,316 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import '../../../styles/global.css';
+import {
+  supportedLocales,
+  defaultLocale,
+  type Locale,
+} from '../../../i18n/translations';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'react-integration', text: 'React 통합' },
+  { depth: 2, slug: 'vue-integration', text: 'Vue 통합' },
+  { depth: 2, slug: 'svelte-integration', text: 'Svelte 통합' },
+  { depth: 2, slug: 'common-patterns', text: '공통 패턴' },
+  { depth: 2, slug: 'state-management', text: '상태 관리' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Framework Integration – 에디터 아키텍처 – contenteditable.lab"
+      description="React, Vue, Svelte 및 기타 프레임워크와 모델 기반 contenteditable 에디터 통합"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Framework Integration</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Framework Integration</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              React, Vue, Svelte 및 기타 프레임워크와 모델 기반 contenteditable 에디터를 통합하는 방법입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                모델 기반 에디터를 프레임워크와 통합하려면 라이프사이클, 상태 관리 및 DOM 업데이트를 신중하게 처리해야 합니다. 핵심은 프레임워크 상태와 통합하면서 에디터가 자체 DOM을 관리하도록 하는 것입니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>핵심 원칙:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">에디터가 자체 DOM 관리 - 프레임워크가 재렌더링하지 않도록</li>
+                  <li class="mb-1">ref를 사용하여 에디터 인스턴스 접근</li>
+                  <li class="mb-1">필요 시 에디터 상태를 프레임워크 상태와 동기화</li>
+                  <li class="mb-1">라이프사이클 적절히 처리 - 초기화 및 정리</li>
+                  <li class="mb-1">프레임워크가 에디터 DOM을 diff하지 않도록 방지</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="react-integration" title="React 통합">
+              <p class="m-0 mb-4">
+                React 통합은 ref 사용과 React가 에디터 DOM을 재렌더링하지 않도록 방지하는 것이 필요합니다:
+              </p>
+
+              <DocSection id="react-basic" title="기본 통합" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { useEffect, useRef, useState } from 'react';
+import { Editor } from './editor';
+
+function EditorComponent() {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const [content, setContent] = useState('');
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    // 에디터 초기화
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent: content,
+    });
+
+    editorInstanceRef.current = editor;
+
+    // 변경 사항 듣기
+    editor.on('change', (newContent) => {
+      setContent(newContent);
+    });
+
+    // 정리
+    return () => {
+      editor.destroy();
+    };
+  }, []); // 한 번만 실행
+
+  return (
+    <div
+      ref={editorRef}
+      contentEditable={false} // 에디터가 contenteditable 관리
+      suppressContentEditableWarning // React 경고 억제
+    />
+  );
+}`} />
+              </DocSection>
+
+              <DocSection id="react-hooks" title="Custom Hook" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { useEffect, useRef, useState, useCallback } from 'react';
+import { Editor } from './editor';
+
+function useEditor(initialContent: string = '') {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const [content, setContent] = useState(initialContent);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent,
+    });
+
+    editorInstanceRef.current = editor;
+    setIsReady(true);
+
+    editor.on('change', (newContent) => {
+      setContent(newContent);
+    });
+
+    return () => {
+      editor.destroy();
+      setIsReady(false);
+    };
+  }, []);
+
+  return {
+    editorRef,
+    content,
+    isReady,
+    editor: editorInstanceRef.current,
+  };
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="vue-integration" title="Vue 통합">
+              <p class="m-0 mb-4">
+                Vue 통합은 템플릿 ref와 라이프사이클 훅을 사용합니다:
+              </p>
+
+              <DocSection id="vue-composition" title="Composition API" depth={3}>
+                <DocCodeBlock language="typescript" code={`<template>
+  <div ref="editorRef" />
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue';
+import { Editor } from './editor';
+
+const editorRef = ref<HTMLElement | null>(null);
+const editorInstance = ref<Editor | null>(null);
+const content = ref('');
+
+onMounted(() => {
+  if (!editorRef.value) return;
+
+  const editor = new Editor({
+    element: editorRef.value,
+    initialContent: content.value,
+  });
+
+  editorInstance.value = editor;
+
+  editor.on('change', (newContent) => {
+    content.value = newContent;
+  });
+});
+
+onUnmounted(() => {
+  editorInstance.value?.destroy();
+});
+</script>`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="svelte-integration" title="Svelte 통합">
+              <p class="m-0 mb-4">
+                Svelte 통합은 bind:this와 라이프사이클 함수를 사용합니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`<script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
+  import { Editor } from './editor';
+
+  let editorElement: HTMLDivElement;
+  let editorInstance: Editor | null = null;
+  let content = '';
+
+  onMount(() => {
+    if (!editorElement) return;
+
+    editorInstance = new Editor({
+      element: editorElement,
+      initialContent: content,
+    });
+
+    editorInstance.on('change', (newContent) => {
+      content = newContent;
+    });
+  });
+
+  onDestroy(() => {
+    editorInstance?.destroy();
+  });
+</script>
+
+<div bind:this={editorElement} />`} />
+            </DocSection>
+
+            <DocSection id="common-patterns" title="공통 패턴">
+              <p class="m-0 mb-4">
+                프레임워크 간 공통 패턴:
+              </p>
+
+              <DocSection id="preventing-diff" title="프레임워크 DOM Diff 방지" depth={3}>
+                <DocCodeBlock language="typescript" code={`// React: key 사용하여 재렌더링 방지
+<div key="editor-root" ref={editorRef} suppressContentEditableWarning />
+
+// Vue: key 사용
+<div :key="'editor'" ref="editorRef" />
+
+// Vue: v-once 사용 (한 번만 렌더링)
+<div v-once ref="editorRef" />
+
+// Svelte: key 사용
+<div key="editor" bind:this={editorElement} />`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="state-management" title="상태 관리">
+              <p class="m-0 mb-4">
+                상태 관리 라이브러리와 통합:
+              </p>
+
+              <DocSection id="redux-integration" title="Redux 통합" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Editor } from './editor';
+import { setEditorContent, selectEditorContent } from './editorSlice';
+
+function ReduxEditor() {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<Editor | null>(null);
+  const dispatch = useDispatch();
+  const content = useSelector(selectEditorContent);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const editor = new Editor({
+      element: editorRef.current,
+      initialContent: content,
+    });
+
+    editorInstanceRef.current = editor;
+
+    editor.on('change', (newContent) => {
+      dispatch(setEditorContent(newContent));
+    });
+
+    return () => editor.destroy();
+  }, []);
+
+  return <div ref={editorRef} suppressContentEditableWarning />;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/framework-integration"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Model-DOM 동기화' },
+                { title: 'Plugin Development', href: '/editor/plugin-development', description: '플러그인 개발 가이드' },
+                { title: 'Error Handling', href: '/editor/error-handling', description: '에러 처리 전략' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

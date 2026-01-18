@@ -1,0 +1,1249 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'contenteditable-false-impact', text: 'contenteditable=false Impact on Model' },
+  { depth: 3, slug: 'model-representation', text: 'Model Representation' },
+  { depth: 3, slug: 'rendering-considerations', text: 'Rendering Considerations' },
+  { depth: 3, slug: 'selection-boundaries', text: 'Selection Boundaries' },
+  { depth: 2, slug: 'dom-to-model-conversion', text: 'DOM to Model Conversion' },
+  { depth: 3, slug: 'contenteditable-false-detection', text: 'Detecting contenteditable=false' },
+  { depth: 3, slug: 'nested-structures', text: 'Nested Structures' },
+  { depth: 3, slug: 'browser-inconsistencies', text: 'Browser Inconsistencies' },
+  { depth: 2, slug: 'model-to-dom-conversion', text: 'Model to DOM Conversion' },
+  { depth: 3, slug: 'preserving-readonly', text: 'Preserving Read-only State' },
+  { depth: 3, slug: 'attribute-synchronization', text: 'Attribute Synchronization' },
+  { depth: 2, slug: 'selection-synchronization', text: 'Selection Synchronization' },
+  { depth: 3, slug: 'selection-loss-prevention', text: 'Selection Loss Prevention' },
+  { depth: 3, slug: 'boundary-handling', text: 'Boundary Handling' },
+  { depth: 2, slug: 'external-dom-manipulation', text: 'External DOM Manipulation' },
+  { depth: 3, slug: 'browser-translation', text: 'Browser Translation' },
+  { depth: 3, slug: 'browser-extensions', text: 'Browser Extensions' },
+  { depth: 3, slug: 'framework-re-renders', text: 'Framework Re-renders' },
+  { depth: 2, slug: 'undo-redo-synchronization', text: 'Undo/Redo Synchronization' },
+  { depth: 3, slug: 'programmatic-changes', text: 'Programmatic Changes in History' },
+  { depth: 3, slug: 'selection-in-history', text: 'Selection in History' },
+  { depth: 3, slug: 'browser-history-integration', text: 'Browser History Integration' },
+  { depth: 2, slug: 'ime-composition-sync', text: 'IME Composition Synchronization' },
+  { depth: 3, slug: 'composition-state-tracking', text: 'Composition State Tracking' },
+  { depth: 3, slug: 'duplicate-events', text: 'Handling Duplicate Events' },
+  { depth: 3, slug: 'composition-to-model', text: 'Composition to Model Conversion' },
+  { depth: 2, slug: 'paste-synchronization', text: 'Paste Operation Synchronization' },
+  { depth: 3, slug: 'paste-dom-to-model', text: 'Paste DOM to Model' },
+  { depth: 3, slug: 'paste-formatting', text: 'Formatting Preservation' },
+  { depth: 3, slug: 'paste-composition-conflict', text: 'Paste During Composition' },
+  { depth: 2, slug: 'drag-drop-synchronization', text: 'Drag & Drop Synchronization' },
+  { depth: 3, slug: 'drag-dom-changes', text: 'DOM Changes During Drag' },
+  { depth: 3, slug: 'drop-to-model', text: 'Drop to Model Conversion' },
+  { depth: 3, slug: 'duplicate-prevention', text: 'Duplicate Prevention' },
+  { depth: 2, slug: 'transaction-dom-sync', text: 'Transaction and DOM Updates' },
+  { depth: 3, slug: 'atomic-dom-updates', text: 'Atomic DOM Updates' },
+  { depth: 3, slug: 'rollback-dom', text: 'DOM Rollback' },
+  { depth: 2, slug: 'consistency-validation', text: 'Consistency Validation & Recovery' },
+  { depth: 3, slug: 'model-dom-validation', text: 'Model-DOM Validation' },
+  { depth: 3, slug: 'inconsistency-detection', text: 'Inconsistency Detection' },
+  { depth: 3, slug: 'recovery-strategies', text: 'Recovery Strategies' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Model-DOM Synchronization – Editor Architecture – contenteditable.lab"
+      description="Understanding model-DOM synchronization challenges: contenteditable=false handling, selection preservation, and external DOM manipulation"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Model-DOM Synchronization</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Model-DOM Synchronization
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Synchronizing between your abstract document model and the DOM is one of the most challenging aspects of building contenteditable editors. This guide covers critical considerations and common pitfalls.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The core challenge in model-based editors is maintaining bidirectional synchronization: converting user DOM edits to model operations, and rendering model changes back to DOM. Special cases like <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code>, browser extensions, and framework re-renders complicate this significantly.
+              </p>
+              <DocAlert type="warning" title="⚠️ Why This is Difficult">
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1"><code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> behavior is inconsistent across browsers</li>
+                  <li class="mb-1">Selection can be lost during DOM updates</li>
+                  <li class="mb-1">External DOM manipulation (translations, extensions) breaks assumptions</li>
+                  <li class="mb-1">Framework re-renders can reset caret position</li>
+                  <li class="mb-1">Model operations must account for read-only regions</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="contenteditable-false-impact" title="contenteditable=false Impact on Model">
+              <p class="m-0 mb-4">
+                When <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements exist in your document, they create read-only regions that must be represented in your model and handled carefully during operations.
+              </p>
+
+              <DocSection id="model-representation" title="Model Representation" depth={3}>
+                <p class="m-0 mb-3">
+                  Represent read-only nodes in your model:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface Node {
+  type: string;
+  attrs?: Record<string, any>;
+  content?: Node[];
+  // Mark nodes as non-editable
+  marks?: Mark[];
+}
+
+interface Mark {
+  type: 'readonly' | 'locked' | 'protected';
+  attrs?: Record<string, any>;
+}
+
+// Example: Image node that should not be editable
+const imageNode = {
+  type: 'image',
+  attrs: {
+    src: 'image.jpg',
+    alt: 'Description',
+    contenteditable: false // Store in model
+  },
+  marks: [{ type: 'readonly' }] // Mark as read-only
+};
+
+// Or use a separate flag
+interface DocumentNode {
+  type: string;
+  editable: boolean; // Explicit flag
+  attrs?: Record<string, any>;
+  content?: DocumentNode[];
+}`} />
+                <p class="m-0 mb-3">
+                  <strong>Key considerations:</strong>
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li>Store <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> state in model attributes</li>
+                  <li>Use marks or flags to indicate read-only regions</li>
+                  <li>Validate operations don't modify read-only nodes</li>
+                  <li>Preserve read-only state during transformations</li>
+                </ul>
+              </DocSection>
+
+              <DocSection id="rendering-considerations" title="Rendering Considerations" depth={3}>
+                <p class="m-0 mb-3">
+                  When rendering model to DOM, preserve <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code>:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ModelRenderer {
+  renderNode(node) {
+    const element = document.createElement(this.getTagName(node.type));
+    
+    // Preserve contenteditable=false from model
+    if (node.attrs?.contenteditable === false) {
+      element.setAttribute('contenteditable', 'false');
+    }
+    
+    // Add data attributes for model tracking
+    element.setAttribute('data-node-id', node.id);
+    element.setAttribute('data-node-type', node.type);
+    
+    // Render children
+    if (node.content) {
+      node.content.forEach(child => {
+        element.appendChild(this.renderNode(child));
+      });
+    }
+    
+    return element;
+  }
+  
+  // Prevent editing in read-only nodes
+  setupReadonlyHandlers(element) {
+    if (element.getAttribute('contenteditable') === 'false') {
+      element.addEventListener('beforeinput', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      element.addEventListener('input', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    }
+  }
+}`} />
+                <DocAlert type="error" title="⚠️ Browser Inconsistency" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    Some browsers (especially Chrome) may allow editing within <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements. Always add programmatic protection using <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event handlers.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="selection-boundaries" title="Selection Boundaries" depth={3}>
+                <p class="m-0 mb-3">
+                  Selection that spans across editable and non-editable boundaries requires special handling:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SelectionManager {
+  normalizeSelection(range) {
+    // Check if selection spans contenteditable=false
+    const startEditable = this.isEditable(range.startContainer);
+    const endEditable = this.isEditable(range.endContainer);
+    
+    if (!startEditable || !endEditable) {
+      // Selection crosses boundary
+      // Option 1: Expand to nearest editable boundary
+      return this.expandToEditableBoundary(range);
+      
+      // Option 2: Collapse to nearest editable position
+      // return this.collapseToEditablePosition(range);
+    }
+    
+    return range;
+  }
+  
+  isEditable(node) {
+    let current = node;
+    while (current && current !== this.editor) {
+      if (current.getAttribute?.('contenteditable') === 'false') {
+        return false;
+      }
+      current = current.parentElement;
+    }
+    return true;
+  }
+  
+  expandToEditableBoundary(range) {
+    // Find nearest editable ancestor
+    let start = range.startContainer;
+    while (start && !this.isEditable(start)) {
+      start = start.parentElement;
+    }
+    
+    let end = range.endContainer;
+    while (end && !this.isEditable(end)) {
+      end = end.parentElement;
+    }
+    
+    if (start && end) {
+      range.setStart(start, 0);
+      range.setEnd(end, end.textContent?.length || 0);
+    }
+    
+    return range;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="dom-to-model-conversion" title="DOM to Model Conversion">
+              <p class="m-0 mb-4">
+                Converting DOM changes back to model operations requires detecting <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> and handling nested structures correctly.
+              </p>
+
+              <DocSection id="contenteditable-false-detection" title="Detecting contenteditable=false" depth={3}>
+                <p class="m-0 mb-3">
+                  When parsing DOM to model, detect and preserve read-only state:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DOMParser {
+  parseElement(element) {
+    const node = {
+      type: this.getElementType(element),
+      attrs: this.parseAttributes(element),
+      content: []
+    };
+    
+    // Detect contenteditable=false
+    const contenteditable = element.getAttribute('contenteditable');
+    if (contenteditable === 'false') {
+      node.attrs.contenteditable = false;
+      node.marks = [{ type: 'readonly' }];
+    }
+    
+    // Parse children
+    for (const child of element.childNodes) {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        node.content.push(this.parseElement(child));
+      } else if (child.nodeType === Node.TEXT_NODE) {
+        node.content.push({
+          type: 'text',
+          text: child.textContent
+        });
+      }
+    }
+    
+    return node;
+  }
+  
+  parseAttributes(element) {
+    const attrs = {};
+    
+    // Copy relevant attributes
+    for (const attr of element.attributes) {
+      if (this.isRelevantAttribute(attr.name)) {
+        attrs[attr.name] = attr.value;
+      }
+    }
+    
+    return attrs;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="nested-structures" title="Nested Structures" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle nested <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable</code> attributes correctly:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DOMParser {
+  isEditable(element) {
+    // Walk up the tree to determine editability
+    let current = element;
+    
+    while (current && current !== this.editor) {
+      const ce = current.getAttribute('contenteditable');
+      
+      if (ce === 'false') {
+        return false;
+      }
+      
+      if (ce === 'true') {
+        return true;
+      }
+      
+      // If inherit or not set, check parent
+      current = current.parentElement;
+    }
+    
+    // Default: editor is editable
+    return true;
+  }
+  
+  parseWithInheritance(element) {
+    const node = this.parseElement(element);
+    
+    // Determine actual editability based on inheritance
+    const actuallyEditable = this.isEditable(element);
+    if (!actuallyEditable) {
+      node.attrs.contenteditable = false;
+      node.marks = [{ type: 'readonly' }];
+    }
+    
+    return node;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="browser-inconsistencies" title="Browser Inconsistencies" depth={3}>
+                <p class="m-0 mb-3">
+                  Different browsers handle <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> differently:
+                </p>
+                <ul class="m-0 mb-4 pl-6">
+                  <li><strong>Chrome/Edge:</strong> May allow editing within <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements</li>
+                  <li><strong>Firefox:</strong> Generally respects <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> but cursor may disappear</li>
+                  <li><strong>Safari:</strong> Generally respects <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code></li>
+                </ul>
+                <p class="m-0 mb-4">
+                  Always validate DOM changes against your model's read-only constraints, regardless of browser behavior:
+                </p>
+                <DocCodeBlock language="typescript" code={`class OperationValidator {
+  validateOperation(operation, model) {
+    const targetNode = this.getNodeAtPath(model, operation.path);
+    
+    // Check if target is read-only
+    if (targetNode?.attrs?.contenteditable === false) {
+      throw new Error('Cannot modify read-only node');
+    }
+    
+    // Check if operation would affect read-only nodes
+    const affectedNodes = this.getAffectedNodes(operation, model);
+    for (const node of affectedNodes) {
+      if (node.attrs?.contenteditable === false) {
+        throw new Error('Operation would affect read-only node');
+      }
+    }
+    
+    return true;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="model-to-dom-conversion" title="Model to DOM Conversion">
+              <p class="m-0 mb-4">
+                When rendering model to DOM, ensure <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> attributes are correctly applied and preserved.
+              </p>
+
+              <DocSection id="preserving-readonly" title="Preserving Read-only State" depth={3}>
+                <p class="m-0 mb-3">
+                  Always restore <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> when updating DOM:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ModelRenderer {
+  updateDOM(model, previousModel) {
+    const diff = this.diffModels(previousModel, model);
+    
+    diff.forEach(change => {
+      switch (change.type) {
+        case 'update':
+          const element = this.findDOMElement(change.path);
+          
+          // Always restore contenteditable attribute
+          if (change.node.attrs?.contenteditable === false) {
+            element.setAttribute('contenteditable', 'false');
+            this.setupReadonlyHandlers(element);
+          } else {
+            element.removeAttribute('contenteditable');
+          }
+          break;
+          
+        case 'insert':
+          const newElement = this.renderNode(change.node);
+          // contenteditable=false is set in renderNode
+          this.insertElement(newElement, change.path);
+          break;
+      }
+    });
+  }
+  
+  renderNode(node) {
+    const element = document.createElement(this.getTagName(node.type));
+    
+    // Copy all attributes including contenteditable
+    if (node.attrs) {
+      Object.entries(node.attrs).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          element.setAttribute(key, String(value));
+        }
+      });
+    }
+    
+    // Setup readonly handlers if needed
+    if (node.attrs?.contenteditable === false) {
+      this.setupReadonlyHandlers(element);
+    }
+    
+    return element;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="attribute-synchronization" title="Attribute Synchronization" depth={3}>
+                <p class="m-0 mb-3">
+                  Keep model attributes and DOM attributes in sync:
+                </p>
+                <DocCodeBlock language="typescript" code={`class AttributeSync {
+  syncAttributes(modelNode, domElement) {
+    // Model -> DOM
+    if (modelNode.attrs) {
+      Object.entries(modelNode.attrs).forEach(([key, value]) => {
+        if (key === 'contenteditable' && value === false) {
+          domElement.setAttribute('contenteditable', 'false');
+        } else if (value !== undefined && value !== null) {
+          domElement.setAttribute(key, String(value));
+        }
+      });
+    }
+    
+    // DOM -> Model (for external changes)
+    const domAttrs = {};
+    for (const attr of domElement.attributes) {
+      domAttrs[attr.name] = attr.value;
+    }
+    
+    // Detect if contenteditable was changed externally
+    if (domAttrs.contenteditable === 'false' && 
+        modelNode.attrs?.contenteditable !== false) {
+      // External change detected, update model
+      this.updateModelAttribute(modelNode, 'contenteditable', false);
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="selection-synchronization" title="Selection Synchronization">
+              <p class="m-0 mb-4">
+                Selection must be preserved when converting between DOM and model, especially when <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements are involved.
+              </p>
+
+              <DocSection id="selection-loss-prevention" title="Selection Loss Prevention" depth={3}>
+                <p class="m-0 mb-3">
+                  Save and restore selection during DOM updates:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SelectionManager {
+  saveSelection() {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return null;
+    
+    const range = selection.getRangeAt(0);
+    
+    // Convert DOM selection to model selection
+    return {
+      anchor: this.domPositionToModelPath(range.startContainer, range.startOffset),
+      focus: this.domPositionToModelPath(range.endContainer, range.endOffset),
+      collapsed: range.collapsed
+    };
+  }
+  
+  restoreSelection(modelSelection) {
+    if (!modelSelection) return;
+    
+    // Convert model selection to DOM selection
+    const anchorPos = this.modelPathToDOMPosition(modelSelection.anchor);
+    const focusPos = this.modelPathToDOMPosition(modelSelection.focus);
+    
+    if (!anchorPos || !focusPos) return;
+    
+    const range = document.createRange();
+    range.setStart(anchorPos.node, anchorPos.offset);
+    range.setEnd(focusPos.node, focusPos.offset);
+    
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  
+  // Update selection after model operations
+  updateSelectionAfterOperation(operation, previousSelection) {
+    // Adjust selection based on operation
+    const newSelection = this.adjustSelectionForOperation(
+      previousSelection,
+      operation
+    );
+    
+    // Restore in next frame to ensure DOM is updated
+    requestAnimationFrame(() => {
+      this.restoreSelection(newSelection);
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="boundary-handling" title="Boundary Handling" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle selection boundaries at editable/non-editable junctions:
+                </p>
+                <DocCodeBlock language="typescript" code={`class BoundaryHandler {
+  normalizeSelectionAtBoundary(range) {
+    const startEditable = this.isEditable(range.startContainer);
+    const endEditable = this.isEditable(range.endContainer);
+    
+    // If selection starts in non-editable, move to next editable
+    if (!startEditable) {
+      const nextEditable = this.findNextEditable(range.startContainer);
+      if (nextEditable) {
+        range.setStart(nextEditable.node, nextEditable.offset);
+      } else {
+        // No editable found, collapse selection
+        range.collapse(true);
+      }
+    }
+    
+    // If selection ends in non-editable, move to previous editable
+    if (!endEditable) {
+      const prevEditable = this.findPreviousEditable(range.endContainer);
+      if (prevEditable) {
+        range.setEnd(prevEditable.node, prevEditable.offset);
+      } else {
+        range.collapse(false);
+      }
+    }
+    
+    return range;
+  }
+  
+  findNextEditable(node) {
+    // Walk forward in DOM tree to find next editable position
+    let current = node;
+    while (current) {
+      if (this.isEditable(current)) {
+        return { node: current, offset: 0 };
+      }
+      current = this.getNextSibling(current) || this.getNextSibling(current?.parentElement);
+    }
+    return null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="external-dom-manipulation" title="External DOM Manipulation">
+              <p class="m-0 mb-4">
+                External factors like browser translation, extensions, and framework re-renders can manipulate the DOM, breaking your model synchronization.
+              </p>
+
+              <DocSection id="browser-translation" title="Browser Translation" depth={3}>
+                <p class="m-0 mb-3">
+                  Browser translation features manipulate DOM, potentially breaking your model:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TranslationHandler {
+  preventTranslation(element) {
+    // Disable translation for editor
+    element.setAttribute('translate', 'no');
+    
+    // Monitor for translation changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        // Detect if translation injected elements
+        if (this.isTranslationElement(mutation.target)) {
+          // Revert translation changes
+          this.revertTranslation(mutation.target);
+        }
+      });
+    });
+    
+    observer.observe(element, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  }
+  
+  isTranslationElement(element) {
+    // Translation often adds specific classes or attributes
+    return element.classList?.contains('translated') ||
+           element.hasAttribute('data-translation-id');
+  }
+  
+  revertTranslation(element) {
+    // Restore original content from model
+    const nodeId = element.getAttribute('data-node-id');
+    if (nodeId) {
+      const modelNode = this.getNodeById(nodeId);
+      this.renderNode(modelNode, element);
+    }
+  }
+}`} />
+                <DocAlert type="warning" title="⚠️ Translation Impact" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    Browser translation can inject <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">&lt;span&gt;</code> elements, modify text content, and break <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> attributes. Always use <code class="bg-white/50 dark:bg-black/20 px-1.5 py-0.5 rounded text-[0.85em]">translate="no"</code> and monitor for changes.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="browser-extensions" title="Browser Extensions" depth={3}>
+                <p class="m-0 mb-3">
+                  Browser extensions can inject scripts and modify DOM:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ExtensionHandler {
+  detectExternalChanges() {
+    // Use MutationObserver to detect unexpected changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        // Check if change matches our model
+        if (!this.isExpectedChange(mutation)) {
+          // External change detected
+          this.revertToModel(mutation.target);
+        }
+      });
+    });
+    
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['contenteditable', 'data-node-id']
+    });
+  }
+  
+  isExpectedChange(mutation) {
+    // Check if this change was initiated by our code
+    return mutation.target.hasAttribute('data-expected-change') ||
+           this.isOurOperation(mutation);
+  }
+  
+  revertToModel(element) {
+    // Restore from model
+    const nodeId = element.getAttribute('data-node-id');
+    if (nodeId) {
+      const modelNode = this.getNodeById(nodeId);
+      this.renderNode(modelNode, element.parentElement);
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="framework-re-renders" title="Framework Re-renders" depth={3}>
+                <p class="m-0 mb-3">
+                  Framework re-renders can reset DOM, losing selection and breaking synchronization:
+                </p>
+                <DocCodeBlock language="typescript" code={`class FrameworkSync {
+  handleReRender() {
+    // Save state before framework re-render
+    const selection = this.saveSelection();
+    const model = this.getModel();
+    
+    // Mark that we're about to update
+    this.isUpdating = true;
+    
+    // Framework re-renders DOM
+    // ... framework code ...
+    
+    // After re-render, restore
+    requestAnimationFrame(() => {
+      this.restoreModel(model);
+      this.restoreSelection(selection);
+      this.isUpdating = false;
+    });
+  }
+  
+  preventCaretJump() {
+    // Save caret position before any DOM update
+    const selection = this.saveSelection();
+    
+    // Perform update
+    this.updateDOM();
+    
+    // Restore in next frame
+    requestAnimationFrame(() => {
+      this.restoreSelection(selection);
+    });
+  }
+  
+  // Use MutationObserver to detect framework changes
+  watchForFrameworkChanges() {
+    const observer = new MutationObserver(() => {
+      if (!this.isUpdating) {
+        // Unexpected change, sync from DOM to model
+        this.syncFromDOM();
+      }
+    });
+    
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="undo-redo-synchronization" title="Undo/Redo Synchronization">
+              <p class="m-0 mb-4">
+                Browser's native undo/redo stack doesn't include programmatic DOM changes. You need to implement custom undo/redo that synchronizes with your model.
+              </p>
+
+              <DocSection id="programmatic-changes" title="Programmatic Changes in History" depth={3}>
+                <p class="m-0 mb-3">
+                  Track all model operations for undo/redo, including programmatic changes:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  constructor(model) {
+    this.model = model;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.maxSize = 50;
+  }
+  
+  recordOperation(operation, beforeState, afterState) {
+    const historyEntry = {
+      operation,
+      beforeModel: beforeState,
+      afterModel: afterState,
+      beforeSelection: this.saveSelection(),
+      timestamp: Date.now()
+    };
+    
+    this.undoStack.push(historyEntry);
+    if (this.undoStack.length > this.maxSize) {
+      this.undoStack.shift();
+    }
+    this.redoStack = [];
+  }
+  
+  undo() {
+    if (this.undoStack.length === 0) return false;
+    const entry = this.undoStack.pop();
+    this.model = entry.beforeModel;
+    this.renderModelToDOM(this.model);
+    requestAnimationFrame(() => {
+      this.restoreSelection(entry.beforeSelection);
+    });
+    this.redoStack.push(entry);
+    return true;
+  }
+}`} />
+                <DocAlert type="warning" title="⚠️ Browser History vs Custom History" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    Browser's native undo/redo (Ctrl+Z/Cmd+Z) may conflict with your custom implementation. Consider preventing default and handling keyboard shortcuts yourself.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="selection-in-history" title="Selection in History" depth={3}>
+                <p class="m-0 mb-3">
+                  Always save and restore selection with each history entry:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  saveSelection() {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return null;
+    const range = selection.getRangeAt(0);
+    return {
+      anchor: this.domPositionToModelPath(range.startContainer, range.startOffset),
+      focus: this.domPositionToModelPath(range.endContainer, range.endOffset)
+    };
+  }
+  
+  restoreSelection(modelSelection) {
+    if (!modelSelection) return;
+    const anchorPos = this.modelPathToDOMPosition(modelSelection.anchor);
+    const focusPos = this.modelPathToDOMPosition(modelSelection.focus);
+    if (!anchorPos || !focusPos) return;
+    const range = document.createRange();
+    range.setStart(anchorPos.node, anchorPos.offset);
+    range.setEnd(focusPos.node, focusPos.offset);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="browser-history-integration" title="Browser History Integration" depth={3}>
+                <p class="m-0 mb-3">
+                  Prevent browser's native undo/redo from interfering:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryManager {
+  preventBrowserUndoRedo() {
+    this.editor.addEventListener('beforeinput', (e) => {
+      if (e.inputType === 'historyUndo' || e.inputType === 'historyRedo') {
+        e.preventDefault();
+        if (e.inputType === 'historyUndo') {
+          this.undo();
+        } else {
+          this.redo();
+        }
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="ime-composition-sync" title="IME Composition Synchronization">
+              <p class="m-0 mb-4">
+                IME composition creates temporary DOM changes that must be handled carefully to avoid corrupting your model.
+              </p>
+
+              <DocSection id="composition-state-tracking" title="Composition State Tracking" depth={3}>
+                <p class="m-0 mb-3">
+                  Track composition state to prevent model updates during composition:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionHandler {
+  constructor() {
+    this.isComposing = false;
+    this.compositionText = '';
+  }
+  
+  init(editor) {
+    editor.addEventListener('compositionstart', () => {
+      this.isComposing = true;
+      this.compositionText = '';
+    });
+    
+    editor.addEventListener('compositionend', (e) => {
+      this.finalizeComposition(e.data || this.compositionText);
+      this.isComposing = false;
+    });
+  }
+  
+  finalizeComposition(text) {
+    const operation = {
+      type: 'insertText',
+      path: this.saveSelection().anchor,
+      text: text
+    };
+    this.applyToModel(operation);
+    this.renderModelToDOM();
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="duplicate-events" title="Handling Duplicate Events" depth={3}>
+                <p class="m-0 mb-3">
+                  Some browsers (especially iOS Safari with Korean IME) fire duplicate events:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionHandler {
+  handleBeforeInput(e) {
+    if (!e.isComposing) return;
+    
+    if (e.inputType === 'deleteContentBackward' && this.isComposing) {
+      this.pendingDelete = e;
+      e.preventDefault();
+      return;
+    }
+    
+    if (e.inputType === 'insertText' && this.isComposing && this.pendingDelete) {
+      this.pendingDelete = null;
+      this.handleCompositionUpdate(e.data);
+      e.preventDefault();
+      return;
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="composition-to-model" title="Composition to Model Conversion" depth={3}>
+                <p class="m-0 mb-3">
+                  Convert composition result to model operation only after composition ends:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionHandler {
+  compositionend(e) {
+    const finalText = e.data || this.compositionText;
+    const selection = this.saveSelection();
+    const operation = {
+      type: 'insertText',
+      path: selection.anchor,
+      text: finalText
+    };
+    const newModel = this.applyOperation(this.model, operation);
+    this.renderModelToDOM(newModel);
+    this.isComposing = false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="paste-synchronization" title="Paste Operation Synchronization">
+              <p class="m-0 mb-4">
+                Paste operations insert DOM content that must be converted to model operations while preserving formatting.
+              </p>
+
+              <DocSection id="paste-dom-to-model" title="Paste DOM to Model" depth={3}>
+                <p class="m-0 mb-3">
+                  Convert pasted DOM content to model operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PasteHandler {
+  handlePaste(e) {
+    e.preventDefault();
+    const clipboardData = e.clipboardData;
+    const html = clipboardData.getData('text/html');
+    const text = clipboardData.getData('text/plain');
+    const selection = this.saveSelection();
+    
+    if (!selection.collapsed) {
+      this.applyOperation({ type: 'delete', path: selection.anchor });
+    }
+    
+    const operations = html ? this.htmlToModelOperations(html) : this.textToModelOperations(text);
+    operations.forEach(op => this.applyOperation(op));
+    this.renderModelToDOM();
+    requestAnimationFrame(() => {
+      this.restoreSelection(this.calculateSelectionAfterPaste(selection, operations));
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="paste-formatting" title="Formatting Preservation" depth={3}>
+                <p class="m-0 mb-3">
+                  Preserve or filter formatting based on your schema:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PasteHandler {
+  sanitizePastedHTML(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const allowedTags = ['p', 'br', 'strong', 'em', 'u', 'a'];
+    this.filterElements(doc.body, allowedTags);
+    return doc.body.innerHTML;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="paste-composition-conflict" title="Paste During Composition" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle paste operations that occur during IME composition:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PasteHandler {
+  handlePaste(e) {
+    if (this.compositionHandler.isComposing) {
+      this.compositionHandler.cancelComposition();
+    }
+    this.processPaste(e);
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="drag-drop-synchronization" title="Drag & Drop Synchronization">
+              <p class="m-0 mb-4">
+                Drag & drop operations modify DOM directly. You need to detect these changes and convert them to model operations.
+              </p>
+
+              <DocSection id="drag-dom-changes" title="DOM Changes During Drag" depth={3}>
+                <p class="m-0 mb-3">
+                  Monitor DOM changes during drag operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DragDropHandler {
+  init(editor) {
+    let draggedContent = null;
+    editor.addEventListener('dragstart', (e) => {
+      draggedContent = this.getSelectedContent();
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    editor.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const dropPosition = this.getDropPosition(e);
+      if (e.dataTransfer.effectAllowed === 'move') {
+        this.removeDraggedContent();
+      }
+      this.insertAtPosition(dropPosition, draggedContent);
+      const operations = this.dragDropToModelOperations(dropPosition, draggedContent);
+      operations.forEach(op => this.applyOperation(op));
+      this.renderModelToDOM();
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="drop-to-model" title="Drop to Model Conversion" depth={3}>
+                <p class="m-0 mb-3">
+                  Convert drag & drop to model operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DragDropHandler {
+  dragDropToModelOperations(dropPosition, content) {
+    const operations = [];
+    const modelNodes = this.contentToModelNodes(content);
+    modelNodes.forEach((node, index) => {
+      operations.push({
+        type: 'insert',
+        path: { ...dropPosition, offset: dropPosition.offset + index },
+        node: node
+      });
+    });
+    return operations;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="duplicate-prevention" title="Duplicate Prevention" depth={3}>
+                <p class="m-0 mb-3">
+                  Prevent duplicate elements (especially in Firefox):
+                </p>
+                <DocCodeBlock language="typescript" code={`class DragDropHandler {
+  preventDuplicates() {
+    this.editor.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (this.draggedElement && this.draggedElement.parentNode) {
+        this.draggedElement.parentNode.removeChild(this.draggedElement);
+      }
+      this.insertAtDropPosition(e);
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="transaction-dom-sync" title="Transaction and DOM Updates">
+              <p class="m-0 mb-4">
+                Transactions group multiple operations. DOM updates must be atomic and support rollback.
+              </p>
+
+              <DocSection id="atomic-dom-updates" title="Atomic DOM Updates" depth={3}>
+                <p class="m-0 mb-3">
+                  Update DOM atomically for transactions:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TransactionManager {
+  applyTransaction(transaction) {
+    const beforeDOM = this.snapshotDOM();
+    const beforeSelection = this.saveSelection();
+    
+    try {
+      transaction.operations.forEach(op => this.applyOperation(op));
+      this.renderModelToDOM();
+      requestAnimationFrame(() => {
+        this.restoreSelection(beforeSelection);
+      });
+      this.commitTransaction(transaction);
+    } catch (error) {
+      this.rollbackDOM(beforeDOM);
+      throw error;
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="rollback-dom" title="DOM Rollback" depth={3}>
+                <p class="m-0 mb-3">
+                  Rollback DOM to previous state:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TransactionManager {
+  rollbackDOM(beforeDOM) {
+    const parent = this.editor.parentNode;
+    const newEditor = beforeDOM.cloneNode(true);
+    Array.from(this.editor.attributes).forEach(attr => {
+      newEditor.setAttribute(attr.name, attr.value);
+    });
+    parent.replaceChild(newEditor, this.editor);
+    this.editor = newEditor;
+    this.setupEventHandlers();
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="consistency-validation" title="Consistency Validation & Recovery">
+              <p class="m-0 mb-4">
+                Periodically validate that model and DOM are in sync, and recover from inconsistencies.
+              </p>
+
+              <DocSection id="model-dom-validation" title="Model-DOM Validation" depth={3}>
+                <p class="m-0 mb-3">
+                  Validate model and DOM match:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ConsistencyValidator {
+  validate() {
+    const domModel = this.parseDOMToModel(this.editor);
+    const differences = this.diffModels(this.model, domModel);
+    if (differences.length > 0) {
+      this.handleInconsistency(differences);
+    }
+    return differences.length === 0;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="inconsistency-detection" title="Inconsistency Detection" depth={3}>
+                <p class="m-0 mb-3">
+                  Use MutationObserver to detect unexpected DOM changes:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ConsistencyValidator {
+  watchForInconsistencies() {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (!this.isExpectedChange(mutation)) {
+          this.handleUnexpectedChange(mutation);
+        }
+      });
+    });
+    observer.observe(this.editor, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="recovery-strategies" title="Recovery Strategies" depth={3}>
+                <p class="m-0 mb-3">
+                  Strategies for recovering from inconsistencies:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ConsistencyValidator {
+  recoverFromInconsistency(differences) {
+    if (this.shouldRevertToModel(differences)) {
+      this.revertDOMToModel();
+    } else if (this.shouldSyncFromDOM(differences)) {
+      this.syncModelFromDOM();
+    } else {
+      this.mergeDifferences(differences);
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <p class="m-0 mb-4">
+                Best practices for maintaining model-DOM synchronization:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Always save selection before DOM updates:</strong> Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">requestAnimationFrame</code> to restore after updates</li>
+                <li><strong>Store contenteditable state in model:</strong> Don't rely solely on DOM attributes</li>
+                <li><strong>Validate operations against model:</strong> Check read-only constraints before applying</li>
+                <li><strong>Use MutationObserver for external changes:</strong> Detect and revert unexpected DOM modifications</li>
+                <li><strong>Preserve data attributes:</strong> Use <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">data-node-id</code> to track model-DOM mapping</li>
+                <li><strong>Handle boundaries explicitly:</strong> Normalize selections that cross editable/non-editable boundaries</li>
+                <li><strong>Test across browsers:</strong> <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> behavior varies significantly</li>
+                <li><strong>Use programmatic protection:</strong> Add <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> handlers even if browser respects attribute</li>
+              </ul>
+              <DocCodeBlock language="typescript" code={`class ModelDOMSync {
+  // Complete synchronization workflow
+  syncModelToDOM(model) {
+    // 1. Save current selection
+    const selection = this.saveSelection();
+    
+    // 2. Update DOM from model
+    this.updateDOM(model);
+    
+    // 3. Restore selection in next frame
+    requestAnimationFrame(() => {
+      this.restoreSelection(selection);
+    });
+  }
+  
+  syncDOMToModel() {
+    // 1. Parse DOM to model
+    const newModel = this.parseDOM();
+    
+    // 2. Validate against constraints
+    this.validateModel(newModel);
+    
+    // 3. Update model
+    this.setModel(newModel);
+    
+    // 4. Preserve selection
+    const selection = this.saveSelection();
+    requestAnimationFrame(() => {
+      this.restoreSelection(selection);
+    });
+  }
+  
+  // Handle contenteditable=false nodes
+  handleReadonlyNode(node, element) {
+    // Set attribute
+    element.setAttribute('contenteditable', 'false');
+    
+    // Add programmatic protection
+    element.addEventListener('beforeinput', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, { capture: true });
+    
+    // Mark in model
+    node.marks = [{ type: 'readonly' }];
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/model-dom-synchronization"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
+                { title: 'History Management', href: '/editor/history-management', description: 'Undo/redo history management' },
+                { title: 'HTML Mapping', href: '/editor/html-mapping', description: 'HTML to model mapping strategies' },
+                { title: 'Plugin Development', href: '/editor/plugin-development', description: 'Plugin development guide' },
+                { title: 'Testing Strategies', href: '/editor/testing-strategies', description: 'Testing strategies for editors' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,560 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'error-types', text: 'Error Types' },
+  { depth: 2, slug: 'error-handling-strategies', text: 'Error Handling Strategies' },
+  { depth: 2, slug: 'recovery-mechanisms', text: 'Recovery Mechanisms' },
+  { depth: 2, slug: 'error-logging', text: 'Error Logging' },
+  { depth: 2, slug: 'user-feedback', text: 'User Feedback' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Error Handling & Recovery – Editor Architecture – contenteditable.lab"
+      description="Error handling and recovery strategies for model-based contenteditable editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Error Handling & Recovery</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Error Handling & Recovery</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Strategies for handling errors and recovering from failures in model-based contenteditable editors.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Error handling is critical for maintaining editor stability. Errors can occur during model operations, DOM synchronization, user input processing, or external integrations. This guide covers error types, handling strategies, and recovery mechanisms.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Key principles:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Fail gracefully - never crash the editor</li>
+                  <li class="mb-1">Maintain model consistency - rollback on errors</li>
+                  <li class="mb-1">Provide user feedback - inform users of issues</li>
+                  <li class="mb-1">Log errors for debugging - capture error context</li>
+                  <li class="mb-1">Recover automatically when possible</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="error-types" title="Error Types">
+              <p class="m-0 mb-4">
+                Common error types in editors:
+              </p>
+              
+              <DocSection id="model-errors" title="Model Errors" depth={3}>
+                <DocCodeBlock language="typescript" code={`// Invalid operation
+class ModelError extends Error {
+  constructor(
+    message: string,
+    public operation: Operation,
+    public model: DocumentModel
+  ) {
+    super(message);
+    this.name = 'ModelError';
+  }
+}
+
+// Schema validation error
+class SchemaError extends Error {
+  constructor(
+    message: string,
+    public node: Node,
+    public schema: Schema
+  ) {
+    super(message);
+    this.name = 'SchemaError';
+  }
+}
+
+// Position out of bounds
+class PositionError extends Error {
+  constructor(
+    message: string,
+    public path: Path,
+    public model: DocumentModel
+  ) {
+    super(message);
+    this.name = 'PositionError';
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="dom-errors" title="DOM Errors" depth={3}>
+                <DocCodeBlock language="typescript" code={`// DOM node not found
+class DOMNodeError extends Error {
+  constructor(
+    message: string,
+    public expectedNode: Node | null,
+    public actualDOM: HTMLElement
+  ) {
+    super(message);
+    this.name = 'DOMNodeError';
+  }
+}
+
+// Selection sync error
+class SelectionError extends Error {
+  constructor(
+    message: string,
+    public modelSelection: Selection,
+    public domSelection: Selection | null
+  ) {
+    super(message);
+    this.name = 'SelectionError';
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="input-errors" title="Input Processing Errors" depth={3}>
+                <DocCodeBlock language="typescript" code={`// IME composition error
+class IMEError extends Error {
+  constructor(
+    message: string,
+    public event: CompositionEvent,
+    public state: CompositionState
+  ) {
+    super(message);
+    this.name = 'IMEError';
+  }
+}
+
+// Paste processing error
+class PasteError extends Error {
+  constructor(
+    message: string,
+    public clipboardData: DataTransfer,
+    public targetPosition: Path
+  ) {
+    super(message);
+    this.name = 'PasteError';
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="error-handling-strategies" title="Error Handling Strategies">
+              <p class="m-0 mb-4">
+                Different error types require different handling strategies:
+              </p>
+
+              <DocSection id="try-catch-blocks" title="Try-Catch Blocks" depth={3}>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  applyOperation(operation: Operation) {
+    try {
+      // Validate operation
+      this.validateOperation(operation);
+      
+      // Apply to model
+      const newModel = this.model.applyOperation(operation);
+      
+      // Update DOM
+      this.renderer.update(newModel);
+      
+      // Update history
+      this.history.push(operation);
+      
+    } catch (error) {
+      // Handle error
+      this.handleError(error, operation);
+      
+      // Re-throw if critical
+      if (error instanceof CriticalError) {
+        throw error;
+      }
+    }
+  }
+  
+  private handleError(error: Error, operation: Operation) {
+    // Log error
+    this.logger.error('Operation failed', { error, operation });
+    
+    // Rollback if needed
+    if (this.model.isDirty) {
+      this.model.rollback();
+    }
+    
+    // Notify user
+    this.notifyUser('Operation could not be completed', 'error');
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="error-boundaries" title="Error Boundaries" depth={3}>
+                <DocCodeBlock language="typescript" code={`class ErrorBoundary {
+  private errorHandlers: Map<string, ErrorHandler> = new Map();
+  
+  registerHandler(errorType: string, handler: ErrorHandler) {
+    this.errorHandlers.set(errorType, handler);
+  }
+  
+  handle(error: Error, context: ErrorContext) {
+    const errorType = error.constructor.name;
+    const handler = this.errorHandlers.get(errorType);
+    
+    if (handler) {
+      return handler(error, context);
+    }
+    
+    // Default handler
+    return this.defaultHandler(error, context);
+  }
+  
+  private defaultHandler(error: Error, context: ErrorContext) {
+    console.error('Unhandled error:', error, context);
+    return { recovered: false, message: 'An unexpected error occurred' };
+  }
+}
+
+// Usage
+const boundary = new ErrorBoundary();
+
+boundary.registerHandler('ModelError', (error, context) => {
+  // Rollback model
+  context.editor.model.rollback();
+  return { recovered: true, message: 'Changes were reverted' };
+});
+
+boundary.registerHandler('DOMNodeError', (error, context) => {
+  // Re-sync DOM
+  context.editor.renderer.fullRender(context.editor.model);
+  return { recovered: true, message: 'Editor was refreshed' };
+});`} />
+              </DocSection>
+
+              <DocSection id="validation" title="Validation Before Application" depth={3}>
+                <DocCodeBlock language="typescript" code={`class OperationValidator {
+  validate(operation: Operation, model: DocumentModel): ValidationResult {
+    // Check operation type
+    if (!this.isValidOperationType(operation.type)) {
+      return { valid: false, error: 'Invalid operation type' };
+    }
+    
+    // Check path validity
+    if (!this.isValidPath(operation.path, model)) {
+      return { valid: false, error: 'Invalid path' };
+    }
+    
+    // Check schema compliance
+    if (!this.compliesWithSchema(operation, model.schema)) {
+      return { valid: false, error: 'Operation violates schema' };
+    }
+    
+    // Check for conflicts
+    if (this.hasConflicts(operation, model)) {
+      return { valid: false, error: 'Operation conflicts with current state' };
+    }
+    
+    return { valid: true };
+  }
+  
+  private isValidPath(path: Path, model: DocumentModel): boolean {
+    try {
+      const node = model.getNodeAtPath(path);
+      return node !== null;
+    } catch {
+      return false;
+    }
+  }
+}
+
+// Use before applying
+const validator = new OperationValidator();
+const result = validator.validate(operation, editor.model);
+
+if (!result.valid) {
+  throw new ValidationError(result.error, operation);
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="recovery-mechanisms" title="Recovery Mechanisms">
+              <p class="m-0 mb-4">
+                Recovery mechanisms restore editor state after errors:
+              </p>
+
+              <DocSection id="rollback" title="Rollback" depth={3}>
+                <DocCodeBlock language="typescript" code={`class Model {
+  private history: ModelSnapshot[] = [];
+  private currentSnapshot: ModelSnapshot;
+  
+  beginTransaction() {
+    // Save current state
+    this.history.push(this.currentSnapshot.clone());
+  }
+  
+  rollback() {
+    if (this.history.length > 0) {
+      this.currentSnapshot = this.history.pop()!;
+      return true;
+    }
+    return false;
+  }
+  
+  commit() {
+    // Clear history for committed transaction
+    this.history = [];
+  }
+}
+
+// Usage in error handling
+try {
+  editor.model.beginTransaction();
+  editor.applyOperation(operation);
+  editor.model.commit();
+} catch (error) {
+  // Rollback on error
+  editor.model.rollback();
+  editor.renderer.update(editor.model);
+  throw error;
+}`} />
+              </DocSection>
+
+              <DocSection id="re-sync" title="Re-synchronization" depth={3}>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  reSync() {
+    try {
+      // Rebuild model from DOM
+      const newModel = this.parser.parse(this.element);
+      
+      // Validate model
+      const validation = this.schema.validate(newModel);
+      if (!validation.valid) {
+        // Try to fix model
+        const fixedModel = this.schema.fix(newModel);
+        this.model = fixedModel;
+      } else {
+        this.model = newModel;
+      }
+      
+      // Re-render to ensure consistency
+      this.renderer.fullRender(this.model);
+      
+      // Restore selection if possible
+      this.restoreSelection();
+      
+    } catch (error) {
+      // Last resort: reset to empty state
+      this.reset();
+      this.notifyUser('Editor was reset due to an error', 'warning');
+    }
+  }
+  
+  private restoreSelection() {
+    try {
+      const domSelection = window.getSelection();
+      if (domSelection && domSelection.rangeCount > 0) {
+        const modelSelection = this.positionMapper.fromDOMSelection(domSelection);
+        if (modelSelection) {
+          this.selection = modelSelection;
+        }
+      }
+    } catch {
+      // Selection restoration failed, use default
+      this.selection = { start: { path: [0], offset: 0 }, end: { path: [0], offset: 0 } };
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="graceful-degradation" title="Graceful Degradation" depth={3}>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  applyOperation(operation: Operation) {
+    try {
+      // Try full operation
+      return this.applyOperationFull(operation);
+    } catch (error) {
+      // Fallback to simpler operation
+      try {
+        const simplified = this.simplifyOperation(operation);
+        return this.applyOperationFull(simplified);
+      } catch (fallbackError) {
+        // Last resort: skip operation
+        this.logger.warn('Operation skipped', { operation, error, fallbackError });
+        return false;
+      }
+    }
+  }
+  
+  private simplifyOperation(operation: Operation): Operation {
+    // Remove complex parts, keep only essential changes
+    switch (operation.type) {
+      case 'composite':
+        // Return first operation only
+        return operation.operations[0] || operation;
+      case 'applyFormat':
+        // Skip format, just insert/delete
+        return { type: 'insertText', path: operation.path, text: '' };
+      default:
+        return operation;
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="error-logging" title="Error Logging">
+              <p class="m-0 mb-4">
+                Comprehensive error logging helps with debugging and monitoring:
+              </p>
+              <DocCodeBlock language="typescript" code={`interface ErrorLog {
+  timestamp: number;
+  error: Error;
+  context: {
+    operation?: Operation;
+    model?: DocumentModel;
+    selection?: Selection;
+    userAction?: string;
+    browser?: string;
+    url?: string;
+  };
+  stack?: string;
+  recovered: boolean;
+}
+
+class ErrorLogger {
+  private logs: ErrorLog[] = [];
+  
+  log(error: Error, context: ErrorContext, recovered: boolean = false) {
+    const log: ErrorLog = {
+      timestamp: Date.now(),
+      error,
+      context: {
+        operation: context.operation,
+        model: context.model ? this.serializeModel(context.model) : undefined,
+        selection: context.selection,
+        userAction: context.userAction,
+        browser: navigator.userAgent,
+        url: window.location.href,
+      },
+      stack: error.stack,
+      recovered,
+    };
+    
+    this.logs.push(log);
+    
+    // Send to monitoring service in production
+    if (process.env.NODE_ENV === 'production') {
+      this.sendToMonitoring(log);
+    }
+    
+    // Console in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Editor error:', log);
+    }
+  }
+  
+  private sendToMonitoring(log: ErrorLog) {
+    // Send to error tracking service (e.g., Sentry, LogRocket)
+    // fetch('/api/errors', { method: 'POST', body: JSON.stringify(log) });
+  }
+  
+  getRecentErrors(limit: number = 10): ErrorLog[] {
+    return this.logs.slice(-limit);
+  }
+}`} />
+            </DocSection>
+
+            <DocSection id="user-feedback" title="User Feedback">
+              <p class="m-0 mb-4">
+                Users should be informed about errors in a non-intrusive way:
+              </p>
+              <DocCodeBlock language="typescript" code={`class ErrorNotifier {
+  private notificationElement: HTMLElement | null = null;
+  
+  notify(message: string, type: 'error' | 'warning' | 'info' = 'error') {
+    // Create or update notification
+    if (!this.notificationElement) {
+      this.notificationElement = this.createNotificationElement();
+      document.body.appendChild(this.notificationElement);
+    }
+    
+    this.notificationElement.textContent = message;
+    this.notificationElement.className = \`error-notification error-notification-\${type}\`;
+    
+    // Show notification
+    this.notificationElement.style.display = 'block';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      this.hide();
+    }, 5000);
+  }
+  
+  private createNotificationElement(): HTMLElement {
+    const element = document.createElement('div');
+    element.className = 'error-notification';
+    element.style.cssText = \`
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 16px;
+      background: #f44336;
+      color: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 10000;
+      display: none;
+    \`;
+    return element;
+  }
+  
+  hide() {
+    if (this.notificationElement) {
+      this.notificationElement.style.display = 'none';
+    }
+  }
+}
+
+// Usage
+const notifier = new ErrorNotifier();
+
+try {
+  editor.applyOperation(operation);
+} catch (error) {
+  notifier.notify('Could not complete operation. Changes were reverted.', 'error');
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/error-handling"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Debugging Techniques', href: '/editor/debugging', description: 'Debugging strategies' },
+                { title: 'Testing Strategies', href: '/editor/testing-strategies', description: 'Testing strategies' },
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Transaction system' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Font Family</strong> mark type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   fontFamily: {
     attrs: {
       family: { default: 'Arial' }
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: 'Monospace text',
   marks: [{
@@ -82,7 +82,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeFontFamilyMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeFontFamilyMark(text, mark) {
   const family = mark.attrs?.family || 'Arial';
   return '<span style="font-family: ' + escapeHtml(family) + '">' + 
          text + '</span>';
@@ -93,7 +93,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function extractFontFamilyMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractFontFamilyMark(element) {
   if (element.tagName === 'SPAN' && element.style.fontFamily) {
     const family = extractFontFamily(element.style.fontFamily);
     return {
@@ -118,7 +118,7 @@ function extractFontFamily(fontFamilyString) {
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Setting font family
+              <DocCodeBlock language="typescript" code={`// Setting font family
 function setFontFamily(family) {
   addMark({
     type: 'fontFamily',
@@ -140,7 +140,7 @@ function showFontFamilyPicker() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Font family with quotes
+              <DocCodeBlock language="typescript" code={`// Issue: Font family with quotes
 // Solution: Handle quoted font names
 function normalizeFontFamily(family) {
   return family.replace(/['"]/g, '');
@@ -167,7 +167,7 @@ function validateFontFamily(family) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class FontFamilyMark {
+              <DocCodeBlock language="typescript" code={`class FontFamilyMark {
   constructor(attrs) {
     this.type = 'fontFamily';
     this.attrs = { family: attrs?.family || 'Arial' };

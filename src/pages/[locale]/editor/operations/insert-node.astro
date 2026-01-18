@@ -1,0 +1,140 @@
+---
+import SiteNav from '../../../../components/SiteNav.astro';
+import BaseHead from '../../../../components/BaseHead.astro';
+import TableOfContents from '../../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../../components/docs/DocNavigation.astro';
+import '../../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'interface', text: '인터페이스' },
+  { depth: 2, slug: 'usage', text: '사용법' },
+  { depth: 2, slug: 'inverse', text: '역 Operation' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="Insert Node Operation – 에디터 아키텍처 – contenteditable.lab"
+      description="모델 기반 에디터를 위한 노드 삽입 operation"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Insert Node</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Insert Node Operation
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              문서 모델에 블록 또는 인라인 노드를 삽입합니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                Insert node operation은 특정 경로에 문서에 블록 또는 인라인 노드를 추가합니다. 단락, 제목, 목록 및 기타 구조화된 콘텐츠 삽입에 사용됩니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="인터페이스">
+              <DocCodeBlock language="typescript" code={`interface InsertNodeOperation extends Operation {
+  type: 'insertNode';
+  path: Path;
+  node: Node;
+}
+
+interface Node {
+  type: string;
+  children?: Node[];
+  attributes?: Record<string, any>;
+  text?: string; // 텍스트 노드용
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="사용법">
+              <DocCodeBlock language="typescript" code={`// 단락 삽입
+function insertParagraph(editor: Editor, position: Path) {
+  const operation: InsertNodeOperation = {
+    type: 'insertNode',
+    path: position,
+    node: {
+      type: 'paragraph',
+      children: [
+        { type: 'text', text: '' }
+      ]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// 제목 삽입
+function insertHeading(editor: Editor, position: Path, level: number, text: string) {
+  const operation: InsertNodeOperation = {
+    type: 'insertNode',
+    path: position,
+    node: {
+      type: 'heading',
+      attributes: { level },
+      children: [
+        { type: 'text', text: text }
+      ]
+    }
+  };
+  
+  editor.applyOperation(operation);
+}`} />
+            </DocSection>
+
+            <DocSection id="inverse" title="역 Operation">
+              <p class="m-0 mb-4">
+                Insert node의 역 operation은 delete node입니다:
+              </p>
+              <DocCodeBlock language="typescript" code={`function getInverse(operation: InsertNodeOperation): DeleteNodeOperation {
+  return {
+    type: 'deleteNode',
+    path: operation.path,
+    deletedNode: operation.node // undo를 위해 저장
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/insert-node"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations 개요' },
+                { title: 'Insert Text', href: '/editor/operations/insert-text', description: 'Insert text operation' },
+                { title: 'Delete Content', href: '/editor/operations/delete-content', description: 'Delete content operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

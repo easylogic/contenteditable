@@ -1,0 +1,755 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'ime-composition', text: 'IME Composition Handling' },
+  { depth: 3, slug: 'composition-events', text: 'Composition Events' },
+  { depth: 3, slug: 'composition-state', text: 'Composition State Management' },
+  { depth: 3, slug: 'ios-safari-issues', text: 'iOS Safari Special Cases' },
+  { depth: 2, slug: 'keyboard-events', text: 'Keyboard Event Handling' },
+  { depth: 3, slug: 'beforeinput-api', text: 'beforeinput API' },
+  { depth: 3, slug: 'keyboard-shortcuts', text: 'Keyboard Shortcuts' },
+  { depth: 3, slug: 'special-keys', text: 'Special Key Handling' },
+  { depth: 2, slug: 'text-input', text: 'Text Input Processing' },
+  { depth: 3, slug: 'input-types', text: 'Input Type Detection' },
+  { depth: 3, slug: 'text-normalization', text: 'Text Normalization' },
+  { depth: 2, slug: 'paste-handling', text: 'Paste Operation Handling' },
+  { depth: 3, slug: 'paste-events', text: 'Paste Events' },
+  { depth: 3, slug: 'paste-filtering', text: 'Paste Filtering' },
+  { depth: 2, slug: 'mobile-input', text: 'Mobile Input Handling' },
+  { depth: 3, slug: 'virtual-keyboard', text: 'Virtual Keyboard' },
+  { depth: 3, slug: 'text-prediction', text: 'Text Prediction' },
+  { depth: 2, slug: 'edge-cases', text: 'Edge Cases and Pitfalls' },
+  { depth: 3, slug: 'composition-during-paste', text: 'Composition During Paste' },
+  { depth: 3, slug: 'composition-during-undo', text: 'Composition During Undo' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Input Handling & IME – Editor Architecture – contenteditable.lab"
+      description="Comprehensive guide to input handling, IME composition, keyboard events, and text processing in model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Input Handling & IME</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Input Handling & IME
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Comprehensive guide to handling user input, IME composition, keyboard events, and text processing in model-based editors.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Input handling is one of the most complex aspects of building a contenteditable editor. It involves coordinating between browser events, IME composition states, keyboard shortcuts, and your document model. This guide covers the challenges and solutions for robust input handling.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Key challenges:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">IME composition events don't fire on iOS Safari for Korean IME</li>
+                  <li class="mb-1">Keyboard handlers must allow browser default during composition</li>
+                  <li class="mb-1">Paste operations can occur during active composition</li>
+                  <li class="mb-1">Mobile keyboards have different behavior than desktop</li>
+                  <li class="mb-1">Text prediction and autocorrect interfere with custom handlers</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="ime-composition" title="IME Composition Handling">
+              <p class="m-0 mb-4">
+                Input Method Editors (IME) allow users to input complex characters (Korean, Japanese, Chinese, etc.) by composing them from simpler components. Handling IME composition correctly is critical for supporting international users.
+              </p>
+
+              <DocSection id="composition-events" title="Composition Events" depth={3}>
+                <p class="m-0 mb-3">
+                  The standard composition event lifecycle:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionManager {
+  #isComposing = false;
+  #compositionData = '';
+
+  constructor(editor) {
+    this.#editor = editor;
+    this.#setupCompositionHandlers();
+  }
+
+  #setupCompositionHandlers() {
+    const element = this.#editor.element;
+
+    element.addEventListener('compositionstart', (e) => {
+      this.#isComposing = true;
+      this.#compositionData = '';
+      // Prevent custom keyboard handlers during composition
+      this.#editor.setCompositionMode(true);
+    });
+
+    element.addEventListener('compositionupdate', (e) => {
+      this.#compositionData = e.data;
+      // Update model with composition text
+      this.#updateCompositionText(e.data);
+    });
+
+    element.addEventListener('compositionend', (e) => {
+      this.#isComposing = false;
+      this.#compositionData = '';
+      // Commit composition to model
+      this.#commitComposition(e.data);
+      this.#editor.setCompositionMode(false);
+    });
+  }
+
+  #updateCompositionText(data) {
+    // Update model with temporary composition text
+    // This text may change or be cancelled
+  }
+
+  #commitComposition(data) {
+    // Finalize composition text in model
+    // Replace temporary composition text with final text
+  }
+
+  get isComposing() {
+    return this.#isComposing;
+  }
+}`} />
+                <DocAlert type="error" class="mt-4">
+                  <p class="m-0 mb-2 text-sm">
+                    <strong>iOS Safari Issue:</strong> Composition events do NOT fire for Korean IME on iOS Safari. The <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">isComposing</code> flag is always <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">false</code>.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="composition-state" title="Composition State Management" depth={3}>
+                <p class="m-0 mb-3">
+                  Track composition state to prevent custom handlers from interfering:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  #isComposing = false;
+  #compositionMode = false;
+
+  setCompositionMode(enabled) {
+    this.#compositionMode = enabled;
+  }
+
+  handleKeyDown(e) {
+    // Always allow browser default during composition
+    if (this.#isComposing || this.#compositionMode) {
+      return; // Don't prevent default
+    }
+
+    // Custom keyboard handlers
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.#handleEnter();
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      this.#handleBackspace();
+    }
+  }
+
+  // iOS Safari workaround: Always allow default for certain keys
+  handleKeyDownIOS(e) {
+    // For iOS Safari, always allow default for Enter/Backspace/Delete
+    // because isComposing is unreliable
+    if (this.#isIOS() && ['Enter', 'Backspace', 'Delete'].includes(e.key)) {
+      return; // Allow browser default
+    }
+
+    // Custom handlers for other keys
+    this.handleKeyDown(e);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="ios-safari-issues" title="iOS Safari Special Cases" depth={3}>
+                <p class="m-0 mb-3">
+                  iOS Safari requires special handling because composition events don't fire for Korean IME:
+                </p>
+                <DocCodeBlock language="typescript" code={`class IOSCompositionDetector {
+  #isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  #isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+  #lastInputTime = 0;
+  #inputPattern = /[가-힣]/; // Korean character pattern
+
+  detectComposition(inputText) {
+    if (!this.#isIOS || !this.#isSafari) {
+      return false; // Use standard composition events
+    }
+
+    // Heuristic: If input contains Korean characters and
+    // input events are firing rapidly, likely composition
+    const hasKorean = this.#inputPattern.test(inputText);
+    const timeSinceLastInput = Date.now() - this.#lastInputTime;
+    this.#lastInputTime = Date.now();
+
+    // If Korean input with rapid events (< 100ms), likely composition
+    return hasKorean && timeSinceLastInput < 100;
+  }
+
+  // Alternative: Always allow browser default on iOS Safari
+  shouldAllowDefault(key) {
+    if (this.#isIOS && this.#isSafari) {
+      // Always allow default for Enter/Backspace/Delete
+      return ['Enter', 'Backspace', 'Delete'].includes(key);
+    }
+    return false;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="keyboard-events" title="Keyboard Event Handling">
+              <p class="m-0 mb-4">
+                Keyboard events must be handled carefully to support both custom shortcuts and browser default behavior during composition.
+              </p>
+
+              <DocSection id="beforeinput-api" title="beforeinput API" depth={3}>
+                <p class="m-0 mb-3">
+                  The <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">beforeinput</code> event provides structured information about input operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`element.addEventListener('beforeinput', (e) => {
+  // Check if composition is active
+  if (e.isComposing) {
+    // Allow browser default during composition
+    return;
+  }
+
+  // Handle different input types
+  switch (e.inputType) {
+    case 'insertText':
+      e.preventDefault();
+      this.#handleInsertText(e.data);
+      break;
+
+    case 'insertParagraph':
+      e.preventDefault();
+      this.#handleInsertParagraph();
+      break;
+
+    case 'deleteContentBackward':
+      e.preventDefault();
+      this.#handleDeleteBackward();
+      break;
+
+    case 'formatBold':
+      e.preventDefault();
+      this.#handleFormatBold();
+      break;
+
+    // ... other input types
+  }
+});`} />
+                <DocAlert type="info" class="mt-4">
+                  <p class="m-0 text-sm">
+                    <strong>Note:</strong> <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">isComposing</code> in <code class="bg-bg-surface px-1 py-0.5 rounded text-xs">beforeinput</code> is unreliable on iOS Safari for Korean IME. Always check composition state separately.
+                  </p>
+                </DocAlert>
+              </DocSection>
+
+              <DocSection id="keyboard-shortcuts" title="Keyboard Shortcuts" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle keyboard shortcuts while respecting composition state:
+                </p>
+                <DocCodeBlock language="typescript" code={`class KeyboardShortcutHandler {
+  handleKeyDown(e) {
+    // Check for modifier keys
+    const isModifier = e.ctrlKey || e.metaKey || e.altKey;
+
+    // Don't handle shortcuts during composition
+    if (this.#isComposing) {
+      return;
+    }
+
+    // Handle shortcuts
+    if (isModifier && e.key === 'b') {
+      e.preventDefault();
+      this.#toggleBold();
+    } else if (isModifier && e.key === 'i') {
+      e.preventDefault();
+      this.#toggleItalic();
+    } else if (isModifier && e.key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        this.#redo();
+      } else {
+        this.#undo();
+      }
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="special-keys" title="Special Key Handling" depth={3}>
+                <p class="m-0 mb-3">
+                  Special keys (Enter, Backspace, Delete, Tab) require careful handling:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SpecialKeyHandler {
+  handleEnter(e) {
+    if (this.#isComposing) {
+      return; // Allow browser default
+    }
+
+    e.preventDefault();
+    
+    // Check if Shift is pressed
+    if (e.shiftKey) {
+      this.#insertLineBreak();
+    } else {
+      this.#insertParagraph();
+    }
+  }
+
+  handleBackspace(e) {
+    if (this.#isComposing) {
+      return; // Allow browser default
+    }
+
+    e.preventDefault();
+    
+    const selection = this.#getSelection();
+    if (selection.isCollapsed) {
+      // Delete character before cursor
+      this.#deleteBackward();
+    } else {
+      // Delete selection
+      this.#deleteSelection();
+    }
+  }
+
+  handleTab(e) {
+    if (this.#isComposing) {
+      return; // Allow browser default (may be used for IME)
+    }
+
+    e.preventDefault();
+    
+    if (e.shiftKey) {
+      this.#outdent();
+    } else {
+      this.#indent();
+    }
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="text-input" title="Text Input Processing">
+              <p class="m-0 mb-4">
+                Process text input and normalize it according to your document model requirements.
+              </p>
+
+              <DocSection id="input-types" title="Input Type Detection" depth={3}>
+                <p class="m-0 mb-3">
+                  Different input types require different handling:
+                </p>
+                <DocCodeBlock language="typescript" code={`class InputProcessor {
+  processInput(e) {
+    switch (e.inputType) {
+      case 'insertText':
+        this.#handleInsertText(e.data);
+        break;
+
+      case 'insertCompositionText':
+        // IME composition text
+        this.#handleCompositionText(e.data);
+        break;
+
+      case 'insertFromPaste':
+        // Paste operation
+        this.#handlePaste();
+        break;
+
+      case 'insertFromDrop':
+        // Drag and drop
+        this.#handleDrop();
+        break;
+
+      case 'insertFromPredictiveText':
+        // Mobile text prediction
+        this.#handlePredictiveText(e.data);
+        break;
+
+      default:
+        // Unknown input type
+        this.#handleUnknownInput(e);
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="text-normalization" title="Text Normalization" depth={3}>
+                <p class="m-0 mb-3">
+                  Normalize text input to match your model's requirements:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TextNormalizer {
+  normalize(text) {
+    // Remove zero-width characters
+    text = text.replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+    // Normalize line breaks
+    text = text.replace(/\\r\\n/g, '\\n');
+    text = text.replace(/\\r/g, '\\n');
+
+    // Normalize whitespace (optional, depends on requirements)
+    // text = text.replace(/[ \\t]+/g, ' ');
+
+    // Remove control characters (except newline, tab)
+    text = text.replace(/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/g, '');
+
+    return text;
+  }
+
+  // Handle invisible characters that browsers insert
+  cleanInvisibleChars(text) {
+    // Zero-width non-breaking space
+    text = text.replace(/\\uFEFF/g, '');
+    
+    // Zero-width space
+    text = text.replace(/\\u200B/g, '');
+    
+    // Zero-width joiner/non-joiner
+    text = text.replace(/[\\u200C\\u200D]/g, '');
+
+    return text;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="paste-handling" title="Paste Operation Handling">
+              <p class="m-0 mb-4">
+                Paste operations can include rich formatting, images, and other content that needs to be converted to your document model.
+              </p>
+
+              <DocSection id="paste-events" title="Paste Events" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle paste events and extract clipboard data:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PasteHandler {
+  constructor(editor) {
+    this.#editor = editor;
+    this.#setupPasteHandlers();
+  }
+
+  #setupPasteHandlers() {
+    this.#editor.element.addEventListener('paste', async (e) => {
+      e.preventDefault();
+
+      // Check if composition is active
+      if (this.#editor.isComposing) {
+        // Wait for composition to end
+        await this.#waitForCompositionEnd();
+      }
+
+      // Get clipboard data
+      const clipboardData = e.clipboardData || window.clipboardData;
+      const items = clipboardData.items;
+
+      // Process different data types
+      for (const item of items) {
+        if (item.type.startsWith('text/')) {
+          const text = await this.#getTextFromItem(item);
+          this.#handleTextPaste(text);
+        } else if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          this.#handleImagePaste(file);
+        }
+      }
+    });
+  }
+
+  async #getTextFromItem(item) {
+    return new Promise((resolve) => {
+      item.getAsString(resolve);
+    });
+  }
+
+  #handleTextPaste(text) {
+    // Convert HTML/text to model
+    const model = this.#parsePastedContent(text);
+    this.#editor.insertModel(model);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="paste-filtering" title="Paste Filtering" depth={3}>
+                <p class="m-0 mb-3">
+                  Filter and sanitize pasted content:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PasteFilter {
+  filterHTML(html) {
+    // Remove unwanted tags
+    const allowedTags = ['p', 'br', 'strong', 'em', 'u', 'code'];
+    const cleaned = this.#removeDisallowedTags(html, allowedTags);
+
+    // Remove attributes
+    const sanitized = this.#removeAttributes(cleaned);
+
+    // Normalize structure
+    const normalized = this.#normalizeStructure(sanitized);
+
+    return normalized;
+  }
+
+  #removeDisallowedTags(html, allowed) {
+    // Use DOMParser to safely parse and filter
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Remove disallowed tags
+    const allElements = doc.querySelectorAll('*');
+    allElements.forEach((el) => {
+      if (!allowed.includes(el.tagName.toLowerCase())) {
+        // Replace with text content
+        const text = document.createTextNode(el.textContent);
+        el.parentNode?.replaceChild(text, el);
+      }
+    });
+
+    return doc.body.innerHTML;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="mobile-input" title="Mobile Input Handling">
+              <p class="m-0 mb-4">
+                Mobile devices present unique challenges with virtual keyboards, text prediction, and touch interactions.
+              </p>
+
+              <DocSection id="virtual-keyboard" title="Virtual Keyboard" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle virtual keyboard appearance and viewport changes:
+                </p>
+                <DocCodeBlock language="typescript" code={`class MobileKeyboardHandler {
+  constructor(editor) {
+    this.#editor = editor;
+    this.#setupKeyboardHandlers();
+  }
+
+  #setupKeyboardHandlers() {
+    // Detect viewport resize (keyboard appearance)
+    let viewportHeight = window.visualViewport?.height || window.innerHeight;
+    
+    window.visualViewport?.addEventListener('resize', () => {
+      const newHeight = window.visualViewport.height;
+      const heightDiff = viewportHeight - newHeight;
+
+      if (heightDiff > 150) {
+        // Keyboard appeared
+        this.#onKeyboardShow();
+      } else if (heightDiff < -150) {
+        // Keyboard hidden
+        this.#onKeyboardHide();
+      }
+
+      viewportHeight = newHeight;
+    });
+  }
+
+  #onKeyboardShow() {
+    // Scroll to keep cursor visible
+    this.#scrollToCursor();
+    
+    // Adjust editor layout
+    this.#adjustLayoutForKeyboard();
+  }
+
+  #onKeyboardHide() {
+    // Restore layout
+    this.#restoreLayout();
+  }
+
+  #scrollToCursor() {
+    const selection = window.getSelection();
+    if (selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    
+    // Scroll if cursor is below visible area
+    if (rect.bottom > window.visualViewport.height) {
+      range.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="text-prediction" title="Text Prediction" depth={3}>
+                <p class="m-0 mb-3">
+                  Handle mobile text prediction and autocorrect:
+                </p>
+                <DocCodeBlock language="typescript" code={`class MobileTextPredictionHandler {
+  handleInput(e) {
+    if (e.inputType === 'insertFromPredictiveText') {
+      // Mobile keyboard text prediction
+      this.#handlePredictiveText(e.data);
+    } else if (e.inputType === 'insertText') {
+      // Check if this might be autocorrect
+      if (this.#isLikelyAutocorrect(e.data)) {
+        this.#handleAutocorrect(e.data);
+      } else {
+        this.#handleNormalInput(e.data);
+      }
+    }
+  }
+
+  #isLikelyAutocorrect(text) {
+    // Heuristic: If text is very different from what was typed,
+    // might be autocorrect
+    // This is difficult to detect reliably
+    return false;
+  }
+
+  // Disable autocorrect for code blocks
+  disableAutocorrect(element) {
+    element.setAttribute('autocorrect', 'off');
+    element.setAttribute('autocapitalize', 'off');
+    element.setAttribute('spellcheck', 'false');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="edge-cases" title="Edge Cases and Pitfalls">
+              <p class="m-0 mb-4">
+                Common edge cases that can break input handling:
+              </p>
+
+              <DocSection id="composition-during-paste" title="Composition During Paste" depth={3}>
+                <p class="m-0 mb-3">
+                  Paste can occur during active composition:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionPasteHandler {
+  async handlePaste(e) {
+    // Check if composition is active
+    if (this.#isComposing) {
+      // Cancel composition first
+      await this.#cancelComposition();
+    }
+
+    // Then handle paste
+    this.#processPaste(e);
+  }
+
+  async #cancelComposition() {
+    // Force composition end
+    // This may lose composition text, but paste takes priority
+    const event = new CompositionEvent('compositionend', {
+      bubbles: true,
+      cancelable: true,
+      data: ''
+    });
+    this.#editor.element.dispatchEvent(event);
+    
+    // Wait a tick for composition to fully end
+    await new Promise(resolve => setTimeout(resolve, 0));
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="composition-during-undo" title="Composition During Undo" depth={3}>
+                <p class="m-0 mb-3">
+                  Undo/redo can occur during composition:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CompositionUndoHandler {
+  handleUndo(e) {
+    // Don't allow undo during composition
+    if (this.#isComposing) {
+      e.preventDefault();
+      return;
+    }
+
+    // Normal undo handling
+    this.#performUndo();
+  }
+
+  handleRedo(e) {
+    // Don't allow redo during composition
+    if (this.#isComposing) {
+      e.preventDefault();
+      return;
+    }
+
+    // Normal redo handling
+    this.#performRedo();
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <p class="m-0 mb-4">
+                Key principles for robust input handling:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>Always check composition state:</strong> Never prevent default during active composition
+                </li>
+                <li class="mb-2">
+                  <strong>Handle iOS Safari specially:</strong> Composition events don't fire for Korean IME
+                </li>
+                <li class="mb-2">
+                  <strong>Use beforeinput when possible:</strong> More reliable than keydown/keypress
+                </li>
+                <li class="mb-2">
+                  <strong>Normalize text input:</strong> Remove invisible characters and normalize whitespace
+                </li>
+                <li class="mb-2">
+                  <strong>Filter pasted content:</strong> Sanitize HTML and convert to your model format
+                </li>
+                <li class="mb-2">
+                  <strong>Handle mobile separately:</strong> Virtual keyboards and text prediction require special handling
+                </li>
+                <li class="mb-2">
+                  <strong>Test with real IMEs:</strong> Test with Korean, Japanese, Chinese IMEs on different platforms
+                </li>
+              </ul>
+            </DocSection>
+            <DocNavigation
+              current="/editor/input-handling"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Synchronizing model and DOM' },
+                { title: 'Plugin Development', href: '/editor/plugin-development', description: 'Plugin development guide' },
+                { title: 'Testing Strategies', href: '/editor/testing-strategies', description: 'Testing strategies for editors' },
+                { title: 'Debugging Techniques', href: '/editor/debugging', description: 'Debugging strategies' },
+                { title: 'Mobile Support', href: '/editor/mobile-support', description: 'Mobile support guide' },
+                { title: 'Accessibility', href: '/editor/accessibility', description: 'Accessibility best practices' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

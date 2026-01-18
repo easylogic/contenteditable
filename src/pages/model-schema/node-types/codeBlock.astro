@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Code Block</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   codeBlock: {
     content: 'text*',
     group: 'block',
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'codeBlock',
   attrs: { language: 'javascript' },
   children: [
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeCodeBlock(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCodeBlock(node) {
   const language = node.attrs?.language || '';
   const code = node.children.map(child => child.text).join('');
   const attrs = language ? { 'data-language': language } : {};
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseCodeBlock(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCodeBlock(domNode) {
   const pre = domNode.tagName === 'PRE' ? domNode : domNode.closest('pre');
   if (!pre) return null;
   
@@ -120,7 +120,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering code block
+              <DocCodeBlock language="typescript" code={`// Rendering code block
 const pre = document.createElement('pre');
 const code = document.createElement('code');
 pre.contentEditable = 'false'; // Code blocks are typically read-only
@@ -144,7 +144,7 @@ function handleEnterInCodeBlock(e) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Whitespace preservation
+              <DocCodeBlock language="typescript" code={`// Issue: Whitespace preservation
 // Solution: Use pre tag and preserve whitespace
 function preserveWhitespace(text) {
   return text.replace(/ /g, '&nbsp;').replace(/\\n/g, '<br>');
@@ -169,7 +169,7 @@ function handleTabInCodeBlock(e) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class CodeBlockNode {
+              <DocCodeBlock language="typescript" code={`class CodeBlockNode {
   constructor(attrs, children) {
     this.type = 'codeBlock';
     this.attrs = { language: attrs?.language || null };

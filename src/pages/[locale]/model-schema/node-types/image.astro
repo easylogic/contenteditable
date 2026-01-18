@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="이미지 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>이미지</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   image: {
     inline: true,
     attrs: {
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'image',
   attrs: {
     src: 'https://example.com/image.jpg',
@@ -106,7 +106,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeImage(node) {
+              <DocCodeBlock language="typescript" code={`function serializeImage(node) {
   const attrs = {};
   if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
   if (node.attrs.alt) attrs.alt = escapeHtml(node.attrs.alt);
@@ -121,7 +121,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseImage(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseImage(domNode) {
   return {
     type: 'image',
     attrs: {
@@ -142,7 +142,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 이미지 렌더링
+              <DocCodeBlock language="typescript" code={`// 이미지 렌더링
 const img = document.createElement('img');
 img.src = node.attrs.src;
 img.alt = node.attrs.alt || '';
@@ -174,7 +174,7 @@ function handleImageUpload(file) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 이미지 로딩 오류
+              <DocCodeBlock language="typescript" code={`// 문제: 이미지 로딩 오류
 // 해결: 깨진 이미지 처리
 img.onerror = function() {
   this.src = 'placeholder.jpg';
@@ -204,7 +204,7 @@ function selectImage(img) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class ImageNode {
+              <DocCodeBlock language="typescript" code={`class ImageNode {
   constructor(attrs) {
     this.type = 'image';
     this.attrs = {

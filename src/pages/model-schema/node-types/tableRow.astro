@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Table Row</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tableRow: {
     content: '(tableCell | tableHeader)+',
     tableRole: 'row',
@@ -65,7 +65,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tableRow',
   children: [
     {
@@ -84,7 +84,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeTableRow(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTableRow(node) {
   return '<tr>' + serializeChildren(node.children) + '</tr>';
 }`} />
             </DocSection>
@@ -93,7 +93,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseTableRow(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTableRow(domNode) {
   return {
     type: 'tableRow',
     children: Array.from(domNode.children)
@@ -110,7 +110,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering table row
+              <DocCodeBlock language="typescript" code={`// Rendering table row
 const tr = document.createElement('tr');
 tr.contentEditable = 'true';
 node.children.forEach(cell => {
@@ -137,7 +137,7 @@ function addTableRow(table) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Row cell count mismatch
+              <DocCodeBlock language="typescript" code={`// Issue: Row cell count mismatch
 // Solution: Ensure consistent cell count
 function validateRowCells(row, expectedCount) {
   const cells = row.querySelectorAll('td, th');
@@ -169,7 +169,7 @@ function selectRow(tr) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class TableRowNode {
+              <DocCodeBlock language="typescript" code={`class TableRowNode {
   constructor(children) {
     this.type = 'tableRow';
     this.children = children || [];

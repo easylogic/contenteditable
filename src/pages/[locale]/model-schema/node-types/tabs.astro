@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="탭 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>탭</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tabs: {
     content: 'block+',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tabs',
   attrs: { activeTab: 0 },
   children: [
@@ -108,7 +108,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeTabs(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTabs(node) {
   return '<div data-type="tabs" data-active="' + node.attrs.activeTab + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -118,7 +118,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseTabs(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTabs(domNode) {
   return {
     type: 'tabs',
     attrs: { activeTab: parseInt(domNode.getAttribute('data-active')) || 0 },
@@ -136,7 +136,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 탭 렌더링
+              <DocCodeBlock language="typescript" code={`// 탭 렌더링
 const tabs = document.createElement('div');
 tabs.setAttribute('data-type', 'tabs');
 tabs.setAttribute('data-active', node.attrs.activeTab);
@@ -161,7 +161,7 @@ function switchTab(tabs, index) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 탭 상태 관리
+              <DocCodeBlock language="typescript" code={`// 문제: 탭 상태 관리
 // 해결: 모델과 뷰 간 활성 탭 동기화
 function syncTabState(tabs, model) {
   tabs.setAttribute('data-active', model.attrs.activeTab);
@@ -180,7 +180,7 @@ function updateTabVisibility(tabs, activeIndex) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class TabsNode {
+              <DocCodeBlock language="typescript" code={`class TabsNode {
   constructor(attrs, children) {
     this.type = 'tabs';
     this.attrs = { activeTab: attrs?.activeTab || 0 };

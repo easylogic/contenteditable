@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="테이블 셀 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>테이블 셀</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tableCell: {
     content: 'block+',
     tableRole: 'cell',
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tableCell',
   attrs: { colspan: 1, rowspan: 1 },
   children: [
@@ -107,7 +107,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeTableCell(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTableCell(node) {
   const attrs = {};
   if (node.attrs.colspan > 1) attrs.colspan = node.attrs.colspan;
   if (node.attrs.rowspan > 1) attrs.rowspan = node.attrs.rowspan;
@@ -120,7 +120,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseTableCell(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTableCell(domNode) {
   return {
     type: 'tableCell',
     attrs: {
@@ -141,7 +141,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 테이블 셀 렌더링
+              <DocCodeBlock language="typescript" code={`// 테이블 셀 렌더링
 const td = document.createElement('td');
 td.contentEditable = 'true';
 if (node.attrs.colspan > 1) td.colSpan = node.attrs.colspan;
@@ -166,7 +166,7 @@ function handleEnterInTableCell(e) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 빈 셀
+              <DocCodeBlock language="typescript" code={`// 문제: 빈 셀
 // 해결: 최소 하나의 블록 보장
 function validateTableCell(cell) {
   if (!cell.querySelector('p, ul, ol, h1, h2, h3, h4, h5, h6')) {
@@ -196,7 +196,7 @@ function validateCellSpan(cell, table) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class TableCellNode {
+              <DocCodeBlock language="typescript" code={`class TableCellNode {
   constructor(attrs, children) {
     this.type = 'tableCell';
     this.attrs = {

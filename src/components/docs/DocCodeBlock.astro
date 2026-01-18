@@ -1,14 +1,36 @@
 ---
+import { codeToHtml } from 'shiki';
+
 interface Props {
   code: string;
   language?: string;
   class?: string;
 }
 
-const { code, language, class: className = '' } = Astro.props;
+const { code, language = 'typescript', class: className = '' } = Astro.props;
+
+// Highlight code using shiki
+const html = await codeToHtml(code, {
+  lang: language,
+  themes: {
+    dark: 'github-dark',
+    light: 'github-light',
+  },
+});
+
+// shiki returns <pre> tag, inject classes
+const htmlWithClasses = html.replace(
+  '<pre class="shiki',
+  `<pre class="shiki overflow-x-auto text-sm leading-relaxed m-0 ${className}`
+);
 ---
 
-<pre class={`bg-bg-muted border border-border-light rounded-lg p-4 overflow-x-auto text-sm leading-relaxed text-text-primary ${className}`}>
-  <code>{code}</code>
-</pre>
+<div set:html={htmlWithClasses} />
+
+<style>
+  :global(.shiki) {
+    background-color: transparent !important;
+    margin: 0 !important;
+  }
+</style>
 

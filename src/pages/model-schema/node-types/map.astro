@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Map</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   map: {
     group: 'block',
     attrs: {
@@ -69,7 +69,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'map',
   attrs: {
     lat: 37.5665,
@@ -83,7 +83,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeMap(node) {
+              <DocCodeBlock language="typescript" code={`function serializeMap(node) {
   return '<div data-type="map" data-lat="' + node.attrs.lat + 
          '" data-lng="' + node.attrs.lng + '" data-zoom="' + node.attrs.zoom + '"></div>';
 }`} />
@@ -93,7 +93,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseMap(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseMap(domNode) {
   return {
     type: 'map',
     attrs: {
@@ -112,7 +112,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering map
+              <DocCodeBlock language="typescript" code={`// Rendering map
 const map = document.createElement('div');
 map.setAttribute('data-type', 'map');
 map.setAttribute('data-lat', node.attrs.lat);
@@ -138,7 +138,7 @@ function renderMap(element) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Map library initialization
+              <DocCodeBlock language="typescript" code={`// Issue: Map library initialization
 // Solution: Initialize map library
 function initMapLibrary() {
   if (window.L) {
@@ -157,7 +157,7 @@ function validateCoordinates(lat, lng) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class MapNode {
+              <DocCodeBlock language="typescript" code={`class MapNode {
   constructor(attrs) {
     this.type = 'map';
     this.attrs = {

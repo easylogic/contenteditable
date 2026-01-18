@@ -50,7 +50,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="HTML 매핑 – contenteditable.lab"
@@ -94,7 +94,7 @@ const headings = [
               </p>
 
               <DocSection id="node-serialization" title="노드 직렬화" depth={3}>
-                <DocCodeBlock code={`function serializeNode(node) {
+                <DocCodeBlock language="typescript" code={`function serializeNode(node) {
   switch (node.type) {
     case 'document':
       return serializeChildren(node.children);
@@ -134,7 +134,7 @@ function serializeChildren(children) {
                 <p class="m-0 mb-3">
                   텍스트 노드에 마크를 적용합니다:
                 </p>
-                <DocCodeBlock code={`function serializeText(node) {
+                <DocCodeBlock language="typescript" code={`function serializeText(node) {
   let html = escapeHtml(node.text);
   
   // 순서대로 마크 적용
@@ -173,7 +173,7 @@ function wrapWithMark(html, mark) {
               </DocSection>
 
               <DocSection id="attribute-serialization" title="속성 직렬화" depth={3}>
-                <DocCodeBlock code={`function serializeAttrs(attrs) {
+                <DocCodeBlock language="typescript" code={`function serializeAttrs(attrs) {
   const parts = [];
   
   for (const [key, value] of Object.entries(attrs)) {
@@ -204,7 +204,7 @@ function escapeHtml(text) {
               </p>
 
               <DocSection id="html-parsing" title="HTML 파싱" depth={3}>
-                <DocCodeBlock code={`function parseHTML(html) {
+                <DocCodeBlock language="typescript" code={`function parseHTML(html) {
   // HTML 문자열을 DOM으로 파싱
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
@@ -256,7 +256,7 @@ function parseChildren(domNodes) {
               </DocSection>
 
               <DocSection id="node-parsing" title="노드 파싱" depth={3}>
-                <DocCodeBlock code={`function getNodeType(tagName) {
+                <DocCodeBlock language="typescript" code={`function getNodeType(tagName) {
   const tagMap = {
     'P': 'paragraph',
     'H1': 'heading',
@@ -301,7 +301,7 @@ function extractAttributes(domElement, nodeType) {
               </DocSection>
 
               <DocSection id="mark-extraction" title="마크 추출" depth={3}>
-                <DocCodeBlock code={`function extractMarks(textNode) {
+                <DocCodeBlock language="typescript" code={`function extractMarks(textNode) {
   const marks = [];
   let current = textNode.parentElement;
   
@@ -350,7 +350,7 @@ function getMarkFromElement(element) {
               </p>
 
               <DocSection id="element-normalization" title="요소 정규화" depth={3}>
-                <DocCodeBlock code={`function normalizeHTML(html) {
+                <DocCodeBlock language="typescript" code={`function normalizeHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
@@ -398,7 +398,7 @@ function normalizeElements(element) {
               </DocSection>
 
               <DocSection id="structure-normalization" title="구조 정규화" depth={3}>
-                <DocCodeBlock code={`function fixStructure(element) {
+                <DocCodeBlock language="typescript" code={`function fixStructure(element) {
   // 블록이 body/document의 직접 자식인지 확인
   const blocks = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'BLOCKQUOTE'];
   
@@ -474,7 +474,7 @@ function removeEmptyNodes(element) {
               </p>
 
               <DocSection id="diff-algorithm" title="Diff 알고리즘" depth={3}>
-                <DocCodeBlock code={`function updateDOM(oldModel, newModel, domRoot) {
+                <DocCodeBlock language="typescript" code={`function updateDOM(oldModel, newModel, domRoot) {
   // 모델을 비교하고 차이점 찾기
   const diff = diffModels(oldModel, newModel);
   
@@ -539,7 +539,7 @@ function nodesEqual(node1, node2) {
               </DocSection>
 
               <DocSection id="dom-patching" title="DOM 패칭" depth={3}>
-                <DocCodeBlock code={`function applyChange(change, domRoot) {
+                <DocCodeBlock language="typescript" code={`function applyChange(change, domRoot) {
   const domNode = findDOMNode(change.index, domRoot);
   
   switch (change.type) {
@@ -593,7 +593,7 @@ function updateDOMNode(domNode, oldNode, newNode) {
                 <p class="m-0 mb-3">
                   HTML은 중첩된 포맷팅을 가질 수 있습니다: <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">&lt;strong&gt;&lt;em&gt;텍스트&lt;/em&gt;&lt;/strong&gt;</code>
                 </p>
-                <DocCodeBlock code={`// HTML: <strong><em>볼드 이탤릭</em></strong>
+                <DocCodeBlock language="typescript" code={`// HTML: <strong><em>볼드 이탤릭</em></strong>
 // 모델: 두 마크를 모두 가진 단일 텍스트 노드
 {
   type: 'text',
@@ -634,7 +634,7 @@ function serializeText(node) {
                 <p class="m-0 mb-3">
                   빈 단락, 빈 목록 등을 처리합니다:
                 </p>
-                <DocCodeBlock code={`// 빈 단락
+                <DocCodeBlock language="typescript" code={`// 빈 단락
 {
   type: 'paragraph',
   children: []
@@ -664,7 +664,7 @@ function parseNode(domNode) {
                 <p class="m-0 mb-3">
                   HTML은 공백을 축소하지만, 보존하고 싶을 수 있습니다:
                 </p>
-                <DocCodeBlock code={`// 코드 블록에서 공백 보존
+                <DocCodeBlock language="typescript" code={`// 코드 블록에서 공백 보존
 {
   type: 'codeBlock',
   children: [

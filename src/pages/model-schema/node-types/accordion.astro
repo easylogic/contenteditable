@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Accordion</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   accordion: {
     content: 'block+',
     group: 'block',
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'accordion',
   attrs: { open: false },
   children: [
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeAccordion(node) {
+              <DocCodeBlock language="typescript" code={`function serializeAccordion(node) {
   return '<div data-type="accordion" data-open="' + node.attrs.open + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -99,7 +99,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseAccordion(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseAccordion(domNode) {
   return {
     type: 'accordion',
     attrs: { open: domNode.getAttribute('data-open') === 'true' },
@@ -117,7 +117,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering accordion
+              <DocCodeBlock language="typescript" code={`// Rendering accordion
 const accordion = document.createElement('div');
 accordion.setAttribute('data-type', 'accordion');
 accordion.setAttribute('data-open', node.attrs.open);
@@ -141,7 +141,7 @@ function toggleAccordion(accordion) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Accordion state management
+              <DocCodeBlock language="typescript" code={`// Issue: Accordion state management
 // Solution: Sync state between model and view
 function syncAccordionState(accordion, model) {
   accordion.setAttribute('data-open', model.attrs.open);
@@ -158,7 +158,7 @@ function handleNestedAccordion(parent, child) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class AccordionNode {
+              <DocCodeBlock language="typescript" code={`class AccordionNode {
   constructor(attrs, children) {
     this.type = 'accordion';
     this.attrs = { open: attrs?.open || false };

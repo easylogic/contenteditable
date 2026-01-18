@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Document</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   document: {
     content: 'block+',
     // Document is the root node, always present
@@ -65,7 +65,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'document',
   children: [
     {
@@ -80,7 +80,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeDocument(node) {
+              <DocCodeBlock language="typescript" code={`function serializeDocument(node) {
   return serializeChildren(node.children);
 }
 
@@ -92,7 +92,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseDocument(html) {
+              <DocCodeBlock language="typescript" code={`function parseDocument(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
@@ -112,7 +112,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering
+              <DocCodeBlock language="typescript" code={`// Rendering
 const container = document.createElement('div');
 container.contentEditable = 'true';
 node.children.forEach(child => {
@@ -139,7 +139,7 @@ function getDocumentSelection() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Document must always have at least one block
+              <DocCodeBlock language="typescript" code={`// Issue: Document must always have at least one block
 // Solution: Ensure document always has content
 if (node.children.length === 0) {
   node.children.push({
@@ -169,7 +169,7 @@ function ensureDocumentNotEmpty(doc) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class DocumentNode {
+              <DocCodeBlock language="typescript" code={`class DocumentNode {
   constructor(children) {
     this.type = 'document';
     this.children = children || [];

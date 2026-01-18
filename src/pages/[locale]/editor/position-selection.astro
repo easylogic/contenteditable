@@ -51,7 +51,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="위치 & 선택 관리 – contenteditable.lab"
@@ -121,7 +121,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   모델의 위치는 경로(인덱스 배열)를 사용하여 문서 트리를 탐색합니다:
                 </p>
-                <DocCodeBlock code={`// 경로 구조: [blockIndex, inlineIndex, textOffset]
+                <DocCodeBlock language="typescript" code={`// 경로 구조: [blockIndex, inlineIndex, textOffset]
 // 예제 문서:
 {
   type: 'document',
@@ -150,7 +150,7 @@ const headings = [
                 <p class="m-0 mb-3">
                   오프셋은 대상 노드 내의 문자 위치를 나타냅니다:
                 </p>
-                <DocCodeBlock code={`// 텍스트 노드의 경우, 오프셋은 문자 위치
+                <DocCodeBlock language="typescript" code={`// 텍스트 노드의 경우, 오프셋은 문자 위치
 {
   path: [0, 0],  // 첫 번째 단락, 첫 번째 인라인
   offset: 5      // 텍스트 노드에서 5번째 문자
@@ -185,7 +185,7 @@ function findPosition(path, offset) {
                 <p class="m-0 mb-3">
                   경로 기반 위치는 DOM이 변경되어도 유효합니다:
                 </p>
-                <DocCodeBlock code={`// 편집 전 위치
+                <DocCodeBlock language="typescript" code={`// 편집 전 위치
 const position = { path: [0, 0], offset: 10 };
 
 // 사용자가 [0, 0], offset: 5 위치에 텍스트 삽입
@@ -205,7 +205,7 @@ const newPosition = { path: [0, 0], offset: 15 };  // 10 + 삽입된 5개 문자
                 <p class="m-0 mb-3">
                   선택은 두 위치로 표현됩니다: 앵커(선택이 시작된 위치)와 포커스(선택이 끝난 위치):
                 </p>
-                <DocCodeBlock code={`// 모델 선택
+                <DocCodeBlock language="typescript" code={`// 모델 선택
 {
   anchor: { path: [0, 0], offset: 5 },
   focus: { path: [0, 2], offset: 3 },
@@ -240,7 +240,7 @@ const newPosition = { path: [0, 0], offset: 15 };  // 10 + 삽입된 5개 문자
                 <p class="m-0 mb-3">
                   축소된 선택은 커서를 나타냅니다 (선택된 텍스트 없음):
                 </p>
-                <DocCodeBlock code={`// 축소된 선택
+                <DocCodeBlock language="typescript" code={`// 축소된 선택
 {
   anchor: { path: [0, 1], offset: 10 },
   focus: { path: [0, 1], offset: 10 },
@@ -271,7 +271,7 @@ function getCursorPosition(selection) {
               </p>
 
               <DocSection id="dom-position-to-path" title="DOM 위치를 경로로" depth={3}>
-                <DocCodeBlock code={`function domPositionToPath(domNode, domOffset, model) {
+                <DocCodeBlock language="typescript" code={`function domPositionToPath(domNode, domOffset, model) {
   // DOM 노드에 해당하는 모델 노드 찾기
   const modelNode = findModelNodeForDOM(domNode, model);
   
@@ -319,7 +319,7 @@ function findModelNodeForDOM(domNode, model) {
               </DocSection>
 
               <DocSection id="dom-range-to-selection" title="DOM 범위를 선택으로" depth={3}>
-                <DocCodeBlock code={`function domSelectionToModel(domSelection) {
+                <DocCodeBlock language="typescript" code={`function domSelectionToModel(domSelection) {
   if (domSelection.rangeCount === 0) {
     return null;
   }
@@ -375,7 +375,7 @@ function comparePositions(pos1, pos2) {
               </p>
 
               <DocSection id="path-to-dom-position" title="경로를 DOM 위치로" depth={3}>
-                <DocCodeBlock code={`function pathToDOMPosition(path, offset, model) {
+                <DocCodeBlock language="typescript" code={`function pathToDOMPosition(path, offset, model) {
   // 경로를 사용하여 모델 트리 탐색
   let node = model;
   for (let i = 0; i < path.length; i++) {
@@ -422,7 +422,7 @@ function findDOMNodeForModel(modelNode) {
               </DocSection>
 
               <DocSection id="selection-to-dom-range" title="선택을 DOM 범위로" depth={3}>
-                <DocCodeBlock code={`function modelSelectionToDOM(modelSelection) {
+                <DocCodeBlock language="typescript" code={`function modelSelectionToDOM(modelSelection) {
   // 앵커 위치 변환
   const anchorDOM = pathToDOMPosition(
     modelSelection.anchor.path,
@@ -468,7 +468,7 @@ function findDOMNodeForModel(modelNode) {
               </p>
 
               <DocSection id="normalize-invalid" title="유효하지 않은 선택 정규화" depth={3}>
-                <DocCodeBlock code={`function normalizeSelection(selection, model) {
+                <DocCodeBlock language="typescript" code={`function normalizeSelection(selection, model) {
   // 앵커가 유효한지 확인
   const anchorValid = isValidPosition(selection.anchor, model);
   if (!anchorValid) {
@@ -532,7 +532,7 @@ function findNearestValidPosition(position, model) {
                 <p class="m-0 mb-3">
                   때로는 전체 노드를 포함하도록 선택을 확장해야 합니다:
                 </p>
-                <DocCodeBlock code={`function expandSelectionToNodes(selection, model) {
+                <DocCodeBlock language="typescript" code={`function expandSelectionToNodes(selection, model) {
   // 앵커를 노드 시작으로 확장
   const anchorNode = getNodeAtPath(model, selection.anchor.path);
   if (anchorNode && selection.anchor.offset > 0) {
@@ -569,7 +569,7 @@ function findNearestValidPosition(position, model) {
                 <p class="m-0 mb-3">
                   작업 후 업데이트가 필요한 위치를 추적합니다:
                 </p>
-                <DocCodeBlock code={`class PositionTracker {
+                <DocCodeBlock language="typescript" code={`class PositionTracker {
   constructor() {
     this.positions = new Map();
   }
@@ -624,7 +624,7 @@ function findNearestValidPosition(position, model) {
               </DocSection>
 
               <DocSection id="updating-positions" title="편집 후 위치 업데이트" depth={3}>
-                <DocCodeBlock code={`function updateSelectionAfterEdit(selection, operation) {
+                <DocCodeBlock language="typescript" code={`function updateSelectionAfterEdit(selection, operation) {
   // 앵커 업데이트
   selection.anchor = updatePosition(selection.anchor, operation);
   

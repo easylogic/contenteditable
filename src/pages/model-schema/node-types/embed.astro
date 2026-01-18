@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Embed</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   embed: {
     group: 'block',
     attrs: {
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'embed',
   attrs: {
     url: 'https://example.com/embed',
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeEmbed(node) {
+              <DocCodeBlock language="typescript" code={`function serializeEmbed(node) {
   return '<div data-type="embed" data-embed-type="' + node.attrs.type + 
          '" data-url="' + escapeHtml(node.attrs.url) + '"></div>';
 }`} />
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseEmbed(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseEmbed(domNode) {
   return {
     type: 'embed',
     attrs: {
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering embed
+              <DocCodeBlock language="typescript" code={`// Rendering embed
 const embed = document.createElement('div');
 embed.setAttribute('data-type', 'embed');
 embed.setAttribute('data-embed-type', node.attrs.type);
@@ -124,7 +124,7 @@ embed.contentEditable = 'false'; // Embeds are typically rendered`} />
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Embed URL validation
+              <DocCodeBlock language="typescript" code={`// Issue: Embed URL validation
 // Solution: Validate embed URLs
 function validateEmbedUrl(url, type) {
   const patterns = {
@@ -149,7 +149,7 @@ function detectEmbedType(url) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class EmbedNode {
+              <DocCodeBlock language="typescript" code={`class EmbedNode {
   constructor(attrs) {
     this.type = 'embed';
     this.attrs = {

@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="섹션 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>섹션</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   section: {
     content: 'block+',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'section',
   attrs: { level: 1 },
   children: [
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeSection(node) {
+              <DocCodeBlock language="typescript" code={`function serializeSection(node) {
   return '<section data-level="' + node.attrs.level + '">' + 
          serializeChildren(node.children) + '</section>';
 }`} />
@@ -119,7 +119,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseSection(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseSection(domNode) {
   return {
     type: 'section',
     attrs: { level: parseInt(domNode.getAttribute('data-level')) || 1 },
@@ -137,7 +137,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 섹션 렌더링
+              <DocCodeBlock language="typescript" code={`// 섹션 렌더링
 const section = document.createElement('section');
 section.setAttribute('data-level', node.attrs.level);
 section.contentEditable = 'true';
@@ -153,7 +153,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 섹션 중첩
+              <DocCodeBlock language="typescript" code={`// 문제: 섹션 중첩
 // 해결: 중첩된 섹션 처리
 function validateSectionNesting(section, parent) {
   const level = parseInt(section.getAttribute('data-level'));
@@ -173,7 +173,7 @@ function validateSectionStructure(section) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class SectionNode {
+              <DocCodeBlock language="typescript" code={`class SectionNode {
   constructor(attrs, children) {
     this.type = 'section';
     this.attrs = { level: attrs?.level || 1 };

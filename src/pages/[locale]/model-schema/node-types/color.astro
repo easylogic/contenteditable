@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="색상 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>색상</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   color: {
     attrs: {
       color: { default: '#000000' }
@@ -86,7 +86,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '색상 텍스트',
   marks: [{
@@ -100,7 +100,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeColorMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeColorMark(text, mark) {
   const color = mark.attrs?.color || '#000000';
   return '<span style="color: ' + escapeHtml(color) + '">' + text + '</span>';
 }`} />
@@ -110,7 +110,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractColorMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractColorMark(element) {
   if (element.tagName === 'SPAN' && element.style.color) {
     return {
       type: 'color',
@@ -133,7 +133,7 @@ function extractColorFromStyle(colorString) {
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 색상 적용
+              <DocCodeBlock language="typescript" code={`// 색상 적용
 function applyColor(color) {
   addMark({
     type: 'color',
@@ -157,7 +157,7 @@ function showColorPicker() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 색상 형식 정규화
+              <DocCodeBlock language="typescript" code={`// 문제: 색상 형식 정규화
 // 해결: hex 형식으로 정규화
 function normalizeColor(color) {
   if (color.startsWith('rgb')) {
@@ -182,7 +182,7 @@ function applyColorWithMarks(text, color, otherMarks) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class ColorMark {
+              <DocCodeBlock language="typescript" code={`class ColorMark {
   constructor(attrs) {
     this.type = 'color';
     this.attrs = { color: attrs?.color || '#000000' };

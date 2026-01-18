@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Image</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   image: {
     inline: true,
     attrs: {
@@ -71,7 +71,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'image',
   attrs: {
     src: 'https://example.com/image.jpg',
@@ -86,7 +86,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeImage(node) {
+              <DocCodeBlock language="typescript" code={`function serializeImage(node) {
   const attrs = {};
   if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
   if (node.attrs.alt) attrs.alt = escapeHtml(node.attrs.alt);
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseImage(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseImage(domNode) {
   return {
     type: 'image',
     attrs: {
@@ -122,7 +122,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering image
+              <DocCodeBlock language="typescript" code={`// Rendering image
 const img = document.createElement('img');
 img.src = node.attrs.src;
 img.alt = node.attrs.alt || '';
@@ -154,7 +154,7 @@ function handleImageUpload(file) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Image loading errors
+              <DocCodeBlock language="typescript" code={`// Issue: Image loading errors
 // Solution: Handle broken images
 img.onerror = function() {
   this.src = 'placeholder.jpg';
@@ -184,7 +184,7 @@ function selectImage(img) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class ImageNode {
+              <DocCodeBlock language="typescript" code={`class ImageNode {
   constructor(attrs) {
     this.type = 'image';
     this.attrs = {

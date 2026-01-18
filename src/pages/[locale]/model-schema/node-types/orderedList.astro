@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="순서 있는 목록 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>순서 있는 목록</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   orderedList: {
     content: 'listItem+',
     group: 'block',
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'orderedList',
   attrs: { start: 1 },
   children: [
@@ -110,7 +110,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeOrderedList(node) {
+              <DocCodeBlock language="typescript" code={`function serializeOrderedList(node) {
   const attrs = node.attrs?.start !== 1 ? { start: node.attrs.start } : {};
   return '<ol' + serializeAttrs(attrs) + '>' + 
          serializeChildren(node.children) + '</ol>';
@@ -121,7 +121,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseOrderedList(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseOrderedList(domNode) {
   const start = parseInt(domNode.getAttribute('start')) || 1;
   return {
     type: 'orderedList',
@@ -140,7 +140,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 순서 있는 목록 렌더링
+              <DocCodeBlock language="typescript" code={`// 순서 있는 목록 렌더링
 const ol = document.createElement('ol');
 ol.contentEditable = 'true';
 if (node.attrs?.start !== 1) {
@@ -173,7 +173,7 @@ function createOrderedList() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 중첩된 목록
+              <DocCodeBlock language="typescript" code={`// 문제: 중첩된 목록
 // 해결: 중첩된 목록 항목을 올바르게 처리
 function handleNestedList(list, nestedList) {
   // 올바른 중첩 구조 보장
@@ -206,7 +206,7 @@ function validateListItem(item) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class OrderedListNode {
+              <DocCodeBlock language="typescript" code={`class OrderedListNode {
   constructor(attrs, children) {
     this.type = 'orderedList';
     this.attrs = { start: attrs?.start || 1 };

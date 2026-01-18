@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Iframe</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   iframe: {
     group: 'block',
     attrs: {
@@ -70,7 +70,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'iframe',
   attrs: {
     src: 'https://example.com/embed',
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeIframe(node) {
+              <DocCodeBlock language="typescript" code={`function serializeIframe(node) {
   const attrs = {};
   if (node.attrs.src) attrs.src = escapeHtml(node.attrs.src);
   if (node.attrs.width) attrs.width = node.attrs.width;
@@ -99,7 +99,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseIframe(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseIframe(domNode) {
   return {
     type: 'iframe',
     attrs: {
@@ -119,7 +119,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering iframe
+              <DocCodeBlock language="typescript" code={`// Rendering iframe
 const iframe = document.createElement('iframe');
 iframe.src = node.attrs.src;
 if (node.attrs.width) iframe.width = node.attrs.width;
@@ -135,7 +135,7 @@ iframe.contentEditable = 'false'; // Iframes are not editable`} />
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: XSS security
+              <DocCodeBlock language="typescript" code={`// Issue: XSS security
 // Solution: Validate and sanitize src URLs
 function validateIframeSrc(src) {
   const allowedDomains = ['youtube.com', 'vimeo.com'];
@@ -170,7 +170,7 @@ function makeIframeResponsive(iframe) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class IframeNode {
+              <DocCodeBlock language="typescript" code={`class IframeNode {
   constructor(attrs) {
     this.type = 'iframe';
     this.attrs = {

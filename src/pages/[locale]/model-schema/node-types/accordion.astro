@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="아코디언 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>아코디언</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   accordion: {
     content: 'block+',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'accordion',
   attrs: { open: false },
   children: [
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeAccordion(node) {
+              <DocCodeBlock language="typescript" code={`function serializeAccordion(node) {
   return '<div data-type="accordion" data-open="' + node.attrs.open + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -119,7 +119,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseAccordion(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseAccordion(domNode) {
   return {
     type: 'accordion',
     attrs: { open: domNode.getAttribute('data-open') === 'true' },
@@ -137,7 +137,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 아코디언 렌더링
+              <DocCodeBlock language="typescript" code={`// 아코디언 렌더링
 const accordion = document.createElement('div');
 accordion.setAttribute('data-type', 'accordion');
 accordion.setAttribute('data-open', node.attrs.open);
@@ -161,7 +161,7 @@ function toggleAccordion(accordion) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 아코디언 상태 관리
+              <DocCodeBlock language="typescript" code={`// 문제: 아코디언 상태 관리
 // 해결: 모델과 뷰 간 상태 동기화
 function syncAccordionState(accordion, model) {
   accordion.setAttribute('data-open', model.attrs.open);
@@ -178,7 +178,7 @@ function handleNestedAccordion(parent, child) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class AccordionNode {
+              <DocCodeBlock language="typescript" code={`class AccordionNode {
   constructor(attrs, children) {
     this.type = 'accordion';
     this.attrs = { open: attrs?.open || false };

@@ -1,0 +1,380 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'operation-interface', text: 'Operation Interface' },
+  { depth: 2, slug: 'insert-operations', text: 'Insert Operations' },
+  { depth: 2, slug: 'delete-operations', text: 'Delete Operations' },
+  { depth: 2, slug: 'format-operations', text: 'Format Operations' },
+  { depth: 2, slug: 'replace-operations', text: 'Replace Operations' },
+  { depth: 2, slug: 'move-operations', text: 'Move Operations' },
+  { depth: 2, slug: 'node-operations', text: 'Node Structure Operations' },
+  { depth: 2, slug: 'composite-operations', text: 'Composite Operations' },
+  { depth: 2, slug: 'operation-inversion', text: 'Operation Inversion' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Operations – Editor Architecture – contenteditable.lab"
+      description="Comprehensive guide to operation types used in transactions for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Operations</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Operations
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Comprehensive guide to operation types that can be combined in transactions for model-based editors.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Operations are atomic changes to the document model. They can be grouped into transactions to ensure consistency and enable undo/redo functionality. Each operation type has specific properties and behaviors.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Operation characteristics:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Immutable - operations don't modify existing state</li>
+                  <li class="mb-1">Invertible - each operation has an inverse</li>
+                  <li class="mb-1">Composable - operations can be combined in transactions</li>
+                  <li class="mb-1">Validatable - operations can be validated before application</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="operation-interface" title="Operation Interface">
+              <p class="m-0 mb-4">
+                All operations follow a common interface:
+              </p>
+              <DocCodeBlock language="typescript" code={`interface Operation {
+  type: string;
+  path: Path;
+  data?: any;
+  inverse?: Operation; // Pre-computed inverse for efficiency
+  metadata?: {
+    source?: 'user' | 'programmatic';
+    timestamp?: number;
+    [key: string]: any;
+  };
+}
+
+// Path represents position in document tree
+type Path = number[];
+
+// Example paths:
+// [0] - first child of root
+// [0, 1] - second child of first child
+// [0, 1, 2] - third child of second child of first child`} />
+            </DocSection>
+
+            <DocSection id="insert-operations" title="Insert Operations">
+              <p class="m-0 mb-4">
+                Insert operations add content to the document at a specific path.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/insert-text" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Text</h4>
+                  <p class="text-xs m-0 text-text-secondary">Insert text content at a specific position</p>
+                </a>
+                <a href="/editor/operations/insert-node" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Node</h4>
+                  <p class="text-xs m-0 text-text-secondary">Insert block or inline nodes</p>
+                </a>
+                <a href="/editor/operations/insert-paragraph" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Paragraph</h4>
+                  <p class="text-xs m-0 text-text-secondary">Insert a new paragraph node</p>
+                </a>
+                <a href="/editor/operations/insert-line-break" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Insert Line Break</h4>
+                  <p class="text-xs m-0 text-text-secondary">Insert a soft line break</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="delete-operations" title="Delete Operations">
+              <p class="m-0 mb-4">
+                Delete operations remove content from the document.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/delete-content" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Content</h4>
+                  <p class="text-xs m-0 text-text-secondary">Delete content in a range</p>
+                </a>
+                <a href="/editor/operations/delete-backward" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Backward</h4>
+                  <p class="text-xs m-0 text-text-secondary">Delete content before cursor</p>
+                </a>
+                <a href="/editor/operations/delete-forward" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Forward</h4>
+                  <p class="text-xs m-0 text-text-secondary">Delete content after cursor</p>
+                </a>
+                <a href="/editor/operations/delete-word" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Delete Word</h4>
+                  <p class="text-xs m-0 text-text-secondary">Delete word backward or forward</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="format-operations" title="Format Operations">
+              <p class="m-0 mb-4">
+                Format operations modify text styling without changing content.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/apply-format" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Apply Format</h4>
+                  <p class="text-xs m-0 text-text-secondary">Apply formatting to text range</p>
+                </a>
+                <a href="/editor/operations/remove-format" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Remove Format</h4>
+                  <p class="text-xs m-0 text-text-secondary">Remove formatting from text range</p>
+                </a>
+                <a href="/editor/operations/toggle-format" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Toggle Format</h4>
+                  <p class="text-xs m-0 text-text-secondary">Toggle formatting on/off</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="replace-operations" title="Replace Operations">
+              <p class="m-0 mb-4">
+                Replace operations combine delete and insert in a single operation.
+              </p>
+              <div class="mb-4">
+                <a href="/editor/operations/replace" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline block">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Replace</h4>
+                  <p class="text-xs m-0 text-text-secondary">Replace content in a range with new content</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="move-operations" title="Move Operations">
+              <p class="m-0 mb-4">
+                Move operations relocate content within the document.
+              </p>
+              <div class="mb-4">
+                <a href="/editor/operations/move" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline block">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Move</h4>
+                  <p class="text-xs m-0 text-text-secondary">Move nodes or content to a different position</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="node-operations" title="Node Structure Operations">
+              <p class="m-0 mb-4">
+                Operations that modify node structure and relationships.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <a href="/editor/operations/split-node" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Split Node</h4>
+                  <p class="text-xs m-0 text-text-secondary">Split a node at a position into two nodes</p>
+                </a>
+                <a href="/editor/operations/merge-nodes" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Merge Nodes</h4>
+                  <p class="text-xs m-0 text-text-secondary">Merge two adjacent nodes into one</p>
+                </a>
+                <a href="/editor/operations/wrap" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Wrap</h4>
+                  <p class="text-xs m-0 text-text-secondary">Wrap nodes with another node</p>
+                </a>
+                <a href="/editor/operations/unwrap" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Unwrap</h4>
+                  <p class="text-xs m-0 text-text-secondary">Remove wrapper node and promote children</p>
+                </a>
+                <a href="/editor/operations/set-node-type" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Set Node Type</h4>
+                  <p class="text-xs m-0 text-text-secondary">Change node type while preserving content</p>
+                </a>
+                <a href="/editor/operations/update-attributes" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Update Attributes</h4>
+                  <p class="text-xs m-0 text-text-secondary">Update node attributes without changing structure</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="composite-operations" title="Composite Operations">
+              <p class="m-0 mb-4">
+                Composite operations combine multiple operations for complex transformations.
+              </p>
+              <div class="mb-4">
+                <a href="/editor/operations/composite" class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline block">
+                  <h4 class="text-sm font-semibold m-0 mb-2 text-text-primary">Composite Operations</h4>
+                  <p class="text-xs m-0 text-text-secondary">Combine multiple operations for complex transformations</p>
+                </a>
+              </div>
+            </DocSection>
+
+            <DocSection id="operation-inversion" title="Operation Inversion">
+              <p class="m-0 mb-4">
+                Every operation must have an inverse for undo functionality.
+              </p>
+              <DocCodeBlock language="typescript" code={`class OperationInverter {
+  invert(operation: Operation): Operation {
+    switch (operation.type) {
+      case 'insertText':
+        return {
+          type: 'deleteText',
+          path: operation.path,
+          length: operation.text.length
+        };
+      
+      case 'deleteText':
+        return {
+          type: 'insertText',
+          path: operation.path,
+          text: operation.deletedContent || ''
+        };
+      
+      case 'insertNode':
+        return {
+          type: 'deleteNode',
+          path: operation.path
+        };
+      
+      case 'deleteNode':
+        return {
+          type: 'insertNode',
+          path: operation.path,
+          node: operation.deletedNode
+        };
+      
+      case 'applyFormat':
+        return {
+          type: 'removeFormat',
+          path: operation.path,
+          length: operation.length,
+          format: operation.format
+        };
+      
+      case 'removeFormat':
+        return {
+          type: 'applyFormat',
+          path: operation.path,
+          length: operation.length,
+          format: operation.format,
+          value: operation.previousValue
+        };
+      
+      case 'replace':
+        return {
+          type: 'replace',
+          path: operation.path,
+          length: typeof operation.content === 'string' 
+            ? operation.content.length 
+            : 1,
+          content: operation.deletedContent
+        };
+      
+      case 'move':
+        return {
+          type: 'move',
+          fromPath: operation.toPath,
+          toPath: operation.fromPath
+        };
+      
+      case 'splitNode':
+        return {
+          type: 'mergeNodes',
+          path: operation.path,
+          targetPath: [operation.path[0] + 1],
+          position: operation.position
+        };
+      
+      case 'mergeNodes':
+        return {
+          type: 'splitNode',
+          path: operation.path,
+          position: operation.position
+        };
+      
+      case 'wrap':
+        return {
+          type: 'unwrap',
+          path: operation.path,
+          wrapperType: operation.wrapper.type,
+          preservedWrapper: operation.wrapper
+        };
+      
+      case 'unwrap':
+        return {
+          type: 'wrap',
+          path: operation.path,
+          wrapper: operation.preservedWrapper!
+        };
+      
+      case 'updateAttributes':
+        return {
+          type: 'updateAttributes',
+          path: operation.path,
+          attributes: operation.previousAttributes || {},
+          previousAttributes: operation.attributes
+        };
+      
+      case 'setNodeType':
+        return {
+          type: 'setNodeType',
+          path: operation.path,
+          nodeType: operation.previousType!,
+          previousType: operation.nodeType,
+          attributes: operation.previousAttributes,
+          previousAttributes: operation.attributes
+        };
+      
+      default:
+        throw new Error(\`Unknown operation type: \${operation.type}\`);
+    }
+  }
+}
+
+// Pre-compute inverse for efficiency
+function createOperationWithInverse(operation: Operation): Operation {
+  const inverter = new OperationInverter();
+  return {
+    ...operation,
+    inverse: inverter.invert(operation)
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations"
+              pages={[
+                { title: 'Transaction System', href: '/editor/transaction', description: 'Using transactions for atomic operations' },
+                { title: 'History Management', href: '/editor/history-management', description: 'Undo/redo history management' },
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

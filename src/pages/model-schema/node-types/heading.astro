@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Heading</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   heading: {
     content: 'inline*',
     group: 'block',
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'heading',
   attrs: { level: 1 },
   children: [
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeHeading(node) {
+              <DocCodeBlock language="typescript" code={`function serializeHeading(node) {
   const level = node.attrs?.level || 1;
   return '<h' + level + '>' + 
          serializeChildren(node.children) + 
@@ -93,7 +93,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseHeading(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseHeading(domNode) {
   const level = parseInt(domNode.tagName[1]) || 1;
   return {
     type: 'heading',
@@ -110,7 +110,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering
+              <DocCodeBlock language="typescript" code={`// Rendering
 const level = node.attrs?.level || 1;
 const h = document.createElement('h' + level);
 h.contentEditable = 'true';
@@ -135,7 +135,7 @@ function changeHeadingLevel(node, newLevel) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Heading level validation
+              <DocCodeBlock language="typescript" code={`// Issue: Heading level validation
 // Solution: Always validate level
 if (node.attrs.level < 1 || node.attrs.level > 6) {
   node.attrs.level = 1;
@@ -159,7 +159,7 @@ function validateHeadingHierarchy(doc) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class HeadingNode {
+              <DocCodeBlock language="typescript" code={`class HeadingNode {
   constructor(attrs, children) {
     this.type = 'heading';
     this.attrs = { level: attrs?.level || 1 };

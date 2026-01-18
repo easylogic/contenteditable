@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="하이라이트 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>하이라이트</strong> 마크 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   highlight: {
     attrs: {
       color: { default: '#ffff00' }
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: '하이라이트된 텍스트',
   marks: [{
@@ -102,7 +102,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeHighlightMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeHighlightMark(text, mark) {
   const color = mark.attrs?.color || '#ffff00';
   return '<mark style="background-color: ' + escapeHtml(color) + '">' + 
          text + '</mark>';
@@ -113,7 +113,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function extractHighlightMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractHighlightMark(element) {
   if (element.tagName === 'MARK') {
     const color = element.style.backgroundColor || '#ffff00';
     return {
@@ -132,7 +132,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 하이라이트 적용
+              <DocCodeBlock language="typescript" code={`// 하이라이트 적용
 function applyHighlight(color = '#ffff00') {
   addMark({
     type: 'highlight',
@@ -153,7 +153,7 @@ function removeHighlight() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 하이라이트 색상 형식
+              <DocCodeBlock language="typescript" code={`// 문제: 하이라이트 색상 형식
 // 해결: hex로 정규화
 function normalizeHighlightColor(color) {
   return normalizeColor(color);
@@ -171,7 +171,7 @@ function mergeHighlights(element) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class HighlightMark {
+              <DocCodeBlock language="typescript" code={`class HighlightMark {
   constructor(attrs) {
     this.type = 'highlight';
     this.attrs = { color: attrs?.color || '#ffff00' };

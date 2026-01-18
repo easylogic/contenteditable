@@ -9,6 +9,7 @@ import {
   defaultLocale,
   getLocaleFromPath,
   getLocalizedPath,
+  getLocaleInfo,
   type Locale,
 } from '../../i18n/translations';
 
@@ -22,6 +23,7 @@ export const getStaticPaths = (() => {
 
 const locale = Astro.params.locale as Locale;
 const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = getLocaleInfo(locale);
 
 // Get all tips for the current locale
 const tips = await getCollection('tips', ({ data }) => data.locale === locale);
@@ -170,7 +172,7 @@ const tipsByDifficulty = tips.reduce((acc, tip) => {
 
 ---
 
-<html lang={locale} dir={locales[locale].dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
 <head>
   <BaseHead 
     title={pageTitle}

@@ -1,0 +1,89 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'interface', text: 'Interface' },
+  { depth: 2, slug: 'usage', text: 'Usage' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Insert Paragraph Operation – Editor Architecture – contenteditable.lab"
+      description="Insert paragraph operation for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Insert Paragraph</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Insert Paragraph Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Insert a new paragraph node at a specific position.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The insert paragraph operation creates a new paragraph node. Typically triggered when user presses Enter.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="Interface">
+              <DocCodeBlock language="typescript" code={`interface InsertParagraphOperation extends Operation {
+  type: 'insertParagraph';
+  path: Path;
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="Usage">
+              <DocCodeBlock language="typescript" code={`function insertParagraph(editor: Editor, position: Path) {
+  const operation: InsertParagraphOperation = {
+    type: 'insertParagraph',
+    path: position
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Inverse: Delete paragraph
+const inverse = {
+  type: 'deleteNode',
+  path: position
+};`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/insert-paragraph"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations overview' },
+                { title: 'Insert Node', href: '/editor/operations/insert-node', description: 'Insert node operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

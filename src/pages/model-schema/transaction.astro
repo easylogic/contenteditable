@@ -1,0 +1,416 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'transaction-model', text: 'Transaction Model' },
+  { depth: 3, slug: 'atomic-operations', text: 'Atomic Operations' },
+  { depth: 3, slug: 'transaction-lifecycle', text: 'Transaction Lifecycle' },
+  { depth: 2, slug: 'rollback-mechanism', text: 'Rollback Mechanism' },
+  { depth: 3, slug: 'operation-inversion', text: 'Operation Inversion' },
+  { depth: 3, slug: 'snapshot-restore', text: 'Snapshot Restore' },
+  { depth: 2, slug: 'nested-transactions', text: 'Nested Transactions' },
+  { depth: 2, slug: 'transaction-isolation', text: 'Transaction Isolation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Transaction System – Model & Schema – contenteditable.lab"
+      description="Understanding transaction system: atomic operations, rollback mechanisms, and nested transactions"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Transaction System</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Transaction System
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              A transaction system ensures atomic operations and provides rollback capabilities.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Transactions group multiple operations into atomic units. Either all operations succeed, or none are applied. This ensures document consistency and enables undo/redo functionality.
+              </p>
+            </DocSection>
+
+            <DocSection id="transaction-model" title="Transaction Model">
+              <DocSection id="atomic-operations" title="Atomic Operations" depth={3}>
+                <p class="m-0 mb-3">
+                  Group operations into transactions for atomicity:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Transaction {
+  #operations = [];
+  #snapshot = null;
+  #editor = null;
+  
+  constructor(editor) {
+    this.#editor = editor;
+    this.#snapshot = this.#editor.getDocument();
+  }
+  
+  add(operation) {
+    this.#operations.push(operation);
+  }
+  
+  async commit() {
+    // Validate all operations
+    for (const op of this.#operations) {
+      if (!this.#editor.canApply(op)) {
+        return false;
+      }
+    }
+    
+    // Apply all operations atomically
+    try {
+      for (const op of this.#operations) {
+        this.#editor.applyOperation(op);
+      }
+      
+      // Commit successful
+      return true;
+    } catch (error) {
+      // Rollback on error
+      this.rollback();
+      return false;
+    }
+  }
+  
+  rollback() {
+    // Restore snapshot
+    this.#editor.setDocument(this.#snapshot);
+    this.#operations = [];
+  }
+  
+  getOperations() {
+    return [...this.#operations];
+  }
+}
+
+// Usage
+const transaction = editor.beginTransaction();
+transaction.add({ type: 'insert', path: [0], content: 'Hello' });
+transaction.add({ type: 'insert', path: [0], content: ' World' });
+
+if (await transaction.commit()) {
+  console.log('Transaction committed');
+} else {
+  console.log('Transaction failed, rolled back');
+}`} />
+              </DocSection>
+
+              <DocSection id="transaction-lifecycle" title="Transaction Lifecycle" depth={3}>
+                <p class="m-0 mb-3">
+                  Complete transaction lifecycle:
+                </p>
+                <DocCodeBlock language="typescript" code={`class TransactionManager {
+  #activeTransactions = [];
+  
+  beginTransaction(editor) {
+    const transaction = new Transaction(editor);
+    this.#activeTransactions.push(transaction);
+    return transaction;
+  }
+  
+  async commitTransaction(transaction) {
+    const index = this.#activeTransactions.indexOf(transaction);
+    if (index === -1) {
+      throw new Error('Transaction not found');
+    }
+    
+    const success = await transaction.commit();
+    
+    if (success) {
+      this.#activeTransactions.splice(index, 1);
+    }
+    
+    return success;
+  }
+  
+  rollbackTransaction(transaction) {
+    const index = this.#activeTransactions.indexOf(transaction);
+    if (index === -1) {
+      throw new Error('Transaction not found');
+    }
+    
+    transaction.rollback();
+    this.#activeTransactions.splice(index, 1);
+  }
+  
+  rollbackAll() {
+    this.#activeTransactions.forEach(transaction => {
+      transaction.rollback();
+    });
+    this.#activeTransactions = [];
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="rollback-mechanism" title="Rollback Mechanism">
+              <DocSection id="operation-inversion" title="Operation Inversion" depth={3}>
+                <p class="m-0 mb-3">
+                  Implement rollback using operation inversion:
+                </p>
+                <DocCodeBlock language="typescript" code={`class RollbackManager {
+  #history = [];
+  #inverseHistory = [];
+  
+  apply(operation) {
+    // Apply operation
+    this.#applyOperation(operation);
+    
+    // Generate inverse operation
+    const inverse = this.#inverse(operation);
+    
+    // Store both
+    this.#history.push(operation);
+    this.#inverseHistory.push(inverse);
+    
+    return inverse;
+  }
+  
+  #inverse(operation) {
+    switch (operation.type) {
+      case 'insert':
+        return {
+          type: 'delete',
+          path: operation.path,
+          length: typeof operation.content === 'string' 
+            ? operation.content.length 
+            : 1
+        };
+      
+      case 'delete':
+        return {
+          type: 'insert',
+          path: operation.path,
+          content: operation.content // Restore deleted content
+        };
+      
+      case 'update':
+        return {
+          type: 'update',
+          path: operation.path,
+          attrs: operation.previousAttrs // Restore previous attributes
+        };
+    }
+  }
+  
+  undo() {
+    if (this.#inverseHistory.length === 0) {
+      return false;
+    }
+    
+    const inverse = this.#inverseHistory.pop();
+    const original = this.#history.pop();
+    
+    // Apply inverse
+    this.#applyOperation(inverse);
+    
+    return true;
+  }
+  
+  redo() {
+    if (this.#history.length === 0) {
+      return false;
+    }
+    
+    // Re-apply last operation
+    const operation = this.#history[this.#history.length - 1];
+    this.#applyOperation(operation);
+    
+    return true;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="snapshot-restore" title="Snapshot Restore" depth={3}>
+                <p class="m-0 mb-3">
+                  Alternative approach using snapshots:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SnapshotManager {
+  #snapshots = [];
+  #currentIndex = -1;
+  
+  createSnapshot(document) {
+    // Deep clone document
+    const snapshot = this.#deepClone(document);
+    
+    // Remove old snapshots after current index
+    this.#snapshots = this.#snapshots.slice(0, this.#currentIndex + 1);
+    
+    // Add new snapshot
+    this.#snapshots.push(snapshot);
+    this.#currentIndex = this.#snapshots.length - 1;
+    
+    return this.#currentIndex;
+  }
+  
+  restoreSnapshot(index) {
+    if (index < 0 || index >= this.#snapshots.length) {
+      return false;
+    }
+    
+    const snapshot = this.#snapshots[index];
+    this.#currentIndex = index;
+    
+    // Restore document
+    return this.#deepClone(snapshot);
+  }
+  
+  undo() {
+    if (this.#currentIndex > 0) {
+      this.#currentIndex--;
+      return this.#snapshots[this.#currentIndex];
+    }
+    return null;
+  }
+  
+  redo() {
+    if (this.#currentIndex < this.#snapshots.length - 1) {
+      this.#currentIndex++;
+      return this.#snapshots[this.#currentIndex];
+    }
+    return null;
+  }
+  
+  #deepClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="nested-transactions" title="Nested Transactions">
+              <p class="m-0 mb-4">
+                Support nested transactions:
+              </p>
+              <DocCodeBlock language="typescript" code={`class NestedTransaction extends Transaction {
+  #parent = null;
+  #children = [];
+  
+  constructor(editor, parent = null) {
+    super(editor);
+    this.#parent = parent;
+    if (parent) {
+      parent.#children.push(this);
+    }
+  }
+  
+  async commit() {
+    // Commit all child transactions first
+    for (const child of this.#children) {
+      const success = await child.commit();
+      if (!success) {
+        return false;
+      }
+    }
+    
+    // Then commit this transaction
+    return await super.commit();
+  }
+  
+  rollback() {
+    // Rollback all child transactions
+    this.#children.forEach(child => child.rollback());
+    
+    // Then rollback this transaction
+    super.rollback();
+  }
+}
+
+// Usage
+const outer = editor.beginTransaction();
+outer.add({ type: 'insert', path: [0], content: 'Outer' });
+
+const inner = editor.beginTransaction(outer);
+inner.add({ type: 'insert', path: [1], content: 'Inner' });
+
+// Committing outer will also commit inner
+await outer.commit();`} />
+            </DocSection>
+
+            <DocSection id="transaction-isolation" title="Transaction Isolation">
+              <p class="m-0 mb-4">
+                Ensure transaction isolation:
+              </p>
+              <DocCodeBlock language="typescript" code={`class IsolatedTransaction extends Transaction {
+  #isolatedDocument = null;
+  
+  constructor(editor) {
+    super(editor);
+    // Create isolated copy of document
+    this.#isolatedDocument = this.#deepClone(editor.getDocument());
+  }
+  
+  add(operation) {
+    // Apply to isolated document
+    this.#isolatedDocument = this.#applyToDocument(
+      this.#isolatedDocument,
+      operation
+    );
+    this.#operations.push(operation);
+  }
+  
+  async commit() {
+    // Validate on isolated document
+    const valid = this.#validate(this.#isolatedDocument);
+    if (!valid) {
+      return false;
+    }
+    
+    // Apply all operations to real document
+    for (const op of this.#operations) {
+      this.#editor.applyOperation(op);
+    }
+    
+    return true;
+  }
+  
+  // Read operations work on isolated document
+  read(path) {
+    return this.#getNodeAtPath(this.#isolatedDocument, path);
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/model-schema/transaction"
+              pages={[
+                { title: 'Model & Schema', href: '/model-schema', description: 'Overview of model and schema concepts' },
+                { title: 'Collaborative Editing', href: '/model-schema/collaborative-editing', description: 'Operational Transformation and CRDTs' },
+                { title: 'Schema Migration', href: '/model-schema/migration', description: 'Version management and migration strategies' },
+                { title: 'Indexing Strategies', href: '/model-schema/indexing', description: 'Document, position, and content indexing' },
+                { title: 'Advanced Validation', href: '/model-schema/validation', description: 'Recursive validation and performance optimization' },
+                { title: 'Node Types', href: '/model-schema/node-types', description: 'Comprehensive node type examples' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

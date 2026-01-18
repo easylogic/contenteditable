@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Bullet List</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   bulletList: {
     content: 'listItem+',
     group: 'block',
@@ -65,7 +65,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'bulletList',
   children: [
     {
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeBulletList(node) {
+              <DocCodeBlock language="typescript" code={`function serializeBulletList(node) {
   return '<ul>' + serializeChildren(node.children) + '</ul>';
 }`} />
             </DocSection>
@@ -94,7 +94,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseBulletList(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseBulletList(domNode) {
   return {
     type: 'bulletList',
     children: Array.from(domNode.children)
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering bullet list
+              <DocCodeBlock language="typescript" code={`// Rendering bullet list
 const ul = document.createElement('ul');
 ul.contentEditable = 'true';
 node.children.forEach(item => {
@@ -140,7 +140,7 @@ function createBulletList() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Nested lists
+              <DocCodeBlock language="typescript" code={`// Issue: Nested lists
 // Solution: Handle nested list items properly
 function handleNestedList(list, nestedList) {
   const lastItem = list.lastElementChild;
@@ -169,7 +169,7 @@ function validateListItem(item) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class BulletListNode {
+              <DocCodeBlock language="typescript" code={`class BulletListNode {
   constructor(children) {
     this.type = 'bulletList';
     this.children = children || [];

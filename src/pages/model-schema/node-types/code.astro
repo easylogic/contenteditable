@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Code</strong> mark type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   code: {
     excludes: 'bold italic underline link'
     // Code mark excludes other formatting marks
@@ -65,7 +65,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: 'inline code',
   marks: [{ type: 'code' }]
@@ -76,7 +76,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeCodeMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeCodeMark(text, mark) {
   return '<code>' + escapeHtml(text) + '</code>';
 }`} />
             </DocSection>
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function extractCodeMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractCodeMark(element) {
   if (element.tagName === 'CODE') {
     return { type: 'code' };
   }
@@ -100,7 +100,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Toggling code
+              <DocCodeBlock language="typescript" code={`// Toggling code
 function toggleCode() {
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
@@ -125,7 +125,7 @@ function toggleCode() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Code mark excludes other marks
+              <DocCodeBlock language="typescript" code={`// Issue: Code mark excludes other marks
 // Solution: Remove conflicting marks when applying code
 function applyCodeMark(textNode) {
   // Remove bold, italic, underline, link
@@ -156,7 +156,7 @@ function escapeHtml(text) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class CodeMark {
+              <DocCodeBlock language="typescript" code={`class CodeMark {
   constructor() {
     this.type = 'code';
   }

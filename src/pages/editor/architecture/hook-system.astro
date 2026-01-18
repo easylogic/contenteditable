@@ -1,0 +1,374 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'sync-hooks', text: 'Synchronous Hooks' },
+  { depth: 3, slug: 'basic-sync-hook', text: 'Basic SyncHook' },
+  { depth: 3, slug: 'waterfall-hook', text: 'Waterfall Hook' },
+  { depth: 2, slug: 'async-hooks', text: 'Asynchronous Hooks' },
+  { depth: 3, slug: 'parallel-hook', text: 'Parallel Hook' },
+  { depth: 3, slug: 'series-hook', text: 'Series Hook' },
+  { depth: 2, slug: 'hook-lifecycle', text: 'Hook Lifecycle Management' },
+  { depth: 3, slug: 'hook-definition', text: 'Hook Definition' },
+  { depth: 3, slug: 'hook-integration', text: 'Hook Integration' },
+  { depth: 2, slug: 'advanced-patterns', text: 'Advanced Patterns' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Hook System Implementation – Editor Architecture – contenteditable.lab"
+      description="Understanding hook system implementation: synchronous hooks, asynchronous hooks, and lifecycle management"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Hook System</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Hook System Implementation
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              A hook system allows plugins to extend editor functionality at specific points in the lifecycle. This pattern is used by webpack, Vue, and other extensible systems.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Hooks provide a way for plugins to tap into the editor's lifecycle and modify behavior at specific points. They enable a plugin architecture where functionality can be extended without modifying core code.
+              </p>
+              <p class="m-0 mb-4">
+                The hook system is inspired by webpack's tapable system and Vue's plugin system. It provides both synchronous and asynchronous hooks, allowing for flexible plugin integration.
+              </p>
+            </DocSection>
+
+            <DocSection id="sync-hooks" title="Synchronous Hooks">
+              <DocSection id="basic-sync-hook" title="Basic SyncHook" depth={3}>
+                <p class="m-0 mb-3">
+                  Synchronous hooks execute callbacks in sequence. Each callback receives the same arguments:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class SyncHook {
+  #callbacks = [];
+  
+  tap(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  call(...args) {
+    this.#callbacks.forEach(callback => {
+      callback(...args);
+    });
+  }
+  
+  untap(fn) {
+    const index = this.#callbacks.indexOf(fn);
+    if (index > -1) {
+      this.#callbacks.splice(index, 1);
+    }
+  }
+}
+
+// Usage
+const hooks = {
+  beforeOperation: new SyncHook(),
+  afterOperation: new SyncHook(),
+  render: new SyncHook()
+};
+
+// Register callbacks
+hooks.beforeOperation.tap((operation) => {
+  console.log('Before operation:', operation);
+});
+
+hooks.beforeOperation.tap((operation) => {
+  // Can modify operation
+  if (operation.type === 'insertText' && operation.text.length > 100) {
+    operation.text = operation.text.substring(0, 100);
+  }
+});
+
+// Call hook
+hooks.beforeOperation.call(operation);`} />
+              </DocSection>
+
+              <DocSection id="waterfall-hook" title="Waterfall Hook" depth={3}>
+                <p class="m-0 mb-3">
+                  Waterfall hooks pass return values to the next callback:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class SyncWaterfallHook {
+  #callbacks = [];
+  
+  tap(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  call(initialValue) {
+    return this.#callbacks.reduce((value, callback) => {
+      return callback(value);
+    }, initialValue);
+  }
+}
+
+// Usage: Transform document through multiple plugins
+const transformHook = new SyncWaterfallHook();
+
+transformHook.tap((doc) => {
+  // Plugin 1: Normalize whitespace
+  return normalizeWhitespace(doc);
+});
+
+transformHook.tap((doc) => {
+  // Plugin 2: Validate structure
+  return validateStructure(doc);
+});
+
+const transformed = transformHook.call(originalDocument);`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="async-hooks" title="Asynchronous Hooks">
+              <DocSection id="parallel-hook" title="Parallel Hook" depth={3}>
+                <p class="m-0 mb-3">
+                  Asynchronous hooks allow parallel execution:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class AsyncParallelHook {
+  #callbacks = [];
+  
+  tapPromise(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  async promise() {
+    // Execute all callbacks in parallel
+    await Promise.all(this.#callbacks.map(callback => callback()));
+  }
+}
+
+// Usage
+const hooks = {
+  initAsync: new AsyncParallelHook()
+};
+
+// Multiple plugins can initialize in parallel
+hooks.initAsync.tapPromise(async () => {
+  await loadUserPreferences();
+});
+
+hooks.initAsync.tapPromise(async () => {
+  await loadDocumentHistory();
+});
+
+// Both run in parallel
+await hooks.initAsync.promise();`} />
+              </DocSection>
+
+              <DocSection id="series-hook" title="Series Hook" depth={3}>
+                <p class="m-0 mb-3">
+                  Series hooks execute sequentially:
+                </p>
+                <DocCodeBlock language="typescript" code={`export class AsyncSeriesHook {
+  #callbacks = [];
+  
+  tapPromise(fn) {
+    this.#callbacks.push(fn);
+  }
+  
+  async promise() {
+    // Execute callbacks sequentially
+    for (const callback of this.#callbacks) {
+      await callback();
+    }
+  }
+}
+
+// Usage
+const hooks = {
+  saveAsync: new AsyncSeriesHook()
+};
+
+// Save operations must be sequential
+hooks.saveAsync.tapPromise(async () => {
+  await saveToLocalStorage();
+});
+
+hooks.saveAsync.tapPromise(async () => {
+  await syncToServer();
+});
+
+// Run sequentially
+await hooks.saveAsync.promise();`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="hook-lifecycle" title="Hook Lifecycle Management">
+              <DocSection id="hook-definition" title="Hook Definition" depth={3}>
+                <p class="m-0 mb-3">
+                  Define a complete hook lifecycle for editor operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`// Editor hooks definition
+const hooks = {
+  // Initialization
+  init: new SyncHook(),
+  initAsync: new AsyncParallelHook(),
+  ready: new SyncHook(),
+  
+  // Operations
+  beforeOperation: new SyncHook(),
+  operation: new SyncHook(),
+  afterOperation: new SyncHook(),
+  
+  // Rendering
+  beforeRender: new SyncHook(),
+  render: new SyncHook(),
+  afterRender: new SyncHook(),
+  
+  // Selection
+  selectionChange: new SyncHook(),
+  
+  // Cleanup
+  destroy: new SyncHook()
+};
+
+class Editor {
+  constructor() {
+    this.#hooks = hooks;
+  }
+  
+  applyOperation(operation) {
+    // Before operation hooks
+    this.#hooks.beforeOperation.call(operation);
+    
+    // Apply operation
+    this.#doApplyOperation(operation);
+    
+    // Operation hooks
+    this.#hooks.operation.call(operation);
+    
+    // After operation hooks
+    this.#hooks.afterOperation.call(operation);
+    
+    // Trigger render
+    this.render();
+  }
+  
+  render() {
+    const doc = this.getDocument();
+    
+    this.#hooks.beforeRender.call(doc);
+    this.#doRender(doc);
+    this.#hooks.render.call(doc);
+    this.#hooks.afterRender.call(doc);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="hook-integration" title="Hook Integration" depth={3}>
+                <p class="m-0 mb-3">
+                  Plugins can integrate with hooks:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HistoryPlugin {
+  apply(editor) {
+    // Hook into operations
+    editor.hooks.beforeOperation.tap((operation) => {
+      // Save state before operation
+      this.#saveState(editor.getDocument());
+    });
+    
+    editor.hooks.afterOperation.tap((operation) => {
+      // Update history after operation
+      this.#updateHistory(operation);
+    });
+  }
+}
+
+class ValidationPlugin {
+  apply(editor) {
+    // Hook into rendering
+    editor.hooks.beforeRender.tap((doc) => {
+      // Validate document before rendering
+      const errors = this.#validate(doc);
+      if (errors.length > 0) {
+        console.warn('Validation errors:', errors);
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="advanced-patterns" title="Advanced Patterns">
+              <p class="m-0 mb-4">
+                Advanced hook patterns for complex scenarios:
+              </p>
+              <DocCodeBlock language="typescript" code={`// Conditional hook execution
+class ConditionalHook extends SyncHook {
+  call(...args) {
+    this.#callbacks.forEach(callback => {
+      if (callback.condition(...args)) {
+        callback.fn(...args);
+      }
+    });
+  }
+}
+
+// Hook with priority
+class PriorityHook extends SyncHook {
+  tap(fn, priority = 0) {
+    this.#callbacks.push({ fn, priority });
+    this.#callbacks.sort((a, b) => b.priority - a.priority);
+  }
+  
+  call(...args) {
+    this.#callbacks.forEach(({ fn }) => {
+      fn(...args);
+    });
+  }
+}
+
+// Hook with context
+class ContextHook extends SyncHook {
+  call(context, ...args) {
+    this.#callbacks.forEach(callback => {
+      callback.call(context, ...args);
+    });
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/architecture/hook-system"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Asynchronous Initialization', href: '/editor/architecture/async-initialization', description: 'Promise-based initialization and lifecycle' },
+                { title: 'Event System', href: '/editor/architecture/event-system', description: 'Event system architecture and patterns' },
+                { title: 'Performance Optimization', href: '/editor/architecture/performance-optimization', description: 'Optimization strategies for large documents' },
+                { title: 'Rendering Pipeline', href: '/editor/architecture/rendering-pipeline', description: 'Rendering pipeline and update scheduling' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

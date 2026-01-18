@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Table Header</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tableHeader: {
     content: 'block+',
     tableRole: 'header_cell',
@@ -71,7 +71,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tableHeader',
   attrs: { colspan: 1, rowspan: 1 },
   children: [
@@ -87,7 +87,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeTableHeader(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTableHeader(node) {
   const attrs = {};
   if (node.attrs.colspan > 1) attrs.colspan = node.attrs.colspan;
   if (node.attrs.rowspan > 1) attrs.rowspan = node.attrs.rowspan;
@@ -100,7 +100,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseTableHeader(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTableHeader(domNode) {
   return {
     type: 'tableHeader',
     attrs: {
@@ -121,7 +121,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering table header
+              <DocCodeBlock language="typescript" code={`// Rendering table header
 const th = document.createElement('th');
 th.contentEditable = 'true';
 if (node.attrs.colspan > 1) th.colSpan = node.attrs.colspan;
@@ -138,7 +138,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Header styling
+              <DocCodeBlock language="typescript" code={`// Issue: Header styling
 // Solution: Apply consistent header styles
 function styleTableHeader(th) {
   th.style.fontWeight = 'bold';
@@ -156,7 +156,7 @@ function setHeaderScope(th, scope) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class TableHeaderNode {
+              <DocCodeBlock language="typescript" code={`class TableHeaderNode {
   constructor(attrs, children) {
     this.type = 'tableHeader';
     this.attrs = {

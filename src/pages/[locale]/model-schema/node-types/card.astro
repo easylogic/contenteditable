@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="카드 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>카드</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   card: {
     content: 'cardHeader cardBody*',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'card',
   attrs: { type: 'default' },
   children: [
@@ -108,7 +108,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeCard(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCard(node) {
   return '<div data-type="card" class="card">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -118,7 +118,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseCard(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCard(domNode) {
   return {
     type: 'card',
     attrs: { type: domNode.getAttribute('data-type') || 'default' },
@@ -136,7 +136,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 카드 렌더링
+              <DocCodeBlock language="typescript" code={`// 카드 렌더링
 const card = document.createElement('div');
 card.setAttribute('data-type', 'card');
 card.className = 'card';
@@ -153,7 +153,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 카드 구조 검증
+              <DocCodeBlock language="typescript" code={`// 문제: 카드 구조 검증
 // 해결: 카드에 헤더가 있는지 확인
 function validateCard(card) {
   if (!card.querySelector('[data-type="card-header"]')) {
@@ -168,7 +168,7 @@ function validateCard(card) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class CardNode {
+              <DocCodeBlock language="typescript" code={`class CardNode {
   constructor(attrs, children) {
     this.type = 'card';
     this.attrs = { type: attrs?.type || 'default' };

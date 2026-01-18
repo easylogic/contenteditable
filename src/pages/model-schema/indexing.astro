@@ -1,0 +1,437 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'document-index', text: 'Document Index' },
+  { depth: 3, slug: 'node-indexing', text: 'Node Indexing' },
+  { depth: 3, slug: 'path-indexing', text: 'Path Indexing' },
+  { depth: 2, slug: 'position-index', text: 'Position Index' },
+  { depth: 3, slug: 'text-positioning', text: 'Text Positioning' },
+  { depth: 3, slug: 'range-queries', text: 'Range Queries' },
+  { depth: 2, slug: 'content-index', text: 'Content Index' },
+  { depth: 3, slug: 'inverted-index', text: 'Inverted Index' },
+  { depth: 3, slug: 'search-operations', text: 'Search Operations' },
+  { depth: 2, slug: 'index-maintenance', text: 'Index Maintenance' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Indexing Strategies – Model & Schema – contenteditable.lab"
+      description="Understanding indexing strategies: document indexing, position indexing, and content indexing for large documents"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/model-schema" class="text-text-muted no-underline">Model/Schema</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Indexing Strategies</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Indexing Strategies
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Efficient indexing is crucial for performance with large documents. Multiple indexing strategies can be used together.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Indexing strategies enable fast lookups and queries on large documents. Different index types serve different purposes:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li><strong>Document Index:</strong> Fast node lookup by ID or path</li>
+                <li><strong>Position Index:</strong> Fast position-to-path conversion</li>
+                <li><strong>Content Index:</strong> Full-text search capabilities</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="document-index" title="Document Index">
+              <DocSection id="node-indexing" title="Node Indexing" depth={3}>
+                <p class="m-0 mb-3">
+                  Index nodes by ID for O(1) lookup:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DocumentIndex {
+  #nodeMap = new Map(); // nodeId -> Node
+  #pathMap = new Map(); // nodeId -> path
+  #parentMap = new Map(); // nodeId -> parentId
+  
+  index(document) {
+    this.#indexNode(document, []);
+  }
+  
+  #indexNode(node, path) {
+    const nodeId = node.id || this.#generateId(node, path);
+    node.id = nodeId;
+    
+    this.#nodeMap.set(nodeId, node);
+    this.#pathMap.set(nodeId, path);
+    
+    if (path.length > 0) {
+      const parentPath = path.slice(0, -1);
+      const parentId = this.#getNodeIdAtPath(parentPath);
+      this.#parentMap.set(nodeId, parentId);
+    }
+    
+    // Index children
+    node.children?.forEach((child, index) => {
+      this.#indexNode(child, [...path, index]);
+    });
+  }
+  
+  getNodeById(id) {
+    return this.#nodeMap.get(id);
+  }
+  
+  getPathById(id) {
+    return this.#pathMap.get(id);
+  }
+  
+  getParentId(id) {
+    return this.#parentMap.get(id);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="path-indexing" title="Path Indexing" depth={3}>
+                <p class="m-0 mb-3">
+                  Index paths for fast path-based lookups:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PathIndex {
+  #pathToNode = new Map(); // path -> Node
+  #nodeToPath = new Map(); // nodeId -> path
+  
+  index(document) {
+    this.#indexPath(document, []);
+  }
+  
+  #indexPath(node, path) {
+    const pathKey = this.#pathToString(path);
+    this.#pathToNode.set(pathKey, node);
+    
+    if (node.id) {
+      this.#nodeToPath.set(node.id, path);
+    }
+    
+    node.children?.forEach((child, index) => {
+      this.#indexPath(child, [...path, index]);
+    });
+  }
+  
+  getNodeByPath(path) {
+    const pathKey = this.#pathToString(path);
+    return this.#pathToNode.get(pathKey);
+  }
+  
+  getPathByNodeId(nodeId) {
+    return this.#nodeToPath.get(nodeId);
+  }
+  
+  #pathToString(path) {
+    return path.join(',');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="position-index" title="Position Index">
+              <DocSection id="text-positioning" title="Text Positioning" depth={3}>
+                <p class="m-0 mb-3">
+                  Index text positions for fast range queries:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PositionIndex {
+  #textPositions = [];
+  #charIndexToPath = new Map();
+  
+  index(document) {
+    let charIndex = 0;
+    this.#indexNode(document, [], charIndex);
+  }
+  
+  #indexNode(node, path, charIndex) {
+    if (node.type === 'text') {
+      // Index each character position
+      for (let i = 0; i < node.text.length; i++) {
+        this.#textPositions.push({
+          path,
+          offset: i,
+          charIndex: charIndex + i
+        });
+        this.#charIndexToPath.set(charIndex + i, { path, offset: i });
+      }
+      return charIndex + node.text.length;
+    }
+    
+    // Index children
+    let currentIndex = charIndex;
+    node.children?.forEach((child, index) => {
+      currentIndex = this.#indexNode(child, [...path, index], currentIndex);
+    });
+    
+    return currentIndex;
+  }
+  
+  pathToCharIndex(path, offset) {
+    const pos = this.#textPositions.find(
+      p => this.#pathsEqual(p.path, path) && p.offset === offset
+    );
+    return pos ? pos.charIndex : -1;
+  }
+  
+  charIndexToPath(charIndex) {
+    return this.#charIndexToPath.get(charIndex);
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="range-queries" title="Range Queries" depth={3}>
+                <p class="m-0 mb-3">
+                  Support efficient range queries:
+                </p>
+                <DocCodeBlock language="typescript" code={`class RangeIndex extends PositionIndex {
+  getRange(startPath, startOffset, endPath, endOffset) {
+    const startIndex = this.pathToCharIndex(startPath, startOffset);
+    const endIndex = this.pathToCharIndex(endPath, endOffset);
+    
+    if (startIndex === -1 || endIndex === -1) {
+      return null;
+    }
+    
+    // Extract text between positions
+    return this.#extractText(startIndex, endIndex);
+  }
+  
+  #extractText(startIndex, endIndex) {
+    const positions = this.#textPositions.filter(
+      p => p.charIndex >= startIndex && p.charIndex < endIndex
+    );
+    
+    // Group by path and extract text
+    const textByPath = new Map();
+    positions.forEach(pos => {
+      if (!textByPath.has(pos.path)) {
+        textByPath.set(pos.path, []);
+      }
+      textByPath.get(pos.path).push(pos);
+    });
+    
+    // Build text string
+    let text = '';
+    textByPath.forEach((positions, path) => {
+      positions.sort((a, b) => a.offset - b.offset);
+      const node = this.#getNodeByPath(path);
+      positions.forEach(pos => {
+        text += node.text[pos.offset];
+      });
+    });
+    
+    return text;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="content-index" title="Content Index">
+              <DocSection id="inverted-index" title="Inverted Index" depth={3}>
+                <p class="m-0 mb-3">
+                  Index content for search and queries:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ContentIndex {
+  #invertedIndex = new Map(); // term -> nodeIds
+  #nodeContent = new Map(); // nodeId -> content
+  
+  index(document) {
+    this.#indexNode(document);
+  }
+  
+  #indexNode(node) {
+    if (node.type === 'text') {
+      const nodeId = node.id;
+      const content = node.text;
+      
+      this.#nodeContent.set(nodeId, content);
+      
+      // Tokenize and index
+      const terms = this.#tokenize(content);
+      terms.forEach(term => {
+        if (!this.#invertedIndex.has(term)) {
+          this.#invertedIndex.set(term, new Set());
+        }
+        this.#invertedIndex.get(term).add(nodeId);
+      });
+    }
+    
+    // Index children
+    node.children?.forEach(child => this.#indexNode(child));
+  }
+  
+  #tokenize(text) {
+    // Simple tokenization
+    return text.toLowerCase()
+      .split(/\s+/)
+      .filter(term => term.length > 0);
+  }`} />
+              </DocSection>
+
+              <DocSection id="search-operations" title="Search Operations" depth={3}>
+                <p class="m-0 mb-3">
+                  Support various search operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`class SearchIndex extends ContentIndex {
+  search(query) {
+    const terms = this.#tokenize(query);
+    
+    // Find nodes containing all terms (AND search)
+    let result = null;
+    
+    terms.forEach(term => {
+      const nodeIds = this.#invertedIndex.get(term);
+      if (!nodeIds) {
+        return [];
+      }
+      
+      if (result === null) {
+        result = new Set(nodeIds);
+      } else {
+        // Intersection
+        result = new Set([...result].filter(id => nodeIds.has(id)));
+      }
+    });
+    
+    return result ? Array.from(result) : [];
+  }
+  
+  searchOr(query) {
+    const terms = this.#tokenize(query);
+    const result = new Set();
+    
+    terms.forEach(term => {
+      const nodeIds = this.#invertedIndex.get(term);
+      if (nodeIds) {
+        nodeIds.forEach(id => result.add(id));
+      }
+    });
+    
+    return Array.from(result);
+  }
+  
+  searchPhrase(phrase) {
+    // Find exact phrase matches
+    const terms = this.#tokenize(phrase);
+    const candidates = this.search(phrase);
+    
+    // Verify phrase order
+    return candidates.filter(nodeId => {
+      const content = this.#nodeContent.get(nodeId);
+      return content.toLowerCase().includes(phrase.toLowerCase());
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="index-maintenance" title="Index Maintenance">
+              <p class="m-0 mb-4">
+                Efficiently update indexes when document changes:
+              </p>
+              <DocCodeBlock language="typescript" code={`class IndexManager {
+  #indexes = [];
+  
+  addIndex(index) {
+    this.#indexes.push(index);
+  }
+  
+  index(document) {
+    this.#indexes.forEach(index => {
+      index.index(document);
+    });
+  }
+  
+  updateIndex(change) {
+    this.#indexes.forEach(index => {
+      index.updateIndex(change);
+    });
+  }
+  
+  // Incremental update
+  updateIncremental(change) {
+    switch (change.type) {
+      case 'insert':
+        this.#handleInsert(change);
+        break;
+      case 'delete':
+        this.#handleDelete(change);
+        break;
+      case 'update':
+        this.#handleUpdate(change);
+        break;
+      case 'move':
+        this.#handleMove(change);
+        break;
+    }
+  }
+  
+  #handleInsert(change) {
+    // Insert new node into indexes
+    this.#indexes.forEach(index => {
+      index.insertNode(change.node, change.path);
+    });
+  }
+  
+  #handleDelete(change) {
+    // Remove node from indexes
+    this.#indexes.forEach(index => {
+      index.deleteNode(change.path);
+    });
+  }
+  
+  #handleUpdate(change) {
+    // Update node in indexes
+    this.#indexes.forEach(index => {
+      index.updateNode(change.path, change.node);
+    });
+  }
+  
+  #handleMove(change) {
+    // Move node in indexes
+    this.#indexes.forEach(index => {
+      index.moveNode(change.path, change.newPath);
+    });
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/model-schema/indexing"
+              pages={[
+                { title: 'Model & Schema', href: '/model-schema', description: 'Overview of model and schema concepts' },
+                { title: 'Collaborative Editing', href: '/model-schema/collaborative-editing', description: 'Operational Transformation and CRDTs' },
+                { title: 'Schema Migration', href: '/model-schema/migration', description: 'Version management and migration strategies' },
+                { title: 'Advanced Validation', href: '/model-schema/validation', description: 'Recursive validation and performance optimization' },
+                { title: 'Transaction System', href: '/model-schema/transaction', description: 'Atomic operations and rollback mechanisms' },
+                { title: 'Node Types', href: '/model-schema/node-types', description: 'Comprehensive node type examples' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

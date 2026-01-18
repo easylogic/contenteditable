@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Text</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   text: {
     group: 'inline',
     // Text nodes are leaf nodes, no children
@@ -65,7 +65,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: 'Hello world',
   marks: [
@@ -79,7 +79,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeText(node) {
+              <DocCodeBlock language="typescript" code={`function serializeText(node) {
   let html = escapeHtml(node.text);
   
   // Apply marks in order
@@ -108,7 +108,7 @@ function wrapWithMark(html, mark) {
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseText(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseText(domNode) {
   return {
     type: 'text',
     text: domNode.textContent,
@@ -137,7 +137,7 @@ function extractMarks(textNode) {
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering
+              <DocCodeBlock language="typescript" code={`// Rendering
 const textNode = document.createTextNode(node.text);
 // Marks are applied by wrapping in parent elements
 // during serialization
@@ -165,7 +165,7 @@ function getTextPosition(textNode, offset) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Text nodes must be inside block or inline nodes
+              <DocCodeBlock language="typescript" code={`// Issue: Text nodes must be inside block or inline nodes
 // Solution: Validate parent node type
 function validateTextNode(textNode) {
   const parent = textNode.parentNode;
@@ -219,7 +219,7 @@ function mergeAdjacentTextNodes(element) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class TextNode {
+              <DocCodeBlock language="typescript" code={`class TextNode {
   constructor(text, marks = []) {
     this.type = 'text';
     this.text = text;

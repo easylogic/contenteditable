@@ -1,0 +1,538 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'plugin-architecture', text: 'Plugin Architecture' },
+  { depth: 3, slug: 'plugin-interface', text: 'Plugin Interface' },
+  { depth: 3, slug: 'plugin-lifecycle', text: 'Plugin Lifecycle' },
+  { depth: 2, slug: 'creating-plugins', text: 'Creating Plugins' },
+  { depth: 3, slug: 'basic-plugin', text: 'Basic Plugin Structure' },
+  { depth: 3, slug: 'plugin-hooks', text: 'Using Hooks' },
+  { depth: 3, slug: 'plugin-commands', text: 'Adding Commands' },
+  { depth: 2, slug: 'plugin-examples', text: 'Plugin Examples' },
+  { depth: 3, slug: 'formatting-plugin', text: 'Formatting Plugin' },
+  { depth: 3, slug: 'link-plugin', text: 'Link Plugin' },
+  { depth: 3, slug: 'image-plugin', text: 'Image Plugin' },
+  { depth: 2, slug: 'plugin-api', text: 'Plugin API' },
+  { depth: 3, slug: 'editor-api', text: 'Editor API' },
+  { depth: 3, slug: 'model-api', text: 'Model API' },
+  { depth: 3, slug: 'view-api', text: 'View API' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Plugin Development Guide – Editor Architecture – contenteditable.lab"
+      description="Guide to developing plugins for model-based contenteditable editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Plugin Development</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Plugin Development Guide
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Guide to developing plugins that extend model-based contenteditable editors with custom functionality.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Plugins allow you to extend editor functionality without modifying core code. They can add formatting, handle special content types, integrate with external services, and customize editor behavior.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 mb-2 text-sm">
+                  <strong>Plugin benefits:</strong>
+                </p>
+                <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
+                  <li class="mb-1">Modular architecture - features can be added/removed independently</li>
+                  <li class="mb-1">Reusable across projects</li>
+                  <li class="mb-1">Easy to test in isolation</li>
+                  <li class="mb-1">Community contributions</li>
+                </ul>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="plugin-architecture" title="Plugin Architecture">
+              <p class="m-0 mb-4">
+                Plugins integrate with the editor through hooks, commands, and the editor API.
+              </p>
+
+              <DocSection id="plugin-interface" title="Plugin Interface" depth={3}>
+                <p class="m-0 mb-3">
+                  All plugins implement a standard interface:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface Plugin {
+  name: string;
+  version?: string;
+  
+  // Lifecycle methods
+  install(editor: Editor): void | Promise<void>;
+  uninstall?(editor: Editor): void | Promise<void>;
+  
+  // Optional: Plugin configuration
+  configure?(config: PluginConfig): void;
+}
+
+class MyPlugin implements Plugin {
+  name = 'my-plugin';
+  version = '1.0.0';
+  
+  install(editor: Editor) {
+    // Register hooks, commands, etc.
+  }
+  
+  uninstall(editor: Editor) {
+    // Cleanup
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="plugin-lifecycle" title="Plugin Lifecycle" depth={3}>
+                <p class="m-0 mb-3">
+                  Plugins go through a lifecycle:
+                </p>
+                <DocCodeBlock language="typescript" code={`// 1. Plugin instantiation
+const plugin = new MyPlugin();
+
+// 2. Plugin installation (called by editor)
+await editor.use(plugin);
+// or
+await plugin.install(editor);
+
+// 3. Plugin active (handling events, commands, etc.)
+
+// 4. Plugin uninstallation (optional)
+await plugin.uninstall?.(editor);
+// or
+editor.removePlugin(plugin);`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="creating-plugins" title="Creating Plugins">
+              <p class="m-0 mb-4">
+                Create a plugin by implementing the Plugin interface and registering hooks or commands.
+              </p>
+
+              <DocSection id="basic-plugin" title="Basic Plugin Structure" depth={3}>
+                <p class="m-0 mb-3">
+                  A minimal plugin:
+                </p>
+                <DocCodeBlock language="typescript" code={`class BasicPlugin implements Plugin {
+  name = 'basic-plugin';
+  #editor: Editor | null = null;
+
+  install(editor: Editor) {
+    this.#editor = editor;
+    
+    // Register event listeners
+    editor.on('operation', this.#handleOperation.bind(this));
+    
+    // Register commands
+    editor.registerCommand('basic:action', this.#handleCommand.bind(this));
+  }
+
+  uninstall(editor: Editor) {
+    // Remove event listeners
+    editor.off('operation', this.#handleOperation);
+    
+    // Unregister commands
+    editor.unregisterCommand('basic:action');
+    
+    this.#editor = null;
+  }
+
+  #handleOperation(operation: Operation) {
+    // Handle operations
+  }
+
+  #handleCommand() {
+    // Handle command
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="plugin-hooks" title="Using Hooks" depth={3}>
+                <p class="m-0 mb-3">
+                  Plugins can hook into editor lifecycle and operations:
+                </p>
+                <DocCodeBlock language="typescript" code={`class HookPlugin implements Plugin {
+  name = 'hook-plugin';
+
+  install(editor: Editor) {
+    // Hook into operation lifecycle
+    editor.hooks.beforeOperation.tap((operation) => {
+      // Modify operation before it's applied
+      if (operation.type === 'insert') {
+        // Transform operation
+      }
+    });
+
+    editor.hooks.afterOperation.tap((operation) => {
+      // React to operation after it's applied
+    });
+
+    // Hook into rendering
+    editor.hooks.beforeRender.tap(() => {
+      // Prepare for render
+    });
+
+    editor.hooks.afterRender.tap(() => {
+      // Post-render cleanup
+    });
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="plugin-commands" title="Adding Commands" depth={3}>
+                <p class="m-0 mb-3">
+                  Plugins can register commands that can be called programmatically or via keyboard shortcuts:
+                </p>
+                <DocCodeBlock language="typescript" code={`class CommandPlugin implements Plugin {
+  name = 'command-plugin';
+
+  install(editor: Editor) {
+    // Register command
+    editor.registerCommand('format:bold', () => {
+      const selection = editor.getSelection();
+      if (selection.isCollapsed) {
+        // Apply format to current word or selection
+        editor.toggleFormat('bold', selection);
+      }
+    });
+
+    // Register keyboard shortcut
+    editor.registerShortcut('Mod-b', 'format:bold');
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="plugin-examples" title="Plugin Examples">
+              <p class="m-0 mb-4">
+                Real-world plugin examples:
+              </p>
+
+              <DocSection id="formatting-plugin" title="Formatting Plugin" depth={3}>
+                <p class="m-0 mb-3">
+                  A plugin that adds text formatting:
+                </p>
+                <DocCodeBlock language="typescript" code={`class FormattingPlugin implements Plugin {
+  name = 'formatting';
+  #editor: Editor | null = null;
+
+  install(editor: Editor) {
+    this.#editor = editor;
+
+    // Register formatting commands
+    editor.registerCommand('format:bold', () => this.#toggleBold());
+    editor.registerCommand('format:italic', () => this.#toggleItalic());
+    editor.registerCommand('format:underline', () => this.#toggleUnderline());
+
+    // Register shortcuts
+    editor.registerShortcut('Mod-b', 'format:bold');
+    editor.registerShortcut('Mod-i', 'format:italic');
+    editor.registerShortcut('Mod-u', 'format:underline');
+  }
+
+  #toggleBold() {
+    if (!this.#editor) return;
+    const selection = this.#editor.getSelection();
+    this.#editor.toggleFormat('bold', selection);
+  }
+
+  #toggleItalic() {
+    if (!this.#editor) return;
+    const selection = this.#editor.getSelection();
+    this.#editor.toggleFormat('italic', selection);
+  }
+
+  #toggleUnderline() {
+    if (!this.#editor) return;
+    const selection = this.#editor.getSelection();
+    this.#editor.toggleFormat('underline', selection);
+  }
+
+  uninstall(editor: Editor) {
+    editor.unregisterCommand('format:bold');
+    editor.unregisterCommand('format:italic');
+    editor.unregisterCommand('format:underline');
+    this.#editor = null;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="link-plugin" title="Link Plugin" depth={3}>
+                <p class="m-0 mb-3">
+                  A plugin that handles links:
+                </p>
+                <DocCodeBlock language="typescript" code={`class LinkPlugin implements Plugin {
+  name = 'link';
+  #editor: Editor | null = null;
+
+  install(editor: Editor) {
+    this.#editor = editor;
+
+    // Register link command
+    editor.registerCommand('link:insert', (url: string) => {
+      const selection = editor.getSelection();
+      if (selection.isCollapsed) {
+        // Insert link at cursor
+        editor.insertLink(url, selection);
+      } else {
+        // Wrap selection with link
+        editor.wrapWithLink(selection, url);
+      }
+    });
+
+    // Handle link clicks
+    editor.element.addEventListener('click', (e) => {
+      const link = (e.target as HTMLElement).closest('a');
+      if (link && e.ctrlKey) {
+        // Allow default (open link)
+        return;
+      }
+      if (link) {
+        e.preventDefault();
+        // Edit link
+        this.#editLink(link);
+      }
+    });
+  }
+
+  #editLink(link: HTMLElement) {
+    const url = prompt('Edit URL:', link.getAttribute('href') || '');
+    if (url !== null) {
+      link.setAttribute('href', url);
+    }
+  }
+
+  uninstall(editor: Editor) {
+    editor.unregisterCommand('link:insert');
+    this.#editor = null;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="image-plugin" title="Image Plugin" depth={3}>
+                <p class="m-0 mb-3">
+                  A plugin that handles images:
+                </p>
+                <DocCodeBlock language="typescript" code={`class ImagePlugin implements Plugin {
+  name = 'image';
+  #editor: Editor | null = null;
+  #uploadUrl: string;
+
+  constructor(uploadUrl: string) {
+    this.#uploadUrl = uploadUrl;
+  }
+
+  install(editor: Editor) {
+    this.#editor = editor;
+
+    // Handle paste
+    editor.element.addEventListener('paste', async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            await this.#handleImagePaste(file);
+          }
+        }
+      }
+    });
+
+    // Register command
+    editor.registerCommand('image:insert', async (file: File) => {
+      await this.#uploadAndInsert(file);
+    });
+  }
+
+  async #handleImagePaste(file: File) {
+    await this.#uploadAndInsert(file);
+  }
+
+  async #uploadAndInsert(file: File) {
+    if (!this.#editor) return;
+
+    // Upload image
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await fetch(this.#uploadUrl, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const { url } = await response.json();
+
+    // Insert into editor
+    const selection = this.#editor.getSelection();
+    this.#editor.insertImage(url, selection);
+  }
+
+  uninstall(editor: Editor) {
+    editor.unregisterCommand('image:insert');
+    this.#editor = null;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="plugin-api" title="Plugin API">
+              <p class="m-0 mb-4">
+                Plugins have access to the editor API for manipulating content, selection, and state.
+              </p>
+
+              <DocSection id="editor-api" title="Editor API" depth={3}>
+                <p class="m-0 mb-3">
+                  Core editor methods:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface Editor {
+  // Selection
+  getSelection(): Selection;
+  setSelection(selection: Selection): void;
+
+  // Content manipulation
+  insertText(text: string, selection?: Selection): void;
+  insertNode(node: Node, selection?: Selection): void;
+  deleteContent(selection: Selection): void;
+  
+  // Formatting
+  toggleFormat(format: string, selection: Selection): void;
+  hasFormat(format: string, selection: Selection): boolean;
+  
+  // Commands
+  registerCommand(name: string, handler: Function): void;
+  unregisterCommand(name: string): void;
+  executeCommand(name: string, ...args: any[]): void;
+  
+  // Events
+  on(event: string, handler: Function): void;
+  off(event: string, handler: Function): void;
+  emit(event: string, data?: any): void;
+  
+  // Hooks
+  hooks: {
+    beforeOperation: Hook;
+    afterOperation: Hook;
+    beforeRender: Hook;
+    afterRender: Hook;
+  };
+}`} />
+              </DocSection>
+
+              <DocSection id="model-api" title="Model API" depth={3}>
+                <p class="m-0 mb-3">
+                  Access to document model:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface Model {
+  // Read operations
+  getNode(path: Path): Node | null;
+  getText(range?: Range): string;
+  
+  // Write operations
+  applyOperation(operation: Operation): void;
+  
+  // Traversal
+  walk(callback: (node: Node, path: Path) => void): void;
+  
+  // Query
+  findNodes(predicate: (node: Node) => boolean): Node[];
+}`} />
+              </DocSection>
+
+              <DocSection id="view-api" title="View API" depth={3}>
+                <p class="m-0 mb-3">
+                  Access to DOM view:
+                </p>
+                <DocCodeBlock language="typescript" code={`interface View {
+  // DOM access
+  element: HTMLElement;
+  getNodeElement(node: Node): HTMLElement | null;
+  
+  // Rendering
+  render(): void;
+  updateNode(node: Node): void;
+  
+  // Selection
+  getDOMSelection(): Selection | null;
+  setDOMSelection(selection: Selection): void;
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <p class="m-0 mb-4">
+                Key principles for plugin development:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">
+                  <strong>Keep plugins focused:</strong> Each plugin should have a single, well-defined purpose
+                </li>
+                <li class="mb-2">
+                  <strong>Clean up on uninstall:</strong> Remove all event listeners, commands, and references
+                </li>
+                <li class="mb-2">
+                  <strong>Use hooks when possible:</strong> Prefer hooks over direct API calls for extensibility
+                </li>
+                <li class="mb-2">
+                  <strong>Handle errors gracefully:</strong> Don't let plugin errors break the editor
+                </li>
+                <li class="mb-2">
+                  <strong>Document your plugin:</strong> Provide clear API documentation and examples
+                </li>
+                <li class="mb-2">
+                  <strong>Test thoroughly:</strong> Test with different browsers, IMEs, and edge cases
+                </li>
+                <li class="mb-2">
+                  <strong>Consider performance:</strong> Avoid expensive operations in hot paths
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/plugin-development"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
+                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Synchronizing model and DOM' },
+                { title: 'Testing Strategies', href: '/editor/testing-strategies', description: 'Testing strategies for editors' },
+                { title: 'Debugging Techniques', href: '/editor/debugging', description: 'Debugging strategies' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

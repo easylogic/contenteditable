@@ -1,0 +1,318 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../../components/docs/DocAlert.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+export async function getStaticPaths() {
+  return [
+    { params: { locale: 'ko' } },
+  ];
+}
+
+const headings = [
+  { depth: 2, slug: 'overview', text: '개요' },
+  { depth: 2, slug: 'testing-challenges', text: '테스트 도전과제' },
+  { depth: 2, slug: 'unit-testing', text: '단위 테스트' },
+  { depth: 3, slug: 'model-testing', text: '모델 테스트' },
+  { depth: 3, slug: 'operation-testing', text: '작업 테스트' },
+  { depth: 2, slug: 'integration-testing', text: '통합 테스트' },
+  { depth: 3, slug: 'dom-testing', text: 'DOM 테스트' },
+  { depth: 3, slug: 'event-testing', text: '이벤트 테스트' },
+  { depth: 2, slug: 'ime-testing', text: 'IME 테스트' },
+  { depth: 3, slug: 'composition-testing', text: '조합 테스트' },
+  { depth: 3, slug: 'cross-browser-ime', text: '크로스 브라우저 IME 테스트' },
+  { depth: 2, slug: 'e2e-testing', text: '엔드투엔드 테스트' },
+  { depth: 3, slug: 'playwright-testing', text: 'Playwright 테스트' },
+  { depth: 2, slug: 'mobile-testing', text: '모바일 테스트' },
+  { depth: 2, slug: 'performance-testing', text: '성능 테스트' },
+  { depth: 2, slug: 'best-practices', text: '모범 사례' },
+];
+
+const locale = Astro.params.locale || 'ko';
+---
+
+<html lang={locale}>
+  <head>
+    <BaseHead
+      title="테스트 전략 – 에디터 아키텍처 – contenteditable.lab"
+      description="contenteditable 에디터를 위한 포괄적인 테스트 전략"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">에디터</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">아키텍처</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">테스트 전략</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">테스트 전략</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              모델 기반 contenteditable 에디터를 위한 포괄적인 테스트 전략입니다.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                contenteditable 에디터 테스트는 브라우저 차이, IME 동작, DOM 복잡성으로 인해 어렵습니다. 이 가이드는 다양한 수준의 테스트 전략을 다룹니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="testing-challenges" title="테스트 도전과제">
+              <p class="m-0 mb-4">
+                contenteditable 에디터 테스트의 주요 도전과제:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">이벤트 발생 및 DOM 동작의 브라우저 차이</li>
+                <li class="mb-2">IME 조합 이벤트가 브라우저 간 일관되게 발생하지 않음</li>
+                <li class="mb-2">브라우저 간 선택 API 차이</li>
+                <li class="mb-2">모바일 브라우저가 데스크톱과 다른 동작</li>
+                <li class="mb-2">비동기 작업 및 DOM 업데이트의 타이밍 문제</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="unit-testing" title="단위 테스트">
+              <p class="m-0 mb-4">
+                모델 작업과 변환을 격리하여 테스트합니다.
+              </p>
+
+              <DocSection id="model-testing" title="모델 테스트" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { describe, it, expect } from 'vitest';
+import { Editor } from './editor';
+
+describe('모델 작업', () => {
+  it('커서 위치에 텍스트 삽입', () => {
+    const editor = new Editor();
+    editor.setContent('Hello world');
+    editor.setSelection({ start: 5, end: 5 });
+    
+    editor.insertText(' beautiful');
+    
+    expect(editor.getContent()).toBe('Hello beautiful world');
+  });
+
+  it('선택된 텍스트 삭제', () => {
+    const editor = new Editor();
+    editor.setContent('Hello world');
+    editor.setSelection({ start: 0, end: 5 });
+    
+    editor.deleteContent();
+    
+    expect(editor.getContent()).toBe(' world');
+  });
+});`} />
+              </DocSection>
+
+              <DocSection id="operation-testing" title="작업 테스트" depth={3}>
+                <DocCodeBlock language="typescript" code={`describe('작업', () => {
+  it('삽입 작업 적용', () => {
+    const doc = { type: 'doc', children: [] };
+    const operation = {
+      type: 'insert',
+      path: [0],
+      node: { type: 'text', text: 'Hello' }
+    };
+    
+    const result = applyOperation(doc, operation);
+    
+    expect(result.children[0].text).toBe('Hello');
+  });
+
+  it('실행 취소/다시 실행 지원', () => {
+    const editor = new Editor();
+    editor.insertText('Hello');
+    editor.insertText(' world');
+    
+    editor.undo();
+    expect(editor.getContent()).toBe('Hello');
+    
+    editor.redo();
+    expect(editor.getContent()).toBe('Hello world');
+  });
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="integration-testing" title="통합 테스트">
+              <p class="m-0 mb-4">
+                DOM 동기화 및 이벤트 처리를 테스트합니다.
+              </p>
+
+              <DocSection id="dom-testing" title="DOM 테스트" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { render, screen, fireEvent } from '@testing-library/react';
+
+describe('DOM 동기화', () => {
+  it('모델 변경 시 DOM 업데이트', () => {
+    const { container } = render(<Editor />);
+    const editor = container.querySelector('[contenteditable]');
+    
+    // 입력 시뮬레이션
+    fireEvent.input(editor, {
+      target: { textContent: 'Hello world' }
+    });
+    
+    expect(editor.textContent).toBe('Hello world');
+  });
+});`} />
+              </DocSection>
+
+              <DocSection id="event-testing" title="이벤트 테스트" depth={3}>
+                <DocCodeBlock language="typescript" code={`describe('이벤트 처리', () => {
+  it('beforeinput 이벤트 처리', () => {
+    const editor = new Editor();
+    const element = editor.element;
+    
+    const handler = vi.fn();
+    editor.on('beforeinput', handler);
+    
+    const event = new InputEvent('beforeinput', {
+      inputType: 'insertText',
+      data: 'Hello'
+    });
+    
+    element.dispatchEvent(event);
+    
+    expect(handler).toHaveBeenCalled();
+  });
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="ime-testing" title="IME 테스트">
+              <p class="m-0 mb-4">
+                IME 테스트는 브라우저 차이로 인해 특별한 처리가 필요합니다.
+              </p>
+
+              <DocSection id="composition-testing" title="조합 테스트" depth={3}>
+                <DocCodeBlock language="typescript" code={`describe('IME 조합', () => {
+  it('조합 이벤트 처리', async () => {
+    const editor = new Editor();
+    const element = editor.element;
+    
+    // 조합 시뮬레이션
+    element.dispatchEvent(new CompositionEvent('compositionstart'));
+    element.dispatchEvent(new CompositionEvent('compositionupdate', { data: '한' }));
+    element.dispatchEvent(new CompositionEvent('compositionupdate', { data: '한글' }));
+    element.dispatchEvent(new CompositionEvent('compositionend', { data: '한글' }));
+    
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    expect(editor.getContent()).toContain('한글');
+  });
+});`} />
+              </DocSection>
+
+              <DocSection id="cross-browser-ime" title="크로스 브라우저 IME 테스트" depth={3}>
+                <DocAlert type="warning">
+                  <p class="m-0 text-sm">
+                    <strong>참고:</strong> iOS Safari는 한국어 IME에 대해 조합 이벤트를 발생시키지 않습니다. 실제 기기나 브라우저 자동화 도구로 테스트하세요.
+                  </p>
+                </DocAlert>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="e2e-testing" title="엔드투엔드 테스트">
+              <p class="m-0 mb-4">
+                브라우저 자동화로 전체 사용자 워크플로우를 테스트합니다.
+              </p>
+
+              <DocSection id="playwright-testing" title="Playwright 테스트" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { test, expect } from '@playwright/test';
+
+test('텍스트 삽입', async ({ page }) => {
+  await page.goto('/editor');
+  const editor = page.locator('[contenteditable]');
+  
+  await editor.click();
+  await editor.type('Hello world');
+  
+  await expect(editor).toHaveText('Hello world');
+});
+
+test('IME 조합 처리', async ({ page }) => {
+  await page.goto('/editor');
+  const editor = page.locator('[contenteditable]');
+  
+  await editor.click();
+  // 한국어 문자 입력
+  await editor.pressSequentially('한글');
+  
+  await expect(editor).toContainText('한글');
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="mobile-testing" title="모바일 테스트">
+              <p class="m-0 mb-4">
+                모바일 테스트는 실제 기기나 에뮬레이션이 필요합니다.
+              </p>
+              <DocCodeBlock language="typescript" code={`test('가상 키보드 처리', async ({ page, isMobile }) => {
+  if (!isMobile) test.skip();
+  
+  await page.goto('/editor');
+  const editor = page.locator('[contenteditable]');
+  
+  await editor.tap();
+  // 가상 키보드가 나타나야 함
+  await editor.type('Hello');
+  
+  await expect(editor).toHaveText('Hello');
+});`} />
+            </DocSection>
+
+            <DocSection id="performance-testing" title="성능 테스트">
+              <p class="m-0 mb-4">
+                대용량 문서로 에디터 성능을 테스트합니다.
+              </p>
+              <DocCodeBlock language="typescript" code={`test('대용량 문서 처리', async () => {
+  const editor = new Editor();
+  const largeText = 'Hello '.repeat(10000);
+  
+  const start = performance.now();
+  editor.setContent(largeText);
+  const end = performance.now();
+  
+  expect(end - start).toBeLessThan(100); // 100ms 미만으로 완료되어야 함
+});`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="모범 사례">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">모델 작업을 격리하여 테스트</li>
+                <li class="mb-2">DOM 동기화를 별도로 테스트</li>
+                <li class="mb-2">조합 테스트에 실제 IME 사용</li>
+                <li class="mb-2">여러 브라우저에서 테스트</li>
+                <li class="mb-2">실제 모바일 기기에서 테스트</li>
+                <li class="mb-2">외부 종속성 모킹</li>
+                <li class="mb-2">엣지 케이스 및 오류 조건 테스트</li>
+              </ul>
+            </DocSection>
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+
+    <DocNavigation
+      current="/editor/testing-strategies"
+      pages={[
+        { title: '에디터 아키텍처', href: '/editor/architecture', description: '에디터 아키텍처 개요' },
+        { title: '플러그인 개발', href: '/editor/plugin-development', description: '플러그인 개발 가이드' },
+        { title: '디버깅 기법', href: '/editor/debugging', description: '디버깅 전략' },
+      ]}
+    />
+  </body>
+</html>

@@ -1,0 +1,462 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'incremental-updates', text: 'Incremental DOM Updates' },
+  { depth: 3, slug: 'diff-algorithm', text: 'Diff Algorithm' },
+  { depth: 3, slug: 'patch-application', text: 'Patch Application' },
+  { depth: 2, slug: 'batch-updates', text: 'Batch Updates' },
+  { depth: 3, slug: 'update-batching', text: 'Update Batching' },
+  { depth: 3, slug: 'debouncing', text: 'Debouncing' },
+  { depth: 2, slug: 'virtual-dom', text: 'Virtual DOM Pattern' },
+  { depth: 3, slug: 'vdom-implementation', text: 'VDOM Implementation' },
+  { depth: 3, slug: 'reconciliation', text: 'Reconciliation' },
+  { depth: 2, slug: 'lazy-rendering', text: 'Lazy Rendering' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Performance Optimization – Editor Architecture – contenteditable.lab"
+      description="Understanding performance optimization: incremental updates, batch updates, virtual DOM, and lazy rendering"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Performance Optimization</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Performance Optimization
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Large documents require careful optimization to maintain smooth editing performance.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Performance optimization is critical for editors handling large documents. Key strategies include incremental updates, batching, virtual DOM, and lazy rendering.
+              </p>
+            </DocSection>
+
+            <DocSection id="incremental-updates" title="Incremental DOM Updates">
+              <DocSection id="diff-algorithm" title="Diff Algorithm" depth={3}>
+                <p class="m-0 mb-3">
+                  Only update the parts of the DOM that actually changed:
+                </p>
+                <DocCodeBlock language="typescript" code={`class IncrementalRenderer {
+  #nodeMap = new Map(); // nodeId -> DOM element
+  
+  update(document, previousDocument) {
+    // Find differences
+    const diff = this.#diff(previousDocument, document);
+    
+    // Apply only the changes
+    diff.forEach(change => {
+      switch (change.type) {
+        case 'insert':
+          this.#insertNode(change.node, change.path);
+          break;
+        case 'delete':
+          this.#deleteNode(change.path);
+          break;
+        case 'update':
+          this.#updateNode(change.path, change.attrs);
+          break;
+        case 'move':
+          this.#moveNode(change.path, change.newPath);
+          break;
+      }
+    });
+  }
+  
+  #diff(oldDoc, newDoc) {
+    const changes = [];
+    
+    // Compare node trees using longest common subsequence
+    const lcs = this.#longestCommonSubsequence(
+      oldDoc.children,
+      newDoc.children
+    );
+    
+    let oldIndex = 0;
+    let newIndex = 0;
+    let lcsIndex = 0;
+    
+    while (oldIndex < oldDoc.children.length || newIndex < newDoc.children.length) {
+      if (lcsIndex < lcs.length && 
+          oldDoc.children[oldIndex]?.id === lcs[lcsIndex].id) {
+        // Node unchanged, recurse into children
+        this.#compareNodes(
+          oldDoc.children[oldIndex],
+          newDoc.children[newIndex],
+          [oldIndex],
+          changes
+        );
+        oldIndex++;
+        newIndex++;
+        lcsIndex++;
+      } else if (oldIndex < oldDoc.children.length &&
+                 (lcsIndex >= lcs.length || 
+                  oldDoc.children[oldIndex].id !== lcs[lcsIndex].id)) {
+        // Node deleted
+        changes.push({
+          type: 'delete',
+          path: [oldIndex]
+        });
+        oldIndex++;
+      } else {
+        // Node inserted
+        changes.push({
+          type: 'insert',
+          node: newDoc.children[newIndex],
+          path: [newIndex]
+        });
+        newIndex++;
+      }
+    }
+    
+    return changes;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="patch-application" title="Patch Application" depth={3}>
+                <p class="m-0 mb-3">
+                  Apply patches efficiently:
+                </p>
+                <DocCodeBlock language="typescript" code={`class PatchApplier {
+  applyPatches(container, patches) {
+    // Sort patches by index (reverse order for deletions)
+    const sorted = patches.sort((a, b) => {
+      if (a.type === 'delete' && b.type === 'delete') {
+        return b.index - a.index; // Delete from end
+      }
+      return a.index - b.index;
+    });
+    
+    sorted.forEach(patch => {
+      switch (patch.type) {
+        case 'insert':
+          const newNode = this.#renderNode(patch.node);
+          container.insertBefore(newNode, container.children[patch.index]);
+          break;
+        case 'delete':
+          container.removeChild(container.children[patch.index]);
+          break;
+        case 'update':
+          this.#updateNodeAttributes(
+            container.children[patch.index],
+            patch.attrs
+          );
+          break;
+        case 'move':
+          const node = container.children[patch.from];
+          container.insertBefore(node, container.children[patch.to]);
+          break;
+      }
+    });
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="batch-updates" title="Batch Updates">
+              <DocSection id="update-batching" title="Update Batching" depth={3}>
+                <p class="m-0 mb-3">
+                  Batch multiple operations to avoid unnecessary renders:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Editor {
+  #pendingOperations = [];
+  #renderScheduled = false;
+  
+  applyOperation(operation) {
+    // Add to pending operations
+    this.#pendingOperations.push(operation);
+    
+    // Schedule render (debounced)
+    this.#scheduleRender();
+  }
+  
+  #scheduleRender() {
+    if (this.#renderScheduled) return;
+    
+    this.#renderScheduled = true;
+    
+    // Use requestAnimationFrame for smooth updates
+    requestAnimationFrame(() => {
+      this.#flushOperations();
+      this.#renderScheduled = false;
+    });
+  }
+  
+  #flushOperations() {
+    if (this.#pendingOperations.length === 0) return;
+    
+    // Apply all pending operations
+    const operations = this.#pendingOperations;
+    this.#pendingOperations = [];
+    
+    // Batch apply
+    this.#batchApply(operations);
+    
+    // Single render for all operations
+    this.render();
+  }
+  
+  // Manual batching API
+  batch(callback) {
+    const wasBatching = this.#isBatching;
+    this.#isBatching = true;
+    
+    try {
+      callback();
+    } finally {
+      this.#isBatching = wasBatching;
+      if (!this.#isBatching) {
+        this.#flushOperations();
+      }
+    }
+  }
+}
+
+// Usage
+editor.batch(() => {
+  editor.insertText('Hello');
+  editor.insertText(' ');
+  editor.insertText('World');
+  // Single render after batch completes
+});`} />
+              </DocSection>
+
+              <DocSection id="debouncing" title="Debouncing" depth={3}>
+                <p class="m-0 mb-3">
+                  Debounce frequent updates:
+                </p>
+                <DocCodeBlock language="typescript" code={`class DebouncedRenderer {
+  #pendingRender = null;
+  #delay = 16; // ~60fps
+  
+  scheduleRender() {
+    if (this.#pendingRender) {
+      clearTimeout(this.#pendingRender);
+    }
+    
+    this.#pendingRender = setTimeout(() => {
+      this.render();
+      this.#pendingRender = null;
+    }, this.#delay);
+  }
+  
+  // Throttle for critical updates
+  throttleRender() {
+    if (this.#lastRender && Date.now() - this.#lastRender < this.#delay) {
+      return;
+    }
+    
+    this.render();
+    this.#lastRender = Date.now();
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="virtual-dom" title="Virtual DOM Pattern">
+              <DocSection id="vdom-implementation" title="VDOM Implementation" depth={3}>
+                <p class="m-0 mb-3">
+                  Use a virtual representation to compute changes before touching the DOM:
+                </p>
+                <DocCodeBlock language="typescript" code={`class VirtualDOM {
+  #root = null;
+  
+  render(document) {
+    return this.#renderNode(document);
+  }
+  
+  #renderNode(node) {
+    return {
+      type: node.type,
+      props: node.attrs || {},
+      key: node.id,
+      children: node.children?.map(child => this.#renderNode(child)) || []
+    };
+  }
+  
+  patch(oldTree, newTree) {
+    // Compare virtual trees
+    const patches = this.#diff(oldTree, newTree);
+    
+    // Apply patches to actual DOM
+    this.#applyPatches(patches);
+  }
+  
+  #diff(oldNode, newNode) {
+    const patches = [];
+    
+    if (oldNode.type !== newNode.type) {
+      // Node type changed, replace
+      patches.push({
+        type: 'replace',
+        oldNode,
+        newNode
+      });
+    } else {
+      // Same type, check props and children
+      const propPatches = this.#diffProps(oldNode.props, newNode.props);
+      if (propPatches.length > 0) {
+        patches.push({
+          type: 'props',
+          node: oldNode,
+          patches: propPatches
+        });
+      }
+      
+      // Diff children
+      const childPatches = this.#diffChildren(oldNode.children, newNode.children);
+      patches.push(...childPatches);
+    }
+    
+    return patches;
+  }
+}`} />
+              </DocSection>
+
+              <DocSection id="reconciliation" title="Reconciliation" depth={3}>
+                <p class="m-0 mb-3">
+                  Efficient reconciliation algorithm:
+                </p>
+                <DocCodeBlock language="typescript" code={`class Reconciler {
+  reconcile(oldChildren, newChildren) {
+    // Use keys for efficient matching
+    const oldKeyMap = new Map(
+      oldChildren.map((child, i) => [child.key || i, i])
+    );
+    const newKeyMap = new Map(
+      newChildren.map((child, i) => [child.key || i, i])
+    );
+    
+    const patches = [];
+    
+    // Find moved nodes
+    for (const [key, newIndex] of newKeyMap) {
+      const oldIndex = oldKeyMap.get(key);
+      if (oldIndex !== undefined && oldIndex !== newIndex) {
+        patches.push({
+          type: 'move',
+          key,
+          from: oldIndex,
+          to: newIndex
+        });
+      }
+    }
+    
+    // Find inserted nodes
+    for (const [key, newIndex] of newKeyMap) {
+      if (!oldKeyMap.has(key)) {
+        patches.push({
+          type: 'insert',
+          node: newChildren[newIndex],
+          index: newIndex
+        });
+      }
+    }
+    
+    // Find deleted nodes
+    for (const [key, oldIndex] of oldKeyMap) {
+      if (!newKeyMap.has(key)) {
+        patches.push({
+          type: 'delete',
+          index: oldIndex
+        });
+      }
+    }
+    
+    return patches;
+  }
+}`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="lazy-rendering" title="Lazy Rendering">
+              <p class="m-0 mb-4">
+                Render only visible content:
+              </p>
+              <DocCodeBlock language="typescript" code={`class LazyRenderer {
+  #viewport = { top: 0, bottom: window.innerHeight };
+  #renderedNodes = new Set();
+  
+  render(document) {
+    // Only render nodes in viewport
+    const visibleNodes = this.#getVisibleNodes(document);
+    
+    visibleNodes.forEach(node => {
+      if (!this.#renderedNodes.has(node.id)) {
+        this.#renderNode(node);
+        this.#renderedNodes.add(node.id);
+      }
+    });
+    
+    // Remove nodes outside viewport
+    this.#renderedNodes.forEach(nodeId => {
+      if (!visibleNodes.find(n => n.id === nodeId)) {
+        this.#removeNode(nodeId);
+        this.#renderedNodes.delete(nodeId);
+      }
+    });
+  }
+  
+  #getVisibleNodes(document) {
+    // Calculate which nodes are in viewport
+    const nodes = [];
+    this.#traverse(document, (node, rect) => {
+      if (this.#isInViewport(rect)) {
+        nodes.push(node);
+      }
+    });
+    return nodes;
+  }
+  
+  #isInViewport(rect) {
+    return rect.top < this.#viewport.bottom && 
+           rect.bottom > this.#viewport.top;
+  }
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/architecture/performance-optimization"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture patterns' },
+                { title: 'Asynchronous Initialization', href: '/editor/architecture/async-initialization', description: 'Promise-based initialization and lifecycle' },
+                { title: 'Hook System', href: '/editor/architecture/hook-system', description: 'Understanding hook system implementation' },
+                { title: 'Event System', href: '/editor/architecture/event-system', description: 'Event system architecture and patterns' },
+                { title: 'Rendering Pipeline', href: '/editor/architecture/rendering-pipeline', description: 'Rendering pipeline and update scheduling' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

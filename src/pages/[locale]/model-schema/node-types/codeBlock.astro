@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="코드 블록 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>코드 블록</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   codeBlock: {
     content: 'text*',
     group: 'block',
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'codeBlock',
   attrs: { language: 'javascript' },
   children: [
@@ -101,7 +101,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeCodeBlock(node) {
+              <DocCodeBlock language="typescript" code={`function serializeCodeBlock(node) {
   const language = node.attrs?.language || '';
   const code = node.children.map(child => child.text).join('');
   const attrs = language ? { 'data-language': language } : {};
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseCodeBlock(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseCodeBlock(domNode) {
   const pre = domNode.tagName === 'PRE' ? domNode : domNode.closest('pre');
   if (!pre) return null;
   
@@ -140,7 +140,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 코드 블록 렌더링
+              <DocCodeBlock language="typescript" code={`// 코드 블록 렌더링
 const pre = document.createElement('pre');
 const code = document.createElement('code');
 pre.contentEditable = 'false'; // 코드 블록은 일반적으로 읽기 전용
@@ -164,7 +164,7 @@ function handleEnterInCodeBlock(e) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 공백 보존
+              <DocCodeBlock language="typescript" code={`// 문제: 공백 보존
 // 해결: pre 태그 사용 및 공백 보존
 function preserveWhitespace(text) {
   return text.replace(/ /g, '&nbsp;').replace(/\\n/g, '<br>');
@@ -189,7 +189,7 @@ function handleTabInCodeBlock(e) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class CodeBlockNode {
+              <DocCodeBlock language="typescript" code={`class CodeBlockNode {
   constructor(attrs, children) {
     this.type = 'codeBlock';
     this.attrs = { language: attrs?.language || null };

@@ -1,0 +1,313 @@
+---
+import SiteNav from '../../components/SiteNav.astro';
+import BaseHead from '../../components/BaseHead.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
+import DocAlert from '../../components/docs/DocAlert.astro';
+import DocSection from '../../components/docs/DocSection.astro';
+import DocNavigation from '../../components/docs/DocNavigation.astro';
+import '../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'testing-challenges', text: 'Testing Challenges' },
+  { depth: 2, slug: 'unit-testing', text: 'Unit Testing' },
+  { depth: 3, slug: 'model-testing', text: 'Model Testing' },
+  { depth: 3, slug: 'operation-testing', text: 'Operation Testing' },
+  { depth: 2, slug: 'integration-testing', text: 'Integration Testing' },
+  { depth: 3, slug: 'dom-testing', text: 'DOM Testing' },
+  { depth: 3, slug: 'event-testing', text: 'Event Testing' },
+  { depth: 2, slug: 'ime-testing', text: 'IME Testing' },
+  { depth: 3, slug: 'composition-testing', text: 'Composition Testing' },
+  { depth: 3, slug: 'cross-browser-ime', text: 'Cross-Browser IME Testing' },
+  { depth: 2, slug: 'e2e-testing', text: 'End-to-End Testing' },
+  { depth: 3, slug: 'playwright-testing', text: 'Playwright Testing' },
+  { depth: 3, slug: 'puppeteer-testing', text: 'Puppeteer Testing' },
+  { depth: 2, slug: 'mobile-testing', text: 'Mobile Testing' },
+  { depth: 2, slug: 'performance-testing', text: 'Performance Testing' },
+  { depth: 2, slug: 'best-practices', text: 'Best Practices' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Testing Strategies – Editor Architecture – contenteditable.lab"
+      description="Comprehensive testing strategies for contenteditable editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/architecture" class="text-text-muted no-underline">Architecture</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Testing Strategies</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Testing Strategies</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Comprehensive testing strategies for model-based contenteditable editors.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Testing contenteditable editors is challenging due to browser differences, IME behavior, and DOM complexity. This guide covers testing strategies at different levels.
+              </p>
+            </DocSection>
+
+            <DocSection id="testing-challenges" title="Testing Challenges">
+              <p class="m-0 mb-4">
+                Key challenges in testing contenteditable editors:
+              </p>
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">Browser differences in event firing and DOM behavior</li>
+                <li class="mb-2">IME composition events don't fire consistently across browsers</li>
+                <li class="mb-2">Selection API differences between browsers</li>
+                <li class="mb-2">Mobile browsers have different behavior than desktop</li>
+                <li class="mb-2">Timing issues with async operations and DOM updates</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="unit-testing" title="Unit Testing">
+              <p class="m-0 mb-4">
+                Test model operations and transformations in isolation.
+              </p>
+
+              <DocSection id="model-testing" title="Model Testing" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { describe, it, expect } from 'vitest';
+import { Editor } from './editor';
+
+describe('Model Operations', () => {
+  it('should insert text at cursor', () => {
+    const editor = new Editor();
+    editor.setContent('Hello world');
+    editor.setSelection({ start: 5, end: 5 });
+    
+    editor.insertText(' beautiful');
+    
+    expect(editor.getContent()).toBe('Hello beautiful world');
+  });
+
+  it('should delete selected text', () => {
+    const editor = new Editor();
+    editor.setContent('Hello world');
+    editor.setSelection({ start: 0, end: 5 });
+    
+    editor.deleteContent();
+    
+    expect(editor.getContent()).toBe(' world');
+  });
+});`} />
+              </DocSection>
+
+              <DocSection id="operation-testing" title="Operation Testing" depth={3}>
+                <DocCodeBlock language="typescript" code={`describe('Operations', () => {
+  it('should apply insert operation', () => {
+    const doc = { type: 'doc', children: [] };
+    const operation = {
+      type: 'insert',
+      path: [0],
+      node: { type: 'text', text: 'Hello' }
+    };
+    
+    const result = applyOperation(doc, operation);
+    
+    expect(result.children[0].text).toBe('Hello');
+  });
+
+  it('should support undo/redo', () => {
+    const editor = new Editor();
+    editor.insertText('Hello');
+    editor.insertText(' world');
+    
+    editor.undo();
+    expect(editor.getContent()).toBe('Hello');
+    
+    editor.redo();
+    expect(editor.getContent()).toBe('Hello world');
+  });
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="integration-testing" title="Integration Testing">
+              <p class="m-0 mb-4">
+                Test DOM synchronization and event handling.
+              </p>
+
+              <DocSection id="dom-testing" title="DOM Testing" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { render, screen, fireEvent } from '@testing-library/react';
+
+describe('DOM Synchronization', () => {
+  it('should update DOM when model changes', () => {
+    const { container } = render(<Editor />);
+    const editor = container.querySelector('[contenteditable]');
+    
+    // Simulate input
+    fireEvent.input(editor, {
+      target: { textContent: 'Hello world' }
+    });
+    
+    expect(editor.textContent).toBe('Hello world');
+  });
+});`} />
+              </DocSection>
+
+              <DocSection id="event-testing" title="Event Testing" depth={3}>
+                <DocCodeBlock language="typescript" code={`describe('Event Handling', () => {
+  it('should handle beforeinput events', () => {
+    const editor = new Editor();
+    const element = editor.element;
+    
+    const handler = vi.fn();
+    editor.on('beforeinput', handler);
+    
+    const event = new InputEvent('beforeinput', {
+      inputType: 'insertText',
+      data: 'Hello'
+    });
+    
+    element.dispatchEvent(event);
+    
+    expect(handler).toHaveBeenCalled();
+  });
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="ime-testing" title="IME Testing">
+              <p class="m-0 mb-4">
+                IME testing requires special handling due to browser differences.
+              </p>
+
+              <DocSection id="composition-testing" title="Composition Testing" depth={3}>
+                <DocCodeBlock language="typescript" code={`describe('IME Composition', () => {
+  it('should handle composition events', async () => {
+    const editor = new Editor();
+    const element = editor.element;
+    
+    // Simulate composition
+    element.dispatchEvent(new CompositionEvent('compositionstart'));
+    element.dispatchEvent(new CompositionEvent('compositionupdate', { data: '한' }));
+    element.dispatchEvent(new CompositionEvent('compositionupdate', { data: '한글' }));
+    element.dispatchEvent(new CompositionEvent('compositionend', { data: '한글' }));
+    
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    expect(editor.getContent()).toContain('한글');
+  });
+});`} />
+              </DocSection>
+
+              <DocSection id="cross-browser-ime" title="Cross-Browser IME Testing" depth={3}>
+                <DocAlert type="warning">
+                  <p class="m-0 text-sm">
+                    <strong>Note:</strong> iOS Safari doesn't fire composition events for Korean IME. Test with real devices or browser automation tools.
+                  </p>
+                </DocAlert>
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="e2e-testing" title="End-to-End Testing">
+              <p class="m-0 mb-4">
+                Test full user workflows with browser automation.
+              </p>
+
+              <DocSection id="playwright-testing" title="Playwright Testing" depth={3}>
+                <DocCodeBlock language="typescript" code={`import { test, expect } from '@playwright/test';
+
+test('should insert text', async ({ page }) => {
+  await page.goto('/editor');
+  const editor = page.locator('[contenteditable]');
+  
+  await editor.click();
+  await editor.type('Hello world');
+  
+  await expect(editor).toHaveText('Hello world');
+});
+
+test('should handle IME composition', async ({ page }) => {
+  await page.goto('/editor');
+  const editor = page.locator('[contenteditable]');
+  
+  await editor.click();
+  // Type Korean characters
+  await editor.pressSequentially('한글');
+  
+  await expect(editor).toContainText('한글');
+});`} />
+              </DocSection>
+            </DocSection>
+
+            <DocSection id="mobile-testing" title="Mobile Testing">
+              <p class="m-0 mb-4">
+                Mobile testing requires real devices or emulation.
+              </p>
+              <DocCodeBlock language="typescript" code={`test('should handle virtual keyboard', async ({ page, isMobile }) => {
+  if (!isMobile) test.skip();
+  
+  await page.goto('/editor');
+  const editor = page.locator('[contenteditable]');
+  
+  await editor.tap();
+  // Virtual keyboard should appear
+  await editor.type('Hello');
+  
+  await expect(editor).toHaveText('Hello');
+});`} />
+            </DocSection>
+
+            <DocSection id="performance-testing" title="Performance Testing">
+              <p class="m-0 mb-4">
+                Test editor performance with large documents.
+              </p>
+              <DocCodeBlock language="typescript" code={`test('should handle large documents', async () => {
+  const editor = new Editor();
+  const largeText = 'Hello '.repeat(10000);
+  
+  const start = performance.now();
+  editor.setContent(largeText);
+  const end = performance.now();
+  
+  expect(end - start).toBeLessThan(100); // Should complete in < 100ms
+});`} />
+            </DocSection>
+
+            <DocSection id="best-practices" title="Best Practices">
+              <ul class="m-0 mb-4 pl-6">
+                <li class="mb-2">Test model operations in isolation</li>
+                <li class="mb-2">Test DOM synchronization separately</li>
+                <li class="mb-2">Use real IMEs for composition testing</li>
+                <li class="mb-2">Test across multiple browsers</li>
+                <li class="mb-2">Test on real mobile devices</li>
+                <li class="mb-2">Mock external dependencies</li>
+                <li class="mb-2">Test edge cases and error conditions</li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/testing-strategies"
+              pages={[
+                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
+                { title: 'Plugin Development', href: '/editor/plugin-development', description: 'Plugin development guide' },
+                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
+                { title: 'Debugging Techniques', href: '/editor/debugging', description: 'Debugging strategies' },
+                { title: 'Mobile Support', href: '/editor/mobile-support', description: 'Mobile support guide' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="문서 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>문서</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   document: {
     content: 'block+',
     // 문서는 루트 노드, 항상 존재함
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'document',
   children: [
     {
@@ -100,7 +100,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeDocument(node) {
+              <DocCodeBlock language="typescript" code={`function serializeDocument(node) {
   return serializeChildren(node.children);
 }
 
@@ -112,7 +112,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseDocument(html) {
+              <DocCodeBlock language="typescript" code={`function parseDocument(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   
@@ -132,7 +132,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 렌더링
+              <DocCodeBlock language="typescript" code={`// 렌더링
 const container = document.createElement('div');
 container.contentEditable = 'true';
 node.children.forEach(child => {
@@ -159,7 +159,7 @@ function getDocumentSelection() {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 문서는 항상 최소 하나의 블록을 가져야 함
+              <DocCodeBlock language="typescript" code={`// 문제: 문서는 항상 최소 하나의 블록을 가져야 함
 // 해결: 문서가 항상 콘텐츠를 가지도록 보장
 if (node.children.length === 0) {
   node.children.push({
@@ -189,7 +189,7 @@ function ensureDocumentNotEmpty(doc) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class DocumentNode {
+              <DocCodeBlock language="typescript" code={`class DocumentNode {
   constructor(children) {
     this.type = 'document';
     this.children = children || [];

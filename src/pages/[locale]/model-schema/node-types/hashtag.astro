@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="해시태그 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>해시태그</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   hashtag: {
     inline: true,
     attrs: {
@@ -87,7 +87,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'hashtag',
   attrs: {
     tag: 'javascript'
@@ -99,7 +99,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeHashtag(node) {
+              <DocCodeBlock language="typescript" code={`function serializeHashtag(node) {
   return '<span data-type="hashtag" data-tag="' + escapeHtml(node.attrs.tag) + 
          '">#' + escapeHtml(node.attrs.tag) + '</span>';
 }`} />
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseHashtag(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseHashtag(domNode) {
   const text = domNode.textContent || '';
   const tag = text.startsWith('#') ? text.slice(1) : text;
   return {
@@ -128,7 +128,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 해시태그 렌더링
+              <DocCodeBlock language="typescript" code={`// 해시태그 렌더링
 const hashtag = document.createElement('span');
 hashtag.setAttribute('data-type', 'hashtag');
 hashtag.setAttribute('data-tag', node.attrs.tag);
@@ -144,7 +144,7 @@ hashtag.contentEditable = 'false'; // 해시태그는 일반적으로 직접 편
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 해시태그 감지
+              <DocCodeBlock language="typescript" code={`// 문제: 해시태그 감지
 // 해결: 텍스트에서 해시태그 감지
 function detectHashtags(text) {
   return text.match(/#\w+/g) || [];
@@ -161,7 +161,7 @@ function validateHashtag(tag) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class HashtagNode {
+              <DocCodeBlock language="typescript" code={`class HashtagNode {
   constructor(attrs) {
     this.type = 'hashtag';
     this.attrs = {

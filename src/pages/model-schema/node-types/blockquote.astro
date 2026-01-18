@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Blockquote</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   blockquote: {
     content: 'block+',
     group: 'block'
@@ -65,7 +65,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'blockquote',
   children: [
     {
@@ -80,7 +80,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeBlockquote(node) {
+              <DocCodeBlock language="typescript" code={`function serializeBlockquote(node) {
   return '<blockquote>' + serializeChildren(node.children) + '</blockquote>';
 }`} />
             </DocSection>
@@ -89,7 +89,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseBlockquote(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseBlockquote(domNode) {
   return {
     type: 'blockquote',
     children: parseChildren(domNode.childNodes)
@@ -104,7 +104,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering
+              <DocCodeBlock language="typescript" code={`// Rendering
 const blockquote = document.createElement('blockquote');
 blockquote.contentEditable = 'true';
 node.children.forEach(child => {
@@ -130,7 +130,7 @@ function createBlockquote() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Empty blockquote
+              <DocCodeBlock language="typescript" code={`// Issue: Empty blockquote
 // Solution: Ensure at least one block
 if (node.children.length === 0) {
   node.children.push({
@@ -154,7 +154,7 @@ function validateBlockquote(blockquote) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class BlockquoteNode {
+              <DocCodeBlock language="typescript" code={`class BlockquoteNode {
   constructor(children) {
     this.type = 'blockquote';
     this.children = children || [];

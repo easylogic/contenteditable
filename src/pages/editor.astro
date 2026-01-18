@@ -10,6 +10,8 @@ const headings = [
   { depth: 2, slug: 'core-concepts', text: 'Core Concepts' },
   { depth: 2, slug: 'detailed-guides', text: 'Detailed Guides' },
   { depth: 2, slug: 'getting-started', text: 'Getting Started' },
+  { depth: 2, slug: 'all-documentation', text: 'All Documentation' },
+  { depth: 2, slug: 'related-resources', text: 'Related Resources' },
 ];
 ---
 
@@ -166,6 +168,161 @@ const headings = [
                     <li>Preserving marks and attributes</li>
                   </ul>
                 </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/model-dom-synchronization" class="text-accent-primary hover:underline">Model-DOM Synchronization</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Keeping your model and DOM in sync: handling contenteditable=false, preserving selection, and managing updates.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Bidirectional synchronization</li>
+                    <li>contenteditable=false handling</li>
+                    <li>Selection preservation</li>
+                    <li>Update strategies</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/history-management" class="text-accent-primary hover:underline">History Management</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Implementing undo/redo functionality: model-based history, conflict resolution, and DOM history handling.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Model-based history</li>
+                    <li>DOM history conflicts</li>
+                    <li>Undo/redo implementation</li>
+                    <li>History state management</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/input-handling" class="text-accent-primary hover:underline">Input Handling & IME</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Comprehensive guide to handling user input, IME composition, keyboard events, and text processing.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>IME composition handling</li>
+                    <li>Keyboard event processing</li>
+                    <li>Text input normalization</li>
+                    <li>Paste operation handling</li>
+                    <li>Mobile input support</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/plugin-development" class="text-accent-primary hover:underline">Plugin Development</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Guide to developing plugins that extend model-based contenteditable editors with custom functionality.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Plugin architecture</li>
+                    <li>Plugin lifecycle</li>
+                    <li>Using hooks and commands</li>
+                    <li>Plugin examples</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/testing-strategies" class="text-accent-primary hover:underline">Testing Strategies</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Comprehensive testing strategies for model-based contenteditable editors at different levels.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Unit testing</li>
+                    <li>Integration testing</li>
+                    <li>IME testing</li>
+                    <li>End-to-end testing</li>
+                    <li>Mobile testing</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/debugging" class="text-accent-primary hover:underline">Debugging Techniques</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Debugging strategies and techniques for contenteditable editors, including tools and common issues.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Debugging tools</li>
+                    <li>Event logging</li>
+                    <li>Common issues</li>
+                    <li>Performance debugging</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/mobile-support" class="text-accent-primary hover:underline">Mobile Support</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Guide to supporting mobile devices in contenteditable editors, including virtual keyboards and touch interactions.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Virtual keyboard handling</li>
+                    <li>Touch selection</li>
+                    <li>Mobile input handling</li>
+                    <li>iOS/Android specific issues</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/accessibility" class="text-accent-primary hover:underline">Accessibility</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Accessibility considerations and best practices for contenteditable editors, including screen reader support and ARIA attributes.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Screen reader support</li>
+                    <li>ARIA attributes</li>
+                    <li>Keyboard navigation</li>
+                    <li>Focus management</li>
+                    <li>Live announcements</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/transaction" class="text-accent-primary hover:underline">Transaction System</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Using transactions to group operations into atomic units for consistent history management in model-based editors.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Atomic history entries</li>
+                    <li>Transaction lifecycle</li>
+                    <li>History integration</li>
+                    <li>Transaction patterns</li>
+                    <li>Nested transactions</li>
+                  </ul>
+                </div>
+
+                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    <a href="/editor/operations" class="text-accent-primary hover:underline">Operations</a>
+                  </h3>
+                  <p class="m-0 mb-2 text-sm text-text-secondary">
+                    Comprehensive guide to operation types that can be combined in transactions for model-based editors.
+                  </p>
+                  <ul class="m-0 pl-4 text-sm text-text-secondary">
+                    <li>Insert operations</li>
+                    <li>Delete operations</li>
+                    <li>Format operations</li>
+                    <li>Replace and move operations</li>
+                    <li>Operation inversion</li>
+                  </ul>
+                </div>
               </div>
             </section>
 
@@ -203,6 +360,78 @@ const headings = [
                   <a href="/docs" class="text-accent-primary hover:underline text-sm">→ Browse Documentation</a>
                 </li>
               </ol>
+            </section>
+
+            <section class="mb-8">
+              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+                All Documentation
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+                <a href="/editor/architecture" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Editor Architecture</h4>
+                  <p class="text-xs m-0 text-text-secondary">Model-view separation and architecture patterns</p>
+                </a>
+                <a href="/editor/model-dom-synchronization" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Model-DOM Synchronization</h4>
+                  <p class="text-xs m-0 text-text-secondary">Keeping model and DOM in sync</p>
+                </a>
+                <a href="/editor/history-management" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">History Management</h4>
+                  <p class="text-xs m-0 text-text-secondary">Undo/redo functionality</p>
+                </a>
+                <a href="/editor/html-mapping" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">HTML Mapping</h4>
+                  <p class="text-xs m-0 text-text-secondary">Serialization and parsing</p>
+                </a>
+                <a href="/editor/input-handling" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Input Handling & IME</h4>
+                  <p class="text-xs m-0 text-text-secondary">User input and IME composition</p>
+                </a>
+                <a href="/editor/plugin-development" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Plugin Development</h4>
+                  <p class="text-xs m-0 text-text-secondary">Extending editor functionality</p>
+                </a>
+                <a href="/editor/testing-strategies" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Testing Strategies</h4>
+                  <p class="text-xs m-0 text-text-secondary">Testing editor functionality</p>
+                </a>
+                <a href="/editor/debugging" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Debugging Techniques</h4>
+                  <p class="text-xs m-0 text-text-secondary">Debugging strategies and tools</p>
+                </a>
+                <a href="/editor/mobile-support" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Mobile Support</h4>
+                  <p class="text-xs m-0 text-text-secondary">Mobile device support</p>
+                </a>
+                <a href="/editor/accessibility" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Accessibility</h4>
+                  <p class="text-xs m-0 text-text-secondary">Accessibility best practices</p>
+                </a>
+                <a href="/editor/transaction" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Transaction System</h4>
+                  <p class="text-xs m-0 text-text-secondary">Atomic history management</p>
+                </a>
+                <a href="/editor/operations" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Operations</h4>
+                  <p class="text-xs m-0 text-text-secondary">Operation types and usage</p>
+                </a>
+                <a href="/editor/crdt-operations" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">CRDT Operations & Rendering</h4>
+                  <p class="text-xs m-0 text-text-secondary">CRDT-based collaborative editing and rendering</p>
+                </a>
+                <a href="/editor/history-management-optimization" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">History Management Optimization</h4>
+                  <p class="text-xs m-0 text-text-secondary">Optimizing undo/redo performance</p>
+                </a>
+                <a href="/editor/error-handling" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Error Handling & Recovery</h4>
+                  <p class="text-xs m-0 text-text-secondary">Error handling and recovery strategies</p>
+                </a>
+                <a href="/editor/framework-integration" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Framework Integration</h4>
+                  <p class="text-xs m-0 text-text-secondary">React, Vue, Svelte integration</p>
+                </a>
+              </div>
             </section>
 
             <section class="mb-8">

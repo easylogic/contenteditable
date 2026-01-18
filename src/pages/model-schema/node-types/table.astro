@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Table</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   table: {
     content: 'tableRow+',
     group: 'block',
@@ -87,7 +87,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'table',
   attrs: { colCount: 3 },
   children: [
@@ -114,7 +114,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeTable(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTable(node) {
   let html = '<table><tbody>';
   node.children.forEach(row => {
     html += serializeTableRow(row);
@@ -151,7 +151,7 @@ function serializeTableCell(node) {
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseTable(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTable(domNode) {
   const tbody = domNode.querySelector('tbody') || domNode;
   const rows = Array.from(tbody.querySelectorAll('tr'))
     .map(row => parseTableRow(row));
@@ -199,7 +199,7 @@ function parseTableCell(domNode) {
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering
+              <DocCodeBlock language="typescript" code={`// Rendering
 const table = document.createElement('table');
 const tbody = document.createElement('tbody');
 node.children.forEach(row => {
@@ -234,7 +234,7 @@ function insertColumn(table, index) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Table structure validation
+              <DocCodeBlock language="typescript" code={`// Issue: Table structure validation
 // Solution: Ensure consistent column count
 function validateTable(table) {
   const colCount = table.attrs.colCount;
@@ -268,7 +268,7 @@ function getCellAt(table, row, col) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class TableNode {
+              <DocCodeBlock language="typescript" code={`class TableNode {
   constructor(attrs, children) {
     this.type = 'table';
     this.attrs = { colCount: attrs?.colCount || 0 };

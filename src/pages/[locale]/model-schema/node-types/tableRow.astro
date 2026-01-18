@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="테이블 행 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>테이블 행</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   tableRow: {
     content: '(tableCell | tableHeader)+',
     tableRole: 'row',
@@ -85,7 +85,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'tableRow',
   children: [
     {
@@ -104,7 +104,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeTableRow(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTableRow(node) {
   return '<tr>' + serializeChildren(node.children) + '</tr>';
 }`} />
             </DocSection>
@@ -113,7 +113,7 @@ const headings = [
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseTableRow(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTableRow(domNode) {
   return {
     type: 'tableRow',
     children: Array.from(domNode.children)
@@ -130,7 +130,7 @@ const headings = [
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 테이블 행 렌더링
+              <DocCodeBlock language="typescript" code={`// 테이블 행 렌더링
 const tr = document.createElement('tr');
 tr.contentEditable = 'true';
 node.children.forEach(cell => {
@@ -157,7 +157,7 @@ function addTableRow(table) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 행 셀 개수 불일치
+              <DocCodeBlock language="typescript" code={`// 문제: 행 셀 개수 불일치
 // 해결: 일관된 셀 개수 보장
 function validateRowCells(row, expectedCount) {
   const cells = row.querySelectorAll('td, th');
@@ -189,7 +189,7 @@ function selectRow(tr) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class TableRowNode {
+              <DocCodeBlock language="typescript" code={`class TableRowNode {
   constructor(children) {
     this.type = 'tableRow';
     this.children = children || [];

@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Font Size</strong> mark type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   fontSize: {
     attrs: {
       size: { default: 16 }
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'text',
   text: 'Large text',
   marks: [{
@@ -82,7 +82,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeFontSizeMark(text, mark) {
+              <DocCodeBlock language="typescript" code={`function serializeFontSizeMark(text, mark) {
   const size = mark.attrs?.size || 16;
   return '<span style="font-size: ' + size + 'px">' + text + '</span>';
 }`} />
@@ -92,7 +92,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function extractFontSizeMark(element) {
+              <DocCodeBlock language="typescript" code={`function extractFontSizeMark(element) {
   if (element.tagName === 'SPAN' && element.style.fontSize) {
     const size = parseInt(element.style.fontSize) || 16;
     return {
@@ -111,7 +111,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Setting font size
+              <DocCodeBlock language="typescript" code={`// Setting font size
 function setFontSize(size) {
   addMark({
     type: 'fontSize',
@@ -133,7 +133,7 @@ function showFontSizePicker() {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Font size units (px, em, rem)
+              <DocCodeBlock language="typescript" code={`// Issue: Font size units (px, em, rem)
 // Solution: Normalize to px
 function normalizeFontSize(size) {
   if (typeof size === 'string') {
@@ -158,7 +158,7 @@ function validateFontSize(size) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class FontSizeMark {
+              <DocCodeBlock language="typescript" code={`class FontSizeMark {
   constructor(attrs) {
     this.type = 'fontSize';
     this.attrs = { size: attrs?.size || 16 };

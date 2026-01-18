@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Diagram</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   diagram: {
     group: 'block',
     attrs: {
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'diagram',
   attrs: {
     type: 'flowchart',
@@ -81,7 +81,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeDiagram(node) {
+              <DocCodeBlock language="typescript" code={`function serializeDiagram(node) {
   return '<div data-type="diagram" data-diagram-type="' + node.attrs.type + '">' + 
          escapeHtml(node.attrs.data) + '</div>';
 }`} />
@@ -91,7 +91,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseDiagram(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseDiagram(domNode) {
   return {
     type: 'diagram',
     attrs: {
@@ -109,7 +109,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering diagram
+              <DocCodeBlock language="typescript" code={`// Rendering diagram
 const diagram = document.createElement('div');
 diagram.setAttribute('data-type', 'diagram');
 diagram.setAttribute('data-diagram-type', node.attrs.type);
@@ -134,7 +134,7 @@ function renderDiagram(element) {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Diagram library initialization
+              <DocCodeBlock language="typescript" code={`// Issue: Diagram library initialization
 // Solution: Initialize diagram library
 function initDiagramLibrary() {
   if (window.mermaid) {
@@ -154,7 +154,7 @@ function validateDiagramData(data, type) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class DiagramNode {
+              <DocCodeBlock language="typescript" code={`class DiagramNode {
   constructor(attrs) {
     this.type = 'diagram';
     this.attrs = {

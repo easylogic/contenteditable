@@ -1,0 +1,143 @@
+---
+import SiteNav from '../../../components/SiteNav.astro';
+import BaseHead from '../../../components/BaseHead.astro';
+import TableOfContents from '../../../components/TableOfContents.astro';
+import DocCodeBlock from '../../../components/docs/DocCodeBlock.astro';
+import DocSection from '../../../components/docs/DocSection.astro';
+import DocNavigation from '../../../components/docs/DocNavigation.astro';
+import '../../../styles/global.css';
+
+const headings = [
+  { depth: 2, slug: 'overview', text: 'Overview' },
+  { depth: 2, slug: 'interface', text: 'Interface' },
+  { depth: 2, slug: 'usage', text: 'Usage' },
+  { depth: 2, slug: 'inverse', text: 'Inverse Operation' },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Split Node Operation – Editor Architecture – contenteditable.lab"
+      description="Split node operation for model-based editors"
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+        <div class="flex-1">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor" class="text-text-muted no-underline">Editor</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/editor/operations" class="text-text-muted no-underline">Operations</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Split Node</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Split Node Operation</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Split a node at a specific position into two nodes.
+            </p>
+          </header>
+
+          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                The split node operation divides a node at a specific position into two separate nodes. Commonly used when user presses Enter to split a paragraph.
+              </p>
+            </DocSection>
+
+            <DocSection id="interface" title="Interface">
+              <DocCodeBlock language="typescript" code={`interface SplitNodeOperation extends Operation {
+  type: 'splitNode';
+  path: Path;
+  position: number; // Position within node to split
+  depth?: number; // How deep to split (default: 0, split at top level)
+}`} />
+            </DocSection>
+
+            <DocSection id="usage" title="Usage">
+              <DocCodeBlock language="typescript" code={`// Split paragraph at cursor position
+function splitParagraph(editor: Editor, position: Path) {
+  const operation: SplitNodeOperation = {
+    type: 'splitNode',
+    path: position,
+    position: position[1] // Offset within paragraph
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// Split at specific offset
+function splitAtOffset(editor: Editor, nodePath: Path, offset: number) {
+  const operation: SplitNodeOperation = {
+    type: 'splitNode',
+    path: nodePath,
+    position: offset
+  };
+  
+  editor.applyOperation(operation);
+}
+
+// In transaction (can be decomposed into replace + insert)
+function splitInTransaction(editor: Editor, position: Path) {
+  const tx = editor.beginTransaction();
+  const node = editor.getNodeAtPath(position);
+  
+  const beforeText = node.text.slice(0, position[1]);
+  const afterText = node.text.slice(position[1]);
+  
+  // Update current node
+  tx.add({
+    type: 'replace',
+    path: position,
+    length: node.text.length,
+    content: beforeText
+  });
+  
+  // Insert new node
+  tx.add({
+    type: 'insertNode',
+    path: [position[0] + 1],
+    node: {
+      type: node.type,
+      children: [{ type: 'text', text: afterText }]
+    }
+  });
+  
+  tx.commit();
+}`} />
+            </DocSection>
+
+            <DocSection id="inverse" title="Inverse Operation">
+              <p class="m-0 mb-4">
+                The inverse of split node is merge nodes:
+              </p>
+              <DocCodeBlock language="typescript" code={`function getInverse(operation: SplitNodeOperation): MergeNodesOperation {
+  return {
+    type: 'mergeNodes',
+    path: operation.path,
+    targetPath: [operation.path[0] + 1], // Next sibling
+    position: operation.position
+  };
+}`} />
+            </DocSection>
+
+            <DocNavigation
+              current="/editor/operations/split-node"
+              pages={[
+                { title: 'Operations', href: '/editor/operations', description: 'Operations overview' },
+                { title: 'Merge Nodes', href: '/editor/operations/merge-nodes', description: 'Merge nodes operation' },
+                { title: 'Insert Paragraph', href: '/editor/operations/insert-paragraph', description: 'Insert paragraph operation' },
+              ]}
+            />
+          </article>
+        </div>
+        <TableOfContents headings={headings} />
+      </section>
+    </main>
+  </body>
+</html>

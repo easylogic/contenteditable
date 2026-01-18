@@ -38,7 +38,7 @@ const headings = [
 ];
 ---
 
-<html lang={locale} dir={localeInfo.dir}>
+<html lang={localeInfo.code} dir={localeInfo.dir}>
   <head>
     <BaseHead
       title="테이블 노드 타입 – contenteditable.lab"
@@ -73,7 +73,7 @@ const headings = [
               <p class="m-0 mb-3">
                 <strong>테이블</strong> 노드 타입의 스키마 정의:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   table: {
     content: 'tableRow+',
     group: 'block',
@@ -105,7 +105,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델 표현 예제:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'table',
   attrs: { colCount: 3 },
   children: [
@@ -132,7 +132,7 @@ const headings = [
               <p class="m-0 mb-3">
                 모델을 HTML로 변환:
               </p>
-              <DocCodeBlock code={`function serializeTable(node) {
+              <DocCodeBlock language="typescript" code={`function serializeTable(node) {
   let html = '<table><tbody>';
   node.children.forEach(row => {
     html += serializeTableRow(row);
@@ -169,7 +169,7 @@ function serializeTableCell(node) {
               <p class="m-0 mb-3">
                 HTML을 모델로 파싱:
               </p>
-              <DocCodeBlock code={`function parseTable(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseTable(domNode) {
   const tbody = domNode.querySelector('tbody') || domNode;
   const rows = Array.from(tbody.querySelectorAll('tr'))
     .map(row => parseTableRow(row));
@@ -217,7 +217,7 @@ function parseTableCell(domNode) {
               <p class="m-0 mb-3">
                 뷰 연동 코드:
               </p>
-              <DocCodeBlock code={`// 렌더링
+              <DocCodeBlock language="typescript" code={`// 렌더링
 const table = document.createElement('table');
 const tbody = document.createElement('tbody');
 node.children.forEach(row => {
@@ -252,7 +252,7 @@ function insertColumn(table, index) {
               <p class="m-0 mb-3">
                 일반적인 문제 및 해결 방법:
               </p>
-              <DocCodeBlock code={`// 문제: 테이블 구조 검증
+              <DocCodeBlock language="typescript" code={`// 문제: 테이블 구조 검증
 // 해결: 일관된 열 개수 보장
 function validateTable(table) {
   const colCount = table.attrs.colCount;
@@ -286,7 +286,7 @@ function getCellAt(table, row, col) {
               <p class="m-0 mb-3">
                 완전한 구현 예제:
               </p>
-              <DocCodeBlock code={`class TableNode {
+              <DocCodeBlock language="typescript" code={`class TableNode {
   constructor(attrs, children) {
     this.type = 'table';
     this.attrs = { colCount: attrs?.colCount || 0 };

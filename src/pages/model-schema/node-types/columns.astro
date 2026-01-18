@@ -53,7 +53,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Schema definition for the <strong>Columns</strong> node type:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   columns: {
     content: 'block+',
     group: 'block',
@@ -68,7 +68,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Example model representation:
               </p>
-              <DocCodeBlock code={`{
+              <DocCodeBlock language="typescript" code={`{
   type: 'columns',
   attrs: { count: 2 },
   children: [
@@ -88,7 +88,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Converting model to HTML:
               </p>
-              <DocCodeBlock code={`function serializeColumns(node) {
+              <DocCodeBlock language="typescript" code={`function serializeColumns(node) {
   return '<div data-type="columns" data-count="' + node.attrs.count + '">' + 
          serializeChildren(node.children) + '</div>';
 }`} />
@@ -98,7 +98,7 @@ const headings = [
               <p class="m-0 mb-3">
                 Parsing HTML to model:
               </p>
-              <DocCodeBlock code={`function parseColumns(domNode) {
+              <DocCodeBlock language="typescript" code={`function parseColumns(domNode) {
   return {
     type: 'columns',
     attrs: { count: parseInt(domNode.getAttribute('data-count')) || 2 },
@@ -116,7 +116,7 @@ const headings = [
               <p class="m-0 mb-3">
                 View integration code:
               </p>
-              <DocCodeBlock code={`// Rendering columns
+              <DocCodeBlock language="typescript" code={`// Rendering columns
 const columns = document.createElement('div');
 columns.setAttribute('data-type', 'columns');
 columns.setAttribute('data-count', node.attrs.count);
@@ -136,7 +136,7 @@ node.children.forEach(child => {
               <p class="m-0 mb-3">
                 Common issues and solutions:
               </p>
-              <DocCodeBlock code={`// Issue: Column count mismatch
+              <DocCodeBlock language="typescript" code={`// Issue: Column count mismatch
 // Solution: Ensure children match column count
 function validateColumns(columns, count) {
   const children = columns.children;
@@ -162,7 +162,7 @@ function makeColumnsResponsive(columns) {
               <p class="m-0 mb-3">
                 Complete implementation example:
               </p>
-              <DocCodeBlock code={`class ColumnsNode {
+              <DocCodeBlock language="typescript" code={`class ColumnsNode {
   constructor(attrs, children) {
     this.type = 'columns';
     this.attrs = { count: attrs?.count || 2 };
