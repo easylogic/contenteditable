@@ -1,0 +1,914 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+
+const headings = [
+    { depth: 2, slug: "executive-summary", text: "Executive Summary" },
+    {
+        depth: 2,
+        slug: "architectural-paradigms",
+        text: "Architectural Paradigms",
+    },
+    { depth: 3, slug: "recursive-tree", text: "1. The Recursive Tree" },
+    { depth: 3, slug: "normalized-linear", text: "2. The Normalized Map" },
+    {
+        depth: 2,
+        slug: "performance-characteristics",
+        text: "Performance Characteristics",
+    },
+    { depth: 2, slug: "engine-optimization", text: "Engine Optimization (V8)" },
+    { depth: 3, slug: "inline-caches", text: "Inline Caches & Hidden Classes" },
+    {
+        depth: 3,
+        slug: "memory-layout",
+        text: "Memory Layout & Pointer Chasing",
+    },
+    { depth: 2, slug: "concurrency-theory", text: "Concurrency Theory" },
+    {
+        depth: 3,
+        slug: "interleaving-problem",
+        text: "The Interleaving Problem",
+    },
+    { depth: 3, slug: "crdt-commutativity", text: "CRDT Commutativity" },
+    {
+        depth: 2,
+        slug: "scalability-virtualization",
+        text: "Scalability & Virtualization",
+    },
+    {
+        depth: 2,
+        slug: "framework-integration",
+        text: "Framework Integration (React)",
+    },
+    {
+        depth: 2,
+        slug: "hybrid-architecture",
+        text: "The Hybrid Projection Pattern",
+    },
+];
+---
+
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Data Structure Strategies: A Technical Deep Dive"
+            description="A whitepaper-grade analysis of editor data structures. Exploring V8 Hidden Classes, Garbage Collection pressure, CRDT mathematics, and React reconciliation performance."
+        />
+    </head>
+    <body>
+        <SiteNav />
+        <main class="flex max-w-full m-0 p-0">
+            <section
+                class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+            >
+                <div class="flex-1">
+                    <header class="mb-8">
+                        <nav class="mb-4 text-sm">
+                            <a href="/" class="text-text-muted no-underline"
+                                >Home</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor"
+                                class="text-text-muted no-underline">Editor</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor/architecture"
+                                class="text-text-muted no-underline"
+                                >Architecture</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <span class="text-text-primary"
+                                >Data Structures</span
+                            >
+                        </nav>
+                        <h1 class="text-3xl leading-tight m-0 mb-2">
+                            Data Structure Strategies: Technical Deep Dive
+                        </h1>
+                        <p class="m-0 text-[0.95rem] text-text-secondary">
+                            An advanced engineering analysis of in-memory
+                            document representations. This document moves beyond
+                            basic comparisons to explore the low-level
+                            implications of data structure choice on JavaScript
+                            engines, memory management, and distributed systems
+                            theory.
+                        </p>
+                    </header>
+
+                    <article
+                        class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+                    >
+                        <DocSection
+                            id="executive-summary"
+                            title="Executive Summary"
+                        >
+                            <p class="m-0 mb-4">
+                                The choice between a <strong
+                                    >Recursive Tree</strong
+                                > and a <strong>Normalized Flat Map</strong> is not
+                                merely a stylistic preference; it is a fundamental
+                                tradeoff between <strong
+                                    >Rendering Performance</strong
+                                > and <strong
+                                    >Update/Collaboration Performance</strong
+                                >.
+                            </p>
+                            <p class="m-0 mb-4">
+                                <strong>Trees</strong> align naturally with the DOM
+                                and JavaScript engine optimization paths (Inline Caches),
+                                utilizing contiguous memory arrays for fast traversal.
+                                However, they suffer from O(Depth) update costs and
+                                mathematical instability during concurrent editing
+                                (Position Divergence).
+                            </p>
+                            <p class="m-0 mb-4">
+                                <strong>Flat Maps</strong> prioritize O(1) access
+                                updates and stable addressing, making them mathematically
+                                ideal for CRDTs (Conflict-free Replicated Data Types)
+                                and fine-grained UI updates. However, they incur penalties
+                                in V8 memory usage (Dictionary Mode objects) and require
+                                expensive "hydration" phases to render to the DOM.
+                            </p>
+                        </DocSection>
+
+                        <DocSection
+                            id="architectural-paradigms"
+                            title="Architectural Paradigms"
+                        >
+                            <div id="recursive-tree" class="mb-8 pl-1">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    1. The Recursive Tree
+                                </h3>
+                                <p class="m-0 mb-3">
+                                    The Recursive Tree is the classical
+                                    representation of a document. It is
+                                    isomorphic to the HTML DOM. A `Paragraph`
+                                    node physically contains `Text` nodes in a
+                                    distinct `children` array property.
+                                </p>
+                                <p class="m-0 mb-3">
+                                    This structure relies on <strong
+                                        >Referential Integrity</strong
+                                    >. To traverse from a parent to a child, the
+                                    engine simply dereferences a pointer in a
+                                    contiguous array. This is the architecture
+                                    chosen by <strong>ProseMirror</strong> and <strong
+                                        >Slate</strong
+                                    > because it optimizes for the "Read" path—rendering
+                                    the document is a simple depth-first traversal.
+                                </p>
+                                <DocCodeBlock
+                                    language="typescript"
+                                    code={`// The Tree optimizes for contiguous memory layout
+interface TreeNode {
+  type: string;
+  // V8 allocates this as a contiguous FixedArray[Pointer]
+  children: TreeNode[]; 
+}`}
+                                />
+                            </div>
+
+                            <div id="normalized-linear" class="mb-8 pl-1">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    2. The Normalized Map
+                                </h3>
+                                <p class="m-0 mb-3">
+                                    The Normalized Map treats the document as a
+                                    relational database. Nodes are decoupled
+                                    from their hierarchy and stored in a single
+                                    "Table" (Hash Map), indexed by unstable IDs.
+                                    Hierarchy is reconstructed via Foreign Keys
+                                    (referenced IDs).
+                                </p>
+                                <p class="m-0 mb-3">
+                                    This architecture, popularized by <strong
+                                        >Draft.js</strong
+                                    > and <strong>Lexical</strong>, optimizes
+                                    for the "Write" path. Moving a paragraph
+                                    from the top of the document to the bottom
+                                    is an O(1) operation: simply change the
+                                    `parentId` pointer. No deep structural
+                                    cloning or array splicing is visually
+                                    required, though managing order requires
+                                    ancillary structures (like Linked Lists or
+                                    Index Arrays).
+                                </p>
+                                <DocCodeBlock
+                                    language="typescript"
+                                    code={`// The Map optimizes for O(1) random access
+interface NodeMap {
+  [id: string]: FlatNode; // Hash Table lookup
+}
+// Hierarchy is virtual, reconstructed at runtime
+interface FlatNode {
+  id: string;
+  parent: string; // "Foreign Key"
+  nextSibling: string;
+}`}
+                                />
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="performance-characteristics"
+                            title="Performance Characteristics"
+                        >
+                            <div class="mb-6 overflow-x-auto">
+                                <table
+                                    class="w-full text-sm border-collapse border border-border-light"
+                                >
+                                    <thead>
+                                        <tr class="bg-bg-muted">
+                                            <th
+                                                class="border border-border-light p-2 text-left"
+                                                >Operation</th
+                                            >
+                                            <th
+                                                class="border border-border-light p-2 text-left"
+                                                >Recursive Tree</th
+                                            >
+                                            <th
+                                                class="border border-border-light p-2 text-left"
+                                                >Flat Map</th
+                                            >
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td
+                                                class="border border-border-light p-2 font-semibold"
+                                                >Access by Path</td
+                                            >
+                                            <td
+                                                class="border border-border-light p-2 text-green-600 font-bold"
+                                                >O(Depth)</td
+                                            >
+                                            <td
+                                                class="border border-border-light p-2 text-red-600"
+                                                >O(Depth)</td
+                                            >
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                class="border border-border-light p-2 font-semibold"
+                                                >Access by ID</td
+                                            >
+                                            <td
+                                                class="border border-border-light p-2 text-red-600"
+                                                >O(N)</td
+                                            >
+                                            <td
+                                                class="border border-border-light p-2 text-green-600 font-bold"
+                                                >O(1)</td
+                                            >
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                class="border border-border-light p-2 font-semibold"
+                                                >Move Subtree</td
+                                            >
+                                            <td
+                                                class="border border-border-light p-2 text-red-600"
+                                                >O(Depth)</td
+                                            >
+                                            <td
+                                                class="border border-border-light p-2 text-green-600 font-bold"
+                                                >O(1)</td
+                                            >
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-sm text-text-secondary m-0">
+                                *Note: While Flat Maps win on Big-O algorithmic
+                                complexity for updates, Trees often win on
+                                constant-factor speed for Rendering due to cache
+                                locality.*
+                            </p>
+                        </DocSection>
+
+                        <DocSection
+                            id="engine-optimization"
+                            title="Engine Optimization (V8)"
+                        >
+                            <p class="m-0 mb-4">
+                                To understand the true performance cost, we must
+                                look at how engines like V8 (Chrome/Node.js)
+                                compile these structures.
+                            </p>
+
+                            <div id="inline-caches" class="mb-6 pl-1">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    Inline Caches & Hidden Classes
+                                </h3>
+                                <p class="m-0 mb-3 ml-1">
+                                    V8 uses <strong
+                                        >Hidden Classes (Shapes)</strong
+                                    > to optimize property access. If an object has
+                                    the same shape (e.g., `&#123; type, children &#125;`),
+                                    V8 generates a specialized assembly instruction
+                                    to access properties at a fixed memory offset.
+                                </p>
+                                <ul class="list-disc pl-5 mb-4 space-y-2">
+                                    <li>
+                                        <strong
+                                            >Monomorphic Access (Trees):</strong
+                                        > In a uniform Tree, almost every node shares
+                                        the same Shape. When iterating `node.children`,
+                                        the engine stays in a "Monomorphic" state,
+                                        executing highly optimized assembly code.
+                                    </li>
+                                    <li>
+                                        <strong
+                                            >Megamorphic Access (Flat Maps):</strong
+                                        > A large Hash Map (`Record&lt;string, Node&gt;`)
+                                        often forces V8 into <strong
+                                            >Dictionary Mode</strong
+                                        >. Because keys are added dynamically
+                                        and potentially in random order, V8
+                                        cannot optimize the memory layout.
+                                        Accessing `nodeMap[id]` involves hashing
+                                        the key and walking a Hash Table bucket,
+                                        which is orders of magnitude slower than
+                                        a fixed-offset read.
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div id="memory-layout" class="mb-6 pl-1">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    Memory Layout & Pointer Chasing
+                                </h3>
+                                <p class="m-0 mb-3 ml-1">
+                                    Modern CPUs are bottlenecked by memory
+                                    latency, not cycle speed. Fetching data from
+                                    RAM takes hundreds of cycles; fetching from
+                                    L1/L2 Cache takes single digits.
+                                </p>
+                                <p class="m-0 mb-3 ml-1">
+                                    <strong>Trees</strong> often benefit from allocation
+                                    locality. When a tree is created deeply, child
+                                    nodes are often allocated nearby in the Young
+                                    Generation heap. Traversing the `children` array
+                                    is cache-friendly because the pointers are contiguous.
+                                </p>
+                                <p class="m-0 mb-3 ml-1">
+                                    <strong>Flat Maps</strong> scatter nodes across
+                                    the heap. Traversing a logical document structure
+                                    typically involves "pointer chasing" to random
+                                    memory addresses for each node look-up, causing
+                                    frequent CPU Cache Misses and stalling the pipeline.
+                                </p>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="concurrency-theory"
+                            title="Concurrency Theory"
+                        >
+                            <p class="m-0 mb-4">
+                                Mathematical stability in distributed systems is
+                                the primary reason architectures are moving
+                                towards Flat Maps.
+                            </p>
+
+                            <div id="interleaving-problem" class="mb-8 pl-1">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    The Interleaving Problem (OT)
+                                </h3>
+                                <p class="m-0 mb-3">
+                                    Operational Transformation (OT) relies on
+                                    transforming indices. For example,
+                                    `Insert(0, "A")`.
+                                </p>
+                                <div
+                                    class="p-4 bg-bg-muted rounded-lg border border-border-light font-mono text-sm mb-4"
+                                >
+                                    State: "BC"<br />
+                                    User 1: Insert(0, "A") -> "ABC"<br />
+                                    User 2: Insert(0, "X") -> "XBC"<br />
+                                    <strong>Conflict:</strong> Without a central server
+                                    to decide that User 2's op should become `Insert(1,
+                                    "X")` (or vice versa), the states diverge.
+                                </div>
+                                <p class="m-0 mb-3">
+                                    Trees rely on PATHS `[0, 1, 4]`. These paths
+                                    are highly volatile. Inserting a node at
+                                    index 0 invalidates the paths of <i
+                                        >every subsequent sibling</i
+                                    >. This volatility makes peer-to-peer
+                                    collaboration nearly impossible without a
+                                    central sequencer.
+                                </p>
+                            </div>
+
+                            <div id="crdt-commutativity" class="mb-8 pl-1">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    CRDT Commutativity
+                                </h3>
+                                <p class="m-0 mb-3">
+                                    Conflict-free Replicated Data Types (CRDTs)
+                                    like Yjs or Automerge require operations to
+                                    be <strong>Commutative</strong> ($$A + B = B +
+                                    A$$) and <strong>Idempotent</strong>.
+                                </p>
+                                <p class="m-0 mb-3">
+                                    To achieve this, they use <strong
+                                        >Stable Addressing</strong
+                                    > (Unique IDs). Instead of "Insert at index 5",
+                                    they say "Insert after Node ID `2f8a`".
+                                </p>
+                                <p class="m-0 mb-3">
+                                    Flat Maps are naturally isomorphic to this
+                                    structure. Because every node has a stable
+                                    ID that never changes regardless of its
+                                    position in the document, binding a Flat Map
+                                    editor architecture to a CRDT is trivial.
+                                    Binding a Recursive Tree to a CRDT requires
+                                    maintaining complex "Mapping Tables" to
+                                    translate unstable Paths to stable IDs back
+                                    and forth.
+                                </p>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="scalability-virtualization"
+                            title="Scalability & Virtualization"
+                        >
+                            <h3 class="text-lg font-semibold mb-3">
+                                The Height Calculation Problem
+                            </h3>
+                            <p class="text-sm mb-3">
+                                How do you render a document with 10,000
+                                paragraphs? To render a scrollbar correctly, you
+                                need the total height of the document.
+                            </p>
+                            <ul class="list-disc pl-5 text-sm space-y-2 mb-4">
+                                <li>
+                                    <strong>In Trees:</strong> Computing the height
+                                    of the 500th paragraph might require traversing
+                                    and measuring the previous 499, or maintaining
+                                    complex "height" metadata at every branch of the
+                                    tree.
+                                </li>
+                                <li>
+                                    <strong>In Flat Lists:</strong> If your customized
+                                    model can project a "Flat List of Blocks", virtualization
+                                    (windowing) becomes trivial O(1). This is how
+                                    VS Code handles huge text files (array of lines).
+                                </li>
+                            </ul>
+                            <DocAlert type="success">
+                                <p class="text-sm m-0">
+                                    <strong>Pro Tip:</strong> Many performant editors
+                                    maintain a separate <strong
+                                        >Linear Array of Block Metadata</strong
+                                    > specifically for scrollbar virtualization, decoupled
+                                    from the main document tree.
+                                </p>
+                            </DocAlert>
+                        </DocSection>
+
+                        <DocSection
+                            id="framework-integration"
+                            title="Framework Integration (React/Vue)"
+                        >
+                            <p class="m-0 mb-4">
+                                The choice of data structure deeply impacts UI
+                                framework performance, particularly <strong
+                                    >Reconciliation</strong
+                                >.
+                            </p>
+                            <p class="m-0 mb-3">
+                                React relies on the `key` prop to identify
+                                elements.
+                            </p>
+                            <ul class="list-disc pl-5 mb-4 space-y-2">
+                                <li>
+                                    <strong>In Trees (Index Keys):</strong> Often,
+                                    developers use array indices as keys because nodes
+                                    lack IDs. `map((node, i) => &lt;Node key=&#123;i&#125;
+                                    /&gt;)`. This is disastrous for performance. Inserting
+                                    at index 0 causes React to destroy and recreate
+                                    every subsequent component because their keys
+                                    effectively "shifted".
+                                </li>
+                                <li>
+                                    <strong
+                                        >In Flat Maps (Stable ID Keys):</strong
+                                    > Since every node has a GUID, you can strictly
+                                    render `&lt;Node key=&#123;node.id&#125; /&gt;`.
+                                    When a node moves, React simply moves the DOM
+                                    node without destroying its internal state (caret
+                                    position, scroll offset, etc.). This isolation
+                                    allows for "O(1) Component Updates"—only the specifically
+                                    changed component re-renders.
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocSection
+                            id="hybrid-architecture"
+                            title="The Hybrid Projection Pattern"
+                        >
+                            <p class="m-0 mb-4">
+                                Given the polarized trade-offs, the industry
+                                standard has converged on a <strong
+                                    >Hybrid Projection</strong
+                                > architecture. This pattern strictly separates the
+                                <strong>Storage Model</strong> (how data is saved/synced)
+                                from the <strong>View Model</strong> (how data is
+                                rendered).
+                            </p>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+                            >
+                                <div
+                                    class="border border-border-light rounded-lg p-5"
+                                >
+                                    <h4
+                                        class="font-bold text-lg mb-2 text-blue-600 dark:text-blue-400"
+                                    >
+                                        1. The Storage Model
+                                    </h4>
+                                    <p
+                                        class="text-xs font-mono text-text-secondary mb-3 uppercase tracking-wider"
+                                    >
+                                        Source of Truth (Memory)
+                                    </p>
+                                    <p class="text-sm mb-3">
+                                        The document is stored in memory as a <strong
+                                            >Normalized Flat Map</strong
+                                        > (or CRDT Yjs/Automerge Doc). This optimizes
+                                        for:
+                                    </p>
+                                    <ul
+                                        class="list-disc pl-4 text-sm space-y-1 mb-3"
+                                    >
+                                        <li>
+                                            <strong>O(1) Updates:</strong> Moving
+                                            a node is just pointer changes.
+                                        </li>
+                                        <li>
+                                            <strong>Collaboration:</strong> ID-based
+                                            math avoids conflict.
+                                        </li>
+                                        <li>
+                                            <strong>Serialization:</strong> JSON-friendly
+                                            flat arrays.
+                                        </li>
+                                    </ul>
+                                    <DocCodeBlock
+                                        language="typescript"
+                                        code={`const store = {
+  "id_1": { type: "p", parent: "root", next: "id_2" },
+  "id_2": { type: "p", parent: "root", prev: "id_1" }
+}`}
+                                    />
+                                </div>
+
+                                <div
+                                    class="border border-border-light rounded-lg p-5"
+                                >
+                                    <h4
+                                        class="font-bold text-lg mb-2 text-green-600 dark:text-green-400"
+                                    >
+                                        2. The View Model
+                                    </h4>
+                                    <p
+                                        class="text-xs font-mono text-text-secondary mb-3 uppercase tracking-wider"
+                                    >
+                                        Projection (Ephemeral)
+                                    </p>
+                                    <p class="text-sm mb-3">
+                                        For rendering, we project a <strong
+                                            >Temporary Tree</strong
+                                        >. This tree is often read-only and
+                                        rebuilt only when the underlying Store
+                                        changes (Memoization).
+                                    </p>
+                                </div>
+                                <DocCodeBlock
+                                    language="typescript"
+                                    code={`const view = {
+  type: "root",
+  children: [
+    { id: "id_1", type: "p", children: [] },
+    { id: "id_2", type: "p", children: [] }
+  ]
+}`}
+                                />
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="hybrid-architecture"
+                            title="The Hybrid Projection Pattern"
+                        >
+                            <p class="m-0 mb-4">
+                                As editor complexity increases, the "Single
+                                Model" approach breaks down. Requirements for
+                                Collaboration (Stable IDs) conflict with
+                                requirements for Rendering (Hierarchy).
+                            </p>
+                            <p class="m-0 mb-6 font-medium text-text-primary">
+                                The industry standard solution is the <strong
+                                    >Hybrid Projection Pattern</strong
+                                >. We do not choose one structure; we maintain
+                                two, connected by a highly optimized Selector.
+                            </p>
+
+                            <!-- SUBSECTION 1: THE DATA STORE -->
+                            <div class="mb-10">
+                                <h3
+                                    class="text-xl font-bold mb-4 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 text-sm"
+                                        >1</span
+                                    >
+                                    The Storage Model (Memory)
+                                </h3>
+                                <div
+                                    class="pl-10 border-l-2 border-blue-100 ml-4"
+                                >
+                                    <p class="mb-4 text-sm text-text-secondary">
+                                        The "Source of Truth" must be optimized
+                                        for machine-speed updates. When a user
+                                        types or a peer sends a CRDT update, we
+                                        write here.
+                                    </p>
+                                    <ul
+                                        class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"
+                                    >
+                                        <li
+                                            class="bg-bg-surface border border-border-light p-3 rounded"
+                                        >
+                                            <strong
+                                                class="block text-xs uppercase text-text-muted mb-1"
+                                                >State Type</strong
+                                            >
+                                            Normalized Flat Map
+                                        </li>
+                                        <li
+                                            class="bg-bg-surface border border-border-light p-3 rounded"
+                                        >
+                                            <strong
+                                                class="block text-xs uppercase text-text-muted mb-1"
+                                                >Update Cost</strong
+                                            >
+                                            O(1) Constant Time
+                                        </li>
+                                        <li
+                                            class="bg-bg-surface border border-border-light p-3 rounded"
+                                        >
+                                            <strong
+                                                class="block text-xs uppercase text-text-muted mb-1"
+                                                >Optimized For</strong
+                                            >
+                                            CRDTs & Network Sync
+                                        </li>
+                                    </ul>
+                                    <DocCodeBlock
+                                        language="typescript"
+                                        code={`// The "Database" format.
+// No physical nesting. Only ID references.
+type EditorState = Record<string, NodeState>;
+
+interface NodeState {
+  id: string;
+  type: "paragraph" | "text";
+  parent: string | null;
+  // Doubly Linked List for sibling order
+  prev: string | null;
+  next: string | null; 
+}`}
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- SUBSECTION 2: THE PROJECTION LAYER -->
+                            <div class="mb-10">
+                                <h3
+                                    class="text-xl font-bold mb-4 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="flex items-center justify-center w-8 h-8 rounded-full bg-purple-100 text-purple-700 text-sm"
+                                        >2</span
+                                    >
+                                    The Projection Layer (Selector)
+                                </h3>
+                                <div
+                                    class="pl-10 border-l-2 border-purple-100 ml-4"
+                                >
+                                    <p class="mb-4 text-sm text-text-secondary">
+                                        We cannot give the Flat Map to React, or
+                                        it would require O(N) searches to find
+                                        children. We need a <strong
+                                            >Selector</strong
+                                        > function that transforms Flat Map -> Tree.
+                                    </p>
+                                    <DocCodeBlock
+                                        language="typescript"
+                                        code={`// This function runs whenever the store changes
+function projectTree(state: EditorState, rootId: string): TreeNode {
+  const rootNode = state[rootId];
+  
+  // 1. Find children by traversing the Linked List
+  const children: TreeNode[] = [];
+  let childId = findFirstChild(state, rootId);
+  
+  while (childId) {
+    // 2. Recursively project children
+    children.push(projectTree(state, childId)); 
+    childId = state[childId].next;
+  }
+
+  // 3. Return a Read-Only View Node
+  return { 
+    ...rootNode,
+    children // The Tree structure exists ONLY here
+  }; 
+}`}
+                                    />
+                                    <div
+                                        class="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg"
+                                    >
+                                        <h5
+                                            class="font-bold text-sm text-purple-800 dark:text-purple-200 mb-1"
+                                        >
+                                            Performance Critical: Memoization
+                                        </h5>
+                                        <p class="text-xs m-0">
+                                            If we ran `projectTree` for the
+                                            whole document on every keypress, it
+                                            would be slow. Real editors use <strong
+                                                >Referential Equality Checks</strong
+                                            >. If `state[id]` hasn't changed, we
+                                            return the <i>cached</i> `TreeNode` object.
+                                            This stops React from re-rendering that
+                                            branch.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SUBSECTION 3: THE VIEW LAYER -->
+                            <div class="mb-10">
+                                <h3
+                                    class="text-xl font-bold mb-4 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 text-sm"
+                                        >3</span
+                                    >
+                                    The View Model (Rendering)
+                                </h3>
+                                <div
+                                    class="pl-10 border-l-2 border-green-100 ml-4"
+                                >
+                                    <p class="mb-4 text-sm text-text-secondary">
+                                        Finally, React consumes the Projected
+                                        Tree. The critical trick is identity
+                                        preservation via <strong>Keys</strong>.
+                                    </p>
+                                    <div
+                                        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                    >
+                                        <div
+                                            class="bg-bg-surface p-4 border border-border-light rounded-lg"
+                                        >
+                                            <h5 class="font-bold text-sm mb-2">
+                                                Recursive Component
+                                            </h5>
+                                            <DocCodeBlock
+                                                language="typescript"
+                                                code={`function NodeView({ node }) {
+  // We use the Tree structure to find children
+  return (
+    <div className={node.type}>
+      {node.children.map(child => (
+        // BUT we use the ID for the Key
+        <NodeView 
+           key={child.id} 
+           node={child} 
+        />
+      ))}
+    </div>
+  );
+}`}
+                                            />
+                                        </div>
+                                        <div
+                                            class="flex flex-col justify-center text-sm"
+                                        >
+                                            <p class="mb-3">
+                                                <strong
+                                                    >Why is
+                                                    `key=&#123;child.id&#125;`
+                                                    so important?</strong
+                                                >
+                                            </p>
+                                            <p class="text-text-secondary">
+                                                Even though `projectTree`
+                                                created a brand new `child`
+                                                object, the `id` string remains
+                                                the same string `2f8a`. React
+                                                sees the key matches, so it <strong
+                                                    >updates</strong
+                                                > the existing DOM node instead of
+                                                trashing it.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LIFECYCLE SUMMARY -->
+                            <div
+                                class="p-6 bg-bg-muted rounded-xl border border-border-light"
+                            >
+                                <h4 class="font-bold mb-4">
+                                    Lifecycle of a Keypress
+                                </h4>
+                                <ol
+                                    class="relative border-l border-border-light ml-3 space-y-6"
+                                >
+                                    <li class="ml-6">
+                                        <span
+                                            class="absolute -left-2.5 flex items-center justify-center w-5 h-5 bg-blue-500 rounded-full ring-4 ring-white dark:ring-bg-surface"
+                                        ></span>
+                                        <h5 class="font-semibold text-sm">
+                                            1. Update (Memory)
+                                        </h5>
+                                        <p class="text-xs text-text-secondary">
+                                            User types "A". We find the node in
+                                            the Flat Map and update its text
+                                            content. O(1).
+                                        </p>
+                                    </li>
+                                    <li class="ml-6">
+                                        <span
+                                            class="absolute -left-2.5 flex items-center justify-center w-5 h-5 bg-purple-500 rounded-full ring-4 ring-white dark:ring-bg-surface"
+                                        ></span>
+                                        <h5 class="font-semibold text-sm">
+                                            2. Project (Transformation)
+                                        </h5>
+                                        <p class="text-xs text-text-secondary">
+                                            The Selector runs. It re-creates the
+                                            `TextNode` object wrapper. It
+                                            re-uses cached wrappers for all 500
+                                            other paragraphs.
+                                        </p>
+                                    </li>
+                                    <li class="ml-6">
+                                        <span
+                                            class="absolute -left-2.5 flex items-center justify-center w-5 h-5 bg-green-500 rounded-full ring-4 ring-white dark:ring-bg-surface"
+                                        ></span>
+                                        <h5 class="font-semibold text-sm">
+                                            3. Commit (React)
+                                        </h5>
+                                        <p class="text-xs text-text-secondary">
+                                            React compares the new
+                                            implementation tree. It sees 499
+                                            keys unchanged. It sees 1 key with
+                                            new props. It updates 1 DOM text
+                                            node.
+                                        </p>
+                                    </li>
+                                </ol>
+                            </div>
+                        </DocSection>
+
+                        <DocNavigation
+                            current="/editor/data-structure-strategies"
+                            pages={[
+                                {
+                                    title: "Node ID System",
+                                    href: "/editor/node-id-system",
+                                    description:
+                                        "Address strategies: ID vs Path",
+                                },
+                                {
+                                    title: "Model & Schema",
+                                    href: "/editor/model-schema",
+                                    description: "Defining document structure",
+                                },
+                            ]}
+                        />
+                    </article>
+                </div>
+                <TableOfContents headings={headings} />
+            </section>
+        </main>
+    </body>
+</html>

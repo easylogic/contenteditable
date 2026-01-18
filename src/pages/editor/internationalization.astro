@@ -1,0 +1,177 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+
+const headings = [
+    { depth: 2, slug: "overview", text: "Overview" },
+    { depth: 2, slug: "ui-localization", text: "UI Localization" },
+    { depth: 2, slug: "text-direction", text: "Text Direction (RTL)" },
+    { depth: 2, slug: "keyboard-layouts", text: "Keyboard Layouts" },
+];
+---
+
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Internationalization (i18n) – Editor Architecture"
+            description="Supporting multiple languages in your editor. Localizing UI, handling RTL text direction, and keyboard layout considerations."
+        />
+    </head>
+    <body>
+        <SiteNav />
+        <main class="flex max-w-full m-0 p-0">
+            <section
+                class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+            >
+                <div class="flex-1">
+                    <header class="mb-8">
+                        <nav class="mb-4 text-sm">
+                            <a href="/" class="text-text-muted no-underline"
+                                >Home</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor"
+                                class="text-text-muted no-underline">Editor</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <span class="text-text-primary"
+                                >Internationalization</span
+                            >
+                        </nav>
+                        <h1 class="text-3xl leading-tight m-0 mb-2">
+                            Internationalization (i18n)
+                        </h1>
+                        <p class="m-0 text-[0.95rem] text-text-secondary">
+                            Building for a global audience requires more than
+                            just translating menus. It means supporting
+                            Right-to-Left (RTL) languages and diverse keyboard
+                            inputs.
+                        </p>
+                    </header>
+
+                    <article
+                        class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+                    >
+                        <DocSection id="overview" title="Overview">
+                            <p class="m-0 mb-4">
+                                Internationalization in editors has two layers: <strong
+                                    >UI Localization</strong
+                                > (translating the interface) and <strong
+                                    >Content Support</strong
+                                > (allowing users to write in their language).
+                            </p>
+                        </DocSection>
+
+                        <DocSection
+                            id="ui-localization"
+                            title="UI Localization"
+                        >
+                            <p class="m-0 mb-4">
+                                Ensure all user-facing strings (tooltips,
+                                placeholders, menus) are separated from code.
+                            </p>
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`const translations = {
+  en: {
+    'placeholder.text': 'Type something...',
+    'menu.bold': 'Bold',
+  },
+  ko: {
+    'placeholder.text': '내용을 입력하세요...',
+    'menu.bold': '굵게',
+  }
+};
+
+function t(key, lang) {
+  return translations[lang][key] || key;
+}`}
+                            />
+                        </DocSection>
+
+                        <DocSection
+                            id="text-direction"
+                            title="Text Direction (RTL)"
+                        >
+                            <p class="m-0 mb-4">
+                                Languages like Arabic and Hebrew are written
+                                Right-to-Left.
+                            </p>
+                            <div
+                                class="my-6 p-4 bg-blue-100 dark:bg-blue-900/20 border border-blue-500 dark:border-blue-700 rounded-lg"
+                            >
+                                <h4
+                                    class="text-[0.95rem] m-0 mb-3 font-semibold text-blue-800 dark:text-blue-200"
+                                >
+                                    Best Practice: dir="auto"
+                                </h4>
+                                <div
+                                    class="text-[0.9rem] text-blue-800 dark:text-blue-200"
+                                >
+                                    <p class="m-0">
+                                        Add <code>dir="auto"</code> to your top-level
+                                        contenteditable element. The browser will
+                                        automatically detect the direction of the
+                                        first strong character in a paragraph and
+                                        align it accordingly.
+                                    </p>
+                                </div>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="keyboard-layouts"
+                            title="Keyboard Layouts"
+                        >
+                            <p class="m-0 mb-4">
+                                Do not assume <code>Command+B</code> is universally
+                                comfortable or even possible on all layouts.
+                            </p>
+                            <ul class="list-disc pl-5">
+                                <li>
+                                    <strong>Key Codes:</strong> Use <code
+                                        >event.code</code
+                                    > (physical key) vs <code>event.key</code> (character
+                                    produced).
+                                </li>
+                                <li>
+                                    <strong>Configurability:</strong> Allow users
+                                    to remap shortcuts.
+                                </li>
+                                <li>
+                                    <strong>IME:</strong> Remember that some keystrokes
+                                    trigger composition, not direct input (see Input
+                                    Handling).
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocNavigation
+                            current="/editor/internationalization"
+                            pages={[
+                                {
+                                    title: "Accessibility",
+                                    href: "/editor/accessibility",
+                                    description: "Screen readers & a11y",
+                                },
+                                {
+                                    title: "Editor Architecture",
+                                    href: "/editor/architecture",
+                                    description: "Return to Architecture",
+                                },
+                            ]}
+                        />
+                    </article>
+                </div>
+                <TableOfContents headings={headings} />
+            </section>
+        </main>
+    </body>
+</html>

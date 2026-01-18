@@ -1,0 +1,169 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+
+const headings = [
+    { depth: 2, slug: "overview", text: "Overview" },
+    { depth: 2, slug: "floating-toolbar", text: "Floating Toolbar" },
+    { depth: 2, slug: "slash-menu", text: "Slash Menu" },
+    { depth: 2, slug: "side-menu", text: "Side/Block Menu" },
+];
+---
+
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Editor UI Patterns – Editor Architecture"
+            description="Implementation guide for common editor UI patterns: Floating Toolbar, Slash Commands, and Side Menus."
+        />
+    </head>
+    <body>
+        <SiteNav />
+        <main class="flex max-w-full m-0 p-0">
+            <section
+                class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+            >
+                <div class="flex-1">
+                    <header class="mb-8">
+                        <nav class="mb-4 text-sm">
+                            <a href="/" class="text-text-muted no-underline"
+                                >Home</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor"
+                                class="text-text-muted no-underline">Editor</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <span class="text-text-primary"
+                                >Editor UI Patterns</span
+                            >
+                        </nav>
+                        <h1 class="text-3xl leading-tight m-0 mb-2">
+                            Editor UI Patterns
+                        </h1>
+                        <p class="m-0 text-[0.95rem] text-text-secondary">
+                            Users expect modern interactions like floating
+                            toolbars and slash commands. Learn how to implement
+                            these patterns decoupled from the core editor.
+                        </p>
+                    </header>
+
+                    <article
+                        class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+                    >
+                        <DocSection id="overview" title="Overview">
+                            <p class="m-0 mb-4">
+                                The UI should be a separate layer from the
+                                editor core. It subscribes to editor state
+                                changes (selection, focus) and updates its
+                                position and visibility.
+                            </p>
+                        </DocSection>
+
+                        <DocSection
+                            id="floating-toolbar"
+                            title="Floating Toolbar"
+                        >
+                            <p class="m-0 mb-4">
+                                Appears when text is selected. Shows formatting
+                                options (Bold, Italic, Link).
+                            </p>
+                            <ul class="list-disc pl-5 mb-4">
+                                <li>
+                                    <strong>Trigger:</strong>
+                                    <code>selectionchange</code> or transaction update.
+                                </li>
+                                <li>
+                                    <strong>Positioning:</strong> Use <code
+                                        >range.getBoundingClientRect()</code
+                                    >.
+                                </li>
+                                <li>
+                                    <strong>Logic:</strong> Only show if selection
+                                    is not collapsed and has content.
+                                </li>
+                            </ul>
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`updateToolbar(selection) {
+  if (selection.empty) {
+    this.hide();
+    return;
+  }
+  const rect = selection.getRangeAt(0).getBoundingClientRect();
+  this.showAt(rect.left, rect.top - toolbarHeight - 10);
+}`}
+                            />
+                        </DocSection>
+
+                        <DocSection id="slash-menu" title="Slash Menu">
+                            <p class="m-0 mb-4">
+                                Triggered by typing <code>/</code> at the start of
+                                a block. Shows a list of blocks to insert.
+                            </p>
+                            <ul class="list-disc pl-5 mb-4">
+                                <li>
+                                    <strong>Trigger:</strong>
+                                    <code>input</code> event checking for <code
+                                        >/</code
+                                    >.
+                                </li>
+                                <li>
+                                    <strong>Filtering:</strong> Filter commands based
+                                    on user typing after <code>/</code>.
+                                </li>
+                                <li>
+                                    <strong>Navigation:</strong> Intercept ArrowUp/Down
+                                    to navigate the menu.
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocSection id="side-menu" title="Side/Block Menu">
+                            <p class="m-0 mb-4">
+                                Appears next to the active block (like Notion's
+                                6-dot drag handle). Allows dragging blocks or
+                                changing type.
+                            </p>
+                            <ul class="list-disc pl-5 mb-4">
+                                <li>
+                                    <strong>Positioning:</strong> Track the current
+                                    active block node.
+                                </li>
+                                <li>
+                                    <strong>Interaction:</strong> Must not steal focus
+                                    when clicked (use <code>mousedown</code> with
+                                    <code>preventDefault</code>).
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocNavigation
+                            current="/editor/ui-patterns"
+                            pages={[
+                                {
+                                    title: "Advanced Features",
+                                    href: "/editor/advanced-features",
+                                    description:
+                                        "Search & Replace, Collaboration",
+                                },
+                                {
+                                    title: "Editor Architecture",
+                                    href: "/editor/architecture",
+                                    description: "Return to Architecture",
+                                },
+                            ]}
+                        />
+                    </article>
+                </div>
+                <TableOfContents headings={headings} />
+            </section>
+        </main>
+    </body>
+</html>

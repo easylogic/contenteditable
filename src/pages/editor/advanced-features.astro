@@ -1,0 +1,204 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+
+const headings = [
+    { depth: 2, slug: "overview", text: "Overview" },
+    { depth: 2, slug: "search-replace", text: "Search & Replace" },
+    {
+        depth: 2,
+        slug: "real-time-collaboration",
+        text: "Real-time Collaboration",
+    },
+    { depth: 2, slug: "history-visualizer", text: "History Visualizer" },
+];
+---
+
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Advanced Features – Editor Architecture"
+            description="Implementing advanced features: Search & Replace, Real-time Collaboration with Yjs, and Undo/Redo History Visualization."
+        />
+    </head>
+    <body>
+        <SiteNav />
+        <main class="flex max-w-full m-0 p-0">
+            <section
+                class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+            >
+                <div class="flex-1">
+                    <header class="mb-8">
+                        <nav class="mb-4 text-sm">
+                            <a href="/" class="text-text-muted no-underline"
+                                >Home</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor"
+                                class="text-text-muted no-underline">Editor</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <span class="text-text-primary"
+                                >Advanced Features</span
+                            >
+                        </nav>
+                        <h1 class="text-3xl leading-tight m-0 mb-2">
+                            Advanced Features
+                        </h1>
+                        <p class="m-0 text-[0.95rem] text-text-secondary">
+                            Beyond basic typing: implementing search, real-time
+                            collaboration, and debugging tools.
+                        </p>
+                    </header>
+
+                    <article
+                        class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+                    >
+                        <DocSection id="overview" title="Overview">
+                            <p class="m-0 mb-4">
+                                Professional editors require features that go
+                                beyond content manipulation. This section covers
+                                complex capabilities often needed for production
+                                apps.
+                            </p>
+                        </DocSection>
+
+                        <DocSection
+                            id="search-replace"
+                            title="Search & Replace"
+                        >
+                            <p class="m-0 mb-4">
+                                Do not use <code>window.find()</code>. It
+                                affects selection and is limited. Instead,
+                                implement model-based search.
+                            </p>
+                            <ul class="list-disc pl-5 mb-4">
+                                <li>
+                                    <strong>Search:</strong> Traverse the model text
+                                    nodes, matching regex. Collect paths/ranges.
+                                </li>
+                                <li>
+                                    <strong>Highlight:</strong> Apply a temporary
+                                    "decoration" or "mark" to the matched ranges.
+                                </li>
+                                <li>
+                                    <strong>Replace:</strong> Dispatch a transaction
+                                    replacing the range content.
+                                </li>
+                            </ul>
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`function searchModel(doc, query) {
+  const matches = [];
+  doc.descendants((node, pos) => {
+    if (node.isText) {
+      // Regex match on node.text
+      // push { from: pos + match.index, to: ... }
+    }
+  });
+  return matches;
+}`}
+                            />
+                        </DocSection>
+
+                        <DocSection
+                            id="real-time-collaboration"
+                            title="Real-time Collaboration"
+                        >
+                            <p class="m-0 mb-4">
+                                Modern collaboration uses <strong>CRDTs</strong> (Conflict-free
+                                Replicated Data Types) like <strong>Yjs</strong> or
+                                <strong>Automerge</strong>.
+                            </p>
+
+                            <div
+                                class="my-6 p-4 bg-green-100 dark:bg-green-900/20 border border-green-500 dark:border-green-700 rounded-lg"
+                            >
+                                <h4
+                                    class="text-[0.95rem] m-0 mb-3 font-semibold text-green-800 dark:text-green-200"
+                                >
+                                    Integration Strategy
+                                </h4>
+                                <div
+                                    class="text-[0.9rem] text-green-800 dark:text-green-200"
+                                >
+                                    <p class="m-0">
+                                        Bind your editor model to a Yjs <code
+                                            >Y.XmlFragment</code
+                                        >. Listen for Yjs updates to patch the
+                                        editor, and broadcast editor
+                                        transactions to Yjs.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`// 1. Editor -> Yjs
+editor.on('transaction', (tr) => {
+  yDoc.transact(() => {
+    applyStepsToYjs(tr.steps, yXmlFragment);
+  });
+});
+
+// 2. Yjs -> Editor
+yXmlFragment.observe((event) => {
+  const tr = convertYjsEventsToSteps(event);
+  editor.dispatch(tr);
+});`}
+                            />
+                        </DocSection>
+
+                        <DocSection
+                            id="history-visualizer"
+                            title="History Visualizer"
+                        >
+                            <p class="m-0 mb-4">
+                                For debugging undo/redo stacks, create a
+                                visualizer that renders the transaction history.
+                            </p>
+                            <ul class="list-disc pl-5">
+                                <li>
+                                    <strong>State:</strong> Capture a snapshot of
+                                    the document at each step.
+                                </li>
+                                <li>
+                                    <strong>Diff:</strong> Highlight what changed
+                                    in that transaction.
+                                </li>
+                                <li>
+                                    <strong>Selection:</strong> Show where the user
+                                    cursor was.
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocNavigation
+                            current="/editor/advanced-features"
+                            pages={[
+                                {
+                                    title: "Editor UI Patterns",
+                                    href: "/editor/ui-patterns",
+                                    description: "UI implementation guide",
+                                },
+                                {
+                                    title: "Editor Architecture",
+                                    href: "/editor/architecture",
+                                    description: "Return to Architecture",
+                                },
+                            ]}
+                        />
+                    </article>
+                </div>
+                <TableOfContents headings={headings} />
+            </section>
+        </main>
+    </body>
+</html>

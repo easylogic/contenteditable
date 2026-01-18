@@ -1,0 +1,204 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+
+const headings = [
+    { depth: 2, slug: "overview", text: "Overview" },
+    { depth: 2, slug: "xss-risks", text: "XSS Risks" },
+    { depth: 2, slug: "sanitization-strategy", text: "Sanitization Strategy" },
+    { depth: 2, slug: "paste-handling", text: "Safe Paste Handling" },
+    { depth: 2, slug: "trusted-types", text: "Trusted Types" },
+];
+---
+
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Sanitization & Security – Editor Architecture"
+            description="Best practices for preventing XSS and ensuring security in contenteditable editors. Using DOMPurify, Trusted Types, and safe paste handling."
+        />
+    </head>
+    <body>
+        <SiteNav />
+        <main class="flex max-w-full m-0 p-0">
+            <section
+                class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+            >
+                <div class="flex-1">
+                    <header class="mb-8">
+                        <nav class="mb-4 text-sm">
+                            <a href="/" class="text-text-muted no-underline"
+                                >Home</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor"
+                                class="text-text-muted no-underline">Editor</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <span class="text-text-primary"
+                                >Sanitization & Security</span
+                            >
+                        </nav>
+                        <h1 class="text-3xl leading-tight m-0 mb-2">
+                            Sanitization & Security
+                        </h1>
+                        <p class="m-0 text-[0.95rem] text-text-secondary">
+                            Rich text editors are a primary vector for XSS
+                            attacks. Learn how to secure your editor against
+                            malicious content from paste operations and database
+                            injection.
+                        </p>
+                    </header>
+
+                    <article
+                        class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+                    >
+                        <DocSection id="overview" title="Overview">
+                            <p class="m-0 mb-4">
+                                Because contenteditable editors work directly
+                                with HTML, they are inherently susceptible to
+                                Cross-Site Scripting (XSS). If an attacker can
+                                inject a script tag or an event handler (like <code
+                                    >onload</code
+                                > or <code>onerror</code>) into your document,
+                                they can execute arbitrary code in your users'
+                                browsers.
+                            </p>
+                        </DocSection>
+
+                        <DocSection id="xss-risks" title="XSS Risks">
+                            <p class="m-0 mb-4">
+                                Common attack vectors in editors include:
+                            </p>
+                            <ul class="list-disc pl-5 mb-4">
+                                <li>
+                                    <strong>Paste:</strong> User pastes HTML containing
+                                    <code
+                                        >&lt;img src=x onerror=alert(1)&gt;</code
+                                    >.
+                                </li>
+                                <li>
+                                    <strong>Data Loading:</strong> Loading compromised
+                                    JSON/HTML from the server.
+                                </li>
+                                <li>
+                                    <strong>Drag & Drop:</strong> Dropping malicious
+                                    HTML fragments.
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocSection
+                            id="sanitization-strategy"
+                            title="Sanitization Strategy"
+                        >
+                            <p class="m-0 mb-4">
+                                Never trust HTML. Always sanitize it before
+                                inserting it into the DOM. We recommended using <strong
+                                    >DOMPurify</strong
+                                >.
+                            </p>
+
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`import DOMPurify from 'dompurify';
+
+// Configure allowed tags and attributes
+const config = {
+  ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li'],
+  ALLOWED_ATTR: ['href', 'target', 'class'],
+  FORBID_TAGS: ['script', 'style', 'iframe', 'object'],
+  FORBID_ATTR: ['onclick', 'onerror', 'onmouseover']
+};
+
+export function sanitize(html: string) {
+  return DOMPurify.sanitize(html, config);
+}`}
+                            />
+                        </DocSection>
+
+                        <DocSection
+                            id="paste-handling"
+                            title="Safe Paste Handling"
+                        >
+                            <p class="m-0 mb-4">
+                                When extracting content from the clipboard, use <code
+                                    >DOMParser</code
+                                > to parse it into an inert document, then sanitize
+                                or transform it into your model immediately.
+                            </p>
+
+                            <div
+                                class="my-6 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-lg"
+                            >
+                                <h4
+                                    class="text-[0.95rem] m-0 mb-3 font-semibold text-yellow-800 dark:text-yellow-200"
+                                >
+                                    Warning: innerHTML
+                                </h4>
+                                <div
+                                    class="text-[0.9rem] text-yellow-800 dark:text-yellow-200"
+                                >
+                                    <p class="m-0">
+                                        Never assign pasted text directly to <code
+                                            >innerHTML</code
+                                        > without sanitization. Even assigning it
+                                        to a detached element can trigger network
+                                        requests (e.g., <code
+                                            >&lt;img src="..."&gt;</code
+                                        >).
+                                    </p>
+                                </div>
+                            </div>
+                        </DocSection>
+
+                        <DocSection id="trusted-types" title="Trusted Types">
+                            <p class="m-0 mb-4">
+                                <strong>Trusted Types</strong> is a browser security
+                                feature that prevents DOM XSS by enforcing that only
+                                policy-verified strings can be assigned to dangerous
+                                sinks (like <code>innerHTML</code>).
+                            </p>
+
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`// 1. Create a policy
+const escapePolicy = trustedTypes.createPolicy('my-editor-policy', {
+  createHTML: (string) => DOMPurify.sanitize(string)
+});
+
+// 2. Use the policy
+const safeHTML = escapePolicy.createHTML('<p>Potentially unsafe</p>');
+element.innerHTML = safeHTML;`}
+                            />
+                        </DocSection>
+
+                        <DocNavigation
+                            current="/editor/sanitization-security"
+                            pages={[
+                                {
+                                    title: "Input Handling",
+                                    href: "/editor/input-handling",
+                                    description: "Handling user input",
+                                },
+                                {
+                                    title: "Editor Architecture",
+                                    href: "/editor/architecture",
+                                    description: "Return to Architecture",
+                                },
+                            ]}
+                        />
+                    </article>
+                </div>
+                <TableOfContents headings={headings} />
+            </section>
+        </main>
+    </body>
+</html>

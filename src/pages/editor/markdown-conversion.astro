@@ -1,0 +1,200 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+
+const headings = [
+    { depth: 2, slug: "overview", text: "Overview" },
+    { depth: 2, slug: "markdown-parsing", text: "Markdown Parsing" },
+    { depth: 2, slug: "model-to-markdown", text: "Model to Markdown" },
+    { depth: 2, slug: "shortcuts", text: "Markdown Shortcuts" },
+    { depth: 2, slug: "export-options", text: "Export Options" },
+];
+---
+
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Markdown & Conversion – Editor Architecture"
+            description="Implementing Markdown support in rich text editors. Parsing Markdown to model, serializing model to Markdown, and export options."
+        />
+    </head>
+    <body>
+        <SiteNav />
+        <main class="flex max-w-full m-0 p-0">
+            <section
+                class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+            >
+                <div class="flex-1">
+                    <header class="mb-8">
+                        <nav class="mb-4 text-sm">
+                            <a href="/" class="text-text-muted no-underline"
+                                >Home</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor"
+                                class="text-text-muted no-underline">Editor</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <span class="text-text-primary"
+                                >Markdown & Conversion</span
+                            >
+                        </nav>
+                        <h1 class="text-3xl leading-tight m-0 mb-2">
+                            Markdown & Conversion
+                        </h1>
+                        <p class="m-0 text-[0.95rem] text-text-secondary">
+                            Supporting Markdown lets power users write
+                            formatting quickly. Learn how to convert between
+                            Markdown and your document model.
+                        </p>
+                    </header>
+
+                    <article
+                        class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+                    >
+                        <DocSection id="overview" title="Overview">
+                            <p class="m-0 mb-4">
+                                Many modern editors (Notion, Slack, Discord)
+                                support "Markdown Shortcuts"—typing <code
+                                    >#
+                                </code> creates a heading, <code>**text**</code> makes
+                                it bold. Full Markdown import/export is also a common
+                                requirement.
+                            </p>
+                        </DocSection>
+
+                        <DocSection
+                            id="markdown-parsing"
+                            title="Markdown to Model"
+                        >
+                            <p class="m-0 mb-4">
+                                To import Markdown, you need a parser like <strong
+                                    >marked</strong
+                                > or <strong>remark</strong>, then transform the
+                                AST into your model.
+                            </p>
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`import { marked } from 'marked';
+
+function importMarkdown(md) {
+  const tokens = marked.lexer(md);
+  const doc = { type: 'doc', children: [] };
+  
+  tokens.forEach(token => {
+    if (token.type === 'heading') {
+      doc.children.push({
+        type: 'heading',
+        attrs: { level: token.depth },
+        content: token.text
+      });
+    }
+    // ... handle other tokens
+  });
+  
+  return doc;
+}`}
+                            />
+                        </DocSection>
+
+                        <DocSection
+                            id="model-to-markdown"
+                            title="Model to Markdown"
+                        >
+                            <p class="m-0 mb-4">
+                                To export key-value models to Markdown,
+                                implement a serializer that recurses through
+                                your node tree.
+                            </p>
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`function serialize(node) {
+  if (node.type === 'text') return node.text;
+  
+  if (node.type === 'paragraph') {
+    return node.children.map(serialize).join('') + '\\n\\n';
+  }
+  
+  if (node.type === 'heading') {
+    return '#'.repeat(node.attrs.level) + ' ' + 
+           node.children.map(serialize).join('') + '\\n\\n';
+  }
+  
+  // ... handle other types
+}`}
+                            />
+                        </DocSection>
+
+                        <DocSection id="shortcuts" title="Markdown Shortcuts">
+                            <p class="m-0 mb-4">
+                                For auto-formatting (e.g., typing <code>*</code> lists),
+                                listen to <code>input</code> or <code
+                                    >beforeinput</code
+                                > events and check the text preceding the cursor.
+                            </p>
+                            <ul class="list-disc pl-5">
+                                <li>
+                                    Check for trigger characters (space, enter).
+                                </li>
+                                <li>
+                                    Regex match the line content (e.g., <code
+                                        >/^#\s/</code
+                                    >).
+                                </li>
+                                <li>
+                                    Delete the markdown characters and change
+                                    the block type.
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocSection id="export-options" title="Export Options">
+                            <p class="m-0 mb-4">
+                                Beyond Markdown, considering supporting:
+                            </p>
+                            <ul class="list-disc pl-5">
+                                <li>
+                                    <strong>HTML:</strong> Standard serialization
+                                    (see HTML Mapping).
+                                </li>
+                                <li>
+                                    <strong>Plain Text:</strong> Strip all tags and
+                                    block structure.
+                                </li>
+                                <li>
+                                    <strong>PDF:</strong> Use <code
+                                        >window.print()</code
+                                    > CSS media queries or server-side generation
+                                    (Puppeteer).
+                                </li>
+                            </ul>
+                        </DocSection>
+
+                        <DocNavigation
+                            current="/editor/markdown-conversion"
+                            pages={[
+                                {
+                                    title: "HTML Mapping",
+                                    href: "/editor/html-mapping",
+                                    description: "HTML Serialization",
+                                },
+                                {
+                                    title: "Editor Architecture",
+                                    href: "/editor/architecture",
+                                    description: "Return to Architecture",
+                                },
+                            ]}
+                        />
+                    </article>
+                </div>
+                <TableOfContents headings={headings} />
+            </section>
+        </main>
+    </body>
+</html>

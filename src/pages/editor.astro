@@ -1,17 +1,17 @@
 ---
-import SiteNav from '../components/SiteNav.astro';
-import BaseHead from '../components/BaseHead.astro';
-import TableOfContents from '../components/TableOfContents.astro';
-import '../styles/global.css';
+import SiteNav from "../components/SiteNav.astro";
+import BaseHead from "../components/BaseHead.astro";
+import TableOfContents from "../components/TableOfContents.astro";
+import "../styles/global.css";
 
 // Define headings for TOC
 const headings = [
-  { depth: 2, slug: 'overview', text: 'Overview' },
-  { depth: 2, slug: 'core-concepts', text: 'Core Concepts' },
-  { depth: 2, slug: 'detailed-guides', text: 'Detailed Guides' },
-  { depth: 2, slug: 'getting-started', text: 'Getting Started' },
-  { depth: 2, slug: 'all-documentation', text: 'All Documentation' },
-  { depth: 2, slug: 'related-resources', text: 'Related Resources' },
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "core-concepts", text: "Core Concepts" },
+  { depth: 2, slug: "detailed-guides", text: "Detailed Guides" },
+  { depth: 2, slug: "getting-started", text: "Getting Started" },
+  { depth: 2, slug: "all-documentation", text: "All Documentation" },
+  { depth: 2, slug: "related-resources", text: "Related Resources" },
 ];
 ---
 
@@ -25,7 +25,9 @@ const headings = [
   <body>
     <SiteNav />
     <main class="flex max-w-full m-0 p-0">
-      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
         <div class="flex-1">
           <header class="mb-8">
             <nav class="mb-4 text-sm">
@@ -37,82 +39,152 @@ const headings = [
               Building a Rich Text Editor
             </h1>
             <p class="m-0 text-[0.95rem] text-text-secondary">
-              Architecture, core concepts, and technologies needed to build a robust rich text editor. Understanding model-view separation, schema design, and position management.
+              Architecture, core concepts, and technologies needed to build a
+              robust rich text editor. Understanding model-view separation,
+              schema design, and position management.
             </p>
           </header>
 
-          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
             <section id="overview" class="mb-8">
-              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
                 Overview
               </h2>
               <p class="m-0 mb-4">
-                Building a rich text editor is more than just working with contenteditable. It requires understanding document models, schema design, position management, and the separation between your internal data model and the DOM representation.
+                Building a rich text editor is more than just working with
+                contenteditable. It requires understanding document models,
+                schema design, position management, and the separation between
+                your internal data model and the DOM representation.
               </p>
               <p class="m-0 mb-4">
-                Modern editors like <strong>ProseMirror</strong>, <strong>Slate</strong>, and <strong>Lexical</strong> all follow similar architectural patterns that separate concerns and make editors maintainable and extensible.
+                Modern editors like <strong>ProseMirror</strong>, <strong
+                  >Slate</strong
+                >, and <strong>Lexical</strong> all follow similar architectural patterns
+                that separate concerns and make editors maintainable and extensible.
               </p>
-              <div class="my-6 p-4 bg-blue-100 dark:bg-blue-900/20 border border-blue-500 dark:border-blue-700 rounded-lg">
-                <h3 class="text-lg m-0 mb-3 text-blue-800 dark:text-blue-200 font-semibold">
+              <div
+                class="my-6 p-4 bg-blue-100 dark:bg-blue-900/20 border border-blue-500 dark:border-blue-700 rounded-lg"
+              >
+                <h3
+                  class="text-lg m-0 mb-3 text-blue-800 dark:text-blue-200 font-semibold"
+                >
                   Key Principle: Model-View Separation
                 </h3>
                 <p class="m-0 mb-3 text-blue-900 dark:text-blue-100">
-                  The fundamental principle is separating the <strong>document model</strong> (your internal representation) from the <strong>view</strong> (the DOM). The model is your source of truth, and the view is just a projection.
+                  The fundamental principle is separating the <strong
+                    >document model</strong
+                  > (your internal representation) from the <strong>view</strong
+                  > (the DOM). The model is your source of truth, and the view is
+                  just a projection.
                 </p>
                 <ul class="m-0 pl-6 text-blue-900 dark:text-blue-100">
                   <li>Model: Abstract, schema-validated, framework-agnostic</li>
-                  <li>View: HTML representation, handles user input, browser-specific</li>
+                  <li>
+                    View: HTML representation, handles user input,
+                    browser-specific
+                  </li>
                 </ul>
               </div>
             </section>
 
             <section id="core-concepts" class="mb-8">
-              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
                 Core Concepts
               </h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
-                  <h3 class="text-lg font-semibold mb-2 text-text-primary">Document Model</h3>
+                <div
+                  class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                >
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    Document Model
+                  </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Your internal representation of the document. Tree structure with nodes (blocks, inlines, text) and marks (formatting).
+                    Your internal representation of the document. Tree structure
+                    with nodes (blocks, inlines, text) and marks (formatting).
                   </p>
-                  <a href="/editor/architecture" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                  <a
+                    href="/editor/architecture"
+                    class="text-accent-primary hover:underline text-sm"
+                    >Learn more →</a
+                  >
                 </div>
-                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
-                  <h3 class="text-lg font-semibold mb-2 text-text-primary">Schema</h3>
+                <div
+                  class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                >
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    Schema
+                  </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Defines what your document can contain: node types, content rules, attributes, and marks.
+                    Defines what your document can contain: node types, content
+                    rules, attributes, and marks.
                   </p>
-                  <a href="/editor/model-schema" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                  <a
+                    href="/editor/model-schema"
+                    class="text-accent-primary hover:underline text-sm"
+                    >Learn more →</a
+                  >
                 </div>
-                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
-                  <h3 class="text-lg font-semibold mb-2 text-text-primary">Position Management</h3>
+                <div
+                  class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                >
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    Position Management
+                  </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Representing positions in your model using paths (array of indices) instead of DOM references.
+                    Representing positions in your model using paths (array of
+                    indices) instead of DOM references.
                   </p>
-                  <a href="/editor/position-selection" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                  <a
+                    href="/editor/position-selection"
+                    class="text-accent-primary hover:underline text-sm"
+                    >Learn more →</a
+                  >
                 </div>
-                <div class="p-4 bg-bg-muted rounded-lg border border-border-light">
-                  <h3 class="text-lg font-semibold mb-2 text-text-primary">HTML Mapping</h3>
+                <div
+                  class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                >
+                  <h3 class="text-lg font-semibold mb-2 text-text-primary">
+                    HTML Mapping
+                  </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Converting between your model and HTML: serialization (model → HTML) and deserialization (HTML → model).
+                    Converting between your model and HTML: serialization (model
+                    → HTML) and deserialization (HTML → model).
                   </p>
-                  <a href="/editor/html-mapping" class="text-accent-primary hover:underline text-sm">Learn more →</a>
+                  <a
+                    href="/editor/html-mapping"
+                    class="text-accent-primary hover:underline text-sm"
+                    >Learn more →</a
+                  >
                 </div>
               </div>
             </section>
 
             <section id="detailed-guides" class="mb-8">
-              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
                 Detailed Guides
               </h2>
               <div class="space-y-4">
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/architecture" class="text-accent-primary hover:underline">Editor Architecture</a>
+                    <a
+                      href="/editor/architecture"
+                      class="text-accent-primary hover:underline"
+                      >Editor Architecture</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Model-view separation, document model structure, view layer responsibilities, and how they work together.
+                    Model-view separation, document model structure, view layer
+                    responsibilities, and how they work together.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Why separate model and view</li>
@@ -122,27 +194,53 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/model-schema" class="text-accent-primary hover:underline">Model & Schema</a>
+                    <a
+                      href="/editor/model-schema"
+                      class="text-accent-primary hover:underline"
+                      >Model & Schema</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Designing your document model and schema: node types, document structure, mark system, and validation.
+                    Designing your document model and schema: node types,
+                    document structure, mark system, and validation.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Schema definition and validation</li>
                     <li>Node type design</li>
-                    <li>Document structure patterns</li>
-                    <li>Mark system implementation</li>
+                    <li>
+                      <a
+                        href="/editor/data-structure-strategies"
+                        class="text-accent-primary hover:underline"
+                        >Tree vs Flat Map structures</a
+                      >
+                    </li>
+                    <li>
+                      <a
+                        href="/editor/node-id-system"
+                        class="text-accent-primary hover:underline"
+                        >Node ID vs Path addressing</a
+                      >
+                    </li>
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/position-selection" class="text-accent-primary hover:underline">Position & Selection Management</a>
+                    <a
+                      href="/editor/position-selection"
+                      class="text-accent-primary hover:underline"
+                      >Position & Selection Management</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Managing positions and selections in your model: path-based positions, selection representation, and DOM conversion.
+                    Managing positions and selections in your model: path-based
+                    positions, selection representation, and DOM conversion.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Path-based position representation</li>
@@ -153,12 +251,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/html-mapping" class="text-accent-primary hover:underline">HTML Mapping</a>
+                    <a
+                      href="/editor/html-mapping"
+                      class="text-accent-primary hover:underline"
+                      >HTML Mapping</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Converting between your model and HTML: serialization, deserialization, and incremental updates.
+                    Converting between your model and HTML: serialization,
+                    deserialization, and incremental updates.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Model to HTML serialization</li>
@@ -169,12 +274,20 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/model-dom-synchronization" class="text-accent-primary hover:underline">Model-DOM Synchronization</a>
+                    <a
+                      href="/editor/model-dom-synchronization"
+                      class="text-accent-primary hover:underline"
+                      >Model-DOM Synchronization</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Keeping your model and DOM in sync: handling contenteditable=false, preserving selection, and managing updates.
+                    Keeping your model and DOM in sync: handling
+                    contenteditable=false, preserving selection, and managing
+                    updates.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Bidirectional synchronization</li>
@@ -184,12 +297,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/history-management" class="text-accent-primary hover:underline">History Management</a>
+                    <a
+                      href="/editor/history-management"
+                      class="text-accent-primary hover:underline"
+                      >History Management</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Implementing undo/redo functionality: model-based history, conflict resolution, and DOM history handling.
+                    Implementing undo/redo functionality: model-based history,
+                    conflict resolution, and DOM history handling.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Model-based history</li>
@@ -199,12 +319,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/input-handling" class="text-accent-primary hover:underline">Input Handling & IME</a>
+                    <a
+                      href="/editor/input-handling"
+                      class="text-accent-primary hover:underline"
+                      >Input Handling & IME</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Comprehensive guide to handling user input, IME composition, keyboard events, and text processing.
+                    Comprehensive guide to handling user input, IME composition,
+                    keyboard events, and text processing.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>IME composition handling</li>
@@ -215,12 +342,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/plugin-development" class="text-accent-primary hover:underline">Plugin Development</a>
+                    <a
+                      href="/editor/plugin-development"
+                      class="text-accent-primary hover:underline"
+                      >Plugin Development</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Guide to developing plugins that extend model-based contenteditable editors with custom functionality.
+                    Guide to developing plugins that extend model-based
+                    contenteditable editors with custom functionality.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Plugin architecture</li>
@@ -230,12 +364,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/testing-strategies" class="text-accent-primary hover:underline">Testing Strategies</a>
+                    <a
+                      href="/editor/testing-strategies"
+                      class="text-accent-primary hover:underline"
+                      >Testing Strategies</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Comprehensive testing strategies for model-based contenteditable editors at different levels.
+                    Comprehensive testing strategies for model-based
+                    contenteditable editors at different levels.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Unit testing</li>
@@ -246,12 +387,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/debugging" class="text-accent-primary hover:underline">Debugging Techniques</a>
+                    <a
+                      href="/editor/debugging"
+                      class="text-accent-primary hover:underline"
+                      >Debugging Techniques</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Debugging strategies and techniques for contenteditable editors, including tools and common issues.
+                    Debugging strategies and techniques for contenteditable
+                    editors, including tools and common issues.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Debugging tools</li>
@@ -261,12 +409,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/mobile-support" class="text-accent-primary hover:underline">Mobile Support</a>
+                    <a
+                      href="/editor/mobile-support"
+                      class="text-accent-primary hover:underline"
+                      >Mobile Support</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Guide to supporting mobile devices in contenteditable editors, including virtual keyboards and touch interactions.
+                    Guide to supporting mobile devices in contenteditable
+                    editors, including virtual keyboards and touch interactions.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Virtual keyboard handling</li>
@@ -276,12 +431,20 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/accessibility" class="text-accent-primary hover:underline">Accessibility</a>
+                    <a
+                      href="/editor/accessibility"
+                      class="text-accent-primary hover:underline"
+                      >Accessibility</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Accessibility considerations and best practices for contenteditable editors, including screen reader support and ARIA attributes.
+                    Accessibility considerations and best practices for
+                    contenteditable editors, including screen reader support and
+                    ARIA attributes.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Screen reader support</li>
@@ -292,12 +455,19 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/transaction" class="text-accent-primary hover:underline">Transaction System</a>
+                    <a
+                      href="/editor/transaction"
+                      class="text-accent-primary hover:underline"
+                      >Transaction System</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Using transactions to group operations into atomic units for consistent history management in model-based editors.
+                    Using transactions to group operations into atomic units for
+                    consistent history management in model-based editors.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Atomic history entries</li>
@@ -308,12 +478,18 @@ const headings = [
                   </ul>
                 </div>
 
-                <div class="p-5 bg-bg-muted rounded-lg border border-border-light">
+                <div
+                  class="p-5 bg-bg-muted rounded-lg border border-border-light"
+                >
                   <h3 class="text-lg font-semibold mb-2 text-text-primary">
-                    <a href="/editor/operations" class="text-accent-primary hover:underline">Operations</a>
+                    <a
+                      href="/editor/operations"
+                      class="text-accent-primary hover:underline">Operations</a
+                    >
                   </h3>
                   <p class="m-0 mb-2 text-sm text-text-secondary">
-                    Comprehensive guide to operation types that can be combined in transactions for model-based editors.
+                    Comprehensive guide to operation types that can be combined
+                    in transactions for model-based editors.
                   </p>
                   <ul class="m-0 pl-4 text-sm text-text-secondary">
                     <li>Insert operations</li>
@@ -327,129 +503,372 @@ const headings = [
             </section>
 
             <section id="getting-started" class="mb-8">
-              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
                 Getting Started
               </h2>
-              <p class="m-0 mb-4">
-                Recommended learning path:
-              </p>
+              <p class="m-0 mb-4">Recommended learning path:</p>
               <ol class="m-0 mb-4 pl-6">
                 <li class="mb-3">
-                  <strong>Start with Architecture:</strong> Understand model-view separation and why it's important
-                  <br>
-                  <a href="/editor/architecture" class="text-accent-primary hover:underline text-sm">→ Read Editor Architecture</a>
+                  <strong>Start with Architecture:</strong> Understand model-view
+                  separation and why it's important
+                  <br />
+                  <a
+                    href="/editor/architecture"
+                    class="text-accent-primary hover:underline text-sm"
+                    >→ Read Editor Architecture</a
+                  >
                 </li>
                 <li class="mb-3">
-                  <strong>Learn Model & Schema:</strong> Design your document structure and validation rules
-                  <br>
-                  <a href="/editor/model-schema" class="text-accent-primary hover:underline text-sm">→ Read Model & Schema</a>
+                  <strong>Learn Model & Schema:</strong> Design your document structure
+                  and validation rules
+                  <br />
+                  <a
+                    href="/editor/model-schema"
+                    class="text-accent-primary hover:underline text-sm"
+                    >→ Read Model & Schema</a
+                  >
                 </li>
                 <li class="mb-3">
-                  <strong>Master Position & Selection:</strong> Understand how to represent and manage positions in your model
-                  <br>
-                  <a href="/editor/position-selection" class="text-accent-primary hover:underline text-sm">→ Read Position & Selection</a>
+                  <strong>Master Position & Selection:</strong> Understand how to
+                  represent and manage positions in your model
+                  <br />
+                  <a
+                    href="/editor/position-selection"
+                    class="text-accent-primary hover:underline text-sm"
+                    >→ Read Position & Selection</a
+                  >
                 </li>
                 <li class="mb-3">
-                  <strong>Implement HTML Mapping:</strong> Build serialization and deserialization between model and HTML
-                  <br>
-                  <a href="/editor/html-mapping" class="text-accent-primary hover:underline text-sm">→ Read HTML Mapping</a>
+                  <strong>Implement HTML Mapping:</strong> Build serialization and
+                  deserialization between model and HTML
+                  <br />
+                  <a
+                    href="/editor/html-mapping"
+                    class="text-accent-primary hover:underline text-sm"
+                    >→ Read HTML Mapping</a
+                  >
                 </li>
                 <li class="mb-3">
-                  <strong>Add contenteditable APIs:</strong> Use Selection API, Range API, and events in your view layer
-                  <br>
-                  <a href="/docs" class="text-accent-primary hover:underline text-sm">→ Browse Documentation</a>
+                  <strong>Add contenteditable APIs:</strong> Use Selection API, Range
+                  API, and events in your view layer
+                  <br />
+                  <a
+                    href="/docs"
+                    class="text-accent-primary hover:underline text-sm"
+                    >→ Browse Documentation</a
+                  >
                 </li>
               </ol>
             </section>
 
             <section class="mb-8">
-              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
                 All Documentation
               </h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                <a href="/editor/architecture" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Editor Architecture</h4>
-                  <p class="text-xs m-0 text-text-secondary">Model-view separation and architecture patterns</p>
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6"
+              >
+                <a
+                  href="/editor/architecture"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Editor Architecture
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Model-view separation and architecture patterns
+                  </p>
                 </a>
-                <a href="/editor/model-dom-synchronization" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Model-DOM Synchronization</h4>
-                  <p class="text-xs m-0 text-text-secondary">Keeping model and DOM in sync</p>
+                <a
+                  href="/editor/model-schema"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Model & Schema
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Schema design and validation
+                  </p>
                 </a>
-                <a href="/editor/history-management" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">History Management</h4>
-                  <p class="text-xs m-0 text-text-secondary">Undo/redo functionality</p>
+                <a
+                  href="/editor/data-structure-strategies"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Data Structures
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Tree vs Flat Map strategies
+                  </p>
                 </a>
-                <a href="/editor/html-mapping" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">HTML Mapping</h4>
-                  <p class="text-xs m-0 text-text-secondary">Serialization and parsing</p>
+                <a
+                  href="/editor/node-id-system"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Node ID System
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    ID vs Path addressing
+                  </p>
                 </a>
-                <a href="/editor/input-handling" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Input Handling & IME</h4>
-                  <p class="text-xs m-0 text-text-secondary">User input and IME composition</p>
+                <a
+                  href="/editor/model-dom-synchronization"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Model-DOM Synchronization
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Keeping model and DOM in sync
+                  </p>
                 </a>
-                <a href="/editor/plugin-development" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Plugin Development</h4>
-                  <p class="text-xs m-0 text-text-secondary">Extending editor functionality</p>
+                <a
+                  href="/editor/history-management"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    History Management
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Undo/redo functionality
+                  </p>
                 </a>
-                <a href="/editor/testing-strategies" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Testing Strategies</h4>
-                  <p class="text-xs m-0 text-text-secondary">Testing editor functionality</p>
+                <a
+                  href="/editor/html-mapping"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    HTML Mapping
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Serialization and parsing
+                  </p>
                 </a>
-                <a href="/editor/debugging" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Debugging Techniques</h4>
-                  <p class="text-xs m-0 text-text-secondary">Debugging strategies and tools</p>
+                <a
+                  href="/editor/input-handling"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Input Handling & IME
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    User input and IME composition
+                  </p>
                 </a>
-                <a href="/editor/mobile-support" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Mobile Support</h4>
-                  <p class="text-xs m-0 text-text-secondary">Mobile device support</p>
+                <a
+                  href="/editor/plugin-development"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Plugin Development
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Extending editor functionality
+                  </p>
                 </a>
-                <a href="/editor/accessibility" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Accessibility</h4>
-                  <p class="text-xs m-0 text-text-secondary">Accessibility best practices</p>
+                <a
+                  href="/editor/testing-strategies"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Testing Strategies
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Testing editor functionality
+                  </p>
                 </a>
-                <a href="/editor/transaction" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Transaction System</h4>
-                  <p class="text-xs m-0 text-text-secondary">Atomic history management</p>
+                <a
+                  href="/editor/debugging"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Debugging Techniques
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Debugging strategies and tools
+                  </p>
                 </a>
-                <a href="/editor/operations" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Operations</h4>
-                  <p class="text-xs m-0 text-text-secondary">Operation types and usage</p>
+                <a
+                  href="/editor/mobile-support"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Mobile Support
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Mobile device support
+                  </p>
                 </a>
-                <a href="/editor/crdt-operations" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">CRDT Operations & Rendering</h4>
-                  <p class="text-xs m-0 text-text-secondary">CRDT-based collaborative editing and rendering</p>
+                <a
+                  href="/editor/accessibility"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Accessibility
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Accessibility best practices
+                  </p>
                 </a>
-                <a href="/editor/history-management-optimization" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">History Management Optimization</h4>
-                  <p class="text-xs m-0 text-text-secondary">Optimizing undo/redo performance</p>
+                <a
+                  href="/editor/transaction"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Transaction System
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Atomic history management
+                  </p>
                 </a>
-                <a href="/editor/error-handling" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Error Handling & Recovery</h4>
-                  <p class="text-xs m-0 text-text-secondary">Error handling and recovery strategies</p>
+                <a
+                  href="/editor/operations"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Operations
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Operation types and usage
+                  </p>
                 </a>
-                <a href="/editor/framework-integration" class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline">
-                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">Framework Integration</h4>
-                  <p class="text-xs m-0 text-text-secondary">React, Vue, Svelte integration</p>
+                <a
+                  href="/editor/crdt-operations"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    CRDT Operations & Rendering
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    CRDT-based collaborative editing and rendering
+                  </p>
+                </a>
+                <a
+                  href="/editor/history-management-optimization"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    History Management Optimization
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Optimizing undo/redo performance
+                  </p>
+                </a>
+                <a
+                  href="/editor/error-handling"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Error Handling & Recovery
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Error handling and recovery strategies
+                  </p>
+                </a>
+                <a
+                  href="/editor/framework-integration"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Framework Integration
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    React, Vue, Svelte integration
+                  </p>
+                </a>
+                <a
+                  href="/editor/sanitization-security"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Sanitization & Security
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Security best practices
+                  </p>
+                </a>
+                <a
+                  href="/editor/markdown-conversion"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Markdown & Conversion
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Import/Export guides
+                  </p>
+                </a>
+                <a
+                  href="/editor/advanced-features"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Advanced Features
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Search, Collab, History
+                  </p>
+                </a>
+                <a
+                  href="/editor/ui-patterns"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    UI Patterns
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    Toolbars & Menus
+                  </p>
+                </a>
+                <a
+                  href="/editor/internationalization"
+                  class="p-3 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                >
+                  <h4 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                    Internationalization
+                  </h4>
+                  <p class="text-xs m-0 text-text-secondary">
+                    i18n & RTL support
+                  </p>
                 </a>
               </div>
             </section>
 
             <section class="mb-8">
-              <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
                 Related Resources
               </h2>
               <ul class="m-0 pl-6">
                 <li class="mb-2">
-                  <a href="/docs/practical-patterns" class="text-accent-primary hover:underline">Practical Patterns</a> - Code examples for common patterns
+                  <a
+                    href="/docs/practical-patterns"
+                    class="text-accent-primary hover:underline"
+                    >Practical Patterns</a
+                  > - Code examples for common patterns
                 </li>
                 <li class="mb-2">
-                  <a href="/tips" class="text-accent-primary hover:underline">Tips</a> - Framework integration and best practices
+                  <a href="/tips" class="text-accent-primary hover:underline"
+                    >Tips</a
+                  > - Framework integration and best practices
                 </li>
                 <li class="mb-2">
-                  <a href="/docs/selection-api" class="text-accent-primary hover:underline">Selection API</a> - Working with browser selections
+                  <a
+                    href="/docs/selection-api"
+                    class="text-accent-primary hover:underline">Selection API</a
+                  > - Working with browser selections
                 </li>
                 <li class="mb-2">
-                  <a href="/docs/range-api" class="text-accent-primary hover:underline">Range API</a> - Manipulating DOM ranges
+                  <a
+                    href="/docs/range-api"
+                    class="text-accent-primary hover:underline">Range API</a
+                  > - Manipulating DOM ranges
                 </li>
               </ul>
             </section>

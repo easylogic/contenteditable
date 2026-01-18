@@ -1,0 +1,462 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+
+const headings = [
+    { depth: 2, slug: "overview", text: "The Problem of Reference" },
+    { depth: 2, slug: "path-addressing", text: "1. Path Addressing (Mutable)" },
+    { depth: 3, slug: "volatility-problem", text: "The Volatility Problem" },
+    { depth: 2, slug: "id-addressing", text: "2. ID Addressing (Immutable)" },
+    { depth: 3, slug: "uuid-math", text: "UUID Collision Mathematics" },
+    {
+        depth: 2,
+        slug: "performance-analysis",
+        text: "Performance Analysis (V8)",
+    },
+    { depth: 3, slug: "string-interning", text: "String Interning & Memory" },
+    {
+        depth: 2,
+        slug: "implementation-patterns",
+        text: "Implementation Patterns",
+    },
+    { depth: 3, slug: "hybrid-addressing", text: "Hybrid Addressing" },
+];
+---
+
+<html lang="en">
+    <head>
+        <BaseHead
+            title="Node ID System: Engineering Deep Dive"
+            description="A technical analysis of Path vs ID addressing. Covering UUID collision math, V8 string interning costs, and reverse-lookup optimization strategies."
+        />
+    </head>
+    <body>
+        <SiteNav />
+        <main class="flex max-w-full m-0 p-0">
+            <section
+                class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+            >
+                <div class="flex-1">
+                    <header class="mb-8">
+                        <nav class="mb-4 text-sm">
+                            <a href="/" class="text-text-muted no-underline"
+                                >Home</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor"
+                                class="text-text-muted no-underline">Editor</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <a
+                                href="/editor/architecture"
+                                class="text-text-muted no-underline"
+                                >Architecture</a
+                            >
+                            <span class="text-text-faint mx-2">/</span>
+                            <span class="text-text-primary">Node ID System</span
+                            >
+                        </nav>
+                        <h1 class="text-3xl leading-tight m-0 mb-2">
+                            Node ID System: Engineering Deep Dive
+                        </h1>
+                        <p class="m-0 text-[0.95rem] text-text-secondary">
+                            The "Reference Problem" is the core challenge of any
+                            mutable system. How do you point to an object that
+                            is constantly moving? This document explores
+                            reference stability, collision probability, and the
+                            performance cost of UUIDs in high-frequency text
+                            editing.
+                        </p>
+                    </header>
+
+                    <article
+                        class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+                    >
+                        <DocSection
+                            id="overview"
+                            title="The Problem of Reference"
+                        >
+                            <p class="m-0 mb-4">
+                                In a static document, addressing is trivial:
+                                "The 5th paragraph." In a dynamic editor,
+                                especially with real-time collaboration, indices
+                                are meaningless.
+                            </p>
+                            <p class="m-0 mb-6">
+                                If User A deletes Paragraph 1, then "Paragraph
+                                5" instantly becomes "Paragraph 4" for User A,
+                                but remains "Paragraph 5" for User B until the
+                                network packet arrives. This <strong
+                                    class="text-red-600 dark:text-red-400"
+                                    >Index Divergence</strong
+                                > is the root cause of 90% of collaboration bugs.
+                            </p>
+
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-bg-muted p-5 rounded-lg border border-border-light"
+                            >
+                                <div>
+                                    <h4 class="font-bold text-sm mb-2">
+                                        Mutable References (Paths)
+                                    </h4>
+                                    <ul
+                                        class="list-disc pl-4 text-xs space-y-1 text-text-secondary"
+                                    >
+                                        <li>Address: <code>[0, 4, 1]</code></li>
+                                        <li>Pro: ZERO memory overhead.</li>
+                                        <li>
+                                            Con: Invalidated by <strong
+                                                >any precedent sibling mutation</strong
+                                            >.
+                                        </li>
+                                        <li>
+                                            Use Case: Local rendering, simple
+                                            scripts.
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm mb-2">
+                                        Immutable References (IDs)
+                                    </h4>
+                                    <ul
+                                        class="list-disc pl-4 text-xs space-y-1 text-text-secondary"
+                                    >
+                                        <li>
+                                            Address: <code>"b9f2-k8l1"</code>
+                                        </li>
+                                        <li>
+                                            Pro: Mathematically stable forever.
+                                        </li>
+                                        <li>
+                                            Con: High memory cost (Reference
+                                            storage).
+                                        </li>
+                                        <li>
+                                            Use Case: Collaboration, React Keys,
+                                            Comments.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="path-addressing"
+                            title="1. Path Addressing (Mutable)"
+                        >
+                            <p class="m-0 mb-4">
+                                Path addressing treats the document as a
+                                Coordinate System. A node is defined by its
+                                position in the tree hierarchy.
+                            </p>
+                            <DocCodeBlock
+                                language="typescript"
+                                code={`// A "Path" is a trail of array indices
+type Path = number[]; 
+
+// Example: Root -> 1st Child -> 4th Child
+const target = [0, 3];`}
+                            />
+
+                            <div id="volatility-problem" class="mt-8">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    The Volatility Problem
+                                </h3>
+                                <div
+                                    class="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 p-4 rounded-lg"
+                                >
+                                    <p class="m-0 text-sm mb-2">
+                                        <strong>Scenario:</strong> You are tracking
+                                        a comment on Paragraph 10 <code
+                                            >path: [10]</code
+                                        >.
+                                    </p>
+                                    <p class="m-0 text-sm mb-2">
+                                        <strong>Event:</strong> User deletes Paragraph
+                                        0.
+                                    </p>
+                                    <p
+                                        class="m-0 text-sm font-mono text-red-700 dark:text-red-300"
+                                    >
+                                        All paths > [0] must be decremented.<br
+                                        />
+                                        Your comment now points to <code
+                                            >[10]</code
+                                        >, which is actually the OLD Paragraph
+                                        11.
+                                    </p>
+                                </div>
+                                <p class="mt-4 text-sm">
+                                    To make Paths work in a real editor, you
+                                    need <strong
+                                        >Operational Transformation (OT)</strong
+                                    >. You must mathematically "Transform" every
+                                    single stored path against every incoming
+                                    operation. This is computationally expensive
+                                    (O(History_Length)) and prone to subtle
+                                    bugs.
+                                </p>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="id-addressing"
+                            title="2. ID Addressing (Immutable)"
+                        >
+                            <p class="m-0 mb-4">
+                                ID addressing decouples Identity from Position.
+                                A node is defined by "Who it is", not "Where it
+                                is".
+                            </p>
+
+                            <div id="uuid-math" class="mt-6">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    UUID Collision Mathematics
+                                </h3>
+                                <p class="mb-4 text-sm">
+                                    Developers often fear "What if two IDs
+                                    collide?". Let's look at the math for UUIDv4
+                                    (122 random bits).
+                                </p>
+                                <div class="overflow-x-auto mb-6">
+                                    <table
+                                        class="w-full text-sm text-left border-collapse border border-border-light"
+                                    >
+                                        <thead class="bg-bg-muted">
+                                            <tr>
+                                                <th
+                                                    class="p-2 border border-border-light"
+                                                    >ID Type</th
+                                                >
+                                                <th
+                                                    class="p-2 border border-border-light"
+                                                    >Bits</th
+                                                >
+                                                <th
+                                                    class="p-2 border border-border-light"
+                                                    >Collision Risk (at 1B
+                                                    nodes)</th
+                                                >
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td
+                                                    class="p-2 border border-border-light font-mono text-xs"
+                                                    >Incrementing Int</td
+                                                >
+                                                <td
+                                                    class="p-2 border border-border-light"
+                                                    >32/64</td
+                                                >
+                                                <td
+                                                    class="p-2 border border-border-light text-red-600"
+                                                    ><strong>100%</strong> (in distributed
+                                                    systems)</td
+                                                >
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    class="p-2 border border-border-light font-mono text-xs"
+                                                    >ShortID (8 chars)</td
+                                                >
+                                                <td
+                                                    class="p-2 border border-border-light"
+                                                    >48</td
+                                                >
+                                                <td
+                                                    class="p-2 border border-border-light text-yellow-600"
+                                                    >Rare (0.01%)</td
+                                                >
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    class="p-2 border border-border-light font-mono text-xs"
+                                                    >UUIDv4</td
+                                                >
+                                                <td
+                                                    class="p-2 border border-border-light"
+                                                    >122</td
+                                                >
+                                                <td
+                                                    class="p-2 border border-border-light text-green-600"
+                                                    ><strong>Negligible</strong> ($$10^{
+                                                        -18
+                                                    }$$)</td
+                                                >
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <DocAlert type="warning">
+                                    <p class="m-0 text-sm">
+                                        <strong
+                                            >Never use Auto-Increment Integers.</strong
+                                        > If User A creates "Node 5" offlin and User
+                                        B creates "Node 5" offline, you have an unresolvable
+                                        ID conflict upon merge. Distributed systems
+                                        require a standard random distribution.
+                                    </p>
+                                </DocAlert>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="performance-analysis"
+                            title="Performance Analysis (V8)"
+                        >
+                            <p class="m-0 mb-4">
+                                While IDs are mathematically superior, they
+                                incur real machine costs.
+                            </p>
+
+                            <div id="string-interning" class="pl-1">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    String Interning & Memory
+                                </h3>
+                                <p class="m-0 mb-3">
+                                    In V8 (Chrome/Node), strings are immutable.
+                                    Heavy usage of string IDs can put pressure
+                                    on the heap.
+                                </p>
+                                <ul class="list-disc pl-5 space-y-2 mb-4">
+                                    <li>
+                                        <strong>Object Shape Overhead</strong>:
+                                        An object property key `node["id_123"]`
+                                        is often "Interned" (cached globally).
+                                        If you have 100,000 unique IDs, you have
+                                        100,000 entries in the V8 String Table.
+                                    </li>
+                                    <li>
+                                        <strong>Pointer Size</strong>: A
+                                        sequential integer fits in a "Smi"
+                                        (Small Integer, stored directly in the
+                                        pointer). A string ID requires a pointer
+                                        to a Heap Object (64-bit pointer +
+                                        Object Header + String Data).
+                                    </li>
+                                </ul>
+                                <DocCodeBlock
+                                    language="javascript"
+                                    code={`// MEMORY COST COMPARISON
+// Integer ID: 0 bytes overhead (Stored in pointer)
+const id = 1275; 
+
+// String ID: ~40-60 bytes overhead
+// (Pointer + Map Reference + Hash + Char Data)
+const id = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d";`}
+                                />
+                            </div>
+                            <p class="text-sm mt-4 text-text-secondary">
+                                *Mitigation:* Modern editors often use <strong
+                                    >NanoID</strong
+                                > (URL-friendly, shorter) or <strong
+                                    >Base64</strong
+                                > encoding to reduce the byte storage size compared
+                                to raw hex UUIDs.
+                            </p>
+                        </DocSection>
+
+                        <DocSection
+                            id="implementation-patterns"
+                            title="Implementation Patterns"
+                        >
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    1. The Reverse Lookup Map
+                                </h3>
+                                <p class="mb-3 text-sm">
+                                    Clicking a DOM node and finding the
+                                    corresponding Model Node is a critical "Hot
+                                    Path" (runs on every click/hover). Naive
+                                    search is O(N). We need O(1).
+                                </p>
+                                <DocCodeBlock
+                                    language="typescript"
+                                    code={`class Editor {
+  // Using a WeakMap prevents memory leaks!
+  // If the DOM node is removed, this entry is GC'd.
+  private domToModel = new WeakMap<HTMLElement, NodeID>();
+
+  registerNode(domNode: HTMLElement, modelId: NodeID) {
+    this.domToModel.set(domNode, modelId);
+    // Also handy:
+    domNode.dataset.id = modelId; 
+  }
+
+  getIdFromDom(domNode: HTMLElement): NodeID | null {
+    // Allows O(1) lookup from Event.target
+    return this.domToModel.get(domNode);
+  }
+}`}
+                                />
+                            </div>
+
+                            <div id="hybrid-addressing">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    2. Hybrid Addressing (Standard)
+                                </h3>
+                                <p class="mb-4 text-sm">
+                                    Most professional editors uses <strong
+                                        >Dual Addressing</strong
+                                    >.
+                                </p>
+                                <div
+                                    class="p-5 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-lg"
+                                >
+                                    <ol
+                                        class="list-decimal pl-5 space-y-3 text-sm"
+                                    >
+                                        <li>
+                                            <strong
+                                                class="text-blue-800 dark:text-blue-200"
+                                                >Storage uses IDs:</strong
+                                            > The document model (JSON/CRDT) stores
+                                            only IDs. This ensures sync safety.
+                                        </li>
+                                        <li>
+                                            <strong
+                                                class="text-blue-800 dark:text-blue-200"
+                                                >Selection uses Paths:</strong
+                                            > The caret is defined as `(NodeID, Offset)`
+                                            OR `(Path, Offset)`. Selection is ephemeral
+                                            and local, so using Paths (which are faster
+                                            to compute during typing) is acceptable,
+                                            provided they are re-validated against
+                                            IDs before saving.
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </DocSection>
+
+                        <DocNavigation
+                            current="/editor/node-id-system"
+                            pages={[
+                                {
+                                    title: "Data Structure Strategies",
+                                    href: "/editor/data-structure-strategies",
+                                    description: "Tree vs Map",
+                                },
+                                {
+                                    title: "Editor Architecture",
+                                    href: "/editor/architecture",
+                                    description: "Return to Architecture",
+                                },
+                            ]}
+                        />
+                    </article>
+                </div>
+                <TableOfContents headings={headings} />
+            </section>
+        </main>
+    </body>
+</html>

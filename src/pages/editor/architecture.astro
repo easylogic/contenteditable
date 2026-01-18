@@ -1,59 +1,79 @@
 ---
-import SiteNav from '../../components/SiteNav.astro';
-import BaseHead from '../../components/BaseHead.astro';
-import TableOfContents from '../../components/TableOfContents.astro';
-import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
-import DocAlert from '../../components/docs/DocAlert.astro';
-import DocSection from '../../components/docs/DocSection.astro';
-import DocNavigation from '../../components/docs/DocNavigation.astro';
-import '../../styles/global.css';
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
 
 const headings = [
-  { depth: 2, slug: 'overview', text: 'Overview' },
-  { depth: 2, slug: 'model-view-separation', text: 'Model-View Separation' },
-  { depth: 3, slug: 'why-separate', text: 'Why Separate?' },
-  { depth: 3, slug: 'model-characteristics', text: 'Model Characteristics' },
-  { depth: 3, slug: 'view-characteristics', text: 'View Characteristics' },
-  { depth: 2, slug: 'document-model', text: 'Document Model' },
-  { depth: 3, slug: 'model-structure', text: 'Model Structure' },
-  { depth: 3, slug: 'immutability', text: 'Immutability' },
-  { depth: 3, slug: 'versioning', text: 'Versioning' },
-  { depth: 2, slug: 'view-layer', text: 'View Layer' },
-  { depth: 3, slug: 'rendering', text: 'Rendering' },
-  { depth: 3, slug: 'input-handling', text: 'Input Handling' },
-  { depth: 3, slug: 'selection-sync', text: 'Selection Synchronization' },
-  { depth: 2, slug: 'state-management', text: 'State Management' },
-  { depth: 2, slug: 'architecture-patterns', text: 'Architecture Patterns' },
-  { depth: 3, slug: 'plugin-system', text: 'Plugin System' },
-  { depth: 3, slug: 'command-system', text: 'Command System' },
-  { depth: 3, slug: 'transform-system', text: 'Transform System' },
-  { depth: 2, slug: 'async-initialization', text: 'Asynchronous Initialization' },
-  { depth: 3, slug: 'promise-based-api', text: 'Promise-Based API Design' },
-  { depth: 3, slug: 'initialization-hooks', text: 'Initialization Hooks' },
-  { depth: 2, slug: 'hook-system', text: 'Hook System Implementation' },
-  { depth: 3, slug: 'sync-hooks', text: 'Synchronous Hooks' },
-  { depth: 3, slug: 'async-hooks', text: 'Asynchronous Hooks' },
-  { depth: 3, slug: 'hook-lifecycle', text: 'Hook Lifecycle Management' },
-  { depth: 2, slug: 'event-system', text: 'Event System Architecture' },
-  { depth: 3, slug: 'event-bubbling', text: 'Event Bubbling and Capturing' },
-  { depth: 3, slug: 'event-delegation', text: 'Event Delegation Pattern' },
-  { depth: 3, slug: 'custom-events', text: 'Custom Event System' },
-  { depth: 2, slug: 'performance-optimization', text: 'Performance Optimization' },
-  { depth: 3, slug: 'incremental-updates', text: 'Incremental DOM Updates' },
-  { depth: 3, slug: 'diff-algorithm', text: 'Diff Algorithm' },
-  { depth: 3, slug: 'batch-updates', text: 'Batch Updates and Batching' },
-  { depth: 3, slug: 'virtual-dom', text: 'Virtual DOM Pattern' },
-  { depth: 2, slug: 'rendering-pipeline', text: 'Rendering Pipeline' },
-  { depth: 3, slug: 'render-phases', text: 'Render Phases' },
-  { depth: 3, slug: 'update-scheduling', text: 'Update Scheduling' },
-  { depth: 2, slug: 'model-dom-synchronization', text: 'Model-DOM Synchronization' },
-  { depth: 3, slug: 'contenteditable-false-handling', text: 'contenteditable=false Handling' },
-  { depth: 3, slug: 'selection-preservation', text: 'Selection Preservation' },
-  { depth: 2, slug: 'history-management', text: 'History Management' },
-  { depth: 3, slug: 'model-history', text: 'Model-Based History' },
-  { depth: 3, slug: 'dom-history-conflict', text: 'DOM History Conflict' },
-  { depth: 2, slug: 'input-handling', text: 'Input Handling & IME' },
-  { depth: 2, slug: 'editor-comparison', text: 'How Different Editors Approach This' },
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "model-view-separation", text: "Model-View Separation" },
+  { depth: 3, slug: "why-separate", text: "Why Separate?" },
+  { depth: 3, slug: "model-characteristics", text: "Model Characteristics" },
+  { depth: 3, slug: "view-characteristics", text: "View Characteristics" },
+  { depth: 2, slug: "document-model", text: "Document Model" },
+  { depth: 3, slug: "model-structure", text: "Model Structure" },
+  { depth: 3, slug: "immutability", text: "Immutability" },
+  { depth: 3, slug: "versioning", text: "Versioning" },
+  { depth: 2, slug: "view-layer", text: "View Layer" },
+  { depth: 3, slug: "rendering", text: "Rendering" },
+  { depth: 3, slug: "input-handling", text: "Input Handling" },
+  { depth: 3, slug: "selection-sync", text: "Selection Synchronization" },
+  { depth: 2, slug: "state-management", text: "State Management" },
+  { depth: 2, slug: "architecture-patterns", text: "Architecture Patterns" },
+  { depth: 3, slug: "plugin-system", text: "Plugin System" },
+  { depth: 3, slug: "command-system", text: "Command System" },
+  { depth: 3, slug: "transform-system", text: "Transform System" },
+  {
+    depth: 2,
+    slug: "async-initialization",
+    text: "Asynchronous Initialization",
+  },
+  { depth: 3, slug: "promise-based-api", text: "Promise-Based API Design" },
+  { depth: 3, slug: "initialization-hooks", text: "Initialization Hooks" },
+  { depth: 2, slug: "hook-system", text: "Hook System Implementation" },
+  { depth: 3, slug: "sync-hooks", text: "Synchronous Hooks" },
+  { depth: 3, slug: "async-hooks", text: "Asynchronous Hooks" },
+  { depth: 3, slug: "hook-lifecycle", text: "Hook Lifecycle Management" },
+  { depth: 2, slug: "event-system", text: "Event System Architecture" },
+  { depth: 3, slug: "event-bubbling", text: "Event Bubbling and Capturing" },
+  { depth: 3, slug: "event-delegation", text: "Event Delegation Pattern" },
+  { depth: 3, slug: "custom-events", text: "Custom Event System" },
+  {
+    depth: 2,
+    slug: "performance-optimization",
+    text: "Performance Optimization",
+  },
+  { depth: 3, slug: "incremental-updates", text: "Incremental DOM Updates" },
+  { depth: 3, slug: "diff-algorithm", text: "Diff Algorithm" },
+  { depth: 3, slug: "batch-updates", text: "Batch Updates and Batching" },
+  { depth: 3, slug: "virtual-dom", text: "Virtual DOM Pattern" },
+  { depth: 2, slug: "rendering-pipeline", text: "Rendering Pipeline" },
+  { depth: 3, slug: "render-phases", text: "Render Phases" },
+  { depth: 3, slug: "update-scheduling", text: "Update Scheduling" },
+  {
+    depth: 2,
+    slug: "model-dom-synchronization",
+    text: "Model-DOM Synchronization",
+  },
+  {
+    depth: 3,
+    slug: "contenteditable-false-handling",
+    text: "contenteditable=false Handling",
+  },
+  { depth: 3, slug: "selection-preservation", text: "Selection Preservation" },
+  { depth: 2, slug: "history-management", text: "History Management" },
+  { depth: 3, slug: "model-history", text: "Model-Based History" },
+  { depth: 3, slug: "dom-history-conflict", text: "DOM History Conflict" },
+  { depth: 2, slug: "input-handling", text: "Input Handling & IME" },
+  {
+    depth: 2,
+    slug: "editor-comparison",
+    text: "How Different Editors Approach This",
+  },
 ];
 ---
 
@@ -67,7 +87,9 @@ const headings = [
   <body>
     <SiteNav />
     <main class="flex max-w-full m-0 p-0">
-      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
         <div class="flex-1">
           <header class="mb-8">
             <nav class="mb-4 text-sm">
@@ -77,30 +99,45 @@ const headings = [
               <span class="text-text-faint mx-2">/</span>
               <span class="text-text-primary">Architecture</span>
             </nav>
-            <h1 class="text-3xl leading-tight m-0 mb-2">
-              Editor Architecture
-            </h1>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Editor Architecture</h1>
             <p class="m-0 text-[0.95rem] text-text-secondary">
-              Understanding the fundamental architecture of rich text editors: model-view separation, document model design, and view layer responsibilities.
+              Understanding the fundamental architecture of rich text editors:
+              model-view separation, document model design, and view layer
+              responsibilities.
             </p>
           </header>
 
-          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
             <DocSection id="overview" title="Overview">
               <p class="m-0 mb-4">
-                Modern rich text editors follow a consistent architectural pattern that separates the document model from its visual representation. This separation is the foundation of maintainable, extensible editors.
+                Modern rich text editors follow a consistent architectural
+                pattern that separates the document model from its visual
+                representation. This separation is the foundation of
+                maintainable, extensible editors.
               </p>
             </DocSection>
 
-            <DocSection id="model-view-separation" title="Model-View Separation">
+            <DocSection
+              id="model-view-separation"
+              title="Model-View Separation"
+            >
               <p class="m-0 mb-4">
-                The core principle of editor architecture is separating the <strong>document model</strong> (your internal representation) from the <strong>view</strong> (the DOM).
+                The core principle of editor architecture is separating the <strong
+                  >document model</strong
+                > (your internal representation) from the <strong>view</strong> (the
+                DOM).
               </p>
 
-              <div class="my-6 p-6 bg-bg-muted rounded-lg border border-border-light">
+              <div
+                class="my-6 p-6 bg-bg-muted rounded-lg border border-border-light"
+              >
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 class="text-lg font-semibold mb-3 text-text-primary">Document Model</h4>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">
+                      Document Model
+                    </h4>
                     <ul class="m-0 pl-4 text-sm text-text-secondary">
                       <li class="mb-2">Abstract representation</li>
                       <li class="mb-2">Schema-validated structure</li>
@@ -111,7 +148,9 @@ const headings = [
                     </ul>
                   </div>
                   <div>
-                    <h4 class="text-lg font-semibold mb-3 text-text-primary">View (DOM)</h4>
+                    <h4 class="text-lg font-semibold mb-3 text-text-primary">
+                      View (DOM)
+                    </h4>
                     <ul class="m-0 pl-4 text-sm text-text-secondary">
                       <li class="mb-2">HTML representation</li>
                       <li class="mb-2">User-visible interface</li>
@@ -124,7 +163,8 @@ const headings = [
                 </div>
               </div>
 
-              <DocSection id="why-separate" title="Why Separate?" depth={3}>
+              <div id="why-separate" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Why Separate?</h3>
                 <p class="m-0 mb-3">
                   <strong>1. DOM is unreliable:</strong>
                 </p>
@@ -163,21 +203,33 @@ const headings = [
                   <li>Operations are reversible</li>
                   <li>Can validate before applying</li>
                 </ul>
-              </DocSection>
+              </div>
 
-              <DocSection id="model-characteristics" title="Model Characteristics" depth={3}>
-                <p class="m-0 mb-3">
-                  The document model should be:
-                </p>
+              <div id="model-characteristics" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">
+                  Model Characteristics
+                </h3>
+                <p class="m-0 mb-3">The document model should be:</p>
                 <ul class="m-0 mb-4 pl-6">
-                  <li><strong>Abstract:</strong> Independent of how it's rendered</li>
+                  <li>
+                    <strong>Abstract:</strong> Independent of how it's rendered
+                  </li>
                   <li><strong>Validated:</strong> Always conforms to schema</li>
-                  <li><strong>Immutable or versioned:</strong> Enables history and undo/redo</li>
-                  <li><strong>Position-based:</strong> Uses paths/offsets, not DOM references</li>
-                  <li><strong>Serializable:</strong> Can be converted to JSON, HTML, Markdown, etc.</li>
+                  <li>
+                    <strong>Immutable or versioned:</strong> Enables history and undo/redo
+                  </li>
+                  <li>
+                    <strong>Position-based:</strong> Uses paths/offsets, not DOM references
+                  </li>
+                  <li>
+                    <strong>Serializable:</strong> Can be converted to JSON, HTML,
+                    Markdown, etc.
+                  </li>
                 </ul>
 
-                <DocCodeBlock language="typescript" code={`// Example document model
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// Example document model
 {
   type: 'document',
   children: [
@@ -194,25 +246,38 @@ const headings = [
       children: [{ type: 'text', text: 'Title' }]
     }
   ]
-}`} />
-              </DocSection>
+}`}
+                />
+              </div>
 
-              <DocSection id="view-characteristics" title="View Characteristics" depth={3}>
-                <p class="m-0 mb-3">
-                  The view layer is responsible for:
-                </p>
+              <div id="view-characteristics" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">View Characteristics</h3>
+                <p class="m-0 mb-3">The view layer is responsible for:</p>
                 <ul class="m-0 mb-4 pl-6">
                   <li><strong>Rendering:</strong> Converting model to DOM</li>
-                  <li><strong>Input handling:</strong> Intercepting user input and converting to model operations</li>
-                  <li><strong>Selection sync:</strong> Keeping DOM selection in sync with model selection</li>
-                  <li><strong>DOM updates:</strong> Efficiently updating only changed parts</li>
+                  <li>
+                    <strong>Input handling:</strong> Intercepting user input and converting
+                    to model operations
+                  </li>
+                  <li>
+                    <strong>Selection sync:</strong> Keeping DOM selection in sync
+                    with model selection
+                  </li>
+                  <li>
+                    <strong>DOM updates:</strong> Efficiently updating only changed
+                    parts
+                  </li>
                 </ul>
 
                 <p class="m-0 mb-4">
-                  The view is a <strong>projection</strong> of the model, not the source of truth. When the model changes, the view updates. When the user interacts with the view, it triggers model operations.
+                  The view is a <strong>projection</strong> of the model, not the
+                  source of truth. When the model changes, the view updates. When
+                  the user interacts with the view, it triggers model operations.
                 </p>
 
-                <DocCodeBlock language="typescript" code={`// View layer responsibilities
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// View layer responsibilities
 class View {
   // Render model to DOM
   render(model) {
@@ -232,26 +297,36 @@ class View {
     const domSelection = this.modelToDOMSelection(modelSelection);
     this.setDOMSelection(domSelection);
   }
-}`} />
-              </DocSection>
+}`}
+                />
+              </div>
             </DocSection>
 
             <DocSection id="document-model" title="Document Model">
               <p class="m-0 mb-4">
-                The document model is your source of truth. It represents the document structure independently of how it's rendered.
+                The document model is your source of truth. It represents the
+                document structure independently of how it's rendered.
               </p>
 
-              <DocSection id="model-structure" title="Model Structure" depth={3}>
-                <p class="m-0 mb-3">
-                  Documents are hierarchical trees:
-                </p>
+              <div id="model-structure" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Model Structure</h3>
+                <p class="m-0 mb-3">Documents are hierarchical trees:</p>
                 <ul class="m-0 mb-4 pl-6">
-                  <li><strong>Block nodes:</strong> Paragraphs, headings, lists, code blocks</li>
-                  <li><strong>Inline nodes:</strong> Text, links, images (within blocks)</li>
-                  <li><strong>Text nodes:</strong> Actual text content with marks</li>
+                  <li>
+                    <strong>Block nodes:</strong> Paragraphs, headings, lists, code
+                    blocks
+                  </li>
+                  <li>
+                    <strong>Inline nodes:</strong> Text, links, images (within blocks)
+                  </li>
+                  <li>
+                    <strong>Text nodes:</strong> Actual text content with marks
+                  </li>
                 </ul>
 
-                <DocCodeBlock language="typescript" code={`// Complete document model example
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// Complete document model example
 {
   type: 'document',
   children: [
@@ -287,13 +362,39 @@ class View {
       ]
     }
   ]
-}`} />
-              </DocSection>
+}`}
+                />
+                <div
+                  class="mt-6 p-4 bg-bg-muted rounded-lg border border-border-light"
+                >
+                  <h4 class="text-sm font-semibold mb-2 text-text-primary">
+                    Deep Dive: Data Structures
+                  </h4>
+                  <p class="text-sm m-0 mb-3 text-text-secondary">
+                    Choosing between Tree and Flat Map structures, and how to
+                    address nodes (IDs vs Paths) are critical architectural
+                    decisions.
+                  </p>
+                  <div class="flex flex-col sm:flex-row gap-4 text-sm">
+                    <a
+                      href="/editor/data-structure-strategies"
+                      class="text-accent-primary hover:underline font-medium"
+                    >
+                      → Tree vs Flat Map Strategy
+                    </a>
+                    <a
+                      href="/editor/node-id-system"
+                      class="text-accent-primary hover:underline font-medium"
+                    >
+                      → Node ID vs Path System
+                    </a>
+                  </div>
+                </div>
+              </div>
 
-              <DocSection id="immutability" title="Immutability" depth={3}>
-                <p class="m-0 mb-3">
-                  Many editors use immutable models for:
-                </p>
+              <div id="immutability" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Immutability</h3>
+                <p class="m-0 mb-3">Many editors use immutable models for:</p>
                 <ul class="m-0 mb-4 pl-6">
                   <li>Easy undo/redo (just store previous versions)</li>
                   <li>Time-travel debugging</li>
@@ -301,7 +402,9 @@ class View {
                   <li>Framework integration (React, etc.)</li>
                 </ul>
 
-                <DocCodeBlock language="typescript" code={`// Immutable model update
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// Immutable model update
 function insertText(model, position, text) {
   // Create new model instead of mutating
   return {
@@ -313,10 +416,12 @@ function insertText(model, position, text) {
       return child;
     })
   };
-}`} />
-              </DocSection>
+}`}
+                />
+              </div>
 
-              <DocSection id="versioning" title="Versioning" depth={3}>
+              <div id="versioning" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Versioning</h3>
                 <p class="m-0 mb-3">
                   Some editors use mutable models with versioning:
                 </p>
@@ -327,7 +432,9 @@ function insertText(model, position, text) {
                   <li>Easier to implement collaborative editing</li>
                 </ul>
 
-                <DocCodeBlock language="typescript" code={`// Versioned model
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// Versioned model
 class Document {
   constructor() {
     this.nodes = [];
@@ -344,20 +451,25 @@ class Document {
   getVersion() {
     return this.version;
   }
-}`} />
-              </DocSection>
+}`}
+                />
+              </div>
             </DocSection>
 
             <DocSection id="view-layer" title="View Layer">
               <p class="m-0 mb-4">
-                The view layer renders the model to DOM and handles user interactions.
+                The view layer renders the model to DOM and handles user
+                interactions.
               </p>
 
-              <DocSection id="rendering" title="Rendering" depth={3}>
+              <div id="rendering" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Rendering</h3>
                 <p class="m-0 mb-3">
                   Rendering converts model nodes to DOM elements:
                 </p>
-                <DocCodeBlock language="typescript" code={`function renderNode(node) {
+                <DocCodeBlock
+                  language="typescript"
+                  code={`function renderNode(node) {
   switch (node.type) {
     case 'paragraph':
       return createElement('p', renderChildren(node.children));
@@ -377,14 +489,19 @@ class Document {
       link.appendChild(renderChildren(node.children));
       return link;
   }
-}`} />
-              </DocSection>
+}`}
+                />
+              </div>
 
-              <DocSection id="input-handling" title="Input Handling" depth={3}>
+              <div id="input-handling" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Input Handling</h3>
                 <p class="m-0 mb-3">
-                  The view intercepts user input and converts it to model operations:
+                  The view intercepts user input and converts it to model
+                  operations:
                 </p>
-                <DocCodeBlock language="typescript" code={`editor.addEventListener('beforeinput', (e) => {
+                <DocCodeBlock
+                  language="typescript"
+                  code={`editor.addEventListener('beforeinput', (e) => {
   if (e.inputType === 'insertText') {
     e.preventDefault();
     
@@ -403,14 +520,20 @@ class Document {
     
     // Model change triggers view update
   }
-});`} />
-              </DocSection>
+});`}
+                />
+              </div>
 
-              <DocSection id="selection-sync" title="Selection Synchronization" depth={3}>
+              <div id="selection-sync" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">
+                  Selection Synchronization
+                </h3>
                 <p class="m-0 mb-3">
                   Selection must be kept in sync between DOM and model:
                 </p>
-                <DocCodeBlock language="typescript" code={`// When user changes selection in DOM
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// When user changes selection in DOM
 editor.addEventListener('selectionchange', () => {
   const domSelection = window.getSelection();
   const modelSelection = domToModelSelection(domSelection);
@@ -422,23 +545,26 @@ editor.on('modelChange', () => {
   const modelSelection = editor.getSelection();
   const domSelection = modelToDOMSelection(modelSelection);
   setDOMSelection(domSelection);
-});`} />
-              </DocSection>
+});`}
+                />
+              </div>
             </DocSection>
 
             <DocSection id="state-management" title="State Management">
-              <p class="m-0 mb-4">
-                Editor state includes:
-              </p>
+              <p class="m-0 mb-4">Editor state includes:</p>
               <ul class="m-0 mb-4 pl-6">
                 <li><strong>Document:</strong> The current document model</li>
-                <li><strong>Selection:</strong> Current selection in model coordinates</li>
+                <li>
+                  <strong>Selection:</strong> Current selection in model coordinates
+                </li>
                 <li><strong>History:</strong> Undo/redo stack</li>
                 <li><strong>Schema:</strong> Document schema definition</li>
                 <li><strong>Plugins:</strong> Plugin state</li>
               </ul>
 
-              <DocCodeBlock language="typescript" code={`class EditorState {
+              <DocCodeBlock
+                language="typescript"
+                code={`class EditorState {
   constructor(schema) {
     this.schema = schema;
     this.doc = createEmptyDocument(schema);
@@ -467,19 +593,22 @@ editor.on('modelChange', () => {
     
     return true;
   }
-}`} />
+}`}
+              />
             </DocSection>
 
-            <DocSection id="architecture-patterns" title="Architecture Patterns">
-              <p class="m-0 mb-4">
-                Common patterns in editor architecture:
-              </p>
+            <DocSection
+              id="architecture-patterns"
+              title="Architecture Patterns"
+            >
+              <p class="m-0 mb-4">Common patterns in editor architecture:</p>
 
-              <DocSection id="plugin-system" title="Plugin System" depth={3}>
-                <p class="m-0 mb-3">
-                  Plugins extend editor functionality:
-                </p>
-                <DocCodeBlock language="typescript" code={`class Plugin {
+              <div id="plugin-system" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Plugin System</h3>
+                <p class="m-0 mb-3">Plugins extend editor functionality:</p>
+                <DocCodeBlock
+                  language="typescript"
+                  code={`class Plugin {
   constructor(editor) {
     this.editor = editor;
   }
@@ -503,14 +632,16 @@ editor.on('modelChange', () => {
 // Usage
 editor.use(new HistoryPlugin());
 editor.use(new LinkPlugin());
-editor.use(new ImagePlugin());`} />
-              </DocSection>
+editor.use(new ImagePlugin());`}
+                />
+              </div>
 
-              <DocSection id="command-system" title="Command System" depth={3}>
-                <p class="m-0 mb-3">
-                  Commands are high-level operations:
-                </p>
-                <DocCodeBlock language="typescript" code={`class Command {
+              <div id="command-system" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Command System</h3>
+                <p class="m-0 mb-3">Commands are high-level operations:</p>
+                <DocCodeBlock
+                  language="typescript"
+                  code={`class Command {
   constructor(editor) {
     this.editor = editor;
   }
@@ -542,14 +673,18 @@ class BoldCommand extends Command {
       });
     }
   }
-}`} />
-              </DocSection>
+}`}
+                />
+              </div>
 
-              <DocSection id="transform-system" title="Transform System" depth={3}>
+              <div id="transform-system" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Transform System</h3>
                 <p class="m-0 mb-3">
                   Transforms are low-level operations that modify the model:
                 </p>
-                <DocCodeBlock language="typescript" code={`class Transform {
+                <DocCodeBlock
+                  language="typescript"
+                  code={`class Transform {
   insertText(doc, position, text) {
     // Insert text at position
     // Update all positions after insertion
@@ -571,16 +706,25 @@ class BoldCommand extends Command {
     // Split node at position
     return newDocument;
   }
-}`} />
-              </DocSection>
+}`}
+                />
+              </div>
             </DocSection>
 
-            <DocSection id="async-initialization" title="Asynchronous Initialization">
+            <DocSection
+              id="async-initialization"
+              title="Asynchronous Initialization"
+            >
               <p class="m-0 mb-4">
-                Modern editors often require asynchronous initialization for loading resources, parsing schemas, or setting up plugins. This is similar to how WebGPU requires async device initialization.
+                Modern editors often require asynchronous initialization for
+                loading resources, parsing schemas, or setting up plugins. This
+                is similar to how WebGPU requires async device initialization.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/architecture/async-initialization" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/architecture/async-initialization"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on Asynchronous Initialization →
                 </a>
               </p>
@@ -588,10 +732,15 @@ class BoldCommand extends Command {
 
             <DocSection id="hook-system" title="Hook System Implementation">
               <p class="m-0 mb-4">
-                A hook system allows plugins to extend editor functionality at specific points in the lifecycle. This pattern is used by webpack, Vue, and other extensible systems.
+                A hook system allows plugins to extend editor functionality at
+                specific points in the lifecycle. This pattern is used by
+                webpack, Vue, and other extensible systems.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/architecture/hook-system" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/architecture/hook-system"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on Hook System Implementation →
                 </a>
               </p>
@@ -599,21 +748,32 @@ class BoldCommand extends Command {
 
             <DocSection id="event-system" title="Event System Architecture">
               <p class="m-0 mb-4">
-                A well-designed event system enables plugins to react to editor state changes and user interactions.
+                A well-designed event system enables plugins to react to editor
+                state changes and user interactions.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/architecture/event-system" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/architecture/event-system"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on Event System Architecture →
                 </a>
               </p>
             </DocSection>
 
-            <DocSection id="performance-optimization" title="Performance Optimization">
+            <DocSection
+              id="performance-optimization"
+              title="Performance Optimization"
+            >
               <p class="m-0 mb-4">
-                Large documents require careful optimization to maintain smooth editing performance.
+                Large documents require careful optimization to maintain smooth
+                editing performance.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/architecture/performance-optimization" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/architecture/performance-optimization"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on Performance Optimization →
                 </a>
               </p>
@@ -621,21 +781,37 @@ class BoldCommand extends Command {
 
             <DocSection id="rendering-pipeline" title="Rendering Pipeline">
               <p class="m-0 mb-4">
-                A well-structured rendering pipeline ensures consistent updates and good performance.
+                A well-structured rendering pipeline ensures consistent updates
+                and good performance.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/architecture/rendering-pipeline" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/architecture/rendering-pipeline"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on Rendering Pipeline →
                 </a>
               </p>
             </DocSection>
 
-            <DocSection id="model-dom-synchronization" title="Model-DOM Synchronization">
+            <DocSection
+              id="model-dom-synchronization"
+              title="Model-DOM Synchronization"
+            >
               <p class="m-0 mb-4">
-                Synchronizing between your abstract document model and the DOM is one of the most challenging aspects of building contenteditable editors. This includes handling <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">contenteditable="false"</code> elements, preserving selection during updates, and dealing with external DOM manipulation.
+                Synchronizing between your abstract document model and the DOM
+                is one of the most challenging aspects of building
+                contenteditable editors. This includes handling <code
+                  class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]"
+                  >contenteditable="false"</code
+                > elements, preserving selection during updates, and dealing with
+                external DOM manipulation.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/model-dom-synchronization" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/model-dom-synchronization"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on Model-DOM Synchronization →
                 </a>
               </p>
@@ -643,10 +819,19 @@ class BoldCommand extends Command {
 
             <DocSection id="history-management" title="History Management">
               <p class="m-0 mb-4">
-                Managing undo/redo history in model-based editors requires careful coordination between your model state and browser's DOM history. This includes handling <code class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]">preventDefault()</code> conflicts, IME composition state mismatches, and programmatic changes that don't appear in browser history.
+                Managing undo/redo history in model-based editors requires
+                careful coordination between your model state and browser's DOM
+                history. This includes handling <code
+                  class="bg-bg-muted px-1.5 py-0.5 rounded text-[0.85em]"
+                  >preventDefault()</code
+                > conflicts, IME composition state mismatches, and programmatic changes
+                that don't appear in browser history.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/history-management" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/history-management"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on History Management →
                 </a>
               </p>
@@ -654,22 +839,37 @@ class BoldCommand extends Command {
 
             <DocSection id="input-handling" title="Input Handling & IME">
               <p class="m-0 mb-4">
-                Input handling is one of the most complex aspects of building contenteditable editors. It involves coordinating between browser events, IME composition states, keyboard shortcuts, and your document model. This includes handling iOS Safari's lack of composition events for Korean IME, mobile virtual keyboards, and text prediction.
+                Input handling is one of the most complex aspects of building
+                contenteditable editors. It involves coordinating between
+                browser events, IME composition states, keyboard shortcuts, and
+                your document model. This includes handling iOS Safari's lack of
+                composition events for Korean IME, mobile virtual keyboards, and
+                text prediction.
               </p>
               <p class="m-0 mb-4">
-                <a href="/editor/input-handling" class="text-accent-primary hover:underline font-semibold">
+                <a
+                  href="/editor/input-handling"
+                  class="text-accent-primary hover:underline font-semibold"
+                >
                   Read detailed guide on Input Handling & IME →
                 </a>
               </p>
             </DocSection>
 
-            <DocSection id="editor-comparison" title="How Different Editors Approach This">
+            <DocSection
+              id="editor-comparison"
+              title="How Different Editors Approach This"
+            >
               <p class="m-0 mb-4">
                 Different editors implement these concepts differently:
               </p>
 
-              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
-                <h3 class="text-lg font-semibold mb-3 text-text-primary">ProseMirror</h3>
+              <div
+                class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light"
+              >
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">
+                  ProseMirror
+                </h3>
                 <ul class="m-0 mb-3 pl-6">
                   <li>Strict schema-based validation</li>
                   <li>Immutable document model</li>
@@ -680,8 +880,12 @@ class BoldCommand extends Command {
                 </ul>
               </div>
 
-              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
-                <h3 class="text-lg font-semibold mb-3 text-text-primary">Slate</h3>
+              <div
+                class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light"
+              >
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">
+                  Slate
+                </h3>
                 <ul class="m-0 mb-3 pl-6">
                   <li>React-first architecture</li>
                   <li>Immutable model with React state</li>
@@ -692,8 +896,12 @@ class BoldCommand extends Command {
                 </ul>
               </div>
 
-              <div class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light">
-                <h3 class="text-lg font-semibold mb-3 text-text-primary">Lexical</h3>
+              <div
+                class="my-4 p-4 bg-bg-muted rounded-lg border border-border-light"
+              >
+                <h3 class="text-lg font-semibold mb-3 text-text-primary">
+                  Lexical
+                </h3>
                 <ul class="m-0 mb-3 pl-6">
                   <li>Framework-agnostic core</li>
                   <li>Mutable model with reconciliation</li>
@@ -708,13 +916,56 @@ class BoldCommand extends Command {
             <DocNavigation
               current="/editor/architecture"
               pages={[
-                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Synchronizing model and DOM' },
-                { title: 'History Management', href: '/editor/history-management', description: 'Undo/redo history management' },
-                { title: 'Transaction System', href: '/editor/transaction', description: 'Using transactions for atomic history' },
-                { title: 'Operations', href: '/editor/operations', description: 'Operation types and usage' },
-                { title: 'HTML Mapping', href: '/editor/html-mapping', description: 'HTML serialization and parsing' },
-                { title: 'Input Handling & IME', href: '/editor/input-handling', description: 'Input handling and IME composition' },
-                { title: 'Plugin Development', href: '/editor/plugin-development', description: 'Plugin development guide' },
+                {
+                  title: "Model & Schema",
+                  href: "/editor/model-schema",
+                  description: "Schema design and validation",
+                },
+                {
+                  title: "Data Structure Strategies",
+                  href: "/editor/data-structure-strategies",
+                  description: "Tree vs Flat Map",
+                },
+                {
+                  title: "Node ID System",
+                  href: "/editor/node-id-system",
+                  description: "ID vs Path addressing",
+                },
+                {
+                  title: "Model-DOM Synchronization",
+                  href: "/editor/model-dom-synchronization",
+                  description: "Synchronizing model and DOM",
+                },
+                {
+                  title: "History Management",
+                  href: "/editor/history-management",
+                  description: "Undo/redo history management",
+                },
+                {
+                  title: "Transaction System",
+                  href: "/editor/transaction",
+                  description: "Using transactions for atomic history",
+                },
+                {
+                  title: "Operations",
+                  href: "/editor/operations",
+                  description: "Operation types and usage",
+                },
+                {
+                  title: "HTML Mapping",
+                  href: "/editor/html-mapping",
+                  description: "HTML serialization and parsing",
+                },
+                {
+                  title: "Input Handling & IME",
+                  href: "/editor/input-handling",
+                  description: "Input handling and IME composition",
+                },
+                {
+                  title: "Plugin Development",
+                  href: "/editor/plugin-development",
+                  description: "Plugin development guide",
+                },
               ]}
             />
           </article>
