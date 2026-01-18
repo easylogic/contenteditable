@@ -1,20 +1,20 @@
 ---
-import SiteNav from '../../components/SiteNav.astro';
-import BaseHead from '../../components/BaseHead.astro';
-import TableOfContents from '../../components/TableOfContents.astro';
-import DocCodeBlock from '../../components/docs/DocCodeBlock.astro';
-import DocSection from '../../components/docs/DocSection.astro';
-import DocNavigation from '../../components/docs/DocNavigation.astro';
-import DocAlert from '../../components/docs/DocAlert.astro';
-import '../../styles/global.css';
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocCodeBlock from "../../components/docs/DocCodeBlock.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import "../../styles/global.css";
 
 const headings = [
-  { depth: 2, slug: 'overview', text: 'Overview' },
-  { depth: 2, slug: 'react-integration', text: 'React Integration' },
-  { depth: 2, slug: 'vue-integration', text: 'Vue Integration' },
-  { depth: 2, slug: 'svelte-integration', text: 'Svelte Integration' },
-  { depth: 2, slug: 'common-patterns', text: 'Common Patterns' },
-  { depth: 2, slug: 'state-management', text: 'State Management' },
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "react-integration", text: "React Integration" },
+  { depth: 2, slug: "vue-integration", text: "Vue Integration" },
+  { depth: 2, slug: "svelte-integration", text: "Svelte Integration" },
+  { depth: 2, slug: "common-patterns", text: "Common Patterns" },
+  { depth: 2, slug: "state-management", text: "State Management" },
 ];
 ---
 
@@ -28,7 +28,9 @@ const headings = [
   <body>
     <SiteNav />
     <main class="flex max-w-full m-0 p-0">
-      <section class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
         <div class="flex-1">
           <header class="mb-8">
             <nav class="mb-4 text-sm">
@@ -38,38 +40,58 @@ const headings = [
               <span class="text-text-faint mx-2">/</span>
               <span class="text-text-primary">Framework Integration</span>
             </nav>
-            <h1 class="text-3xl leading-tight m-0 mb-2">Framework Integration</h1>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Framework Integration
+            </h1>
             <p class="m-0 text-[0.95rem] text-text-secondary">
-              Integrating model-based contenteditable editors with React, Vue, Svelte, and other frameworks.
+              Integrating model-based contenteditable editors with React, Vue,
+              Svelte, and other frameworks.
             </p>
           </header>
 
-          <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
             <DocSection id="overview" title="Overview">
               <p class="m-0 mb-4">
-                Integrating a model-based editor with frameworks requires careful handling of lifecycle, state management, and DOM updates. The key is to let the editor manage its own DOM while integrating with framework state.
+                Integrating a model-based editor with frameworks requires
+                careful handling of lifecycle, state management, and DOM
+                updates. The key is to let the editor manage its own DOM while
+                integrating with framework state.
               </p>
               <DocAlert type="info">
                 <p class="m-0 mb-2 text-sm">
                   <strong>Key principles:</strong>
                 </p>
                 <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
-                  <li class="mb-1">Editor manages its own DOM - don't let framework re-render it</li>
+                  <li class="mb-1">
+                    Editor manages its own DOM - don't let framework re-render
+                    it
+                  </li>
                   <li class="mb-1">Use refs to access editor instance</li>
-                  <li class="mb-1">Sync editor state with framework state when needed</li>
-                  <li class="mb-1">Handle lifecycle properly - initialize and cleanup</li>
-                  <li class="mb-1">Prevent framework from diffing editor DOM</li>
+                  <li class="mb-1">
+                    Sync editor state with framework state when needed
+                  </li>
+                  <li class="mb-1">
+                    Handle lifecycle properly - initialize and cleanup
+                  </li>
+                  <li class="mb-1">
+                    Prevent framework from diffing editor DOM
+                  </li>
                 </ul>
               </DocAlert>
             </DocSection>
 
             <DocSection id="react-integration" title="React Integration">
               <p class="m-0 mb-4">
-                React integration requires using refs and preventing React from re-rendering the editor DOM:
+                React integration requires using refs and preventing React from
+                re-rendering the editor DOM:
               </p>
 
               <DocSection id="react-basic" title="Basic Integration" depth={3}>
-                <DocCodeBlock language="typescript" code={`import { useEffect, useRef, useState } from 'react';
+                <DocCodeBlock
+                  language="typescript"
+                  code={`import { useEffect, useRef, useState } from 'react';
 import { Editor } from './editor';
 
 function EditorComponent() {
@@ -113,11 +135,14 @@ function EditorComponent() {
       suppressContentEditableWarning // React warning suppression
     />
   );
-}`} />
+}`}
+                />
               </DocSection>
 
               <DocSection id="react-hooks" title="Custom Hook" depth={3}>
-                <DocCodeBlock language="typescript" code={`import { useEffect, useRef, useState, useCallback } from 'react';
+                <DocCodeBlock
+                  language="typescript"
+                  code={`import { useEffect, useRef, useState, useCallback } from 'react';
 import { Editor } from './editor';
 
 function useEditor(initialContent: string = '') {
@@ -178,11 +203,18 @@ function MyEditor() {
       {isReady && <p>Editor is ready. Content: {content}</p>}
     </div>
   );
-}`} />
+}`}
+                />
               </DocSection>
 
-              <DocSection id="react-prevent-rerender" title="Preventing Re-renders" depth={3}>
-                <DocCodeBlock language="typescript" code={`import { memo, useRef, useEffect } from 'react';
+              <DocSection
+                id="react-prevent-rerender"
+                title="Preventing Re-renders"
+                depth={3}
+              >
+                <DocCodeBlock
+                  language="typescript"
+                  code={`import { memo, useRef, useEffect } from 'react';
 
 // Memoize to prevent unnecessary re-renders
 const EditorComponent = memo(({ initialContent }: { initialContent: string }) => {
@@ -244,7 +276,8 @@ function EditorWrapper({ content }: { content: string }) {
   }, [content]);
 
   return <div ref={editorRef} suppressContentEditableWarning />;
-}`} />
+}`}
+                />
               </DocSection>
             </DocSection>
 
@@ -253,13 +286,19 @@ function EditorWrapper({ content }: { content: string }) {
                 Vue integration uses template refs and lifecycle hooks:
               </p>
 
-              <DocSection id="vue-composition" title="Composition API" depth={3}>
-                <DocCodeBlock language="typescript" code={`<template>
+              <DocSection
+                id="vue-composition"
+                title="Composition API"
+                depth={3}
+              >
+                <DocCodeBlock
+                  language="typescript"
+                  code={`<template>
   <div ref="editorRef" />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from ${'"vue"'};
 import { Editor } from './editor';
 
 const editorRef = ref<HTMLElement | null>(null);
@@ -291,11 +330,14 @@ watch(() => props.content, (newContent) => {
     editorInstance.value.setContent(newContent);
   }
 });
-</script>`} />
+</script>`}
+                />
               </DocSection>
 
               <DocSection id="vue-options" title="Options API" depth={3}>
-                <DocCodeBlock language="typescript" code={`<template>
+                <DocCodeBlock
+                  language="typescript"
+                  code={`<template>
   <div ref="editor" />
 </template>
 
@@ -335,7 +377,8 @@ export default {
     },
   },
 };
-</script>`} />
+</script>`}
+                />
               </DocSection>
             </DocSection>
 
@@ -343,8 +386,10 @@ export default {
               <p class="m-0 mb-4">
                 Svelte integration uses bind:this and lifecycle functions:
               </p>
-              <DocCodeBlock language="typescript" code={`<script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+              <DocCodeBlock
+                language="typescript"
+                code={`<script lang="ts">
+  import { onMount, onDestroy } from ${'"svelte"'};
   import { Editor } from './editor';
 
   let editorElement: HTMLDivElement;
@@ -374,16 +419,21 @@ export default {
   }
 </script>
 
-<div bind:this={editorElement} />`} />
+<div bind:this={editorElement} />`}
+              />
             </DocSection>
 
             <DocSection id="common-patterns" title="Common Patterns">
-              <p class="m-0 mb-4">
-                Common patterns across frameworks:
-              </p>
+              <p class="m-0 mb-4">Common patterns across frameworks:</p>
 
-              <DocSection id="controlled-vs-uncontrolled" title="Controlled vs Uncontrolled" depth={3}>
-                <DocCodeBlock language="typescript" code={`// Controlled: Framework manages content
+              <DocSection
+                id="controlled-vs-uncontrolled"
+                title="Controlled vs Uncontrolled"
+                depth={3}
+              >
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// Controlled: Framework manages content
 function ControlledEditor({ content, onChange }: ControlledProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<Editor | null>(null);
@@ -440,11 +490,18 @@ function UncontrolledEditor({ initialContent }: UncontrolledProps) {
   }));
 
   return <div ref={editorRef} suppressContentEditableWarning />;
-}`} />
+}`}
+                />
               </DocSection>
 
-              <DocSection id="preventing-diff" title="Preventing Framework DOM Diffing" depth={3}>
-                <DocCodeBlock language="typescript" code={`// React: Use key to prevent re-renders
+              <DocSection
+                id="preventing-diff"
+                title="Preventing Framework DOM Diffing"
+                depth={3}
+              >
+                <DocCodeBlock
+                  language="typescript"
+                  code={`// React: Use key to prevent re-renders
 <div key="editor-root" ref={editorRef} suppressContentEditableWarning />
 
 // React: Use data attribute
@@ -464,7 +521,8 @@ function UncontrolledEditor({ initialContent }: UncontrolledProps) {
   ref={editorRef}
   data-framework-ignore // Framework should ignore this element
   suppressContentEditableWarning
-/>`} />
+/>`}
+                />
               </DocSection>
             </DocSection>
 
@@ -473,8 +531,14 @@ function UncontrolledEditor({ initialContent }: UncontrolledProps) {
                 Integrating with state management libraries:
               </p>
 
-              <DocSection id="redux-integration" title="Redux Integration" depth={3}>
-                <DocCodeBlock language="typescript" code={`import { useEffect, useRef } from 'react';
+              <DocSection
+                id="redux-integration"
+                title="Redux Integration"
+                depth={3}
+              >
+                <DocCodeBlock
+                  language="typescript"
+                  code={`import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Editor } from './editor';
 import { setEditorContent, selectEditorContent } from './editorSlice';
@@ -510,11 +574,18 @@ function ReduxEditor() {
   }, [content]);
 
   return <div ref={editorRef} suppressContentEditableWarning />;
-}`} />
+}`}
+                />
               </DocSection>
 
-              <DocSection id="zustand-integration" title="Zustand Integration" depth={3}>
-                <DocCodeBlock language="typescript" code={`import { useEffect, useRef } from 'react';
+              <DocSection
+                id="zustand-integration"
+                title="Zustand Integration"
+                depth={3}
+              >
+                <DocCodeBlock
+                  language="typescript"
+                  code={`import { useEffect, useRef } from 'react';
 import { useEditorStore } from './editorStore';
 import { Editor } from './editor';
 
@@ -548,17 +619,34 @@ function ZustandEditor() {
   }, [content]);
 
   return <div ref={editorRef} suppressContentEditableWarning />;
-}`} />
+}`}
+                />
               </DocSection>
             </DocSection>
 
             <DocNavigation
               current="/editor/framework-integration"
               pages={[
-                { title: 'Editor Architecture', href: '/editor/architecture', description: 'Overview of editor architecture' },
-                { title: 'Model-DOM Synchronization', href: '/editor/model-dom-synchronization', description: 'Model-DOM sync' },
-                { title: 'Plugin Development', href: '/editor/plugin-development', description: 'Plugin development guide' },
-                { title: 'Error Handling', href: '/editor/error-handling', description: 'Error handling strategies' },
+                {
+                  title: "Editor Architecture",
+                  href: "/editor/architecture",
+                  description: "Overview of editor architecture",
+                },
+                {
+                  title: "Model-DOM Synchronization",
+                  href: "/editor/model-dom-synchronization",
+                  description: "Model-DOM sync",
+                },
+                {
+                  title: "Plugin Development",
+                  href: "/editor/plugin-development",
+                  description: "Plugin development guide",
+                },
+                {
+                  title: "Error Handling",
+                  href: "/editor/error-handling",
+                  description: "Error handling strategies",
+                },
               ]}
             />
           </article>

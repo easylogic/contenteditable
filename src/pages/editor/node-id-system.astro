@@ -26,6 +26,28 @@ const headings = [
         text: "Implementation Patterns",
     },
     { depth: 3, slug: "hybrid-addressing", text: "Hybrid Addressing" },
+    { depth: 2, slug: "id-algorithms", text: "3. ID Generation Algorithms" },
+    { depth: 3, slug: "nanoid", text: "NanoID (Compact)" },
+    { depth: 3, slug: "ulid-cuid", text: "ULID & CUID (Time-Sortable)" },
+    {
+        depth: 2,
+        slug: "database-impact",
+        text: "4. Database Engineering Impact",
+    },
+    {
+        depth: 3,
+        slug: "btree-fragmentation",
+        text: "B-Tree Index Fragmentation",
+    },
+    { depth: 2, slug: "frontend-arch", text: "5. Frontend Architecture" },
+    { depth: 3, slug: "react-reconciliation", text: "React Reconciliation" },
+    { depth: 3, slug: "virtualization", text: "Virtualization & Scroll" },
+    { depth: 2, slug: "security", text: "6. Security Implications" },
+    {
+        depth: 2,
+        slug: "editor-comparison",
+        text: "7. Real-world Editor Analysis",
+    },
 ];
 ---
 
@@ -434,6 +456,460 @@ const id = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d";`}
                                             IDs before saving.
                                         </li>
                                     </ol>
+                                </div>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="id-algorithms"
+                            title="3. ID Generation Algorithms"
+                        >
+                            <p class="m-0 mb-6">
+                                Not all IDs are created equal. The choice of
+                                algorithm has profound implications for storage
+                                size, database performance, and network
+                                bandwidth.
+                            </p>
+
+                            <div id="nanoid" class="mb-8">
+                                <h3
+                                    class="text-lg font-semibold mb-3 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700 border border-blue-200"
+                                        >Compact</span
+                                    >
+                                    NanoID
+                                </h3>
+                                <p class="text-sm mb-3">
+                                    NanoID uses a larger alphabet (A-Z, a-z,
+                                    0-9, -, _) to pack more entropy into fewer
+                                    characters. This is the <strong
+                                        >recommended choice for Text Editors</strong
+                                    >.
+                                </p>
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
+                                >
+                                    <div
+                                        class="bg-bg-muted p-4 rounded-lg border border-border-light"
+                                    >
+                                        <h5
+                                            class="font-bold text-xs uppercase text-text-muted mb-2"
+                                        >
+                                            UUID (36 chars)
+                                        </h5>
+                                        <code class="text-xs break-all"
+                                            >f47ac10b-58cc-4372-a567-0e02b2c3d479</code
+                                        >
+                                    </div>
+                                    <div
+                                        class="bg-bg-muted p-4 rounded-lg border border-border-light"
+                                    >
+                                        <h5
+                                            class="font-bold text-xs uppercase text-text-muted mb-2"
+                                        >
+                                            NanoID (21 chars)
+                                        </h5>
+                                        <code class="text-xs break-all"
+                                            >V1StGXR8_Z5jdHi6B-myT</code
+                                        >
+                                    </div>
+                                </div>
+                                <DocAlert type="success">
+                                    <p class="m-0 text-sm">
+                                        <strong>40% Smaller Payload.</strong> For
+                                        a document with 1000 nodes, this saves ~15KB
+                                        of JSON compared to UUIDs. Over a websocket,
+                                        this adds up.
+                                    </p>
+                                </DocAlert>
+                            </div>
+
+                            <div id="ulid-cuid">
+                                <h3
+                                    class="text-lg font-semibold mb-3 flex items-center gap-2"
+                                >
+                                    <span
+                                        class="px-2 py-0.5 rounded text-xs bg-purple-100 text-purple-700 border border-purple-200"
+                                        >Time-Sortable</span
+                                    >
+                                    ULID & CUID
+                                </h3>
+                                <p class="text-sm mb-3">
+                                    <strong
+                                        >Universally Unique Lexicographically
+                                        Sortable Identifier.</strong
+                                    >
+                                    These IDs start with a Timestamp and end with
+                                    Randomness.
+                                </p>
+                                <DocCodeBlock
+                                    language="typescript"
+                                    code={`// ULID Structure
+"01ARZ3NDEKTSV4RRFFQ69G5FAV"
+// [ Timestamp  ] [ Randomness ]
+
+// Benefit: Newer nodes always sort AFTER older nodes
+const sorted = nodes.sort((a, b) => a.id.localeCompare(b.id));
+// ^ This gives you creation order for FREE!`}
+                                />
+                                <p class="text-sm mt-4 text-text-secondary">
+                                    <strong>When to use:</strong> If you store Document
+                                    <em>versions</em> or <em>snapshots</em> in a database,
+                                    use ULIDs for the Snapshot ID. But for internal
+                                    node IDs within the document, plain NanoID is
+                                    sufficient since order is determined by the document
+                                    structure.
+                                </p>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="database-impact"
+                            title="4. Database Engineering Impact"
+                        >
+                            <p class="m-0 mb-4">
+                                If you persist documents to a database, your ID
+                                choice can make or break query performance.
+                            </p>
+
+                            <div
+                                id="btree-fragmentation"
+                                class="p-6 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl mb-6"
+                            >
+                                <h4
+                                    class="font-bold text-red-900 dark:text-red-100 mb-3"
+                                >
+                                    B-Tree Index Fragmentation
+                                </h4>
+                                <p class="text-sm mb-4">
+                                    Relational Databases (PostgreSQL, MySQL) use <strong
+                                        >B-Tree indexes</strong
+                                    > for Primary Keys. B-Trees are optimized for
+                                    <strong>Sequential Insertion</strong>.
+                                </p>
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm"
+                                >
+                                    <div
+                                        class="bg-white dark:bg-bg-surface p-4 rounded-lg"
+                                    >
+                                        <h5
+                                            class="font-semibold text-green-700 dark:text-green-300 mb-2"
+                                        >
+                                            Sequential IDs (1, 2, 3...)
+                                        </h5>
+                                        <ul
+                                            class="list-disc pl-4 space-y-1 text-text-secondary"
+                                        >
+                                            <li>
+                                                New rows append to the end of
+                                                the index.
+                                            </li>
+                                            <li>
+                                                Pages stay full and compact.
+                                            </li>
+                                            <li>
+                                                Buffer cache hit ratio: <strong
+                                                    >High</strong
+                                                >.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div
+                                        class="bg-white dark:bg-bg-surface p-4 rounded-lg"
+                                    >
+                                        <h5
+                                            class="font-semibold text-red-700 dark:text-red-300 mb-2"
+                                        >
+                                            Random UUIDs
+                                        </h5>
+                                        <ul
+                                            class="list-disc pl-4 space-y-1 text-text-secondary"
+                                        >
+                                            <li>
+                                                New rows insert at random
+                                                positions.
+                                            </li>
+                                            <li>
+                                                Constant <strong
+                                                    >Page Splits</strong
+                                                >.
+                                            </li>
+                                            <li>
+                                                Buffer cache hit ratio: <strong
+                                                    >Low</strong
+                                                >.
+                                            </li>
+                                            <li>
+                                                Write Amplification: <strong
+                                                    >2-5x</strong
+                                                >.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p
+                                    class="text-sm mt-4 text-red-800 dark:text-red-200"
+                                >
+                                    <strong>Solution:</strong> Use ULID or CUID for
+                                    database Primary Keys (they are time-sortable),
+                                    or use a separate auto-increment <code
+                                        >internal_id</code
+                                    > for the PK and store the random ID as a secondary
+                                    indexed column.
+                                </p>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="frontend-arch"
+                            title="5. Frontend Architecture"
+                        >
+                            <p class="m-0 mb-6">
+                                On the frontend, stable IDs are essential for
+                                performance and UX.
+                            </p>
+
+                            <div id="react-reconciliation" class="mb-8">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    React Reconciliation & Key Prop
+                                </h3>
+                                <p class="text-sm mb-4">
+                                    React uses the <code>key</code> prop to identify
+                                    which virtual DOM nodes correspond to which real
+                                    DOM nodes.
+                                </p>
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
+                                >
+                                    <div
+                                        class="p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg"
+                                    >
+                                        <h5
+                                            class="font-bold text-sm text-red-800 dark:text-red-200 mb-2"
+                                        >
+                                            Bad: key=&#123;index&#125;
+                                        </h5>
+                                        <p class="text-xs text-text-secondary">
+                                            If you insert a paragraph at the
+                                            top, every <code>key</code> shifts. React
+                                            destroys and re-creates all components.
+                                            <strong
+                                                >Focus is lost. IME state is
+                                                reset.</strong
+                                            >
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="p-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-lg"
+                                    >
+                                        <h5
+                                            class="font-bold text-sm text-green-800 dark:text-green-200 mb-2"
+                                        >
+                                            Good: key=&#123;node.id&#125;
+                                        </h5>
+                                        <p class="text-xs text-text-secondary">
+                                            The node's key remains stable. React
+                                            sees the new ordering and <strong
+                                                >moves</strong
+                                            > the existing DOM nodes. Focus and IME
+                                            are preserved.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="virtualization">
+                                <h3 class="text-lg font-semibold mb-3">
+                                    Virtualization & Scroll Anchoring
+                                </h3>
+                                <p class="text-sm mb-4">
+                                    For documents with 1000+ nodes, you must use <strong
+                                        >Virtualization</strong
+                                    > (only rendering visible nodes). Libraries like
+                                    <code>react-window</code> or <code
+                                        >tanstack-virtual</code
+                                    > rely on stable IDs.
+                                </p>
+                                <DocCodeBlock
+                                    language="typescript"
+                                    code={`// Virtualization with stable IDs
+const sizeCache = new Map<NodeID, number>();
+
+function onNodeResize(id: NodeID, height: number) {
+  sizeCache.set(id, height);
+}
+
+// When the user scrolls back up, we know the EXACT height
+// of off-screen nodes. No scroll jumping!
+function getItemSize(id: NodeID): number {
+  return sizeCache.get(id) ?? ESTIMATED_HEIGHT;
+}`}
+                                />
+                                <p class="text-sm mt-4 text-text-secondary">
+                                    Without stable IDs, if content above the
+                                    viewport changes, the scroll position jumps
+                                    erratically because heights cannot be
+                                    cached.
+                                </p>
+                            </div>
+                        </DocSection>
+
+                        <DocSection
+                            id="security"
+                            title="6. Security Implications"
+                        >
+                            <p class="m-0 mb-4">
+                                IDs are often exposed in URLs. Your choice of ID
+                                format has security implications.
+                            </p>
+                            <div
+                                class="border border-border-light rounded-lg overflow-hidden mb-6"
+                            >
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-bg-muted">
+                                        <tr>
+                                            <th
+                                                class="p-3 border-r border-border-light"
+                                                >URL Pattern</th
+                                            >
+                                            <th class="p-3">Security Risk</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            class="border-b border-border-light"
+                                        >
+                                            <td
+                                                class="p-3 border-r border-border-light font-mono text-xs"
+                                                >/doc/1055</td
+                                            >
+                                            <td
+                                                class="p-3 text-red-600 dark:text-red-400"
+                                            >
+                                                <strong
+                                                    >Enumeration Attack.</strong
+                                                > Attacker iterates through /doc/1056,
+                                                /doc/1057... and scrapes your entire
+                                                database.
+                                            </td>
+                                        </tr>
+                                        <tr
+                                            class="border-b border-border-light"
+                                        >
+                                            <td
+                                                class="p-3 border-r border-border-light font-mono text-xs"
+                                                >/doc/b9f2...</td
+                                            >
+                                            <td
+                                                class="p-3 text-green-600 dark:text-green-400"
+                                            >
+                                                <strong>Secure.</strong> The search
+                                                space is too large to brute-force.
+                                                Cannot guess adjacent document IDs.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                class="p-3 border-r border-border-light font-mono text-xs"
+                                                >ULID timestamps</td
+                                            >
+                                            <td
+                                                class="p-3 text-yellow-600 dark:text-yellow-400"
+                                            >
+                                                <strong
+                                                    >Information Leakage.</strong
+                                                > ULIDs reveal creation time. May
+                                                be acceptable or not depending on
+                                                your use case.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <DocAlert type="info">
+                                <p class="m-0 text-sm">
+                                    <strong>Best Practice:</strong> Use random IDs
+                                    (NanoID/UUID) for public-facing URLs. If you need
+                                    time-sorting internally, use ULID for database
+                                    PKs but expose a random <code
+                                        >public_id</code
+                                    > in the API.
+                                </p>
+                            </DocAlert>
+                        </DocSection>
+
+                        <DocSection
+                            id="editor-comparison"
+                            title="7. Real-world Editor Analysis"
+                        >
+                            <p class="m-0 mb-6">
+                                How do popular open-source editors handle node
+                                identity?
+                            </p>
+                            <div class="space-y-4">
+                                <div
+                                    class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                                >
+                                    <h4 class="font-bold text-sm mb-2">
+                                        ProseMirror
+                                    </h4>
+                                    <p class="text-xs text-text-secondary m-0">
+                                        Uses <strong
+                                            >Path-based addressing</strong
+                                        > with Mapping for OT. Nodes do not have inherent
+                                        IDs. This makes it simpler but requires careful
+                                        transform logic for collaboration plugins.
+                                    </p>
+                                </div>
+                                <div
+                                    class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                                >
+                                    <h4 class="font-bold text-sm mb-2">
+                                        Slate.js
+                                    </h4>
+                                    <p class="text-xs text-text-secondary m-0">
+                                        Uses <strong
+                                            >Path-based addressing</strong
+                                        >. Nodes can optionally have IDs, but
+                                        it's up to the developer to add them.
+                                        Most real-world Slate apps add <code
+                                            >id</code
+                                        > to every Element.
+                                    </p>
+                                </div>
+                                <div
+                                    class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                                >
+                                    <h4 class="font-bold text-sm mb-2">
+                                        Lexical (Meta)
+                                    </h4>
+                                    <p class="text-xs text-text-secondary m-0">
+                                        Uses <strong>ID-based addressing</strong
+                                        > with internal <code>__key</code> property
+                                        on every node. This is used for React reconciliation
+                                        and node lookup. The key is a simple incrementing
+                                        integer per editor instance (safe because
+                                        it's local, not synced).
+                                    </p>
+                                </div>
+                                <div
+                                    class="p-4 bg-bg-muted rounded-lg border border-border-light"
+                                >
+                                    <h4 class="font-bold text-sm mb-2">
+                                        Notion / BlockSuite
+                                    </h4>
+                                    <p class="text-xs text-text-secondary m-0">
+                                        Uses <strong
+                                            >CRDT-based ID addressing</strong
+                                        >. Every block has a stable ID that is
+                                        used for real-time sync. The underlying
+                                        CRDT (Yjs) manages conflict resolution
+                                        using Lamport Timestamps embedded in the
+                                        ID.
+                                    </p>
                                 </div>
                             </div>
                         </DocSection>
