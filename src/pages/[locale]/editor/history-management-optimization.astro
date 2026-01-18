@@ -26,7 +26,7 @@ const headings = [
   { depth: 2, slug: 'overview', text: '개요' },
   { depth: 2, slug: 'problem', text: '전체 Model Snapshot의 문제점' },
   { depth: 2, slug: 'operation-based', text: 'Operation 기반 History' },
-  { depth: 3, slug: 'inverse-operations', text: '역 Operation 사용' },
+  { depth: 3, slug: 'inverse-operations', text: '리버스 Operation 사용' },
   { depth: 3, slug: 'memory-efficiency', text: '메모리 효율성' },
   { depth: 2, slug: 'hybrid-approach', text: 'Hybrid 접근법' },
   { depth: 3, slug: 'periodic-snapshots', text: '주기적 Snapshot' },
@@ -72,7 +72,7 @@ const locale = Astro.params.locale || 'ko';
           <article class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]">
             <DocSection id="overview" title="개요">
               <p class="m-0 mb-4">
-                모든 history entry에 대해 전체 model snapshot을 저장하는 것은 메모리 집약적이고 느립니다. Operation 기반 history 관리는 operation과 역 operation만 저장하여 메모리 사용량을 크게 줄이고 성능을 향상시킵니다.
+                모든 history entry에 대해 전체 model snapshot을 저장하는 것은 메모리 집약적이고 느립니다. Operation 기반 history 관리는 operation과 리버스 Operation만 저장하여 메모리 사용량을 크게 줄이고 성능을 향상시킵니다.
               </p>
               <DocAlert type="error">
                 <p class="m-0 mb-2 text-sm">
@@ -135,14 +135,14 @@ class HistoryManager {
 
             <DocSection id="operation-based" title="Operation 기반 History">
               <p class="m-0 mb-4">
-                Operation만 저장하고 역 operation을 적용하여 undo:
+                Operation만 저장하고 리버스 Operation을 적용하여 undo:
               </p>
 
-              <DocSection id="inverse-operations" title="역 Operation 사용" depth={3}>
+              <DocSection id="inverse-operations" title="리버스 Operation 사용" depth={3}>
                 <DocCodeBlock language="typescript" code={`// ✅ 좋음: Operation 기반 history
 interface HistoryEntry {
   operations: Operation[];
-  inverseOperations: Operation[]; // 사전 계산된 역 operation
+  inverseOperations: Operation[]; // 사전 계산된 리버스 Operation
   beforeSelection: Selection;
   afterSelection: Selection;
   // Model snapshot 없음!
@@ -161,7 +161,7 @@ class HistoryManager {
     
     const afterSelection = this.#model.getSelection();
     
-    // 역 operation 계산
+    // 리버스 Operation 계산
     const inverseOperations = operations
       .slice()
       .reverse()
@@ -184,7 +184,7 @@ class HistoryManager {
     
     const entry = this.#undoStack.pop()!;
     
-    // 역 operation 적용 (역순으로)
+    // 리버스 Operation 적용 (역순으로)
     for (let i = entry.inverseOperations.length - 1; i >= 0; i--) {
       this.#model.apply(entry.inverseOperations[i]);
     }
@@ -300,7 +300,7 @@ const entry = {
     { type: 'insertText', path: [0, 14], text: 'l' },
     { type: 'insertText', path: [0, 15], text: 'd' }
   ],
-  inverseOperations: [/* 11개 역 operation */]
+  inverseOperations: [/* 11개 리버스 Operation */]
 };
 // 총: ~수백 바이트 vs 2MB!
 
@@ -352,7 +352,7 @@ const entry = {
       // Checkpoint에서 복원하고 operation 재생
       this.#restoreFromCheckpoint(nearestCheckpoint, entry);
     } else {
-      // 역 operation 사용 (일반적인 경우)
+      // 리버스 Operation 사용 (일반적인 경우)
       this.#applyInverseOperations(entry.inverseOperations);
     }
     
@@ -449,8 +449,8 @@ class CheckpointManager {
                   <tr>
                     <td class="border border-border-light p-3">Undo 시간</td>
                     <td class="border border-border-light p-3">빠름 (복원)</td>
-                    <td class="border border-border-light p-3">빠름 (역 operation 적용)</td>
-                    <td class="border border-border-light p-3">빠름 (checkpoint 또는 역 operation)</td>
+                    <td class="border border-border-light p-3">빠름 (리버스 Operation 적용)</td>
+                    <td class="border border-border-light p-3">빠름 (checkpoint 또는 리버스 Operation)</td>
                   </tr>
                   <tr>
                     <td class="border border-border-light p-3">확장성</td>
@@ -481,7 +481,7 @@ class CheckpointManager {
     const beforeSelection = transaction.getBeforeSelection();
     const afterSelection = transaction.getAfterSelection();
     
-    // 역 operation 계산
+    // 리버스 Operation 계산
     const inverseOperations = this.#computeInverseOperations(operations);
     
     const entry: HistoryEntry = {
@@ -511,7 +511,7 @@ class CheckpointManager {
     
     const entry = this.#undoStack.pop()!;
     
-    // 역순으로 역 operation 적용
+    // 역순으로 리버스 Operation 적용
     for (let i = entry.inverseOperations.length - 1; i >= 0; i--) {
       const inverseOp = entry.inverseOperations[i];
       this.#model.apply(inverseOp);
@@ -542,7 +542,7 @@ class CheckpointManager {
   }
   
   #computeInverseOperations(operations: Operation[]): Operation[] {
-    // 역순으로 역 operation 계산 필요
+    // 역순으로 리버스 Operation 계산 필요
     // 각 operation 전 상태 캡처
     const inverses: Operation[] = [];
     
@@ -594,7 +594,7 @@ class CheckpointManager {
             <DocSection id="best-practices" title="모범 사례">
               <ul class="m-0 mb-4 pl-6">
                 <li class="mb-2">
-                  <strong>항상 역 operation 저장:</strong> 기록 시 역 operation을 사전 계산하여 undo 중 계산 방지
+                  <strong>항상 리버스 Operation 저장:</strong> 기록 시 리버스 Operation을 사전 계산하여 undo 중 계산 방지
                 </li>
                 <li class="mb-2">
                   <strong>삭제된 콘텐츠 저장:</strong> Delete operation은 적절한 undo를 위해 삭제된 콘텐츠를 저장해야 함
@@ -609,7 +609,7 @@ class CheckpointManager {
                   <strong>긴 체인에 checkpoint 사용:</strong> 매우 긴 undo 체인의 경우 주기적 snapshot과 함께 hybrid 접근법 사용
                 </li>
                 <li class="mb-2">
-                  <strong>Operation 검증:</strong> 역 operation 적용 전에 operation이 유효한지 확인
+                  <strong>Operation 검증:</strong> 리버스 Operation 적용 전에 operation이 유효한지 확인
                 </li>
                 <li class="mb-2">
                   <strong>엣지 케이스 처리:</strong> 빈 operation, 잘못된 경로, 경계 조건 고려

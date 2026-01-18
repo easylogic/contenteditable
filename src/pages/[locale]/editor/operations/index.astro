@@ -71,7 +71,7 @@ const locale = Astro.params.locale || 'ko';
                 </p>
                 <ul class="m-0 mt-2 mb-2 pl-6 text-sm">
                   <li class="mb-1">불변 - operation은 기존 상태를 수정하지 않음</li>
-                  <li class="mb-1">역변환 가능 - 각 operation은 역 operation을 가짐</li>
+                  <li class="mb-1">역변환 가능 - 각 operation은 리버스 Operation을 가짐</li>
                   <li class="mb-1">조합 가능 - operation은 transaction에서 조합 가능</li>
                   <li class="mb-1">검증 가능 - operation은 적용 전에 검증 가능</li>
                 </ul>
@@ -86,7 +86,7 @@ const locale = Astro.params.locale || 'ko';
   type: string;
   path: Path;
   data?: any;
-  inverse?: Operation; // 효율성을 위해 사전 계산된 역 operation
+  inverse?: Operation; // 효율성을 위해 사전 계산된 리버스 Operation
   metadata?: {
     source?: 'user' | 'programmatic';
     timestamp?: number;
@@ -241,7 +241,7 @@ type Path = number[];
 
             <DocSection id="operation-inversion" title="Operation 역변환">
               <p class="m-0 mb-4">
-                모든 operation은 undo 기능을 위해 역 operation을 가져야 합니다.
+                모든 operation은 undo 기능을 위해 리버스 Operation을 가져야 합니다.
               </p>
               <DocCodeBlock language="typescript" code={`class OperationInverter {
   invert(operation: Operation): Operation {
@@ -361,7 +361,7 @@ type Path = number[];
   }
 }
 
-// 효율성을 위해 역 operation 사전 계산
+// 효율성을 위해 리버스 Operation 사전 계산
 function createOperationWithInverse(operation: Operation): Operation {
   const inverter = new OperationInverter();
   return {

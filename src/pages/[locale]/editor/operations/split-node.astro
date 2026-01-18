@@ -17,7 +17,7 @@ const headings = [
   { depth: 2, slug: 'overview', text: '개요' },
   { depth: 2, slug: 'interface', text: '인터페이스' },
   { depth: 2, slug: 'usage', text: '사용법' },
-  { depth: 2, slug: 'inverse', text: '역 Operation' },
+  { depth: 2, slug: 'inverse', text: '리버스 Operation' },
 ];
 
 const locale = Astro.params.locale || 'ko';
@@ -91,9 +91,9 @@ function splitAtOffset(editor: Editor, nodePath: Path, offset: number) {
 }`} />
             </DocSection>
 
-            <DocSection id="inverse" title="역 Operation">
+            <DocSection id="inverse" title="리버스 Operation">
               <p class="m-0 mb-4">
-                Split node의 역 operation은 merge nodes입니다:
+                Split node의 리버스 Operation은 merge nodes입니다:
               </p>
               <DocCodeBlock language="typescript" code={`function getInverse(operation: SplitNodeOperation): MergeNodesOperation {
   return {

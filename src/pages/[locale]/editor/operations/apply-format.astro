@@ -17,7 +17,7 @@ const headings = [
   { depth: 2, slug: 'overview', text: '개요' },
   { depth: 2, slug: 'interface', text: '인터페이스' },
   { depth: 2, slug: 'usage', text: '사용법' },
-  { depth: 2, slug: 'inverse', text: '역 Operation' },
+  { depth: 2, slug: 'inverse', text: '리버스 Operation' },
 ];
 
 const locale = Astro.params.locale || 'ko';
@@ -100,7 +100,7 @@ function applyFormats(editor: Editor, selection: Selection, formats: string[]) {
 }`} />
             </DocSection>
 
-            <DocSection id="inverse" title="역 Operation">
+            <DocSection id="inverse" title="리버스 Operation">
               <DocCodeBlock language="typescript" code={`function getInverse(operation: ApplyFormatOperation): RemoveFormatOperation {
   return {
     type: 'removeFormat',

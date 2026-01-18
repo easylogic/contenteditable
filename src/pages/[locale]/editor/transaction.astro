@@ -372,7 +372,7 @@ async function handlePaste(editor: Editor, pastedContent: string) {
 
     const entry = this.#undoStack.pop()!;
     
-    // 역 operation 적용
+    // 리버스 Operation 적용
     for (let i = entry.operations.length - 1; i >= 0; i--) {
       const op = entry.operations[i];
       const inverse = this.#getInverseOperation(op);

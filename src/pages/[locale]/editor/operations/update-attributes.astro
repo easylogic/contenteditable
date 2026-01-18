@@ -17,7 +17,7 @@ const headings = [
   { depth: 2, slug: 'overview', text: '개요' },
   { depth: 2, slug: 'interface', text: '인터페이스' },
   { depth: 2, slug: 'usage', text: '사용법' },
-  { depth: 2, slug: 'inverse', text: '역 Operation' },
+  { depth: 2, slug: 'inverse', text: '리버스 Operation' },
 ];
 
 const locale = Astro.params.locale || 'ko';
@@ -111,9 +111,9 @@ function updateHeadingLevel(editor: Editor, headingPath: Path, newLevel: number)
 }`} />
             </DocSection>
 
-            <DocSection id="inverse" title="역 Operation">
+            <DocSection id="inverse" title="리버스 Operation">
               <p class="m-0 mb-4">
-                역 operation은 이전 속성을 복원합니다:
+                리버스 Operation은 이전 속성을 복원합니다:
               </p>
               <DocCodeBlock language="typescript" code={`function getInverse(operation: UpdateAttributesOperation): UpdateAttributesOperation {
   return {
