@@ -1,5 +1,5 @@
 ---
-id: ce-0572
+id: ce-0572-ko
 scenarioId: scenario-paste-plain-text
 locale: ko
 os: Linux

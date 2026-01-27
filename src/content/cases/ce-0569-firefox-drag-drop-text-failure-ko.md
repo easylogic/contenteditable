@@ -1,5 +1,5 @@
 ---
-id: ce-0569
+id: ce-0569-ko
 scenarioId: scenario-firefox-drag-drop-issues
 locale: ko
 os: Linux
