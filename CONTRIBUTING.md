@@ -84,7 +84,7 @@ See [TRANSLATION.md](./TRANSLATION.md) for translation guidelines.
 
 ```bash
 # Clone the repository
-git clone https://github.com/barocss/contenteditable.git
+git clone https://github.com/easylogic/contenteditable.git
 cd contenteditable
 
 # Install dependencies
@@ -172,8 +172,8 @@ We are committed to providing a welcoming and inclusive environment for everyone
 
 ## Questions?
 
-- Open a [GitHub Discussion](https://github.com/barocss/contenteditable/discussions)
-- Check existing [Issues](https://github.com/barocss/contenteditable/issues)
+- Open a [GitHub Discussion](https://github.com/easylogic/contenteditable/discussions)
+- Check existing [Issues](https://github.com/easylogic/contenteditable/issues)
 
 ---
 

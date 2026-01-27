@@ -16,7 +16,7 @@ type VerificationData = {
 };
 
 const STORAGE_KEY = 'contenteditable-verifications';
-const GITHUB_REPO = 'barocss/contenteditable';
+const GITHUB_REPO = 'easylogic/contenteditable';
 
 export function CaseVerification({
   caseId,

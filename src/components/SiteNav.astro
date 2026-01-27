@@ -6,9 +6,9 @@ import {
   getLocaleFromPath,
   getLocalizedPath,
   type Locale,
-} from '../i18n/translations';
-import ThemeToggle from './ThemeToggle.astro';
-import { SearchIsland } from './SearchIsland';
+} from "../i18n/translations";
+import ThemeToggle from "./ThemeToggle.astro";
+import { SearchIsland } from "./SearchIsland";
 
 interface NavItem {
   label: string;
@@ -28,8 +28,8 @@ const currentLocale = getLocaleFromPath(currentPath);
 const currentLocaleInfo = locales[currentLocale];
 
 // Get path without locale for language switching
-const localePattern = new RegExp(`^/(${supportedLocales.join('|')})`);
-const pathWithoutLocale = currentPath.replace(localePattern, '') || '/';
+const localePattern = new RegExp(`^/(${supportedLocales.join("|")})`);
+const pathWithoutLocale = currentPath.replace(localePattern, "") || "/";
 
 // Helper to build localized paths
 const localePath = (path: string) => getLocalizedPath(path, currentLocale);
@@ -44,14 +44,46 @@ const availableLocales = supportedLocales.map((code) => ({
 
 // Default navigation items if not provided
 const defaultItems: NavItem[] = [
-  { label: 'Docs', href: localePath('/docs'), active: pathWithoutLocale.startsWith('/docs') },
-  { label: 'Editor', href: localePath('/editor'), active: pathWithoutLocale.startsWith('/editor') },
-  { label: 'Model/Schema', href: localePath('/model-schema'), active: pathWithoutLocale.startsWith('/model-schema') },
-  { label: 'Cases', href: localePath('/cases'), active: pathWithoutLocale.startsWith('/cases') },
-  { label: 'Scenarios', href: localePath('/scenarios'), active: pathWithoutLocale.startsWith('/scenarios') },
-  { label: 'Tips', href: localePath('/tips'), active: pathWithoutLocale.startsWith('/tips') },
-  { label: 'Playground', href: localePath('/playground'), active: pathWithoutLocale.startsWith('/playground') },
-  { label: 'Coverage', href: localePath('/coverage'), active: pathWithoutLocale.startsWith('/coverage') },
+  {
+    label: "Docs",
+    href: localePath("/docs"),
+    active: pathWithoutLocale.startsWith("/docs"),
+  },
+  {
+    label: "Editor",
+    href: localePath("/editor"),
+    active: pathWithoutLocale.startsWith("/editor"),
+  },
+  {
+    label: "Model/Schema",
+    href: localePath("/model-schema"),
+    active: pathWithoutLocale.startsWith("/model-schema"),
+  },
+  {
+    label: "Cases",
+    href: localePath("/cases"),
+    active: pathWithoutLocale.startsWith("/cases"),
+  },
+  {
+    label: "Scenarios",
+    href: localePath("/scenarios"),
+    active: pathWithoutLocale.startsWith("/scenarios"),
+  },
+  {
+    label: "Tips",
+    href: localePath("/tips"),
+    active: pathWithoutLocale.startsWith("/tips"),
+  },
+  {
+    label: "Playground",
+    href: localePath("/playground"),
+    active: pathWithoutLocale.startsWith("/playground"),
+  },
+  {
+    label: "Coverage",
+    href: localePath("/coverage"),
+    active: pathWithoutLocale.startsWith("/coverage"),
+  },
 ];
 
 const navItems = items || defaultItems;
@@ -60,88 +92,143 @@ const navItems = items || defaultItems;
 <header class="site-nav">
   <nav class="site-nav-inner">
     <div class="site-nav-left">
-      <a href={localePath('/')} class="site-logo">
+      <a href={localePath("/")} class="site-logo">
         <span class="logo-icon">⌨</span>
-        <span class="logo-text">contenteditable<span class="logo-dot">.</span>lab</span>
+        <span class="logo-text"
+          >contenteditable<span class="logo-dot">.</span>lab</span
+        >
       </a>
     </div>
 
     <div class="site-nav-center">
-      {navItems.map((item) => (
-        <a
-          href={item.href}
-          class:list={['nav-item', { active: item.active || pathWithoutLocale === item.href.replace(localePattern, '') || pathWithoutLocale.startsWith(item.href.replace(localePattern, '')) }]}
-        >
-          {item.label}
-        </a>
-      ))}
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "nav-item",
+              {
+                active:
+                  item.active ||
+                  pathWithoutLocale === item.href.replace(localePattern, "") ||
+                  pathWithoutLocale.startsWith(
+                    item.href.replace(localePattern, ""),
+                  ),
+              },
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
     </div>
 
     <div class="site-nav-right">
-      {showMobileMenu && (
-        <button class="mobile-menu-toggle" aria-label="Toggle menu" aria-expanded="false">
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </button>
-      )}
+      {
+        showMobileMenu && (
+          <button
+            class="mobile-menu-toggle"
+            aria-label="Toggle menu"
+            aria-expanded="false"
+          >
+            <span class="hamburger-line" />
+            <span class="hamburger-line" />
+            <span class="hamburger-line" />
+          </button>
+        )
+      }
       <SearchIsland client:load />
       <ThemeToggle />
       <div class="lang-dropdown">
         <button class="lang-trigger" aria-haspopup="true" aria-expanded="false">
           <span class="lang-flag">{currentLocaleInfo.flag}</span>
           <span class="lang-code">{currentLocaleInfo.shortName}</span>
-          <svg class="lang-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg
+            class="lang-chevron"
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+          >
+            <path
+              d="M3 4.5L6 7.5L9 4.5"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
           </svg>
         </button>
         <div class="lang-menu" role="menu">
-          {availableLocales.map((locale) => (
-            <a
-              href={locale.href}
-              class:list={['lang-option', { active: locale.isCurrent }]}
-              role="menuitem"
-            >
-              <span class="lang-flag">{locale.flag}</span>
-              <span class="lang-name">{locale.name}</span>
-              {locale.isCurrent && (
-                <svg class="lang-check" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/>
-                </svg>
-              )}
-            </a>
-          ))}
+          {
+            availableLocales.map((locale) => (
+              <a
+                href={locale.href}
+                class:list={["lang-option", { active: locale.isCurrent }]}
+                role="menuitem"
+              >
+                <span class="lang-flag">{locale.flag}</span>
+                <span class="lang-name">{locale.name}</span>
+                {locale.isCurrent && (
+                  <svg
+                    class="lang-check"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                  >
+                    <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
+                  </svg>
+                )}
+              </a>
+            ))
+          }
         </div>
       </div>
       <a
-        href="https://github.com/barocss/contenteditable"
+        href="https://github.com/easylogic/contenteditable"
         target="_blank"
         rel="noopener"
         class="github-link"
         title="View on GitHub"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          <path
+            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+          ></path>
         </svg>
       </a>
     </div>
   </nav>
-  {showMobileMenu && (
-    <div class="mobile-menu">
-      <a href={localePath('/')} class="mobile-menu-logo">
-        <span class="logo-icon">⌨</span>
-        <span class="logo-text">contenteditable<span class="logo-dot">.</span>lab</span>
-      </a>
-      {navItems.map((item) => (
-        <a
-          href={item.href}
-          class:list={['mobile-nav-item', { active: item.active || pathWithoutLocale === item.href.replace(localePattern, '') || pathWithoutLocale.startsWith(item.href.replace(localePattern, '')) }]}
-        >
-          {item.label}
+  {
+    showMobileMenu && (
+      <div class="mobile-menu">
+        <a href={localePath("/")} class="mobile-menu-logo">
+          <span class="logo-icon">⌨</span>
+          <span class="logo-text">
+            contenteditable<span class="logo-dot">.</span>lab
+          </span>
         </a>
-      ))}
-    </div>
-  )}
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "mobile-nav-item",
+              {
+                active:
+                  item.active ||
+                  pathWithoutLocale === item.href.replace(localePattern, "") ||
+                  pathWithoutLocale.startsWith(
+                    item.href.replace(localePattern, ""),
+                  ),
+              },
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+    )
+  }
 </header>
 
 <style>
@@ -202,7 +289,7 @@ const navItems = items || defaultItems;
   }
 
   .logo-text {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
   }
 
   .logo-dot {
@@ -217,7 +304,9 @@ const navItems = items || defaultItems;
     color: var(--text-muted);
     text-decoration: none;
     border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .nav-item:hover {
@@ -231,7 +320,7 @@ const navItems = items || defaultItems;
   }
 
   .nav-item.active::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -10px;
     left: 50%;
@@ -354,7 +443,9 @@ const navItems = items || defaultItems;
     height: 32px;
     color: var(--text-muted);
     border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .github-link:hover {
@@ -416,7 +507,9 @@ const navItems = items || defaultItems;
     z-index: 99;
     transform: translateY(-100%);
     opacity: 0;
-    transition: transform 0.3s, opacity 0.3s;
+    transition:
+      transform 0.3s,
+      opacity 0.3s;
   }
 
   .mobile-menu.active {
@@ -448,7 +541,7 @@ const navItems = items || defaultItems;
   }
 
   .mobile-menu-logo .logo-text {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
   }
 
   .mobile-menu-logo .logo-dot {
@@ -462,7 +555,9 @@ const navItems = items || defaultItems;
     color: var(--text-muted);
     text-decoration: none;
     border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .mobile-nav-item:hover,
@@ -522,34 +617,35 @@ const navItems = items || defaultItems;
 
 <script>
   // Mobile menu toggle
-  document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.querySelector('.mobile-menu-toggle');
-    const menu = document.querySelector('.mobile-menu');
-    
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.querySelector(".mobile-menu-toggle");
+    const menu = document.querySelector(".mobile-menu");
+
     if (toggle && menu) {
-      toggle.addEventListener('click', () => {
-        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!isExpanded));
-        menu.classList.toggle('active');
+      toggle.addEventListener("click", () => {
+        const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!isExpanded));
+        menu.classList.toggle("active");
       });
 
       // Close menu when clicking outside
-      document.addEventListener('click', (e) => {
-        if (!toggle.contains(e.target as Node) && !menu.contains(e.target as Node)) {
-          toggle.setAttribute('aria-expanded', 'false');
-          menu.classList.remove('active');
+      document.addEventListener("click", (e) => {
+        if (
+          !toggle.contains(e.target as Node) &&
+          !menu.contains(e.target as Node)
+        ) {
+          toggle.setAttribute("aria-expanded", "false");
+          menu.classList.remove("active");
         }
       });
 
       // Close menu when clicking a nav item
-      menu.querySelectorAll('.mobile-nav-item').forEach((item) => {
-        item.addEventListener('click', () => {
-          toggle.setAttribute('aria-expanded', 'false');
-          menu.classList.remove('active');
+      menu.querySelectorAll(".mobile-nav-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          toggle.setAttribute("aria-expanded", "false");
+          menu.classList.remove("active");
         });
       });
     }
   });
 </script>
-
-
