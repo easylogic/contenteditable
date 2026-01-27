@@ -2,46 +2,27 @@
 id: ce-0088-contenteditable-with-media-query-ko
 scenarioId: scenario-media-query-layout
 locale: ko
-os: iOS
-osVersion: "17.0"
-device: iPhone
+os: Android
+osVersion: "13"
+device: Phone
 deviceVersion: Any
-browser: Safari
-browserVersion: "17.0"
-keyboard: US
-caseTitle: 미디어 쿼리 레이아웃 변경이 contenteditable 편집을 방해할 수 있음
-description: "contenteditable 요소가 있는 페이지가 미디어 쿼리 변경(예: 방향 변경, 창 크기 조정)에 응답할 때 레이아웃 변경이 편집을 방해할 수 있습니다. 캐럿 위치가 점프하고 선택이 손실될 수 있습니다."
-tags:
-  - media-query
-  - layout
-  - mobile
-  - ios
-  - safari
-status: draft
+browser: Chrome Mobile
+browserVersion: "120.0"
+keyboard: Mobile Samsung
+caseTitle: 미디어 쿼리 레이아웃 변경이 키보드 포커스를 방해함
+description: "모바일 장치에서 @media 쿼리에 의해 트리거되는 레이아웃 이동(예: 방향 전환)은 가상 키보드를 닫히게 하고 선택 영역을 소실시킬 수 있습니다."
+tags: ["media-query", "layout", "mobile", "keyboard-dismiss"]
+status: confirmed
 ---
 
 ## 현상
+CSS 미디어 쿼리가 트리거될 때(예: 장치 회전 또는 컨테이너 너비 변경), 브라우저는 레이아웃 패스를 실행하며 이 과정에서 모바일 브라우저의 현재 DOM 선택 영역이 무효화되어 가상 키보드가 닫힐 수 있습니다.
 
-contenteditable 요소가 있는 페이지가 미디어 쿼리 변경(예: 방향 변경, 창 크기 조정)에 응답할 때 레이아웃 변경이 편집을 방해할 수 있습니다. 캐럿 위치가 점프하고 선택이 손실될 수 있습니다.
-
-## 재현 예시
-
-1. 반응형 페이지에 contenteditable div를 만듭니다.
-2. 텍스트가 선택된 상태로 편집을 시작합니다.
-3. 기기를 회전하거나 창 크기를 조정하여 미디어 쿼리 변경을 트리거합니다.
-4. 편집이 원활하게 계속되는지 관찰합니다.
-5. 캐럿 위치와 선택이 유지되는지 확인합니다.
+## 재현 단계
+1. 모바일 장치에서 contenteditable 필드를 엽니다.
+2. 가상 키보드가 나타나도록 필드에 포커스합니다.
+3. 장치를 회전합니다 (세로 모드 -> 가로 모드).
+4. 키보드가 사라지는지 관찰합니다.
 
 ## 관찰된 동작
-
-- iOS의 Safari에서 레이아웃 변경이 편집을 방해할 수 있습니다.
-- 레이아웃 재계산 중 캐럿 위치가 점프할 수 있습니다.
-- 선택이 손실될 수 있습니다.
-- 가상 키보드가 예상치 못하게 닫힐 수 있습니다.
-
-## 예상 동작
-
-- 레이아웃 변경이 편집을 방해하지 않아야 합니다.
-- 캐럿 위치가 보존되어야 합니다.
-- 선택이 유지되어야 합니다.
-- 편집이 원활하게 계속되어야 합니다.
+뷰포트 변경이 리플로우(Reflow)를 일으키며, 요소의 바운딩 박스가 크게 이동할 경우 브라우저가 활성 요소의 포커스를 잃게 만듭니다.

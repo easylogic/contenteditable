@@ -1,5 +1,5 @@
 ---
-id: architecture-framework-comparison-2025-ko
+id: architecture-framework-comparison-2025-ko-ko
 title: "2025년 에디터 프레임워크 선택 가이드"
 description: "성능, 유연성 및 생태계를 기반으로 한 Lexical, ProseMirror, Slate의 종합 비교 분석입니다."
 category: "architecture"

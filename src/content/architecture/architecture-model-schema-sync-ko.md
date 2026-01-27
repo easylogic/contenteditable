@@ -1,5 +1,5 @@
 ---
-id: architecture-model-schema-sync-ko
+id: architecture-model-schema-sync-ko-ko
 title: "현대적인 모델-스키마 동기화 전략"
 description: "Reconciler 패턴을 사용하여 2025년 에디터에서 견고한 Source of Truth를 유지하는 방법."
 category: "architecture"

@@ -3,44 +3,26 @@ id: ce-0082-contenteditable-with-intersection-observer
 scenarioId: scenario-intersection-observer-interference
 locale: en
 os: macOS
-osVersion: "14.0"
-device: Desktop or Laptop
-deviceVersion: MacBook Pro
+osVersion: "14.2"
+device: Desktop
+deviceVersion: Any
 browser: Safari
-browserVersion: "17.0"
+browserVersion: "17.2"
 keyboard: US
-caseTitle: IntersectionObserver may affect contenteditable visibility detection
-description: "When an IntersectionObserver is used to detect when a contenteditable element becomes visible or hidden, the observer may not fire correctly during editing. Changes to content size or position duri"
-tags:
-  - intersection-observer
-  - visibility
-  - safari
-  - macos
-status: draft
+caseTitle: IntersectionObserver triggers unexpected editor resets
+description: "Using IntersectionObserver to detect editor visibility can cause Safari to drop the IME composition buffer if the intersection state changes while typing."
+tags: ["intersection-observer", "composition", "reset", "safari"]
+status: confirmed
 ---
 
 ## Phenomenon
+In Safari, if an `IntersectionObserver` is watching an editor div, and that div's intersection ratio changes (even slightly during scrolling or keyboard expansion), the browser may trigger a re-render cycle that clears the current IME composition.
 
-When an IntersectionObserver is used to detect when a contenteditable element becomes visible or hidden, the observer may not fire correctly during editing. Changes to content size or position during editing may not trigger intersection updates as expected.
+## Reproduction Steps
+1. Attach an `IntersectionObserver` to the editor.
+2. Start an IME composition (e.g., Korean or Japanese).
+3. Scroll the page so the editor's position moves slightly.
+4. Observe that the current underlined text is immediately committed or deleted.
 
-## Reproduction example
-
-1. Create a contenteditable div that can scroll in and out of view.
-2. Attach an IntersectionObserver to detect visibility.
-3. Edit content that changes the element's size.
-4. Scroll the contenteditable in and out of view.
-5. Observe whether intersection callbacks fire correctly.
-
-## Observed behavior
-
-- In Safari on macOS, IntersectionObserver may not update correctly during editing.
-- Content size changes may not trigger intersection recalculations.
-- Visibility detection may be delayed or incorrect.
-- The observer may miss rapid content changes.
-
-## Expected behavior
-
-- IntersectionObserver should work correctly with contenteditable.
-- Content changes should trigger intersection recalculations.
-- Visibility detection should be accurate and timely.
-
+## Observed Behavior
+Safari's "Is visible" check for event dispatching is sensitive to observer cycles, leading to premature `compositionend` events.

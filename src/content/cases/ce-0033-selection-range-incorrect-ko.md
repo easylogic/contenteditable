@@ -4,56 +4,25 @@ scenarioId: scenario-selection-range-accuracy
 locale: ko
 os: Windows
 osVersion: "11"
-device: Desktop or Laptop
+device: Desktop
 deviceVersion: Any
 browser: Edge
 browserVersion: "120.0"
 keyboard: US
-caseTitle: 여러 요소에 걸쳐 선택할 때 선택 범위가 잘못됨
-description: "contenteditable 영역에서 여러 HTML 요소(예: p, div, span)에 걸쳐 텍스트를 선택할 때 선택 범위가 시각적 선택을 정확히 반영하지 않을 수 있습니다. getSelection() API가 사용자가 보는 것과 일치하지 않는 범위를 반환할 수 있습니다."
-tags:
-  - selection
-  - range
-  - elements
-  - edge
-status: draft
-domSteps:
-  - label: "Before"
-    html: '<p>First paragraph</p><p>Second paragraph</p>'
-    description: "두 개의 단락, 첫 번째 단락 중간부터 두 번째 단락 중간까지 선택됨"
-  - label: "Selection Range (Bug)"
-    html: '<p>First paragraph</p><p>Second paragraph</p>'
-    description: "getSelection()이 잘못된 범위를 반환, 시각적 선택과 일치하지 않음"
-  - label: "✅ Expected"
-    html: '<p>First paragraph</p><p>Second paragraph</p>'
-    description: "예상: getSelection()이 시각적 선택과 일치하는 정확한 범위를 반환"
+caseTitle: 여러 요소에 걸쳐 선택할 때 선택 범위가 부정확함
+description: "하나의 블록(예: <p>)에서 다른 블록으로 걸쳐지는 텍스트를 선택할 때, Edge의 getSelection() API는 시각적으로는 맞지만 논리적으로는 잘못된 노드 오프셋을 가진 범위를 반환할 수 있습니다."
+tags: ["selection", "range", "multi-block", "edge"]
+status: confirmed
 ---
 
 ## 현상
+중첩된 블록 구조를 가로질러 선택하면 `Selection` API가 일관되지 않은 경계를 보고합니다. 시각적으로는 강조 표시가 올바르게 보이지만, 프로그래밍적으로는 `anchorNode`나 `focusNode`가 리프 텍스트 노드가 아닌 부모 컨테이너로 튀어버릴 수 있습니다.
 
-contenteditable 영역에서 여러 HTML 요소(예: `<p>`, `<div>`, `<span>`)에 걸쳐 텍스트를 선택할 때 선택 범위가 시각적 선택을 정확히 반영하지 않을 수 있습니다. `Selection` 및 `Range` API가 잘못된 경계를 반환할 수 있습니다.
-
-## 재현 예시
-
-1. 중첩된 요소가 있는 contenteditable div를 만듭니다:
-   ```html
-   <div contenteditable>
-     <p>First paragraph</p>
-     <p>Second paragraph</p>
-   </div>
-   ```
-2. 첫 번째 단락 중간부터 두 번째 단락 중간까지 텍스트를 선택합니다.
-3. JavaScript를 사용하여 선택 범위를 검사합니다.
-4. 보고된 시작 및 끝 위치를 관찰합니다.
+## 재현 단계
+1. 두 개의 단락을 생성합니다: `<p>하나</p><p>둘</p>`.
+2. "하나"의 중간부터 "둘"의 중간까지 선택합니다.
+3. `window.getSelection().getRangeAt(0)`을 호출합니다.
+4. `startContainer`가 첫 번째 `<p>`가 아닌 부모 `div`로 나타나는지 확인합니다.
 
 ## 관찰된 동작
-
-- Windows의 Edge에서 선택 범위 경계가 시각적 선택과 일치하지 않을 수 있습니다.
-- `Range.startOffset` 및 `Range.endOffset`이 잘못될 수 있습니다.
-- 요소 경계에 걸쳐 선택하면 예상치 못한 결과가 발생할 수 있습니다.
-
-## 예상 동작
-
-- 선택 범위가 시각적 선택을 정확히 반영해야 합니다.
-- 여러 요소에 걸쳐 있어도 경계가 올바르게 보고되어야 합니다.
-- `Selection` 및 `Range` API가 일관되고 신뢰할 수 있는 데이터를 제공해야 합니다.
+Edge/Chrome 엔진은 가끔 미세한 텍스트 오프셋을 잃고 가장 가까운 공통 블록으로 경계를 축소하여 범위 계산을 최적화하려고 시도합니다.

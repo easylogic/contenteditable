@@ -3,43 +3,26 @@ id: ce-0082-contenteditable-with-intersection-observer-ko
 scenarioId: scenario-intersection-observer-interference
 locale: ko
 os: macOS
-osVersion: "14.0"
-device: Desktop or Laptop
-deviceVersion: MacBook Pro
+osVersion: "14.2"
+device: Desktop
+deviceVersion: Any
 browser: Safari
-browserVersion: "17.0"
+browserVersion: "17.2"
 keyboard: US
-caseTitle: IntersectionObserver가 contenteditable 가시성 감지에 영향을 줄 수 있음
-description: "IntersectionObserver를 사용하여 contenteditable 요소가 표시되거나 숨겨지는 시점을 감지할 때 편집 중 관찰자가 올바르게 작동하지 않을 수 있습니다. 편집 중 콘텐츠 크기나 위치 변경이 예상대로 교차 업데이트를 트리거하지 않을 수 있습니다."
-tags:
-  - intersection-observer
-  - visibility
-  - safari
-  - macos
-status: draft
+caseTitle: IntersectionObserver가 예기치 않은 에디터 초기화를 유발함
+description: "에디터의 가시성을 감지하기 위해 IntersectionObserver를 사용하면 타이핑 중에 교차 상태가 변경될 때 Safari가 IME 조합 버퍼를 해제할 수 있습니다."
+tags: ["intersection-observer", "composition", "reset", "safari"]
+status: confirmed
 ---
 
 ## 현상
+Safari에서 `IntersectionObserver`가 에디터 div를 감시하고 있고, 스크롤이나 키보드 확장 중에 해당 div의 교차 비율이 조금이라도 변경되면, 브라우저는 현재의 IME 조합(Composition)을 지워버리는 재렌더링 주기를 트리거할 수 있습니다.
 
-IntersectionObserver를 사용하여 contenteditable 요소가 표시되거나 숨겨지는 시점을 감지할 때 편집 중 관찰자가 올바르게 작동하지 않을 수 있습니다. 편집 중 콘텐츠 크기나 위치 변경이 예상대로 교차 업데이트를 트리거하지 않을 수 있습니다.
-
-## 재현 예시
-
-1. 보기에서 스크롤될 수 있는 contenteditable div를 만듭니다.
-2. 가시성을 감지하는 IntersectionObserver를 연결합니다.
-3. 요소 크기를 변경하는 콘텐츠를 편집합니다.
-4. contenteditable을 보기 안팎으로 스크롤합니다.
-5. 교차 콜백이 올바르게 작동하는지 관찰합니다.
+## 재현 단계
+1. 에디터에 `IntersectionObserver`를 연결합니다.
+2. IME 조합(예: 한글 또는 일본어)을 시작합니다.
+3. 에디터의 위치가 약간 이동하도록 페이지를 스크롤합니다.
+4. 현재 밑줄이 그어진 텍스트가 즉시 확정되거나 삭제되는지 확인합니다.
 
 ## 관찰된 동작
-
-- macOS의 Safari에서 IntersectionObserver가 편집 중 올바르게 업데이트되지 않을 수 있습니다.
-- 콘텐츠 크기 변경이 교차 재계산을 트리거하지 않을 수 있습니다.
-- 가시성 감지가 지연되거나 잘못될 수 있습니다.
-- 관찰자가 빠른 콘텐츠 변경을 놓칠 수 있습니다.
-
-## 예상 동작
-
-- IntersectionObserver가 contenteditable과 올바르게 작동해야 합니다.
-- 콘텐츠 변경이 교차 재계산을 트리거해야 합니다.
-- 가시성 감지가 정확하고 시기적절해야 합니다.
+이벤트 디스패치를 위한 Safari의 "가시성 확인" 로직이 옵저버 주기에 민감하게 반응하여, 조기에 `compositionend` 이벤트를 발생시킵니다.

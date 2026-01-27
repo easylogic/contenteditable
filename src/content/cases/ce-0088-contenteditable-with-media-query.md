@@ -2,47 +2,27 @@
 id: ce-0088-contenteditable-with-media-query
 scenarioId: scenario-media-query-layout
 locale: en
-os: iOS
-osVersion: "17.0"
-device: iPhone
+os: Android
+osVersion: "13"
+device: Phone
 deviceVersion: Any
-browser: Safari
-browserVersion: "17.0"
-keyboard: US
-caseTitle: Media query layout changes may disrupt contenteditable editing
-description: "When a page with a contenteditable element responds to media query changes (e.g., orientation change, window resize), the layout changes may disrupt editing. The caret position may jump, and select"
-tags:
-  - media-query
-  - layout
-  - mobile
-  - ios
-  - safari
-status: draft
+browser: Chrome Mobile
+browserVersion: "120.0"
+keyboard: Mobile Samsung
+caseTitle: Media query layout changes disrupt keyboard focus
+description: "On mobile devices, layout shifts triggered by @media queries (such as orientation changes) can cause the virtual keyboard to dismiss and the selection to be lost."
+tags: ["media-query", "layout", "mobile", "keyboard-dismiss"]
+status: confirmed
 ---
 
 ## Phenomenon
+When a CSS media query is triggered (e.g., rotating a device or shifting container width), browsers often trigger a layout pass that can invalidate the current DOM selection in mobile browsers, leading to the virtual keyboard being dismissed.
 
-When a page with a contenteditable element responds to media query changes (e.g., orientation change, window resize), the layout changes may disrupt editing. The caret position may jump, and selection may be lost.
+## Reproduction Steps
+1. Open a contenteditable field on a mobile device.
+2. Focus the field so the virtual keyboard appears.
+3. Rotate the device (Portrait to Landscape).
+4. Observe that the keyboard often disappears.
 
-## Reproduction example
-
-1. Create a contenteditable div on a responsive page.
-2. Start editing with text selected.
-3. Rotate the device or resize the window to trigger media query changes.
-4. Observe whether editing continues smoothly.
-5. Check if caret position and selection are maintained.
-
-## Observed behavior
-
-- In Safari on iOS, layout changes may disrupt editing.
-- Caret position may jump during layout recalculation.
-- Selection may be lost.
-- The virtual keyboard may close unexpectedly.
-
-## Expected behavior
-
-- Layout changes should not disrupt editing.
-- Caret position should be preserved.
-- Selection should be maintained.
-- Editing should continue seamlessly.
-
+## Observed Behavior
+The viewport change triggers a reflow that causes the browser to lose the active element focus if the element's bounding box moves significantly.

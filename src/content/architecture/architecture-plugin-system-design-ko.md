@@ -1,5 +1,5 @@
 ---
-id: architecture-plugin-system-design-ko
+id: architecture-plugin-system-design-ko-ko
 title: "확장 가능한 플러그인 아키텍처 설계"
 description: "핵심 에디터 모델을 오염시키지 않으면서 수평적으로 기능을 확장할 수 있는 내부 API 설계 방법."
 category: "architecture"

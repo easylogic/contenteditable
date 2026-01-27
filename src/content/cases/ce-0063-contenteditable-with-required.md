@@ -2,42 +2,31 @@
 id: ce-0063-contenteditable-with-required
 scenarioId: scenario-required-validation
 locale: en
-os: macOS
-osVersion: "Ubuntu 22.04"
-device: Desktop or Laptop
+os: Windows
+osVersion: "11"
+device: Desktop
 deviceVersion: Any
 browser: Chrome
 browserVersion: "120.0"
 keyboard: US
 caseTitle: required attribute is not supported for validation
-description: "The required attribute, which works on form inputs to indicate mandatory fields, is not supported on contenteditable regions. There is no built-in way to mark a contenteditable as required for form validation."
-tags:
-  - required
-  - validation
-  - form
-  - chrome
-status: draft
+description: "The HTML5 'required' attribute is ignored by browsers when placed on a contenteditable element, preventing native form validation from blocking empty submissions."
+tags: ["required", "validation", "form", "chrome"]
+status: confirmed
 ---
 
 ## Phenomenon
+When marking a `contenteditable` container as `required`, the browser's form validation engine does not check its content. Users can submit an empty editor even if it's logically "mandatory".
 
-The `required` attribute, which works on form inputs to indicate mandatory fields, is not supported on contenteditable regions. There is no built-in way to mark a contenteditable as required for form validation.
+## Reproduction Steps
+1. Create a `<form>`.
+2. Add `<div contenteditable="true" required></div>`.
+3. Add a submit button.
+4. Leave the div empty and click submit.
+5. Observe that the form submits without showing a "Please fill out this field" tooltip.
 
-## Reproduction example
+## Expected Behavior
+The browser should ideally support native validation for editable regions or provide a focused pseudo-class for validation states.
 
-1. Create a contenteditable div with `required` attribute inside a form.
-2. Try to submit the form without entering content.
-3. Observe whether validation occurs.
-
-## Observed behavior
-
-- In Chrome on macOS, the `required` attribute is ignored on contenteditable.
-- Form validation does not check contenteditable regions.
-- No built-in validation exists.
-
-## Expected behavior
-
-- The `required` attribute should work on contenteditable.
-- Form validation should check contenteditable regions.
-- Or, there should be a standard way to validate contenteditable content.
-
+## Solution
+Use a hidden `input` with the `required` attribute and sync its value, or use the `checkValidity()` API manually on form submission.

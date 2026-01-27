@@ -14,6 +14,19 @@ locale: en
 
 When selecting text that spans across multiple HTML elements (e.g., `<p>`, `<div>`, `<span>`) in a contenteditable region, the selection range may not accurately reflect the visual selection. The `Selection` and `Range` APIs may return incorrect boundaries.
 
+## Observed Behavior
+- In Edge/Chrome, the selection range boundaries may not match the visual selection.
+- The `Range.startOffset` and `Range.endOffset` may be incorrect when spanning element boundaries.
+
+## Reproduction Steps
+1. Create a contenteditable div with nested elements: `<p>First</p><p>Second</p>`.
+2. Select text that spans from the middle of the first paragraph to the middle of the second paragraph.
+3. Use JavaScript to inspect the `Selection` object.
+4. Observe that reported positions mismatch the visual highlight.
+
+## Related Cases
+- [ce-0033: multi-element selection mismatch](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0033-selection-range-incorrect.md)
+
 ## References
 
 - [MDN: Selection API](https://developer.mozilla.org/en-US/docs/Web/API/Selection/) - Official Selection API documentation

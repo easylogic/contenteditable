@@ -2,41 +2,37 @@
 id: ce-0067-contenteditable-with-form-ko
 scenarioId: scenario-form-integration
 locale: ko
-os: Windows
-osVersion: "11"
-device: Desktop or Laptop
+os: macOS
+osVersion: "14.0"
+device: Desktop
 deviceVersion: Any
 browser: Chrome
 browserVersion: "120.0"
 keyboard: US
-caseTitle: contenteditable 콘텐츠가 양식 제출에 포함되지 않음
-description: "contenteditable 영역이 양식 내부에 있을 때 콘텐츠가 자동으로 양식 제출에 포함되지 않습니다. input 및 textarea와 달리 contenteditable 콘텐츠는 수동으로 추출하여 양식 데이터에 추가해야 합니다."
-tags:
-  - form
-  - submission
-  - chrome
-status: draft
+caseTitle: contenteditable 내용이 form 전송에 포함되지 않음
+description: "contenteditable 요소를 <form> 내부에 배치하더라도, 표준 <input>이나 <textarea>와 달리 FormData에 자동으로 포함되거나 폼과 함께 제출되지 않습니다."
+tags: ["form", "submission", "data-loss", "chrome"]
+status: confirmed
 ---
 
 ## 현상
+표준 HTML 폼은 `contenteditable` 영역을 유효한 입력 필드로 인식하지 않습니다. 표준 제출 버튼을 통해 폼을 전송할 때 에디터 내부의 값은 무시되며, 별도의 처리가 없다면 데이터 유실로 이어집니다.
 
-contenteditable 영역이 `<form>` 내부에 있을 때 콘텐츠가 자동으로 양식 제출에 포함되지 않습니다. `<input>` 및 `<textarea>`와 달리 contenteditable 콘텐츠는 수동으로 추출하여 양식 데이터에 추가해야 합니다.
-
-## 재현 예시
-
-1. 그 안에 contenteditable div가 있는 양식을 만듭니다.
-2. contenteditable에 일부 콘텐츠를 입력합니다.
-3. 양식을 제출합니다.
-4. contenteditable 콘텐츠가 포함되어 있는지 양식 데이터를 검사합니다.
-
-## 관찰된 동작
-
-- Windows의 Chrome에서 contenteditable 콘텐츠가 양식 제출에 포함되지 않습니다.
-- 콘텐츠를 수동으로 추출하여 추가해야 합니다.
-- 자동 양식 통합이 없습니다.
+## 재현 단계
+1. `<form>` 내부에 `<div contenteditable="true">`를 배치합니다.
+2. `<button type="submit">`을 추가합니다.
+3. div에 텍스트를 입력하고 제출 버튼을 누릅니다.
+4. 전송된 페이로드에 에디터 내용에 대한 키/값 쌍이 없는 것을 확인합니다.
 
 ## 예상 동작
+에디터 내용은 폼 값으로 취급되어야 하며, 이상적으로는 내부 숨겨진 필드나 `ElementInternals` API를 통해 지원되어야 합니다.
 
-- Contenteditable 콘텐츠가 양식 제출에 포함되어야 합니다.
-- 또는 contenteditable을 양식 필드와 연결하는 표준 방법이 있어야 합니다.
-- 양식 통합이 원활하게 작동해야 합니다.
+## 해결 방법
+모든 `input` 이벤트 발생 시 값을 동기화하는 숨겨진 input 필드를 사용하십시오.
+```javascript
+const editor = document.querySelector('[contenteditable]');
+const hiddenInput = document.querySelector('input[name="editor-content"]');
+editor.addEventListener('input', () => {
+   hiddenInput.value = editor.innerHTML;
+});
+```
