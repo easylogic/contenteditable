@@ -7,6 +7,9 @@ This skill defines the process for creating a "Scenario" - a group of related Ca
 Every scenario must have an English version (`.md`) and a Korean version (`-ko.md`).
 
 ### Frontmatter (YAML)
+> [!IMPORTANT]
+> **Pre-flight Check**: Always verify the current schema in [config.ts](file:///Users/user/github/barocss/contenteditable/src/content/config.ts) before creating or editing scenarios.
+
 - `id`: Unique slug (e.g., `scenario-composition-mismatch`)
 - `title`: Universal name of the phenomenon
 - `description`: High-level technical summary
