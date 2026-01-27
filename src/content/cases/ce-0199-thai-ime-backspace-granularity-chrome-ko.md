@@ -1,6 +1,6 @@
 ---
 id: ce-0199-thai-ime-backspace-granularity-chrome-ko
-scenarioId: scenario-ime-backspace-granularity
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: Windows
 osVersion: "11"

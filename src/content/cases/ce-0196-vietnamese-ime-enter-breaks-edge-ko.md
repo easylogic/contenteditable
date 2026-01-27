@@ -1,6 +1,6 @@
 ---
 id: ce-0196-vietnamese-ime-enter-breaks-edge-ko
-scenarioId: scenario-ime-enter-breaks
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: Windows
 osVersion: "11"

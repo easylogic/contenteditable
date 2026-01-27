@@ -1,6 +1,6 @@
 ---
 id: ce-0182-chinese-ime-enter-breaks-safari
-scenarioId: scenario-ime-enter-breaks
+scenarioId: scenario-ime-interaction-patterns
 locale: en
 os: macOS
 osVersion: "14.0"

@@ -1,6 +1,6 @@
 ---
 id: ce-0181-japanese-ime-enter-breaks-chrome-ko
-scenarioId: scenario-ime-enter-breaks
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: Windows
 osVersion: "11"

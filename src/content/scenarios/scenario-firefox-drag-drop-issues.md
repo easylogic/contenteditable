@@ -1,119 +1,67 @@
 ---
 id: scenario-firefox-drag-drop-issues
-title: Firefox Drag and Drop Issues in contenteditable
-description: "Firefox has several issues with drag and drop functionality in contenteditable elements, including text not moving from textarea to contenteditable, nested span generation, and cursor positioning problems."
-tags:
-  - firefox
-  - drag-drop
-  - textarea
-  - nested-elements
-  - cursor-position
-  - selection
-category: drag-drop
-status: draft
-locale: en
+title: "Firefox Drag and Drop failures in contenteditable"
+description: "Analysis of Firefox's inconsistent handling of native Drag-and-Drop operations within editable containers."
+category: "drag-drop"
+tags: ["firefox", "drag-drop", "ux", "reliability"]
+status: "confirmed"
+locale: "en"
 ---
 
-## Overview
+## Problem Overview
+Drag-and-Drop (DnD) within `contenteditable` is a complex interaction involving the `DataTransfer` API and internal DOM mutations. While Chromium and WebKit have converged on a "move" behavior that dispatches specific `beforeinput` types (like `deleteByDrag`), Firefox often fails to execute the default action. This leaves the text at the source and provides no automated way to teleport it to the destination.
 
-Firefox has several issues with drag and drop functionality in `contenteditable` elements. These include problems with dragging text from `textarea` to `contenteditable`, generating nested spans when dragging within contenteditable spans, and cursor positioning issues when contenteditable is nested within draggable elements.
-
-## Impact
-
-- **Drag and Drop Failure**: Text cannot be moved from textarea to contenteditable in Firefox
-- **DOM Corruption**: Nested spans are generated unexpectedly during drag operations
-- **Cursor Positioning**: Cursor appears at wrong position after drag operations
-- **User Experience**: Drag and drop functionality is unreliable in Firefox
-
-## Technical Details
-
-### Issue 1: Textarea to contenteditable Drag Failure
-
-When dragging text from a `textarea` to a `contenteditable` div in Firefox, the text does not move as expected. This works correctly in Chrome and Internet Explorer.
-
-### Issue 2: Nested Span Generation
-
-When dragging and dropping text within a `<span contenteditable>` element in Firefox, a new nested `<span>` is generated around the dragged text, leading to unintended nesting.
-
-### Issue 3: Cursor Positioning in Draggable Elements
-
-When a `contenteditable` element is nested within a draggable element in Firefox, clicking on it may position the cursor at the start of the editable text, regardless of the click position.
-
-## Browser Comparison
-
-- **Firefox**: All these issues occur
-- **Chrome**: Not affected
-- **Safari**: Not affected
-- **Edge**: Not affected
-
-## Workarounds
-
-### Prevent Unwanted Drag and Drop
+## Observed Behavior
+### Scenario 1: Intra-Editor Move Failure
+In recent versions (v130+), selecting a text fragment and dragging it within the same editor results in a visual ghost but no actual DOM mutation upon drop.
 
 ```javascript
-const editor = document.querySelector('[contenteditable]');
-
-// Disable drag and drop entirely
-editor.addEventListener('dragstart', (e) => {
-  e.preventDefault();
+/* Observer Sequence */
+element.addEventListener('dragstart', (e) => {
+    console.log('1. Drag started'); // Fires
 });
-
-// Or handle drag and drop manually
-editor.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-});
-
-editor.addEventListener('drop', (e) => {
-  e.preventDefault();
-  const text = e.dataTransfer.getData('text/plain');
-  
-  // Insert text manually at cursor position
-  const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0);
-    range.deleteContents();
-    range.insertNode(document.createTextNode(text));
-    range.collapse(false);
-    selection.removeAllRanges();
-    selection.addRange(range);
-  }
+element.addEventListener('drop', (e) => {
+    console.log('2. Drop fired'); // Fires, but default action is skipped by Engine
 });
 ```
 
-### Normalize Nested Spans
+### Scenario 2: Nested Structure Corruption
+Dragging content into or out of nested `<span>` elements often causes Firefox to generate redundant wrapper nodes, breaking the logical tree of the editor.
+
+## Impact
+- **Broken User Intuition**: Modern web users expect editors to behave like native word processors (Word, Pages).
+- **History Divergence**: If a framework manually handles the drop but the browser (eventually) performs a partial move, the undo history becomes corrupted.
+
+## Browser Comparison
+- **Gecko (Firefox)**: Significant inconsistency. Requires manual implementation of the "move" logic via `DataTransfer`.
+- **Blink (Chrome/Edge)**: Highly reliable. Handles `beforeinput` (deleteByDrag/insertFromDrop) natively.
+- **WebKit (Safari)**: Reliable on Desktop; limited support for complex DnD on iOS.
+
+## Solutions
+### 1. The "Manual Teleport" Strategy
+Explicitly set and get the plain text/HTML in the data transfer object to ensure cross-platform compatibility.
 
 ```javascript
-function normalizeNestedSpans(element) {
-  const spans = element.querySelectorAll('span');
-  spans.forEach(span => {
-    // Check if span is nested unnecessarily
-    if (span.parentElement.tagName === 'SPAN' && 
-        span.parentElement.getAttribute('contenteditable') === 'true') {
-      // Unwrap the nested span
-      const parent = span.parentElement;
-      while (span.firstChild) {
-        parent.insertBefore(span.firstChild, span);
-      }
-      parent.removeChild(span);
-    }
-  });
-}
+element.addEventListener('dragstart', (e) => {
+    const range = window.getSelection().getRangeAt(0);
+    e.dataTransfer.setData('text/plain', range.toString());
+    e.dataTransfer.effectAllowed = 'move';
+});
 
-editor.addEventListener('drop', (e) => {
-  // ... handle drop ...
-  normalizeNestedSpans(editor);
+element.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const data = e.dataTransfer.getData('text/plain');
+    const targetRange = document.caretRangeFromPoint(e.clientX, e.clientY);
+    
+    // Explicitly delete source and insert at target
+    // Warning: Requires custom transaction handling in frameworks like Lexical
+    moveFragment(sourceRange, targetRange, data);
 });
 ```
 
 ## Related Cases
-
-- Case IDs will be added as cases are created for specific environment combinations
+- [ce-0569: Drag and drop of text fails to move content](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0569-firefox-drag-drop-text-failure.md)
 
 ## References
-
-- [Firefox Bug 1930277: Nested span creation on drag-and-drop](https://bugzilla.mozilla.org/show_bug.cgi?id=1930277) - Fixed in Firefox 134
-- [Firefox Bug 1860328: Missing caret indicator on Linux during drag](https://bugzilla.mozilla.org/show_bug.cgi?id=1860328) - Fixed
-- [Firefox Bug 1860324: Missing caret when dragging into iframe contenteditable](https://bugzilla.mozilla.org/show_bug.cgi?id=1860324) - Open
-- [Firefox Bug 454832: Drag-drop between two contentEditable areas](https://bugzilla.mozilla.org/show_bug.cgi?id=454832) - Fixed
-- [Stack Overflow: Drag and drop into contenteditable div in Firefox](https://stackoverflow.com/questions/9063111/drag-and-drop-into-contenteditable-div-in-firefox)
+- [Mozilla Bugzilla #1898711](https://bugzilla.mozilla.org/show_bug.cgi?id=1898711)
+- [Lexical Issue #8014](https://github.com/facebook/lexical/issues/8014)

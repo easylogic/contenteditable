@@ -1,6 +1,6 @@
 ---
 id: ce-0200-vietnamese-ime-backspace-granularity-edge-ko
-scenarioId: scenario-ime-backspace-granularity
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: Windows
 osVersion: "11"

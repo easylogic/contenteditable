@@ -1,6 +1,6 @@
 ---
 id: ce-0002-ime-enter-breaks-ko
-scenarioId: scenario-ime-enter-breaks
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: Windows
 osVersion: "11"

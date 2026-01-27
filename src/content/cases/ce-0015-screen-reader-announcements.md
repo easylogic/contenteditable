@@ -1,6 +1,6 @@
 ---
 id: ce-0015-screen-reader-announcements
-scenarioId: scenario-accessibility-announcements
+scenarioId: scenario-accessibility-foundations
 locale: en
 os: macOS
 osVersion: "Ubuntu 22.04"

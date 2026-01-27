@@ -1,6 +1,6 @@
 ---
 id: ce-0004-ime-backspace-removes-whole-syllable
-scenarioId: scenario-ime-backspace-granularity
+scenarioId: scenario-ime-interaction-patterns
 locale: en
 os: Windows
 osVersion: "11"

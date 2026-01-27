@@ -1,6 +1,6 @@
 ---
 id: ce-0022-ime-enter-breaks-firefox-ko
-scenarioId: scenario-ime-enter-breaks
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: Windows
 osVersion: "11"

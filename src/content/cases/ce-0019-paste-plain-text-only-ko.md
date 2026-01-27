@@ -1,6 +1,6 @@
 ---
 id: ce-0019-paste-plain-text-only-ko
-scenarioId: scenario-paste-plain-text
+scenarioId: scenario-content-normalization
 locale: ko
 os: macOS
 osVersion: "Ubuntu 22.04"

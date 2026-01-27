@@ -1,6 +1,6 @@
 ---
 id: ce-0195-thai-ime-enter-breaks-chrome
-scenarioId: scenario-ime-enter-breaks
+scenarioId: scenario-ime-interaction-patterns
 locale: en
 os: Windows
 osVersion: "11"

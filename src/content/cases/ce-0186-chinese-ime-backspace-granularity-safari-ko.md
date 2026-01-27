@@ -1,6 +1,6 @@
 ---
 id: ce-0186-chinese-ime-backspace-granularity-safari-ko
-scenarioId: scenario-ime-backspace-granularity
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: macOS
 osVersion: "14.0"

@@ -1,6 +1,6 @@
 ---
 id: ce-0054-contenteditable-with-aria
-scenarioId: scenario-accessibility-aria
+scenarioId: scenario-accessibility-foundations
 locale: en
 os: macOS
 osVersion: "Ubuntu 22.04"

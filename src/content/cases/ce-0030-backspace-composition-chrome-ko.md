@@ -1,6 +1,6 @@
 ---
 id: ce-0030-backspace-composition-chrome-ko
-scenarioId: scenario-ime-backspace-granularity
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: macOS
 osVersion: "Ubuntu 22.04"
