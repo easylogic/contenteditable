@@ -1,77 +1,81 @@
 ---
-id: ce-0569-firefox-drag-drop-text-failure
+id: ce-0569
 scenarioId: scenario-firefox-drag-drop-issues
 locale: en
 os: Linux
-osVersion: "Ubuntu 24.04 / Windows 11"
+osVersion: "Ubuntu 24.04"
 device: Desktop
 deviceVersion: Any
 browser: Firefox
-browserVersion: "135.0 (Latest)"
+browserVersion: "132.0"
 keyboard: US QWERTY
-caseTitle: "Consolidated Firefox Drag and Drop Failures"
-description: "A comprehensive index of Firefox's broken drag-drop behaviors, including text move failures, unwanted node duplication, and nested span corruption."
-tags: ["drag-drop", "firefox", "ux", "reliability", "dom-corruption"]
+caseTitle: "Drag and drop of text fails to move content"
+description: "In recent Firefox versions (2024/2025), selecting text and dragging it within a contenteditable area fails to perform the 'move' operation, unlike in Chromium-based browsers."
+tags: ["drag-drop", "firefox", "ux", "reliability"]
 status: confirmed
 domSteps:
-  - label: "Cluster A: Move Failure"
-    html: '<div contenteditable="true">[Text to move] ... destination</div>'
-    description: "Standard text selection fails to move when dropped; no events triggered."
-  - label: "Cluster B: Node Duplication"
-    html: '<div contenteditable="true"><span contenteditable="false">Widget</span></div>'
-    description: "Dragging a non-editable wrapper node results in a duplicate instead of a move."
-  - label: "Cluster C: Structural Corruption"
-    html: '<div contenteditable="true">Text <span>inside span</span></div>'
-    description: "Dragging text within a span causes Firefox to generate new, unnecessary nested span wrappers."
+  - label: "Step 1: Text Selection"
+    html: '<div contenteditable="true">[Selected Text] and other content.</div>'
+    description: "User selects a portion of text to move."
+  - label: "Step 2: Dragging"
+    html: '<div contenteditable="true">Selected Text and [Drop Target] other content.</div>'
+    description: "User drags the selection to a new position. Firefox shows the drag ghost but rarely triggers the internal move."
+  - label: "Step 3: Bug Result"
+    html: '<div contenteditable="true">Selected Text and [Drop Target] other content.</div>'
+    description: "Upon dropping, nothing happens. The DOM remains identical to the state before the drag began."
   - label: "✅ Expected"
-    html: "Clean move operation with source deletion and destination insertion, maintaining existing DOM hierarchy."
+    html: '<div contenteditable="true"> and [Selected Text] other content.</div>'
+    description: "Expected: The text is removed from the source and inserted at the destination."
 ---
 
 ## Phenomenon
-Firefox (as of early 2026) remains the most divergent engine regarding Drag and Drop within `contenteditable`. Three primary failure modes exist:
-1.  **Selection Stall**: Standard text selections often fail to move when dragged, leaving the original text intact and the destination empty.
-2.  **Ghost Duplication**: When dragging `contenteditable="false"` elements (common for Mentions or Media), Firefox often inserts a clone at the destination without removing the source.
-3.  **Encapsulation Leak**: Dragging text within a styled container like a `<span>` or `<code>` block triggers an internal "wrapper" logic that creates redundant nested elements (e.g., `<span><span>text</span></span>`).
+A regression or long-standing divergence in Firefox (reported active in Lexical Playground, Nov 2025) prevents the default "drag-to-move" behavior within `contenteditable`. While Chromium and WebKit allow users to reposition text blocks intuitively via drag-and-drop, Firefox often fails to dispatch the necessary `drop` events or internal DOM updates required to teleport the text.
 
-## Reproduction Steps (General)
-1. Open a `contenteditable` editor in Firefox.
-2. Attempt to move text from a `textarea` into the `div`.
-3. Attempt to move a `contenteditable="false"` widget.
-4. Observe the lack of `beforeinput` events for `deleteByDrag`.
+## Reproduction Steps
+1. Open a `contenteditable` editor in Firefox (v130+).
+2. Type two sentences.
+3. Select the first sentence with the mouse.
+4. Click and hold the selection, then drag it to the end of the second sentence.
+5. Release the mouse button.
 
 ## Observed Behavior
-- **`textarea` to `div`**: Complete failure; no text is transferred.
-- **Node persistence**: The "move" effect is treated as a "copy," corrupting internal editor models.
-- **Tag soup**: Unnecessary nesting accumulates, breaking CSS selectors and serialization.
+1. **`dragstart`**: Fires correctly.
+2. **Ghost Image**: Appears and follows the mouse.
+3. **`drop`**: Either does not fire at the target, or fires but the browser's default action (moving the text) is not executed.
+4. **Result**: The selection remains at the source, and nothing is moved. No `beforeinput` with `inputType: "deleteByDrag"` or `"insertFromDrop"` is triggered.
+
+## Expected Behavior
+The browser should automatically handle the deletion of the source fragment and the insertion at the destination, triggering `beforeinput` events for both operations.
 
 ## Impact
-- **Broken UX**: Mouse-heavy users perceive the editor as completely broken.
-- **Model De-sync**: Frameworks like Lexical or Slate cannot track these "ghost" mutations.
+- **Severed UX**: Users who rely on mouse-based editing (common in elderly users or specific workflows) find the editor "broken."
+- **Framework Incompatibility**: Modern frameworks (Lexical, Slate) expect the browser to manage the basic move operation or provide a valid `DataTransfer` object during the drop.
+
+## Browser Comparison
+- **Firefox 130-132**: Reported failure in move operations.
+- **Chrome / Edge**: Works natively and smoothly.
+- **Safari**: Works correctly on macOS.
 
 ## References & Solutions
-### Mitigation: High-Fidelity Drag Manager
-A robust solution requires intercepting both `dragstart` and `drop` to manually coordinate the move via the editor's transformation engine.
+### Mitigation: Manual Drag-Drop Handler
+If the browser fails to move the text, you must implement a complete drag-and-drop manager using the `DataTransfer` API.
 
 ```javascript
-/* Unified Handler (Mitigates Clusters A, B, and C) */
-element.addEventListener('drop', (e) => {
-    // 1. Block native glitchy behavior
-    e.preventDefault();
-    
-    // 2. Identify incoming data
-    const data = e.dataTransfer.getData('text/plain');
-    if (!data) return;
+element.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', window.getSelection().toString());
+    e.dataTransfer.effectAllowed = 'move';
+});
 
-    // 3. Resolve destination
+element.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const data = e.dataTransfer.getData('text/plain');
     const range = document.caretRangeFromPoint(e.clientX, e.clientY);
     
-    // 4. Force 'Move' logic
-    // Delete from source (using stored range from dragstart)
-    // Insert at destination range
-    editor.applyTransform('move', { text: data, at: range });
+    // Manually delete source and insert at range
+    // NOTE: This usually requires a complex transaction logic in frameworks
+    dispatchMoveTransaction(sourceRange, range, data);
 });
 ```
 
-- [Mozilla Bugzilla #1898711](https://bugzilla.mozilla.org/show_bug.cgi?id=1898711)
-- [Lexical Issue #8014](https://github.com/facebook/lexical/issues/8014)
-- [Formerly ce-0013, ce-0300, ce-0310, ce-0554]
+- [Lexical Issue #8014: Drag and drop of text is broken in Firefox](https://github.com/facebook/lexical/issues/8014)
+- [Mozilla Bugzilla #1898711 (Related)](https://bugzilla.mozilla.org/show_bug.cgi?id=1898711)

@@ -1,92 +1,40 @@
 ---
 id: scenario-accessibility-foundations
-title: "Accessibility Foundations: Roles, ARIA, and AT Interop"
-description: "Core principles for building screen-reader friendly editors, focusing on role mapping and state synchronization."
+title: "Accessibility Foundations: Screen Readers, ARIA, and the AX-Tree"
+description: "Ensuring contenteditable editors are navigable for assistive technology users through proper ARIA mapping and engine synchronization."
 category: "accessibility"
-tags: ["accessibility", "aria", "role", "screen-reader", "state-sync"]
+tags: ["accessibility", "aria", "screen-reader", "voiceover", "nvda", "spellcheck"]
 status: "confirmed"
 locale: "en"
 ---
 
 ## Overview
-Contenteditable regions are often "islands" of custom interaction. Assitive Technology (AT) relies on the browser's Accessibility Tree (AX Tree) to understand that a `div` is actually a text input.
+Contenteditable regions often present "Accessibility Walls." While basic typing works, complex features like placeholders, nested blocks, and mention widgets are frequently opaque to screen readers if not paired with a strict ARIA-aware architecture.
 
-## Key Integration Challenges
+## Core Accessibility Challenges
 
-### 1. Platform Role Mapping
-Browsers must map the `contenteditable` property to an OS-level role (e.g., `AXTextArea`).
-- **Regression Note**: macOS Sequoia (Chrome 129) had a major regression where editors were reported as `AXGroup`, breaking word-by-word navigation in VoiceOver.
+### 1. The Placeholder Paradox
+Native contenteditable provides no placeholder attribute. Faking it with CSS or empty `::before` elements often hides the editor's existence from screen readers, or announces the placeholder text even after the user starts typing.
 
-### 2. State & Property Conflicts
-Explicit ARIA attributes can sometimes "clobber" native states.
-- **Pattern**: Applying `aria-readonly="false"` to a `contenteditable="true"` element in Chromium can ironically trigger a read-only signal to the AT.
-- **Guideline**: Let native attributes handle the state unless you are implementing a complex composite widget (like a Grid or Tree).
+### 2. AX-Tree Synchronization & Mutation Thrashing
+Modern browsers build an internal "Accessibility Tree" from the DOM. Rapid mutations (like syntax highlighting or spellcheck decorations) can cause the AX-Tree to refresh too frequently, leading to repetitive or stuttering feedback in tools like NVDA or VoiceOver.
 
-### 3. Relation API (Controls/Owns)
-Linking an editor to a floating menu (e.g., Slash Command menu) requires `aria-controls` or `aria-owns`. 
-- **Bug**: WebKit often fails to forward focus intent to these related elements during an active composition.
+### 3. Role/State Conflicts (2025 Bug)
+Setting `aria-readonly="false"` on a `role="textbox"` element can sometimes override the browser's native editable detection in Chromium, causing screen readers to incorrectly announce the field as read-only.
 
-## Best Practice Template
+### 4. Spellcheck UI Interference
+When `spellcheck="true"` is enabled, Safari's localized suggestion menu can block text selection. Furthermore, red "error squiggles" can persist even after `contenteditable` is set to false, confusing assistive tools about the document's interactive state.
 
-```html
-<!-- The 'Accessible Editor' Pattern -->
-<div 
-  contenteditable="true" 
-  role="textbox" 
-  aria-multiline="true"
-  aria-label="Editor content"
-  aria-autocomplete="list"
->
-  <!-- Content here -->
-</div>
-```
+## Optimization Blueprint
+
+### Explicit Role Mapping
+Always use `role="textbox"` and `aria-multiline="true"` on non-`div` editors to ensure the correct OS-level handles are created.
+
+### Handling Spellcheck Decorations
+Use the `::spelling-error` pseudo-element to style errors without polluting the DOM with additional markup. This prevents AX-Tree thrashing from redundant spans.
 
 ## Related Cases
-- [ce-0573: macOS Sequoia AXGroup bug](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0573-macos-sequoia-chrome-ax-group-bug.md)
-- [ce-0574: aria-readonly attribute conflict](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0574-aria-readonly-conflict-bug.md)
----
-id: scenario-accessibility-foundations
-title: "Accessibility Foundations: Roles, ARIA, and AT Interop"
-description: "Core principles for building screen-reader friendly editors, focusing on role mapping and state synchronization."
-category: "accessibility"
-tags: ["accessibility", "aria", "role", "screen-reader", "state-sync"]
-status: "confirmed"
-locale: "en"
----
-
-## Overview
-Contenteditable regions are often "islands" of custom interaction. Assitive Technology (AT) relies on the browser's Accessibility Tree (AX Tree) to understand that a `div` is actually a text input.
-
-## Key Integration Challenges
-
-### 1. Platform Role Mapping
-Browsers must map the `contenteditable` property to an OS-level role (e.g., `AXTextArea`).
-- **Regression Note**: macOS Sequoia (Chrome 129) had a major regression where editors were reported as `AXGroup`, breaking word-by-word navigation in VoiceOver.
-
-### 2. State & Property Conflicts
-Explicit ARIA attributes can sometimes "clobber" native states.
-- **Pattern**: Applying `aria-readonly="false"` to a `contenteditable="true"` element in Chromium can ironically trigger a read-only signal to the AT.
-- **Guideline**: Let native attributes handle the state unless you are implementing a complex composite widget (like a Grid or Tree).
-
-### 3. Relation API (Controls/Owns)
-Linking an editor to a floating menu (e.g., Slash Command menu) requires `aria-controls` or `aria-owns`. 
-- **Bug**: WebKit often fails to forward focus intent to these related elements during an active composition.
-
-## Best Practice Template
-
-```html
-<!-- The 'Accessible Editor' Pattern -->
-<div 
-  contenteditable="true" 
-  role="textbox" 
-  aria-multiline="true"
-  aria-label="Editor content"
-  aria-autocomplete="list"
->
-  <!-- Content here -->
-</div>
-```
-
-## Related Cases
-- [ce-0573: macOS Sequoia AXGroup bug](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0573-macos-sequoia-chrome-ax-group-bug.md)
-- [ce-0574: aria-readonly attribute conflict](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0574-aria-readonly-conflict-bug.md)
+- [ce-0573: macOS AXGroup bug](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0573-macos-sequoia-chrome-ax-group-bug.md)
+- [ce-0574: aria-readonly conflict](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0574-aria-readonly-conflict-bug.md)
+- [ce-0041: spellcheck interferes](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0041-spellcheck-interferes.md)
+- [ce-0324: Chrome v96 performance regression spellcheck](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0324-chrome-v96-performance-regression-spellcheck.md)

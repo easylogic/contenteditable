@@ -1,86 +1,42 @@
 ---
 id: scenario-ime-ui-experience
-title: "IME UI & Layout: UX Synchronization and Viewport Logic"
-description: "Analysis of the visual layer of IME input, including candidate windows, caret positioning, and mobile viewport shifts."
-category: "ux"
-tags: ["ime", "ux", "scrolling", "viewport", "candidate-window"]
+title: "IME UI & Experience: Viewports, Candidates, and Layout"
+description: "Managing browser UI collisions, virtual keyboard resizing, and IME candidate window positioning."
+category: "ui"
+tags: ["viewport", "keyboard", "candidates", "scroll", "anchoring"]
 status: "confirmed"
 locale: "en"
 ---
 
-## Problem Overview
-IME input is not just data; it is a UI interaction. The browser must coordinate the system's "Candidate Window" (fixed UI) with the web's "Caret Position" (fluid DOM). Misalignment results in "Floating UI" or covered text.
+## Overview
+The "IME experience" is not just about data—it's about the physical stability of the editor. Mobile browsers and floating candidate windows frequently collide with application UI.
 
-## Observed Behavior
+## Key Experience Barriers
 
-### 1. The 'Ghost' Candidate Window
-On macOS, if a `contenteditable` container is positioned using `transform: translate`, the IME candidate window may appear at the wrong coordinates (often at the top-left of the screen), because the browser's coordinate mapping fails to account for the CSS transform.
+### 1. The 'Viewport Jump' (Scroll Anchoring)
+When an IME is activated, the browser's "Visual Viewport" changes. 
+- **Regression (iOS 18)**: Focusing a long document frequently fails to anchor the caret, causing the viewport to jump to the top of the container.
+- **Android**: Chrome often resizes the entire content area, which can cause 'jumpy' layout if elements aren't sized with `dv` units.
 
-### 2. Viewport Obstruction (Mobile)
-When the mobile keyboard opens, the viewport shrinks or scrolls. 
-- **The Android 'Auto-Scroll' Bug**: Chrome for Android sometimes scrolls the *entire page* to keep the caret visible, even if the editor is inside a fixed-height modal, breaking the layout.
+### 2. Candidate Window Positioning
+Floating windows (e.g., Japanese Kanji selection) are rendered by the OS but positioned by the browser.
+- **Bug**: In `Fixed` or `Absolute` containers, WebKit often places the window at the absolute 0,0 screen coordinate instead of anchoring it to the caret.
 
-### 3. Pinyin Visibility (Safari 18)
-In recent Safari versions, the "Pinyin" (phonetic) buffer is often rendered directly into the DOM as part of the text node during composition. If the editor re-renders the DOM, this phonetic text may be accidentally "baked" into the document model.
+### 3. Interactive Widget Behavior
+Modern viewports define `interactive-widget=resizes-content`. Choosing between `resizes-content` and `resizes-visual` determines whether the editor's height shrinks or simply gets covered by the keyboard.
 
-## Solutions
-
-### 1. Coordinate Proxying
-For complex layouts, use a hidden "Caret Proxy" (a standard textarea) that mirrors the editor's focus but remains in the document flow to help the OS find the correct candidate window position.
-
-### 2. Viewport Stabilization
-Use the **Visual Viewport API** to detect when the keyboard shifts the layout and manually adjust padding or transiton logic.
+## Optimization Strategy: Viewport Sync
 
 ```javascript
+/* Use the Visual Viewport API for stabilization */
 window.visualViewport.addEventListener('resize', () => {
-    const offset = window.innerHeight - window.visualViewport.height;
-    document.body.style.paddingBottom = `${offset}px`;
+  if (isFocused && isIMEActive) {
+      // Manually force caret into view to prevent snap-jump
+      ensureCaretInCenter();
+  }
 });
 ```
 
 ## Related Cases
-- [ce-0568: Chrome Android Placeholder/Caret sync](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0568-chrome-android-placeholder-korean-ime.md)
-- [ce-0194: Japanese IME scroll cancels in iOS Safari](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0194-japanese-ime-scroll-cancels-ios-safari.md)
----
-id: scenario-ime-ui-experience
-title: "IME UI & Layout: UX Synchronization and Viewport Logic"
-description: "Analysis of the visual layer of IME input, including candidate windows, caret positioning, and mobile viewport shifts."
-category: "ux"
-tags: ["ime", "ux", "scrolling", "viewport", "candidate-window"]
-status: "confirmed"
-locale: "en"
----
-
-## Problem Overview
-IME input is not just data; it is a UI interaction. The browser must coordinate the system's "Candidate Window" (fixed UI) with the web's "Caret Position" (fluid DOM). Misalignment results in "Floating UI" or covered text.
-
-## Observed Behavior
-
-### 1. The 'Ghost' Candidate Window
-On macOS, if a `contenteditable` container is positioned using `transform: translate`, the IME candidate window may appear at the wrong coordinates (often at the top-left of the screen), because the browser's coordinate mapping fails to account for the CSS transform.
-
-### 2. Viewport Obstruction (Mobile)
-When the mobile keyboard opens, the viewport shrinks or scrolls. 
-- **The Android 'Auto-Scroll' Bug**: Chrome for Android sometimes scrolls the *entire page* to keep the caret visible, even if the editor is inside a fixed-height modal, breaking the layout.
-
-### 3. Pinyin Visibility (Safari 18)
-In recent Safari versions, the "Pinyin" (phonetic) buffer is often rendered directly into the DOM as part of the text node during composition. If the editor re-renders the DOM, this phonetic text may be accidentally "baked" into the document model.
-
-## Solutions
-
-### 1. Coordinate Proxying
-For complex layouts, use a hidden "Caret Proxy" (a standard textarea) that mirrors the editor's focus but remains in the document flow to help the OS find the correct candidate window position.
-
-### 2. Viewport Stabilization
-Use the **Visual Viewport API** to detect when the keyboard shifts the layout and manually adjust padding or transiton logic.
-
-```javascript
-window.visualViewport.addEventListener('resize', () => {
-    const offset = window.innerHeight - window.visualViewport.height;
-    document.body.style.paddingBottom = `${offset}px`;
-});
-```
-
-## Related Cases
-- [ce-0568: Chrome Android Placeholder/Caret sync](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0568-chrome-android-placeholder-korean-ime.md)
-- [ce-0194: Japanese IME scroll cancels in iOS Safari](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0194-japanese-ime-scroll-cancels-ios-safari.md)
+- [ce-0580: iOS scroll anchoring jump](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0580-ios-scroll-anchoring-jump.md)
+- [ce-0049: Japanese IME candidate window position](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0049-ime-candidate-window-position.md)

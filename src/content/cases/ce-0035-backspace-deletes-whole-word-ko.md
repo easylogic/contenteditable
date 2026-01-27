@@ -1,6 +1,6 @@
 ---
 id: ce-0035-backspace-deletes-whole-word-ko
-scenarioId: scenario-backspace-granularity
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: macOS
 osVersion: "Ubuntu 22.04"

@@ -1,6 +1,6 @@
 ---
 id: ce-0102-consecutive-spaces-collapsed
-scenarioId: scenario-consecutive-spaces
+scenarioId: scenario-content-normalization
 locale: en
 os: Windows
 osVersion: "11"

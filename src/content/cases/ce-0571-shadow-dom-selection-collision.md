@@ -1,5 +1,5 @@
 ---
-id: ce-0571-shadow-dom-selection-collision
+id: ce-0571
 scenarioId: scenario-contenteditable-shadow-dom
 locale: en
 os: macOS
@@ -31,8 +31,6 @@ domSteps:
 ## Phenomenon
 The Web Selection API was designed for a single-selection-per-document model. When `contenteditable` is placed inside a Shadow Root, this model breaks. In many browsers (discussed heavily in 2024), the global `window.getSelection()` fails to deep-dive into the shadow tree, returning either the shadow host itself or a null range. Conversely, `shadowRoot.getSelection()` (where available) may report a range that the global document remains unaware of, leading to "Double Selection" UI or command execution failures.
 
-Historically, this has also rendered `document.execCommand` ineffective, as it targets the Light DOM selection which may be stuck at the shadow host boundary.
-
 ## Reproduction Steps
 1. Create a Custom Element with a Shadow Root.
 2. Inside the Shadow Root, append a `div` with `contenteditable="true"`.
@@ -40,7 +38,6 @@ Historically, this has also rendered `document.execCommand` ineffective, as it t
 4. Select the external text.
 5. Click inside the shadow-based editor and start typing.
 6. Check `window.getSelection()` vs `this.shadowRoot.getSelection()`.
-7. Attempt to run `document.execCommand('bold')`.
 
 ## Observed Behavior
 1. **Selection Collision**: The blue highlight from the external text may persist even though the caret is active inside the shadow root.
@@ -67,23 +64,14 @@ The Selection API should provide a consistent path to the deepest active range, 
 Capture selection changes inside the shadow root and manually sync them or use a proxy object for your editor.
 
 ```javascript
-/* Re-routing Selection Logic */
 this.shadowRoot.addEventListener('selectionchange', () => {
     const internalSel = this.shadowRoot.getSelection();
+    // Manual sync logic for your framework
     if (internalSel.rangeCount > 0) {
-        // Manual sync logic for your framework
         editor.updateSelection(internalSel.getRangeAt(0));
     }
 });
-
-/* Proxying execCommand */
-function runCommand(cmd, value) {
-   // Instead of document.execCommand, target the shadow root node
-   document.execCommand(cmd, false, value); // Often fails
-   // Preferred: use manual DOM transformation via the model
-}
 ```
 
 - [W3C Issue: Selection API and Shadow DOM](https://github.com/w3c/selection-api/issues/173)
 - [Stack Overflow: Get selection in Shadow DOM](https://stackoverflow.com/questions/43171542/get-selection-inside-of-a-shadow-dom)
-- [Formerly ce-0051 and ce-0308]

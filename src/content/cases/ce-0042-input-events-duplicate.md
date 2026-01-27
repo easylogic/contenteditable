@@ -1,6 +1,6 @@
 ---
 id: ce-0042-input-events-duplicate
-scenarioId: scenario-input-event-duplication
+scenarioId: scenario-ime-interaction-patterns
 locale: en
 os: Windows
 osVersion: "11"

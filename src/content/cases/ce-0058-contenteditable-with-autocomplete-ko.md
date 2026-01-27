@@ -1,6 +1,6 @@
 ---
 id: ce-0058-contenteditable-with-autocomplete-ko
-scenarioId: scenario-autocomplete-behavior
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: macOS
 osVersion: "Ubuntu 22.04"

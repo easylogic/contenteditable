@@ -1,6 +1,6 @@
 ---
 id: ce-0153-nbsp-line-break-prevention-ko
-scenarioId: scenario-non-breaking-space
+scenarioId: scenario-content-normalization
 locale: ko
 os: Windows
 osVersion: "11"

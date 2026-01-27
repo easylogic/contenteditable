@@ -1,6 +1,6 @@
 ---
 id: ce-0083-contenteditable-with-drag-drop-api-ko
-scenarioId: scenario-firefox-drag-drop-issues
+scenarioId: scenario-drag-drop-api
 locale: ko
 os: macOS
 osVersion: "14.0"

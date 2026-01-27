@@ -1,6 +1,6 @@
 ---
 id: ce-0565-chrome-121-oninput-offset-0
-scenarioId: scenario-input-event-missing
+scenarioId: scenario-ime-interaction-patterns
 locale: en
 os: Windows
 osVersion: "11"

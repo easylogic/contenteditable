@@ -1,6 +1,6 @@
 ---
 id: ce-0041-spellcheck-interferes-ko
-scenarioId: scenario-spellcheck-behavior
+scenarioId: scenario-accessibility-foundations
 locale: ko
 os: macOS
 osVersion: "Ubuntu 22.04"

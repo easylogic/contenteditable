@@ -1,6 +1,6 @@
 ---
-id: ce-0572-plaintext-only-nbsp-layout-broken-ko
-scenarioId: scenario-content-normalization
+id: ce-0572
+scenarioId: scenario-paste-plain-text
 locale: ko
 os: Linux
 osVersion: "Ubuntu 22.04"

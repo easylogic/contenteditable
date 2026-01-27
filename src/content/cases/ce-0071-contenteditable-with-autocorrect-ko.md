@@ -1,6 +1,6 @@
 ---
 id: ce-0071-contenteditable-with-autocorrect-ko
-scenarioId: scenario-autocorrect-behavior
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: iOS
 osVersion: "17.0"

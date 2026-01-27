@@ -1,6 +1,6 @@
 ---
 id: ce-0117-nbsp-converted-to-space-ko
-scenarioId: scenario-non-breaking-space
+scenarioId: scenario-content-normalization
 locale: ko
 os: Windows
 osVersion: "11"

@@ -1,5 +1,5 @@
 ---
-id: ce-0571-shadow-dom-selection-collision-ko
+id: ce-0571
 scenarioId: scenario-contenteditable-shadow-dom
 locale: ko
 os: macOS
@@ -31,8 +31,6 @@ domSteps:
 ## 현상
 웹의 Selection API는 기본적으로 '문서당 하나의 선택 영역' 모델을 기반으로 설계되었습니다. `contenteditable`이 Shadow Root 내부에 배치되면 이 모델이 깨집니다. 2024년에 집중적으로 논의된 바에 따르면, 많은 브라우저에서 전역 `window.getSelection()`이 Shadow 트리 내부까지 탐색하지 못하고 Shadow Host 자체를 반환하거나 null 범위를 반환하는 문제가 발생합니다. 반대로 `shadowRoot.getSelection()`(지원되는 경우)은 전역 문서가 인지하지 못하는 범위를 보고할 수 있어, 시각적으로 두 개의 선택 영역이 나타나거나 명령어 실행이 실패하는 등의 혼란을 야기합니다.
 
-역사적으로 이는 `document.execCommand`가 무력화되는 원인이 되기도 했습니다. 명령어의 대상이 Shadow Host 경계에 멈춰있는 Light DOM 선택 영역을 향하기 때문입니다.
-
 ## 재현 단계
 1. Shadow Root를 가진 커스텀 엘리먼트를 생성합니다.
 2. Shadow Root 내부에 `contenteditable="true"`가 설정된 `div`를 추가합니다.
@@ -40,7 +38,6 @@ domSteps:
 4. 외부 텍스트를 드래그하여 선택합니다.
 5. Shadow 기반 에디터 내부를 클릭하고 타이핑을 시작합니다.
 6. `window.getSelection()`과 `this.shadowRoot.getSelection()`의 값을 비교합니다.
-7. `document.execCommand('bold')` 실행을 시도합니다.
 
 ## 관찰된 동작
 1. **선택 영역 충돌**: 캐럿이 Shadow Root 내부에서 활성화되어 있음에도 불구하고 외부 텍스트의 파란색 하이라이트가 유지될 수 있습니다.
@@ -67,23 +64,14 @@ Selection API는 가장 깊은 곳의 활성 범위까지 일관된 경로를 �
 Shadow Root 내부의 선택 변화를 감지하여 수동으로 동기화하거나 에디터용 프록시 객체를 사용합니다.
 
 ```javascript
-/* 선택 영역 리라우팅 로직 */
 this.shadowRoot.addEventListener('selectionchange', () => {
     const internalSel = this.shadowRoot.getSelection();
+    // 프레임워크에 맞는 수동 동기화 로직
     if (internalSel.rangeCount > 0) {
-        // 프레임워크에 맞는 수동 동기화 로직
         editor.updateSelection(internalSel.getRangeAt(0));
     }
 });
-
-/* execCommand 프록싱 */
-function runCommand(cmd, value) {
-   // document.execCommand 대신 Shadow Root 노드를 타겟팅해야 합니다.
-   document.execCommand(cmd, false, value); // 여전히 실패하는 경우가 많음
-   // 권장: 모델을 통한 수동 DOM 변환 사용
-}
 ```
 
 - [W3C 이슈: Selection API와 Shadow DOM](https://github.com/w3c/selection-api/issues/173)
 - [Stack Overflow: Shadow DOM 내부에서 선택 영역 가져오기](https://stackoverflow.com/questions/43171542/get-selection-inside-of-a-shadow-dom)
-- [이전 ce-0051 및 ce-0308 통합본]

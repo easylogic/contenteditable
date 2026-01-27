@@ -1,6 +1,6 @@
 ---
 id: ce-0217-keyboard-handlers-iscomposing-false-ios-safari-korean-ko
-scenarioId: scenario-keyboard-handlers-during-composition
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: iOS
 osVersion: "17.0+"

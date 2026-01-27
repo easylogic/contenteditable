@@ -1,104 +1,67 @@
 ---
 id: scenario-ime-interaction-patterns-ko
-title: "IME 상호작용 패턴: 키 핸들링, 이벤트 및 예외 케이스"
-description: "IME 조합 세션 중 엔터, 백스페이스, 이스케이프 및 프로그래밍 방식의 동작이 어떻게 처리되는지에 대한 기술적 분석입니다."
+title: "IME 상호작용 패턴: 키, 이벤트 및 예외 사례"
+description: "활성 조합(Composition) 중인 상태에서 Enter, Backspace, Escape 및 프로그래밍 방식의 동작을 처리하기 위한 기술 가이드입니다."
 category: "interaction"
-tags: ["ime", "composition", "keys", "events", "behavior"]
+tags: ["ime", "composition", "keys", "events", "behavior", "autocorrect", "autocapitalize", "input-events"]
 status: "confirmed"
 locale: "ko"
 ---
 
 ## 개요
-표준 키보드 입력과 달리, IME(입력기) 세션은 모든 키 입력을 가로채고 버퍼링합니다. 이 문서는 조합(composition)이 활성화된 상태에서 기능 키와 프로그래밍 방식의 동작을 처리하는 패턴을 설명합니다.
+표준 키보드 입력과 달리, IME(입력기) 세션은 키 입력을 가로채고 버퍼링합니다. 이 문서는 조합이 활성화된 상태에서 기능 키, 입력 이벤트, OS 레벨의 자동 수정 속성 및 프로그래밍 방식의 동작을 처리하는 패턴을 설명합니다.
 
-## 키 핸들링 패턴
+## 키 처리 패턴
 
-### 1. '엔터(Enter)' 딜레마
-- **Blink/WebKit**: 엔터 키 입력 시 보통 조합을 확정(commit)함과 동시에 `inputType: "insertParagraph"`인 `beforeinput` 이벤트를 발생시킵니다. 이를 올바르게 처리하지 않으면 "이중 줄바꿈" 현상이 발생할 수 있습니다.
-- **Gecko**: 엔터 키가 조합만 확정하고, 한 번 더 눌러야 줄바꿈이 삽입되는 경우가 많습니다.
+### 1. 'Enter'의 딜레마
+- **Blink/WebKit**: 'Enter'는 대개 조합을 확정(commit)함과 동시에 `insertParagraph` 타입의 `beforeinput` 이벤트를 발생시킵니다. 이를 적절히 처리하지 않으면 불필요한 줄바꿈이 두 번 발생하는 "Double Break" 현상이 나타납니다.
+- **Gecko**: 'Enter'가 조합을 확정하기만 하고, 줄바꿈을 삽입하려면 한 번 더 눌러야 하는 경우가 많습니다.
 
-### 2. 백스페이스 및 자음/모음 단위 삭제
-한국어(한글)와 같은 언어에서는 백스페이스 한 번으로 글자 전체가 아닌 초성/중성/종성 단위로 삭제(조합 해제)될 수 있습니다.
-- **버그**: 일부 브라우저는 자음/모음 단위 삭제 시 `beforeinput`을 발생시키지 않아 프레임워크가 글자 단위 변화를 추적하는 데 어려움을 겪습니다.
+### 2. 백스페이스 및 음절 단위(Granularity) 처리
+한국어(한글)와 같은 언어에서는 백스페이스 한 번으로 글자 전체가 아닌 초/중/종성(자모) 단위로 지워질 수 있습니다.
+- **버그**: 일부 브라우저에서는 이 자모 단위 삭제 중에 `beforeinput` 신호를 보내지 않아, 프레임워크가 글자 수 변화를 추적하지 못하는 경우가 있습니다.
 
-### 3. KeyCode 229 ('조합 중' 신호)
-조합 세션 중에는 거의 모든 물리적 키가 `keyCode: 229`를 보고합니다.
-- **패턴**: 조합 중에는 로직 구현을 위해 `keydown`에 의존해서는 안 됩니다. 대신 `beforeinput`이나 `compositionupdate`를 사용해야 합니다.
+### 3. iOS/macOS 자동 입력 동작
+`autocorrect`, `autocapitalize`, `autocomplete` 속성들은 IME 버퍼와 예기치 않은 방식으로 상호작용합니다.
+- **자동 수정(Autocorrect) 충돌**: iOS에서 예측 바가 조합 중인 단어를 갑자기 교체하면서, 마지막 `compositionupdate` 값과 다른 값으로 `compositionend`가 발생하는 경우가 있습니다. [WebKit Bug 265856](https://lists.webkit.org/pipermail/webkit-unassigned/2023-December/1136334.html)
+- **자동 대문자화(Autocapitalize)**: `contenteditable`에서 지원이 일관되지 않습니다. 문장 시작 시 예기치 않은 `textInput` 이벤트를 발생시켜 CJK 버퍼를 조기에 플러시할 수 있습니다. [WebKit Bug 148503](https://bugs.webkit.org/show_bug.cgi?id=148503)
 
-## 프로그래밍 방식의 동작 처리
+## 입력 이벤트 이상 현상 (Input Event Anomalies)
 
-### 조합 중 실행 취소(Undo/Redo)
-`isComposing`이 true인 상태에서 `document.execCommand('undo')`를 실행하면 Safari에서 **즉각적인 버퍼 오염**이 발생합니다. 브라우저가 그림자 텍스트(shadow-text)를 놓치고 DOM에 "유령" 글자를 남길 수 있습니다.
+### 'input' 이벤트 누락 (Chrome 121 회귀 버그)
+텍스트 노드나 블록의 `offset 0` 지점에서 타이핑할 때, Chrome 121 버전은 `beforeinput`을 정상적으로 처리함에도 불구하고 DOM 수정 후 최종적인 `input` 이벤트를 디스패치하지 않는 오류가 있습니다.
+- **완화 방법**: `beforeinput` 발생 후 짧은 타이머를 사용하여 `input` 이벤트가 발생했는지 확인하거나, `MutationObserver`를 예비 수단으로 활용하십시오.
 
-### 포커스 및 블러(Blur) 전환
-- **'포커스 소실' 트랩**: 조합 중 엘리먼트의 포커스를 해제하면 보통 강제로 "확정(Commit)"이 일어납니다. 하지만 일부 안드로이드 IME는 세션을 아예 취소해 버려 사용자의 입력 내용을 소실시키기도 합니다.
+### 'input' 이벤트 중복 (Edge)
+일부 Windows 환경의 구형 Edge에서는 하나의 키 입력에 대해 `input` 이벤트가 두 번 트리거되어, 의도치 않은 UI 업데이트나 성능 저하를 유발하는 경우가 보고되었습니다.
 
-## 해결책: 상호작용 가디언(Guardians)
-상태가 잠긴(state-locked) 이벤트 인터셉터를 구현하십시오.
+## 프로그래밍 방식 동작 처리
+
+### 조합 중 실행 취소/다시 실행 (Undo/Redo)
+`isComposing`이 true인 상태에서 `document.execCommand('undo')`를 트리거하면 Safari에서 **즉각적인 버퍼 오염**이 발생합니다.
+
+### 이모지 삽입 vs 조합 (2026 업데이트)
+안드로이드용 Chrome 131+ 버전에서는 조합 중에 이모지 키보드로 전환하여 아이콘을 삽입하면, 버퍼링된 글자를 확정하지 않고 세션을 취소하여 **데이터 유실**이 발생할 수 있습니다. [Chromium 이슈 #381254331](https://issues.chromium.org/issues/381254331)
+
+## 해결책: 상호작용 가디언 (Interaction Guardians)
+상태 잠금 또는 안전 타이머 방식의 이벤트 가로채기를 구현하십시오.
 
 ```javascript
-/* 상호작용 보호 로직 */
-element.addEventListener('keydown', (e) => {
-  if (e.target.isComposing) {
-    if (e.key === 'Enter' || e.key === 'Backspace') {
-       // 중복 처리를 방지하기 위한 로직
-    }
-  }
+/* 입력 이벤트 누락 대응을 위한 안전 타이머 */
+let inputTimer = null;
+element.addEventListener('beforeinput', (e) => {
+  if (inputTimer) clearTimeout(inputTimer);
+  inputTimer = setTimeout(() => {
+    // input 이벤트가 발생하지 않은 경우 모델 수동 동기화
+  }, 50);
+});
+element.addEventListener('input', () => {
+  clearTimeout(inputTimer);
 });
 ```
 
 ## 관련 사례
-- [ce-0577: 안드로이드 첫 단어 중복 현상](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0577-android-first-word-duplication.md)
-- [ce-0181: 크롬 일본어 IME 엔터 버그](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0181-japanese-ime-enter-breaks-chrome.md)
----
-id: scenario-ime-interaction-patterns-ko
-title: "IME 상호작용 패턴: 키 핸들링, 이벤트 및 예외 케이스"
-description: "IME 조합 세션 중 엔터, 백스페이스, 이스케이프 및 프로그래밍 방식의 동작이 어떻게 처리되는지에 대한 기술적 분석입니다."
-category: "interaction"
-tags: ["ime", "composition", "keys", "events", "behavior"]
-status: "confirmed"
-locale: "ko"
----
-
-## 개요
-표준 키보드 입력과 달리, IME(입력기) 세션은 모든 키 입력을 가로채고 버퍼링합니다. 이 문서는 조합(composition)이 활성화된 상태에서 기능 키와 프로그래밍 방식의 동작을 처리하는 패턴을 설명합니다.
-
-## 키 핸들링 패턴
-
-### 1. '엔터(Enter)' 딜레마
-- **Blink/WebKit**: 엔터 키 입력 시 보통 조합을 확정(commit)함과 동시에 `inputType: "insertParagraph"`인 `beforeinput` 이벤트를 발생시킵니다. 이를 올바르게 처리하지 않으면 "이중 줄바꿈" 현상이 발생할 수 있습니다.
-- **Gecko**: 엔터 키가 조합만 확정하고, 한 번 더 눌러야 줄바꿈이 삽입되는 경우가 많습니다.
-
-### 2. 백스페이스 및 자음/모음 단위 삭제
-한국어(한글)와 같은 언어에서는 백스페이스 한 번으로 글자 전체가 아닌 초성/중성/종성 단위로 삭제(조합 해제)될 수 있습니다.
-- **버그**: 일부 브라우저는 자음/모음 단위 삭제 시 `beforeinput`을 발생시키지 않아 프레임워크가 글자 단위 변화를 추적하는 데 어려움을 겪습니다.
-
-### 3. KeyCode 229 ('조합 중' 신호)
-조합 세션 중에는 거의 모든 물리적 키가 `keyCode: 229`를 보고합니다.
-- **패턴**: 조합 중에는 로직 구현을 위해 `keydown`에 의존해서는 안 됩니다. 대신 `beforeinput`이나 `compositionupdate`를 사용해야 합니다.
-
-## 프로그래밍 방식의 동작 처리
-
-### 조합 중 실행 취소(Undo/Redo)
-`isComposing`이 true인 상태에서 `document.execCommand('undo')`를 실행하면 Safari에서 **즉각적인 버퍼 오염**이 발생합니다. 브라우저가 그림자 텍스트(shadow-text)를 놓치고 DOM에 "유령" 글자를 남길 수 있습니다.
-
-### 포커스 및 블러(Blur) 전환
-- **'포커스 소실' 트랩**: 조합 중 엘리먼트의 포커스를 해제하면 보통 강제로 "확정(Commit)"이 일어납니다. 하지만 일부 안드로이드 IME는 세션을 아예 취소해 버려 사용자의 입력 내용을 소실시키기도 합니다.
-
-## 해결책: 상호작용 가디언(Guardians)
-상태가 잠긴(state-locked) 이벤트 인터셉터를 구현하십시오.
-
-```javascript
-/* 상호작용 보호 로직 */
-element.addEventListener('keydown', (e) => {
-  if (e.target.isComposing) {
-    if (e.key === 'Enter' || e.key === 'Backspace') {
-       // 중복 처리를 방지하기 위한 로직
-    }
-  }
-});
-```
-
-## 관련 사례
-- [ce-0577: 안드로이드 첫 단어 중복 현상](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0577-android-first-word-duplication.md)
-- [ce-0181: 크롬 일본어 IME 엔터 버그](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0181-japanese-ime-enter-breaks-chrome.md)
+- [ce-0565: Chrome 121 offset 0 지점에서 onInput 누락](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0565-chrome-121-oninput-offset-0-ko.md)
+- [ce-0581: 안드로이드 이모지 삽입 시 조합 데이터 유실](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0581-android-emoji-composition-corruption-ko.md)
+- [ce-0071: autocorrect 동작 사례](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0071-contenteditable-with-autocorrect-ko.md)
+- [ce-0042: input 이벤트 중복 발생 사례](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0042-input-events-duplicate-ko.md)

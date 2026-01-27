@@ -1,6 +1,6 @@
 ---
 id: ce-0070-contenteditable-with-autocapitalize-ko
-scenarioId: scenario-autocapitalize-behavior
+scenarioId: scenario-ime-interaction-patterns
 locale: ko
 os: iOS
 osVersion: "17.0"

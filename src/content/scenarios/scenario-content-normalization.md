@@ -1,96 +1,39 @@
 ---
 id: scenario-content-normalization
-title: "Content Normalization: Paste, Whitespace, and Entities"
-description: "Technical guide for ensuring predictable DOM output after external interactions like pasting and drag-drop."
-category: "paste"
-tags: ["paste", "normalization", "whitespace", "nbsp", "plaintext-only"]
+title: "Content Normalization: Paste, Whitespace, and DOM Hygiene"
+description: "Architecting a consistent document state by neutralizing browser inconsistencies in HTML insertion and character encoding."
+category: "architecture"
+tags: ["paste", "normalization", "whitespace", "html-hygiene", "plaintext-only"]
 status: "confirmed"
 locale: "en"
 ---
 
 ## Overview
-Incoming content from the clipboard or external drags is inherently "dirty." Modern browsers provide `plaintext-only` modes, but internal normalization logic varies wildly regarding whitespace collapsing and HTML entities.
+Every browser inserts different HTML when a user pastes or hits "Enter." A robust editor must normalize this "Browser Soup" into a predictable internal schema to prevent data corruption and layout breakage.
 
-## Critical Normalization Patterns
+## Critical Normalization Zones
 
-### 1. The 'nbsp' Infection
-Chromium (especially v121) often converts standard U+0020 spaces into non-breaking spaces (`&nbsp;`) during pastes to preserve indentation.
-- **Problem**: This prevents natural line-wrapping in narrow containers, breaking responsive design.
+### 1. Paste Filter & Cleansing
+When pasting from external sources (Word, Excel, Web), browsers inject massive amounts of hidden meta-data and proprietary CSS inside `<style>` blocks. Strict sanitization is required to strip non-standard attributes.
 
-### 2. Trailing Whitespace Stripping
-Firefox historically trims trailing whitespaces at the end of a block upon pasting or Enter, which can break code formatting or precise text alignment.
-- **Solution**: Use `white-space: pre-wrap` or `-moz-pre-space` to force the engine to respect the tail.
+### 2. Whitespace & &nbsp; Management
+Browsers follow HTML rules, which collapse consecutive spaces into one. To maintain visual fidelity, editors often use Non-breaking spaces (`&nbsp;`).
+- **Contamination**: `&nbsp;` blocks CSS line-wrapping, causing layout overflows. This is severe in `plaintext-only` mode.
+- **Conversion**: Chrome/Edge frequently convert non-breaking spaces back to regular spaces during editing, causing intended alignment to collapse.
 
-### 3. Native vs programmatic insertion
-Using `document.execCommand('insertText')` often produces different DOM structures (e.g., `<br>` tags) compared to native `contenteditable="plaintext-only"` behavior (which might use `<div>` separators).
+### 3. Empty Node Pruning
+Rapid editing often leaves empty `<span>`, `<b>`, or `<div>` tags in the DOM. These "Ghost Tags" don't affect visuals but break selection logic and node-count based features.
 
-## Recommended Sanitization Pipeline
+## Normalization Strategy
 
-```javascript
-/* Standard Normalization Hook */
-element.addEventListener('paste', (e) => {
-    // 1. Intercept to enforce plain text if needed
-    if (editorMode === 'plain') {
-        e.preventDefault();
-        const text = e.clipboardData.getData('text/plain');
-        
-        // 2. Immediate Sanitization (Enforce U+0020)
-        const cleanText = text.replace(/\u00A0/g, ' ');
-        
-        // 3. Normalized Insertion
-        insertAtCaret(cleanText);
-    }
-});
-```
+### The Parser Pipeline
+Interrupt the `paste` or `beforeinput` event and run the incoming HTML through a DOMParser. Apply a strict whitelist of tags and attributes before allowing the insertion.
+
+### Whitespace Preservation (CSS over entities)
+Prefer `white-space: pre-wrap` for preserving layouts rather than relying on `&nbsp;` chains. If manual intervention is required, use a `beforeinput` handler to insert `\u00A0` only when a trailing space is detected.
 
 ## Related Cases
-- [ce-0572: plaintext-only paste leaves trailing &nbsp;](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0572-plaintext-only-nbsp-layout-broken.md)
-- [ce-0302: firefox trailing whitespace paste](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0302-firefox-trailing-whitespace-paste-en-ko.md)
----
-id: scenario-content-normalization
-title: "Content Normalization: Paste, Whitespace, and Entities"
-description: "Technical guide for ensuring predictable DOM output after external interactions like pasting and drag-drop."
-category: "paste"
-tags: ["paste", "normalization", "whitespace", "nbsp", "plaintext-only"]
-status: "confirmed"
-locale: "en"
----
-
-## Overview
-Incoming content from the clipboard or external drags is inherently "dirty." Modern browsers provide `plaintext-only` modes, but internal normalization logic varies wildly regarding whitespace collapsing and HTML entities.
-
-## Critical Normalization Patterns
-
-### 1. The 'nbsp' Infection
-Chromium (especially v121) often converts standard U+0020 spaces into non-breaking spaces (`&nbsp;`) during pastes to preserve indentation.
-- **Problem**: This prevents natural line-wrapping in narrow containers, breaking responsive design.
-
-### 2. Trailing Whitespace Stripping
-Firefox historically trims trailing whitespaces at the end of a block upon pasting or Enter, which can break code formatting or precise text alignment.
-- **Solution**: Use `white-space: pre-wrap` or `-moz-pre-space` to force the engine to respect the tail.
-
-### 3. Native vs programmatic insertion
-Using `document.execCommand('insertText')` often produces different DOM structures (e.g., `<br>` tags) compared to native `contenteditable="plaintext-only"` behavior (which might use `<div>` separators).
-
-## Recommended Sanitization Pipeline
-
-```javascript
-/* Standard Normalization Hook */
-element.addEventListener('paste', (e) => {
-    // 1. Intercept to enforce plain text if needed
-    if (editorMode === 'plain') {
-        e.preventDefault();
-        const text = e.clipboardData.getData('text/plain');
-        
-        // 2. Immediate Sanitization (Enforce U+0020)
-        const cleanText = text.replace(/\u00A0/g, ' ');
-        
-        // 3. Normalized Insertion
-        insertAtCaret(cleanText);
-    }
-});
-```
-
-## Related Cases
-- [ce-0572: plaintext-only paste leaves trailing &nbsp;](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0572-plaintext-only-nbsp-layout-broken.md)
-- [ce-0302: firefox trailing whitespace paste](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0302-firefox-trailing-whitespace-paste-en-ko.md)
+- [ce-0572: plaintext-only nbsp bug](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0572-plaintext-only-nbsp-layout-broken.md)
+- [ce-0153: nbsp line break prevention](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0153-nbsp-line-break-prevention.md)
+- [ce-0102: consecutive spaces collapsed](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0102-consecutive-spaces-collapsed.md)
+- [ce-0111: empty elements accumulate](file:///Users/user/github/barocss/contenteditable/src/content/cases/ce-0111-empty-elements-accumulate.md)

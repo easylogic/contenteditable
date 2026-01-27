@@ -1,29 +1,36 @@
 # Content Deduplicator Skill
 
-This skill defines the process for auditing the technical library to identify and resolve redundant Scenarios, Cases, and Architecture documents.
+## Purpose
+This skill provides a systematic approach to reducing documentation debt without losing technical research. It focuses on **Merging and Preserving** micro-scenarios into authoritative technical whitepapers.
 
-## Objectives
-- **Maintain Lean Content**: Prevent fragmentation of information across multiple files with overlapping themes.
-- **Merge Logic**: Combine the "Historical Context" of old bugs with the "Modern Regressions" of new bugs into a single, high-quality document when applicable.
-- **Consistency**: Ensure that localized pairs (EN/KO) are synchronized during the deduplication process.
+## Philosophy: Merge & Preserve
+1.  **Never delete unique insights**: If a small file contains a browser version or a specific reproduction step not in the parent, MOVE it, don't drop it.
+2.  **Authoritative Parents**: All micro-scenarios must point to a "Mega-Whitepaper" (Interaction, UI, Performance, etc.).
+3.  **Surgical Consolidation**:
+    *   Identify semantic overlap.
+    *   Append unique sections of the child to the parent.
+    *   Update all case files (`scenarioId`) before considering child deletion.
 
-## Deduplication Workflow
+## Workflow
 
-### 1. Identify Candidates
-- **Title Scrutiny**: Look for identical or highly similar titles (e.g., "IME Composition" vs "Composition Events").
-- **ID overlap**: Check if different IDs (e.g., `ce-0012` and `ce-0570`) address the same browser ENGINE bug (e.g., Chromium RTL behavior).
-- **Tag Clusters**: Scan for files sharing 100% of their tags and locale.
+### 1. Semantic Audit
+Use `grep` and semantic search to find files with overlapping tags or keywords (e.g., 'scrolling', 'caret').
 
-### 2. Decision Matrix
-- **Merge**: If Case A is a legacy bug and Case B is a 2025 regression of the SAME issue, merge them into one Case, documenting BOTH historical and modern versions.
-- **Delete**: If Case B is an exact duplicate of Case A with no new technical depth, delete Case B.
-- **Re-link**: If a Scenario is redundant but has unique related Cases, move those Case links to the primary Scenario and delete the redundant one.
+### 2. The Merge Procedure
+*   **Context**: Copy the "Phenomenon" or "Cause" from the micro-document.
+*   **Integration**: Add a new sub-header in the Mega-Whitepaper or integrate into an existing one.
+*   **References**: Move the "Related Cases" links to the Mega-Whitepaper's reference section.
 
-### 3. Execution
-- Use `render_diffs` to show the merged content clearly.
-- Update the `task.md` to reflect the cleanup.
-- Ensure that if an English file is deleted, its Korean counterpart is also handled.
+### 3. File Decommissioning
+ONLY after verifying that:
+1.  All content exists in the parent.
+2.  All cases point to the parent.
+3.  The parent build is valid.
 
-## Quality Standards
-- **Source of Truth**: The merged document must mention the original Case IDs (e.g., "Formerly ce-0123 and ce-0567") to preserve historical references.
-- **Clean Registry**: No broken links in `scenarios` after a Case is deleted.
+## mega-whitepaper registry
+- `scenario-ime-interaction-patterns`: Functional keys, beforeinput sequences, composition start/end.
+- `scenario-ime-ui-experience`: Viewport, keyboard, candidate windows, scrolling.
+- `scenario-ime-language-specifics`: CJK, RTL, Thai, Indic unique behaviors.
+- `scenario-performance-foundations`: RuleSet invalidation, memory leaks, large doc lag.
+- `scenario-accessibility-foundations`: ARIA-Tree, screen readers, roles.
+- `scenario-content-normalization`: Paste, whitespace, DOM hygiene.

@@ -1,6 +1,6 @@
 ---
 id: ce-0071-contenteditable-with-autocorrect
-scenarioId: scenario-autocorrect-behavior
+scenarioId: scenario-ime-interaction-patterns
 locale: en
 os: iOS
 osVersion: "17.0"

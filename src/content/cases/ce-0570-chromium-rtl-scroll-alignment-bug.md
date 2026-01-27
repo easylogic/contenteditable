@@ -1,5 +1,5 @@
 ---
-id: ce-0570-chromium-rtl-scroll-alignment-bug
+id: ce-0570
 scenarioId: scenario-rtl-text-direction-inconsistent
 locale: en
 os: Windows
@@ -31,45 +31,48 @@ domSteps:
 ## Phenomenon
 A layout engine regression in Blink (reported April 2024) specifically affects RTL (Right-to-Left) languages within scrolling `contenteditable` containers. When text overflows the horizontal bounds, the browser fails to correctly calculate the `scrollLeft` offset to keep the caret in view. Furthermore, the "Visual to Logical" mapping breaks, causing the blinking bar to appear at incorrect pixel coordinates relative to the characters.
 
-Historically, this is part of a broader inconsistency where `dir="rtl"` is sporadically ignored during dynamic DOM updates or when mixing LTR/RTL text.
-
 ## Reproduction Steps
 1. Create a `<div>` with `contenteditable="true"`, `dir="rtl"`, and `overflow: auto; width: 200px;`.
-2. Input a long string of RTL characters (e.g., Hebrew or Arabic) until it overflows.
-3. Observe the behavior of the caret at the left boundary.
-4. Programmatically toggle the `dir` attribute from `rtl` to `ltr` and back while editing.
+2. Input a long string of RTL characters (e.g., Hebrew or Arabic) until it wraps or overflows horizontally.
+3. Observe the behavior of the caret as it reaches the left boundary (the end of the flow for RTL).
+4. Try to click in the middle of the text to reposition the caret.
 
 ## Observed Behavior
 1. **Scrolling Failure**: The container does not automatically scroll to keep the caret visible as it moves leftward.
-2. **Caret Misalignment**: The caret appears several pixels away from the character or disappears into "negative" scroll space.
-3. **Dynamic Stall**: Changing the `dir` attribute on the fly (e.g., via JavaScript) often fails to re-render the BiDi layout immediately in Firefox and legacy Edge.
-4. **Mixed Content Chaos**: Mixing LTR numbers within RTL text often results in "inverted selection" where dragging the mouse rightward selects text to the left.
+2. **Caret Misalignment**: In some cases, the caret appears several pixels away from the character it belongs to, or disappears entirely if it moves into the "negative" scroll area incorrectly.
+3. **Pasting Error**: Pasting RTL text into an existing RTL block often inserts the content at the wrong logical index.
+
+## Expected Behavior
+The browser should calculate caret coordinates based on the `dir` attribute and the computed BiDi (Bidirectional) layout, ensuring `scrollIntoView()` logic works correctly for the "left" edge (which is the trailing edge in RTL).
 
 ## Impact
-- **Unusable RTL Editors**: Users cannot see their active typing point in responsive containers.
-- **Selection Corruption**: Drag-selecting RTL text produces "jagged" highlights.
+- **Unusable RTL Editors**: Users cannot see what they are typing in narrow containers (like sidebars or comment boxes).
+- **Selection Corruption**: Dragging to select RTL text results in "jagged" or inverted selections that do not match the mouse movement.
 
 ## Browser Comparison
-- **Chrome 124+**: Significant regressions in scrolling and caret placement calculations.
-- **Safari**: Generally superior BiDi layout; handles mixed-direction selection most consistently.
-- **Firefox**: Most reliable for RTL index mapping, but can suffer from "Dynamic Stall" where `dir` attribute changes require a manual `blur/focus` cycle to take effect.
+- **Chrome 124+**: Significant scrolling and caret placement regressions reported.
+- **Safari**: Handles RTL scrolling correctly; better BiDi layout consistency.
+- **Firefox**: Most stable for RTL; correctly maps visual offsets to logical indices.
 
 ## References & Solutions
-### Mitigation: BiDi Normalization
-Force a layout refresh when changing direction and use explicit `<span>` tags with `dir` for mixed-direction content.
+### Mitigation: scrollIntoView Polyfill
+Manually trigger scrolling based on the selection coordinates if the browser fails to do so.
 
 ```javascript
-/* Force Layout Refresh */
-function setDirection(element, dir) {
-    element.dir = dir;
-    // Trick to force BiDi recalculation in Firefox/Chrome
-    const display = element.style.display;
-    element.style.display = 'none';
-    element.offsetHeight; // Trigger reflow
-    element.style.display = display;
-}
+element.addEventListener('input', () => {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const containerRect = element.getBoundingClientRect();
+    
+    if (rect.left < containerRect.left) {
+        // Force scroll for RTL end edge
+        element.scrollLeft += (rect.left - containerRect.left) - 10;
+    }
+});
 ```
 
-- [Chromium Issue #333630733](https://issues.chromium.org/issues/333630733)
+- [Chromium Issue #333630733: RTL scrolling broken in contenteditable](https://issues.chromium.org/issues/333630733)
 - [W3C I18N: RTL Editing challenges](https://www.w3.org/International/questions/qa-html-dir)
-- [Formerly ce-0060 and ce-0556]
