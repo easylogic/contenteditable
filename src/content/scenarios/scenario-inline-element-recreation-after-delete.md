@@ -73,7 +73,7 @@ editor.addEventListener('input', () => {
 
 ## Related Cases
 
-- [ce-0582](ce-0582-chromium-empty-span-recreated-after-delete) – Chromium empty span recreated after delete and type
+- [ce-0582-chromium-empty-span-recreated-after-delete](ce-0582-chromium-empty-span-recreated-after-delete) – Chromium empty span recreated after delete and type
 
 ## References
 

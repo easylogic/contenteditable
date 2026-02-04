@@ -1,5 +1,5 @@
 ---
-id: ce-0582
+id: ce-0582-chromium-empty-span-recreated-after-delete
 scenarioId: scenario-inline-element-recreation-after-delete
 locale: en
 os: Windows

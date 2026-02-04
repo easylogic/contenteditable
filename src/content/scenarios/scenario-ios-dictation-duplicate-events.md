@@ -477,6 +477,7 @@ This suggests similar issues may occur in web applications.
 
 ## References
 
+- [Scenario: iOS Safari contenteditable do not force re-render or change selection during input](scenario-ios-safari-contenteditable-do-not-force-rerender-or-change-selection-during-input) - Do not re-render or change selection during input; inputType may be undefined/null; prevents model–DOM desync
 - [WebKit Bug 261764: iOS/iPadOS dictation doesn't trigger composition events](https://bugs.webkit.org/show_bug.cgi?id=261764) - Composition events not firing
 - [W3C UI Events: Composition events](https://www.w3.org/TR/2016/WD-uievents-20160804/) - Composition event specification
 - [Reddit: Dictation input jumping around](https://www.reddit.com//r/ios/comments/1pfv6c4/dictation_input_jumping_around/) - User reports of duplicate text

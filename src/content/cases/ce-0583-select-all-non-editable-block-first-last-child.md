@@ -1,5 +1,5 @@
 ---
-id: ce-0583
+id: ce-0583-select-all-non-editable-block-first-last-child
 scenarioId: scenario-select-all-non-editable-block
 locale: en
 os: macOS

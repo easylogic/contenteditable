@@ -73,7 +73,7 @@ editor.addEventListener('input', () => {
 
 ## 관련 케이스
 
-- [ce-0582](ce-0582-chromium-empty-span-recreated-after-delete) – Chromium에서 빈 span 삭제 후 입력 시 다시 생성됨
+- [ce-0582-chromium-empty-span-recreated-after-delete](ce-0582-chromium-empty-span-recreated-after-delete) – Chromium에서 빈 span 삭제 후 입력 시 다시 생성됨
 
 ## 참고 자료
 
