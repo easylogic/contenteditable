@@ -77,7 +77,7 @@ editor.addEventListener('keydown', (e) => {
 
 ## 관련 케이스
 
-- [ce-0583](ce-0583-select-all-non-editable-block-first-last-child) – 비편집 블록이 첫/끝 자식일 때 전체 선택 실패 (Safari/Chrome)
+- [ce-0583-select-all-non-editable-block-first-last-child](ce-0583-select-all-non-editable-block-first-last-child) – 비편집 블록이 첫/끝 자식일 때 전체 선택 실패 (Safari/Chrome)
 
 ## 참고 자료
 

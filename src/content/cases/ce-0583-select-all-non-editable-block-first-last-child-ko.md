@@ -1,5 +1,5 @@
 ---
-id: ce-0583-ko
+id: ce-0583-select-all-non-editable-block-first-last-child-ko
 scenarioId: scenario-select-all-non-editable-block
 locale: ko
 os: macOS

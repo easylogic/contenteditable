@@ -77,7 +77,7 @@ editor.addEventListener('keydown', (e) => {
 
 ## Related Cases
 
-- [ce-0583](ce-0583-select-all-non-editable-block-first-last-child) – Select All fails when non-editable block is first or last child (Safari/Chrome)
+- [ce-0583-select-all-non-editable-block-first-last-child](ce-0583-select-all-non-editable-block-first-last-child) – Select All fails when non-editable block is first or last child (Safari/Chrome)
 
 ## References
 
