@@ -301,7 +301,12 @@ element.addEventListener('beforeinput', (e) => {
 ## 관련 케이스
 
 - `ce-0295`: 삼성 키보드 구문 추천 ON 시 a 링크 옆 입력 시 insertCompositionText 이벤트와 selection 불일치
+- [ce-0586-firefox-android-nested-gettargetranges-parent-range](ce-0586-firefox-android-nested-gettargetranges-parent-range): 배열은 비어 있지 않지만 **중첩** `contenteditable`에서 바깥 호스트를 가리키는 `getTargetRanges()` (Firefox Android / Fenix 보고)
 - Chrome 77에서 `getTargetRanges()`가 일관되게 빈 배열을 반환하는 버그
+
+## 관련 시나리오
+
+- [scenario-gettargetranges-nested-wrong-scope](scenario-gettargetranges-nested-wrong-scope) – `targetRanges`가 채워져 있으나 포커스된 안쪽 편집기가 아니라 부모 편집기에 스코프되는 경우
 
 ## 참고 자료
 
