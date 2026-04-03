@@ -301,7 +301,12 @@ element.addEventListener('beforeinput', (e) => {
 ## Related Cases
 
 - `ce-0295`: insertCompositionText event and selection mismatch when typing next to a link with Samsung keyboard text prediction ON
+- [ce-0586-firefox-android-nested-gettargetranges-parent-range](ce-0586-firefox-android-nested-gettargetranges-parent-range): non-empty `getTargetRanges()` that still point at the **wrong** nested `contenteditable` host (Firefox Android / Fenix reports)
 - Chrome 77 bug where `getTargetRanges()` consistently returned empty arrays
+
+## Related Scenarios
+
+- [scenario-gettargetranges-nested-wrong-scope](scenario-gettargetranges-nested-wrong-scope) – When `targetRanges` is populated but scoped to the parent editor instead of the focused inner host
 
 ## References
 
