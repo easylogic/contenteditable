@@ -1,0 +1,125 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "browser-undo", text: "Browser undo stack" },
+  { depth: 2, slug: "model-history", text: "Model-level history" },
+  { depth: 2, slug: "wasm-transactions", text: "WASM transactions" },
+  { depth: 2, slug: "composition", text: "IME & composition" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/undo-model";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Undo & redo model (Rust + WASM) – contenteditable.lab"
+      description="Browser undo vs application history, programmatic DOM changes, and keeping redo coherent when the document state lives in Rust/WASM."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Undo & redo model</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Undo & redo model</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Ctrl+Z can mean “browser undo” or “editor command”—mixing them with a
+              Rust model requires an explicit policy.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                See also{" "}
+                <a href="/editor/history-management" class="text-accent-primary underline"
+                  >Editor → History management</a
+                > for product-neutral patterns. Here we stress <strong>who owns
+                undo</strong> when part of the stack is WASM and part is{" "}
+                <code>contenteditable</code>.
+              </p>
+            </DocSection>
+
+            <DocSection id="browser-undo" title="Browser undo stack">
+              <p class="m-0 mb-4">
+                The browser maintains its own undo history for editable regions.
+                Programmatic DOM updates, <code>execCommand</code>, and some
+                frameworks can <strong>clear</strong> or <strong>split</strong> that
+                stack—behavior varies by browser.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-history" title="Model-level history">
+              <p class="m-0 mb-4">
+                Robust editors usually implement <strong>inverse operations</strong> or
+                snapshots on the <strong>document model</strong> in Rust, then
+                re-render the DOM. Browser undo may be disabled or synchronized via{" "}
+                <code>beforeinput</code> interception where supported.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  Two independent undo stacks (browser + app) confuse users—pick
+                  one authoritative history for text edits.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="wasm-transactions" title="WASM transactions">
+              <p class="m-0 mb-4">
+                Batch model changes into transactions in Rust; expose “undo” as
+                applying inverse ops or rolling back to a checkpoint. Crossing into
+                JS only for DOM patches reduces mismatches.
+              </p>
+            </DocSection>
+
+            <DocSection id="composition" title="IME & composition">
+              <p class="m-0 mb-4">
+                Undo during IME composition is especially fragile. Often you
+                defer history commits until composition ends—aligns with{" "}
+                <a href="/wasm/ime-and-composition" class="text-accent-primary underline"
+                  >IME & composition</a
+                >.
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

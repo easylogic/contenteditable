@@ -1,0 +1,125 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "e2e", text: "End-to-end tests" },
+  { depth: 2, slug: "profiling", text: "Profiling the boundary" },
+  { depth: 2, slug: "ime-paste-ci", text: "IME & paste in CI" },
+  { depth: 2, slug: "determinism", text: "Determinism & seeds" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/testing-debugging-wasm";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Testing & debugging (Rust + WASM) – contenteditable.lab"
+      description="E2E automation, performance profiling of JS↔WASM calls, and reproducing IME and clipboard issues in CI for web editors."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Testing & debugging</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Testing & debugging</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Editors are integration-heavy: WASM adds another layer to measure and
+              reproduce.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Pair with{" "}
+                <a href="/editor/testing-strategies" class="text-accent-primary underline"
+                  >Editor → Testing strategies</a
+                >. Add WASM-specific checks for <strong>call counts</strong>,{" "}
+                <strong>memory</strong> on large paste, and <strong>async
+                ordering</strong>.
+              </p>
+            </DocSection>
+
+            <DocSection id="e2e" title="End-to-end tests">
+              <p class="m-0 mb-4">
+                Drive real browsers (Playwright, Cypress) against your production
+                bundle including WASM. Verify lazy-loaded modules actually load on
+                first editor focus. Snapshot DOM sparingly—prefer assertions on
+                model state exported for tests.
+              </p>
+            </DocSection>
+
+            <DocSection id="profiling" title="Profiling the boundary">
+              <p class="m-0 mb-4">
+                Use the Performance panel: separate time in JS glue, WASM
+                execution, and rendering. If glue dominates, reduce string copies or
+                batch calls (
+                <a href="/wasm/js-wasm-boundary" class="text-accent-primary underline"
+                  >JS ↔ WASM boundary</a
+                >).
+              </p>
+            </DocSection>
+
+            <DocSection id="ime-paste-ci" title="IME & paste in CI">
+              <p class="m-0 mb-4">
+                Headless browsers often differ from macOS/Windows IME. Maintain a
+                matrix of manual or device-farm tests for CJK input and mobile
+                keyboards; automate plain-text paths in CI.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  Flaky tests frequently come from timing between async WASM and
+                  input events—use explicit awaits and stable selectors.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="determinism" title="Determinism & seeds">
+              <p class="m-0 mb-4">
+                For CRDT or randomized fuzzing, fix seeds in Rust tests; for web,
+                record minimal repro sequences (ops lists) to attach to bug
+                reports.
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

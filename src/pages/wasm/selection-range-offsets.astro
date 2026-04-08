@@ -1,0 +1,152 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "utf-indices", text: "UTF-16 vs UTF-8" },
+  { depth: 2, slug: "selection-range", text: "Selection & Range in JS" },
+  { depth: 2, slug: "target-ranges", text: "getTargetRanges & beforeinput" },
+  { depth: 2, slug: "rust-mapping", text: "Mapping to a Rust model" },
+  { depth: 2, slug: "mobile-touch", text: "Mobile & touch selection" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/selection-range-offsets";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Selection, Range & offsets (Rust + WASM) – contenteditable.lab"
+      description="UTF-16 JavaScript strings vs UTF-8 Rust strings, Selection/Range, getTargetRanges, and keeping indices consistent across the JS↔WASM boundary."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Selection, Range & offsets</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Selection, Range & offsets
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              The browser exposes caret and selection in the DOM; your Rust model
+              uses its own positions. Crossing the boundary without a single
+              indexing convention is a frequent source of off-by-one and IME bugs.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Pair this page with{" "}
+                <a href="/editor/position-selection" class="text-accent-primary underline"
+                  >Editor → Position & selection</a
+                > (model-level ideas) and{" "}
+                <a href="/wasm/js-wasm-boundary" class="text-accent-primary underline"
+                  >JS ↔ WASM boundary</a
+                > (copy cost). Here the focus is <strong>numeric indices</strong> and{" "}
+                <strong>Range endpoints</strong>.
+              </p>
+            </DocSection>
+
+            <DocSection id="utf-indices" title="UTF-16 vs UTF-8">
+              <p class="m-0 mb-4">
+                JavaScript strings are indexed in UTF-16 code units. Rust{" "}
+                <code>String</code> is UTF-8 bytes; character boundaries are not
+                the same as JS “character” indices for astral code points and many
+                IME sequences.
+              </p>
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  Prefer passing <strong>byte offsets</strong> in Rust and explicit{" "}
+                  <strong>scalar indices</strong> or <strong>UTF-16 offsets</strong>{" "}
+                  in JS—document which at every API.
+                </li>
+                <li>
+                  Never assume <code>range.startOffset</code> in a text node equals
+                  your Rust <code>char</code> index without conversion.
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="selection-range" title="Selection & Range in JS">
+              <p class="m-0 mb-4">
+                <code>window.getSelection()</code> returns anchor/focus nodes and
+                offsets into DOM text nodes and elements. Your WASM layer usually
+                should not reimplement hit-testing; it consumes{" "}
+                <strong>normalized</strong> positions you derive in JS (paths, node
+                ids, or stable offsets into a flat buffer).
+              </p>
+            </DocSection>
+
+            <DocSection id="target-ranges" title="getTargetRanges & beforeinput">
+              <p class="m-0 mb-4">
+                For <code>beforeinput</code>, <code>getTargetRanges()</code> can
+                describe the range the browser intends to mutate—when supported.
+                Coverage varies; see site{" "}
+                <a href="/scenarios" class="text-accent-primary underline">scenarios</a> on
+                selection and input.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  During IME composition, ranges may be provisional; reconcile after
+                  <code>compositionend</code> when possible.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="rust-mapping" title="Mapping to a Rust model">
+              <p class="m-0 mb-4">
+                Common patterns: (1) maintain a <strong>stable block/inline id map</strong>{" "}
+                in JS and send ids + offsets to WASM; (2) serialize a <strong>thin
+                snapshot</strong> of the selection only; (3) use a <strong>single
+                canonical cursor</strong> in Rust and project to DOM on render.
+              </p>
+            </DocSection>
+
+            <DocSection id="mobile-touch" title="Mobile & touch selection">
+              <p class="m-0 mb-4">
+                Touch handles and delayed selection updates differ from desktop.
+                Tests should include real devices or automation that drives touch
+                selection APIs where possible.
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

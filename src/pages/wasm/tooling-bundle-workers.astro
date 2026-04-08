@@ -1,0 +1,134 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "build-ship", text: "Build & ship" },
+  { depth: 2, slug: "bundle-size", text: "Bundle size & splitting" },
+  { depth: 2, slug: "workers-threads", text: "Workers & threads" },
+  { depth: 2, slug: "browser-constraints", text: "Browser constraints" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/tooling-bundle-workers";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Tooling, bundle & workers (WASM) – contenteditable.lab"
+      description="wasm-pack, wasm-opt, lazy-loading WASM, Web Workers, SharedArrayBuffer, COOP/COEP for Rust editor cores."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Tooling, bundle & workers</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Tooling, bundle & workers
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Practical delivery concerns for Rust modules in the browser—not
+              specific version pins (those change), but the decision space.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Editor WASM binaries can be large. You’ll combine{" "}
+                <strong>compile-time opts</strong> (<code>wasm-opt</code>),{" "}
+                <strong>load strategy</strong> (dynamic <code>import()</code>),
+                and sometimes <strong>off-main-thread</strong> work for CRDT or
+                heavy transforms.
+              </p>
+            </DocSection>
+
+            <DocSection id="build-ship" title="Build & ship">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  <strong>wasm-pack</strong> / <strong>trunk</strong> — common
+                  entry points; align with your JS bundler (Vite, Webpack, etc.).
+                </li>
+                <li>
+                  <strong>wasm-opt</strong> — shrink and speed; measure before
+                  and after for your real workload.
+                </li>
+                <li>
+                  <strong>Source maps</strong> — keep for dev; strip for prod when
+                  size matters.
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="bundle-size" title="Bundle size & splitting">
+              <p class="m-0 mb-4">
+                Lazy-load the editor WASM on routes that need it. Consider
+                separating <strong>lightweight</strong> validation WASM from{" "}
+                <strong>heavy</strong> layout if you truly have two tiers—two
+                modules can be easier to cache than one monolith.
+              </p>
+            </DocSection>
+
+            <DocSection id="workers-threads" title="Workers & threads">
+              <p class="m-0 mb-4">
+                Moving CRDT merge or parse work to a <strong>Web Worker</strong>{" "}
+                keeps the main thread responsive. True shared-memory parallelism
+                needs <code>SharedArrayBuffer</code>, which imposes{" "}
+                <strong>cross-origin isolation</strong> (COOP/COEP) on your site.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  Editor UI still needs selection sync on the main thread—workers
+                  are not a free pass for input latency; they help CPU-bound
+                  background tasks.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="browser-constraints" title="Browser constraints">
+              <p class="m-0 mb-4">
+                Policies (CSP, COEP, third-party embeds) affect whether you can
+                use threads or import WASM from CDNs. Validate against your
+                deployment target early.
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

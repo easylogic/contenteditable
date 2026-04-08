@@ -1,0 +1,146 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "yrs-yjs", text: "Yrs & Yjs interop" },
+  { depth: 2, slug: "editor-host", text: "Editor host in JS" },
+  { depth: 2, slug: "snapshots-streams", text: "Snapshots vs streams" },
+  { depth: 2, slug: "more-reading", text: "More reading" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/collaboration-crdt-wasm";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Collaboration & CRDT (WASM) – contenteditable.lab"
+      description="Rust CRDT crates, WASM bindings, and connecting to JavaScript editor hosts and Yjs-compatible providers."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Collaboration & CRDT (WASM)</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Collaboration & CRDT (WASM)
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Many teams run <strong>Yrs</strong> (Rust) or similar CRDTs compiled
+              to WASM while the visible editor remains a JS component.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Real-time collaboration needs compact <strong>update messages</strong>,
+                deterministic merge, and often compatibility with existing{" "}
+                <strong>Yjs</strong> providers. Rust implementations can sit in WASM
+                next to your app, while awareness/cursors stay in JS.
+              </p>
+              <p class="m-0 mb-4">
+                Editor-specific CRDT design is also covered from a product-neutral
+                angle in{" "}
+                <a href="/editor/crdt-operations" class="text-accent-primary underline">Editor → CRDT operations</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="yrs-yjs" title="Yrs & Yjs interop">
+              <p class="m-0 mb-4">
+                The <strong>y-crdt</strong> ecosystem provides Rust types (Yrs)
+                and WASM bindings so you can produce/consume updates compatible with
+                Yjs wire format—useful when the rest of your stack expects Yjs.
+              </p>
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  Keep <strong>network codecs</strong> and <strong>merge</strong>{" "}
+                  in WASM if you need predictable performance or shared code with
+                  native clients.
+                </li>
+                <li>
+                  Keep <strong>UI binding</strong> (mapping CRDT to editor ops) in
+                  JS if you already use ProseMirror/Lexical/Slate adapters.
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="editor-host" title="Editor host in JS">
+              <p class="m-0 mb-4">
+                The WASM module rarely replaces the whole editor UX: it’s a{" "}
+                <strong>collaboration engine</strong> or <strong>transform
+                worker</strong>. Selection, IME, and toolbar still follow web
+                patterns described in other Wasm guides.
+              </p>
+            </DocSection>
+
+            <DocSection id="snapshots-streams" title="Snapshots vs streams">
+              <p class="m-0 mb-4">
+                Bootstrapping collaborators usually needs an initial snapshot plus
+                a stream of updates. Decide where snapshots are generated (Rust vs
+                JS) and how large they are over the WASM boundary—same concerns as{" "}
+                <a href="/wasm/js-wasm-boundary" class="text-accent-primary underline">JS ↔ WASM boundary</a>.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  For offline-first, persistence layers (IndexedDB, OPFS) often
+                  live in JS or via separate WASM shims—plan integration tests
+                  across reload.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="more-reading" title="More reading">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  <a href="https://docs.rs/yrs" class="text-accent-primary underline">yrs</a> on docs.rs
+                </li>
+                <li>
+                  <a href="https://github.com/y-crdt/y-crdt" class="text-accent-primary underline">y-crdt</a> on GitHub
+                </li>
+                <li>
+                  <a href="https://yjs.dev/" class="text-accent-primary underline">Yjs</a> project site
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

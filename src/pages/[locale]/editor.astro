@@ -88,6 +88,10 @@ const translations = {
     browseDocs: 'Browse Documentation',
     home: 'Home',
     editor: 'Editor',
+    wasmCalloutTitle: 'Rust + WebAssembly',
+    wasmCalloutText:
+      'If your document core runs in Rust and ships as WASM, use the dedicated Wasm guides for the JS↔WASM boundary, IME, selection mapping, undo, testing, and deployment—alongside the language-agnostic topics below.',
+    wasmCalloutLink: 'Wasm guides →',
   },
   ko: {
     title: '리치 텍스트 에디터 만들기',
@@ -152,6 +156,10 @@ const translations = {
     browseDocs: '문서 둘러보기',
     home: '홈',
     editor: '에디터',
+    wasmCalloutTitle: 'Rust + WebAssembly',
+    wasmCalloutText:
+      '문서 코어를 Rust로 두고 WASM으로 배포한다면, 아래 언어에 무관한 주제와 함께 JS↔WASM 경계·IME·선택 매핑·실행 취소·테스트·배포를 다루는 Wasm 전용 가이드를 참고하세요.',
+    wasmCalloutLink: 'Wasm 가이드 →',
   },
 };
 
@@ -215,6 +223,17 @@ const headings = [
                   <li>{t.modelItem1}</li>
                   <li>{t.modelItem2}</li>
                 </ul>
+              </div>
+              <div class="my-6 p-4 bg-emerald-50 dark:bg-emerald-900/15 border border-emerald-600/30 dark:border-emerald-700 rounded-lg">
+                <h3 class="text-lg m-0 mb-2 text-emerald-900 dark:text-emerald-100 font-semibold">
+                  {t.wasmCalloutTitle}
+                </h3>
+                <p class="m-0 text-sm text-emerald-900/95 dark:text-emerald-100/95">
+                  {t.wasmCalloutText}
+                </p>
+                <p class="m-0 mt-3">
+                  <a href={localePath('/wasm')} class="text-accent-primary font-medium underline">{t.wasmCalloutLink}</a>
+                </p>
               </div>
             </section>
 

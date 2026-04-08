@@ -1,0 +1,126 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "host-surface", text: "Browser as host surface" },
+  { depth: 2, slug: "roles-labels", text: "Roles & labels" },
+  { depth: 2, slug: "focus", text: "Focus management" },
+  { depth: 2, slug: "wasm-limit", text: "What WASM does not fix" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/accessibility-wasm";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Accessibility (WASM host) – contenteditable.lab"
+      description="Screen readers, ARIA, and focus when the editable region is still a browser surface backed by Rust/WASM logic."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Accessibility (WASM host)</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Accessibility (WASM host)
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Moving logic to Rust does not outsource accessibility: the accessible
+              tree still comes from the DOM (or your replacement strategy).
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Complement{" "}
+                <a href="/editor/accessibility" class="text-accent-primary underline"
+                  >Editor → Accessibility</a
+                >. For typical hybrid editors, WASM handles data; the{" "}
+                <strong>view</strong> must expose correct roles, names, and focus
+                moves for keyboard and AT users.
+              </p>
+            </DocSection>
+
+            <DocSection id="host-surface" title="Browser as host surface">
+              <p class="m-0 mb-4">
+                With <code>contenteditable</code>, assistive tech interacts with the
+                same DOM you mutate from JS. If Rust drives all structure via
+                patches, ensure updates preserve <strong>stable landmarks</strong>{" "}
+                (headings, lists) where possible.
+              </p>
+            </DocSection>
+
+            <DocSection id="roles-labels" title="Roles & labels">
+              <p class="m-0 mb-4">
+                Toolbar buttons need labels; the editable region may need{" "}
+                <code>aria-multiline</code>, instructions, or live regions for
+                collaboration status—policy belongs in the UI layer even if copy
+                comes from WASM.
+              </p>
+            </DocSection>
+
+            <DocSection id="focus" title="Focus management">
+              <p class="m-0 mb-4">
+                Custom toolbars and modals must not steal focus without restoring
+                the caret; WASM callbacks that trigger re-renders should be
+                sequenced so focus is not lost mid-IME session.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  Canvas-only editors need explicit accessibility mappings (e.g.
+                  separate off-screen input or ARIA canvas patterns)—much heavier
+                  than DOM-hosted editing.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="wasm-limit" title="What WASM does not fix">
+              <p class="m-0 mb-4">
+                Screen reader behavior for complex widgets is still dominated by
+                browser and AT heuristics. Test with VoiceOver, NVDA, and mobile
+                TalkBack on real devices.
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

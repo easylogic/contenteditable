@@ -1,0 +1,123 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "csp", text: "CSP" },
+  { depth: 2, slug: "sri-integrity", text: "SRI·무결성" },
+  { depth: 2, slug: "paste-xss", text: "붙여넣기·XSS" },
+  { depth: 2, slug: "third-party", text: "서드파티 임베드" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/security-deployment-wasm");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`보안·배포 (WASM) – contenteditable.lab`}
+      description="CSP, SRI, WASM 호스팅, contenteditable·붙여넣기·XSS."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">보안·배포</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">보안·배포</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              WASM이어도 붙여넣기 HTML·스크립트 가젯은 XSS입니다. 정책을 하나로 유지하세요.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                <a href={localePath("/editor/sanitization-security")} class="text-accent-primary underline">에디터 → 정제·보안</a>과
+                맞추고, 정제를 Rust/WASM에서 하면 JS 경로와 <strong>동일한 정책</strong>을 씁니다.{" "}
+                <a href={localePath("/wasm/clipboard-input-routing")} class="text-accent-primary underline">클립보드·입력 라우팅</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="csp" title="CSP">
+              <p class="m-0 mb-4">
+                <code>script-src</code>와 WASM 로드에 필요한 지시어(환경에 따라 <code>wasm-unsafe-eval</code> 등)는 브라우저 문서를 따라가며 업데이트됩니다.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">WASM만 돌리게 CSP를 느슨히 하면 XSS 면이 넓어질 수 있습니다. 신뢰하는 출처만 허용하세요.</p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="sri-integrity" title="SRI·무결성">
+              <p class="m-0 mb-4">
+                WASM·JS를 신뢰 출처에서 제공하고, 도구가 지원하면 무결성 속성으로 CDN 치환을 감지합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="paste-xss" title="붙여넣기·XSS">
+              <p class="m-0 mb-4">
+                붙여넣기 HTML은 신뢰할 수 없는 입력입니다. JS든 WASM이든 DOM에 넣기 전에 스크립트·이벤트 핸들러·위험 URL을 일관되게 제거합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="third-party" title="서드파티 임베드">
+              <p class="m-0 mb-4">
+                iframe·외부 사이트 임베드는 COOP/COEP·워커 가능 여부를 바꿉니다.{" "}
+                <a href={localePath("/wasm/tooling-bundle-workers")} class="text-accent-primary underline">툴링·번들·워커</a>.
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

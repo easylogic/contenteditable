@@ -1,0 +1,132 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "build-ship", text: "빌드·배포" },
+  { depth: 2, slug: "bundle-size", text: "번들·스플릿" },
+  { depth: 2, slug: "workers-threads", text: "워커·스레드" },
+  { depth: 2, slug: "browser-constraints", text: "브라우저 제약" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/tooling-bundle-workers");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`툴링·번들·워커 – contenteditable.lab`}
+      description="wasm-pack, wasm-opt, 동적 로드, Web Worker, SharedArrayBuffer·COOP/COEP."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">툴링·번들·워커</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">툴링·번들·워커</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              브라우저에 올리는 Rust 모듈의 빌드·크기·스레드—버전 핀은 바뀌므로 결정
+              축만 정리합니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                에디터 WASM은 커질 수 있습니다. <code>wasm-opt</code>·<strong>동적 import</strong>로
+                로드 시점을 나누고, CRDT 병합 등 CPU 바운드 작업은 <strong>Web Worker</strong>를
+                검토합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="build-ship" title="빌드·배포">
+              <ul class="m-0 pl-6 space-y-2">
+                <li><strong>wasm-pack</strong> / <strong>trunk</strong> — 번들러(Vite 등)와 맞추기.</li>
+                <li><strong>wasm-opt</strong> — 전후 크기·속도 측정.</li>
+                <li><strong>소스맵</strong> — 개발에만, 프로덕션에서 제거 여부 검토.</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="bundle-size" title="번들·스플릿">
+              <p class="m-0 mb-4">
+                에디터가 필요한 라우트에서만 WASM을 지연 로드합니다. 검증용 가벼운
+                모듈과 레이아웃용 무거운 모듈을 나누면 캐시 전략이 쉬워질 수 있습니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="workers-threads" title="워커·스레드">
+              <p class="m-0 mb-4">
+                CRDT 병합·파싱을 Worker로 옮기면 메인 스레드 반응성이 좋아집니다.
+                <code>SharedArrayBuffer</code>를 쓰려면 <strong>교차 출처 격리</strong>(COOP/COEP)가
+                필요합니다.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  선택·IME 동기화는 여전히 메인 스레드—Worker가 입력 지연을 없애주는
+                  마법은 아닙니다.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="browser-constraints" title="브라우저 제약">
+              <p class="m-0 mb-4">
+                CSP, COEP, 서드파티 임베드는 스레드·CDN WASM 로드에 영향을 줍니다.
+                배포 환경에서 일찍 검증하세요.
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

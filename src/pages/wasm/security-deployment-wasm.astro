@@ -1,0 +1,124 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "csp", text: "Content Security Policy" },
+  { depth: 2, slug: "sri-integrity", text: "SRI & module integrity" },
+  { depth: 2, slug: "paste-xss", text: "Paste & XSS with WASM sanitize" },
+  { depth: 2, slug: "third-party", text: "Third-party embeds" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/security-deployment-wasm";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Security & deployment (WASM) – contenteditable.lab"
+      description="CSP, subresource integrity, hosting WASM modules safely next to contenteditable and paste pipelines."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Security & deployment</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Security & deployment</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              WASM does not remove XSS: paste HTML, script gadgets, and CDN
+              integrity still matter.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Align with{" "}
+                <a href="/editor/sanitization-security" class="text-accent-primary underline"
+                  >Editor → Sanitization & security</a
+                >. If sanitization runs in Rust/WASM, keep <strong>one policy</strong>{" "}
+                with the JS path (
+                <a href="/wasm/clipboard-input-routing" class="text-accent-primary underline"
+                  >Clipboard & input routing</a
+                >).
+              </p>
+            </DocSection>
+
+            <DocSection id="csp" title="Content Security Policy">
+              <p class="m-0 mb-4">
+                <code>script-src</code> and <code>wasm-unsafe-eval</code> (or
+                nonces/hashes) affect how browsers load compiled modules. Review
+                official docs when upgrading browsers—policies evolve.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  Relaxing CSP to “make WASM work” can widen XSS—tighten around
+                  hosts you control.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="sri-integrity" title="SRI & module integrity">
+              <p class="m-0 mb-4">
+                Serve WASM and JS from trusted origins; use integrity attributes
+                where your toolchain supports them so CDN swaps are detected.
+              </p>
+            </DocSection>
+
+            <DocSection id="paste-xss" title="Paste & XSS with WASM sanitize">
+              <p class="m-0 mb-4">
+                Pasted HTML is untrusted input. Whether you sanitize in JS or
+                WASM, block scripts, javascript: URLs, and inline event handlers
+                consistently before inserting into the DOM.
+              </p>
+            </DocSection>
+
+            <DocSection id="third-party" title="Third-party embeds">
+              <p class="m-0 mb-4">
+                Embedding your editor in iframes or foreign sites changes COOP/COEP
+                and worker availability—retest (
+                <a href="/wasm/tooling-bundle-workers" class="text-accent-primary underline"
+                  >Tooling, bundle & workers</a
+                >).
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

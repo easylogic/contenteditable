@@ -1,0 +1,153 @@
+---
+import SiteNav from "../components/SiteNav.astro";
+import BaseHead from "../components/BaseHead.astro";
+import TableOfContents from "../components/TableOfContents.astro";
+import DocAlert from "../components/docs/DocAlert.astro";
+import "../styles/global.css";
+import { wasmSectionPages } from "../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "why-multiple-pages", text: "Why a whole section?" },
+  { depth: 2, slug: "how-this-fits", text: "How this fits the rest of the site" },
+  { depth: 2, slug: "guides", text: "Guides" },
+];
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Rust + WASM Rich Text – contenteditable.lab"
+      description="Multi-page guide: editing models, IME, JS↔WASM boundary, clipboard, tooling, and CRDT when the editor core is Rust compiled to WebAssembly."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Wasm</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Rich text with Rust + WebAssembly
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Concepts that appear when the <strong>document core</strong> lives
+              in Rust and ships as WASM, while the <strong>browser</strong> still
+              owns IME, selection, and much of input—plus the JS↔WASM boundary
+              cost model.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <section id="overview" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                Overview
+              </h2>
+              <p class="m-0 mb-4">
+                Moving the editor “brain” to Rust does <strong>not</strong> remove
+                browser editing quirks: composition, clipboard normalization,
+                selection APIs, and undo interaction remain host concerns unless
+                you replace the surface entirely (e.g. canvas with a custom input
+                stack—then you inherit different costs).
+              </p>
+              <p class="m-0 mb-4">
+                These pages focus on <strong>architecture and boundaries</strong>:
+                where editing happens, how IME relates to your Rust model, how data
+                crosses the JS↔WASM line, and how collaboration layers (CRDT) often
+                sit next to WASM modules.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  For <strong>language-agnostic</strong> editor design (schema,
+                  transactions, HTML mapping), use{" "}
+                  <a href="/editor" class="text-accent-primary underline">Editor</a>
+                  . Here we assume a <strong>Rust core + browser host</strong>.
+                </p>
+              </DocAlert>
+            </section>
+
+            <section id="why-multiple-pages" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                Why a whole section?
+              </h2>
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  <strong>Editing model</strong> choices (DOM vs canvas vs hybrid)
+                  change who implements caret, IME, and accessibility.
+                </li>
+                <li>
+                  <strong>IME</strong> is not “implemented in Rust” in the browser:
+                  you integrate with composition events and reconcile to your model.
+                </li>
+                <li>
+                  <strong>FFI</strong>: every keystroke or paste can accidentally
+                  copy whole documents across the boundary—design matters as much
+                  as algorithms.
+                </li>
+                <li>
+                  <strong>Collaboration</strong> often uses Rust CRDT crates with
+                  WASM bindings while the visible editor remains JS-hosted.
+                </li>
+              </ul>
+            </section>
+
+            <section id="how-this-fits" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                How this fits the rest of the site
+              </h2>
+              <p class="m-0 mb-4">
+                <a href="/scenarios" class="text-accent-primary underline"
+                  >Scenarios</a
+                > and <a href="/cases" class="text-accent-primary underline">Cases</a
+                > document real browser behavior (IME, paste, selection). WASM teams hit
+                the same phenomena; these guides explain how they connect to a Rust
+                core.
+              </p>
+            </section>
+
+            <section id="guides" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                Guides
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {
+                  wasmSectionPages.map((p) => (
+                    <a
+                      href={`/wasm/${p.slug}`}
+                      class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                    >
+                      <h3 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                        {p.titleEn}
+                      </h3>
+                      <p class="text-xs m-0 text-text-secondary">{p.descEn}</p>
+                    </a>
+                  ))
+                }
+              </div>
+            </section>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

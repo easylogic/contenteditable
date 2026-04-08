@@ -1,0 +1,164 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "browser-owns-ime", text: "The browser owns IME" },
+  { depth: 2, slug: "composition-lifecycle", text: "Composition lifecycle" },
+  { depth: 2, slug: "model-sync", text: "Syncing a Rust model" },
+  { depth: 2, slug: "mobile-ime", text: "Mobile & platform variance" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/ime-and-composition";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="IME & composition (Rust + WASM) – contenteditable.lab"
+      description="compositionstart/update/end, beforeinput, and reconciling IME with a Rust document model behind WASM."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">IME & composition</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">IME & composition</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Input Method Editors (CJK, Vietnamese, etc.) interact with the DOM
+              first. Your Rust model must follow—not replace—the composition
+              session.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                In WASM you do not “implement IME” for web: the OS/IME draws the
+                candidate window and inserts text through the browser’s editing
+                pipeline. Your integration work is <strong>event ordering</strong>,{" "}
+                <strong>commit boundaries</strong>, and <strong>keeping one source
+                of truth</strong> during an unfinished composition.
+              </p>
+              <p class="m-0 mb-4">
+                This site’s <a href="/scenarios" class="text-accent-primary underline">scenarios</a> on composition,
+                <code>beforeinput</code>, and mobile keyboards apply equally when
+                the backing model is Rust.
+              </p>
+            </DocSection>
+
+            <DocSection id="browser-owns-ime" title="The browser owns IME">
+              <p class="m-0 mb-4">
+                Calls across the JS↔WASM boundary should not assume you can sample
+                the “final character” on every keydown: during composition, partial
+                text is provisional. Pushing provisional state into Rust on
+                every <code>compositionupdate</code> can work but increases copies
+                and race risk with layout.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  Treat <strong>compositionend</strong> (and equivalent commit
+                  signals) as the primary point to commit stable text into your
+                  Rust model—unless you have a deliberate streaming design and
+                  handle cancellation.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="composition-lifecycle" title="Composition lifecycle">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  <code>compositionstart</code> — mark an “IME session” in your
+                  controller; pause structural merges that assume committed text.
+                </li>
+                <li>
+                  <code>compositionupdate</code> — DOM shows intermediate glyphs;
+                  optional lightweight mirror into WASM for preview features.
+                </li>
+                <li>
+                  <code>compositionend</code> — commit; reconcile selection offsets
+                  in UTF-8/UTF-16 aware code (JS strings are UTF-16; Rust{" "}
+                  <code>String</code> is UTF-8—index mismatches are a classic bug).
+                </li>
+              </ul>
+              <p class="m-0 mt-4">
+                Pair with <code>beforeinput</code> where available; cancellation
+                semantics differ by browser—see <a
+                  href="/editor/input-handling"
+                  class="text-accent-primary underline">Editor → Input handling</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-sync" title="Syncing a Rust model">
+              <p class="m-0 mb-4">
+                Practical strategies:
+              </p>
+              <ol class="m-0 pl-6 space-y-2 list-decimal">
+                <li>
+                  <strong>DOM truth during composition:</strong> WASM holds
+                  structural doc; JS keeps ephemeral composition text in the DOM
+                  until commit—then send one patch across the boundary.
+                </li>
+                <li>
+                  <strong>Op log from committed input only:</strong> WASM applies
+                  operations for committed codepoints; composition preview stays
+                  out of CRDT until commit (simpler for Yjs/Yrs interop).
+                </li>
+                <li>
+                  <strong>Full mirror:</strong> stream updates—only if you measure
+                  boundary cost and handle rollback on cancel.
+                </li>
+              </ol>
+            </DocSection>
+
+            <DocSection id="mobile-ime" title="Mobile & platform variance">
+              <p class="m-0 mb-4">
+                Mobile keyboards differ in when composition events fire, how
+                backspace behaves in Hangul/Japanese, and how WebView wrappers
+                behave. Your WASM core cannot abstract that away—you need the same
+                empirical testing as any web editor.
+              </p>
+              <p class="m-0">
+                Related: <a href="/editor/mobile-support" class="text-accent-primary underline">Editor → Mobile support</a>.
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

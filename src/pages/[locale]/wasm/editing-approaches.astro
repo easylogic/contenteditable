@@ -1,0 +1,327 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "contenteditable-with-wasm", text: "contenteditable + WASM 하이브리드" },
+  { depth: 2, slug: "source-of-truth", text: "진실의 원천" },
+  { depth: 2, slug: "event-pipeline", text: "입력 이벤트·순서" },
+  { depth: 2, slug: "reconciliation", text: "DOM ↔ 모델 루프" },
+  { depth: 2, slug: "normalization", text: "DOM 형태·스키마" },
+  { depth: 2, slug: "islands", text: "비편집 아일랜드" },
+  { depth: 2, slug: "wasm-calls", text: "WASM 호출 시점" },
+  { depth: 2, slug: "canvas-custom", text: "캔버스·자체 렌더러" },
+  { depth: 2, slug: "where-rust-sits", text: "Rust가 맡는 일" },
+  { depth: 2, slug: "choosing", text: "선택·다음 단계" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/editing-approaches");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`에디팅 방식 (Rust + WASM) – contenteditable.lab`}
+      description="contenteditable과 Rust/WASM 코어: 진실 원천, 이벤트 순서, DOM↔모델 동기화, 정규화, 경계 호출."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">에디팅 방식</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">에디팅 방식</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              <code>contenteditable</code>과 Rust/WASM 문서 코어를 함께 쓸 때 IME·선택·모델이
+              어긋나지 않게 하려면 정책과 루프를 명시해야 합니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                WASM “뇌”를 쓰는 웹 에디터도 대개 브라우저 편집 표면을 씁니다: 루트{" "}
+                <code>contenteditable</code>(또는 얇은 래퍼). Rust는 검증·변환·협업·무거운
+                파싱을 맡고, DOM은 캐럿·IME·네이티브 선택을 맡습니다.
+              </p>
+              <p class="m-0 mb-4">
+                이 페이지는 그 분업을 <strong>건강하게 유지하는 정책·루프</strong>를
+                다룹니다. 일반적인 모델/뷰 이론은{" "}
+                <a href={localePath("/editor/architecture")} class="text-accent-primary underline">에디터 → 아키텍처</a>,
+                IME·클립보드 세부는 연결된 Wasm 가이드를 보세요.
+              </p>
+            </DocSection>
+
+            <DocSection id="contenteditable-with-wasm" title="contenteditable + WASM 하이브리드">
+              <p class="m-0 mb-4">
+                하이브리드에서는 <strong>JavaScript/TypeScript</strong>가 사용자가
+                입력하는 DOM 트리에 리스너를 달고, 필요 시 Rust에서 돌아온 패치를
+                적용합니다. <strong>WASM</strong>은 실행 취소·협업·내보내기에 믿을
+                수 있는 정본 문서(또는 연산 로그)를 가집니다.
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>장점:</strong> IME·맞춤법·접근성 트리·플랫폼 선택 동작을
+                  브라우저가 제공합니다.
+                </li>
+                <li>
+                  <strong>단점:</strong> 브라우저마다 HTML 조금씩 다르게 만듭니다.
+                  지속적으로 맞춰야 하며,{" "}
+                  <a href={localePath("/scenarios")} class="text-accent-primary underline">시나리오</a>에
+                  실제 차이가 정리돼 있습니다.
+                </li>
+              </ul>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  Rust는 여기서 편집 표면 전체를 대체하지 않고, 한 언어로 두고 싶은
+                  <strong>깨지기 쉽거나 비싼</strong> 문서 로직을 옮기는 쪽입니다.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="source-of-truth" title="진실의 원천">
+              <p class="m-0 mb-4">
+                한 시점에 <strong>하나</strong>의 권위를 정하세요:
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>모델 우선:</strong> 안정된 편집마다(예: IME{" "}
+                  <code>compositionend</code> 후) WASM에 연산 적용 → JS가 DOM을
+                  모델에 맞춤. 조합 중에 DOM과 싸우면 위험합니다.
+                </li>
+                <li>
+                  <strong>입력 중 DOM 우선:</strong> 타이핑 동안은 DOM이 정본이고,
+                  주기적으로 또는 커밋 시점에 Rust 모델로 파싱. 파싱이 손실이 있으면
+                  스키마·테스트로 틈을 막아야 합니다.
+                </li>
+              </ul>
+              <p class="m-0 mb-4">
+                실용적 절충: <strong>IME 조합 세션 동안</strong>은 DOM을 우선하고,
+                확정 후 한 번에 Rust에 반영하는 패턴이 많습니다.{" "}
+                <a href={localePath("/wasm/ime-and-composition")} class="text-accent-primary underline">IME·조합 입력</a>.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  DOM 전체 문자열과 Rust 트리를 매 키마다 서로 독립적으로 갱신하면
+                  레이스·중복 문자가 납니다. <strong>넘기는 지점</strong>을 설계하세요.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="event-pipeline" title="입력 이벤트·순서">
+              <p class="m-0 mb-4">
+                컨트롤러 코드 안에 <strong>명시적 파이프라인</strong>을 두세요(핸들러만
+                흩뿌리지 않기):
+              </p>
+              <ol class="m-0 mb-4 pl-6 space-y-2 list-decimal">
+                <li>
+                  <code>beforeinput</code> — 가능한 편집 가로채기/취소,{" "}
+                  <code>getTargetRanges()</code> 활용.
+                </li>
+                <li>
+                  <code>input</code> — DOM 변경 후. 조합 밖에서 DOM 스냅샷 동기화를
+                  둘 때 디바운스.
+                </li>
+                <li>
+                  <code>composition*</code> — Rust에 “미리보기”를 줄지, 확정 텍스트만
+                  줄지.
+                </li>
+                <li>
+                  <code>selectionchange</code> — 모델 좌표로 매핑; 비동기 WASM 갱신이
+                  Range를 깨뜨리지 않게.{" "}
+                  <a href={localePath("/wasm/selection-range-offsets")} class="text-accent-primary underline">선택·오프셋</a>.
+                </li>
+              </ol>
+              <p class="m-0">
+                이벤트 의미:{" "}
+                <a href={localePath("/editor/input-handling")} class="text-accent-primary underline">에디터 → 입력 처리</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="reconciliation" title="DOM ↔ 모델 루프">
+              <p class="m-0 mb-4">
+                흔한 루프 예:
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>커밋 시 파싱:</strong> 서브트리 직렬화 또는 DOM diff → 구조화
+                  연산을 WASM에 → 모델이 거부·정규화하면 DOM에 반영.
+                </li>
+                <li>
+                  <strong>JS에서 연산 스트림:</strong>{" "}
+                  <code>beforeinput</code> 유형을 작은 연산으로 바꿔 WASM에 적용 →
+                  최소 DOM 패치 지시를 반환.
+                </li>
+                <li>
+                  <strong>투영:</strong> WASM이 권위; 트랜잭션마다 직렬화 뷰로 DOM
+                  전체 또는 부분 교체(제어는 크고 diff 비용도 큼).
+                </li>
+              </ul>
+              <p class="m-0 mb-4">
+                매 이벤트마다 <strong>HTML 전체</strong>를 WASM으로 넘기지 말고{" "}
+                프로파일로 검증하세요.{" "}
+                <a href={localePath("/wasm/js-wasm-boundary")} class="text-accent-primary underline">JS ↔ WASM 경계</a>.
+              </p>
+              <p class="m-0">
+                이론:{" "}
+                <a href={localePath("/editor/model-dom-synchronization")} class="text-accent-primary underline">에디터 → 모델–DOM 동기화</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="normalization" title="DOM 형태·스키마">
+              <p class="m-0 mb-4">
+                브라우저는 <code>&lt;br&gt;</code>, 빈 블록, 중첩{" "}
+                <code>span</code>을 제각각 넣습니다. Rust 스키마로 <strong>허용 형태</strong>를
+                정하고, Enter·붙여넣기 뒤에 정규화합니다(JS에서 빠른 DOM 수술 또는
+                WASM에서 네이티브와 규칙 공유).
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  붙여넣기 후·CRDT에 넣기 <strong>전</strong>에 금지 태그를 걸러내고
+                  정책을 하나로 유지.{" "}
+                  <a href={localePath("/wasm/clipboard-input-routing")} class="text-accent-primary underline">클립보드·입력 라우팅</a>.
+                </li>
+                <li>
+                  <a href={localePath("/wasm/security-deployment-wasm")} class="text-accent-primary underline">보안·배포</a>와
+                  같이 XSS 정책이 갈라지지 않게 하세요.
+                </li>
+              </ul>
+              <p class="m-0">
+                스키마·HTML:{" "}
+                <a href={localePath("/editor/model-schema")} class="text-accent-primary underline">에디터 → 모델·스키마</a>,{" "}
+                <a href={localePath("/editor/html-mapping")} class="text-accent-primary underline">HTML 매핑</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="islands" title="비편집 아일랜드">
+              <p class="m-0 mb-4">
+                <code>contenteditable=false</code>·멘션·수식 블록·위젯을 본문에 섞으면
+                경계에서 선택이 접히거나 점프합니다. Android와 데스크톱 차이도 큽니다.
+              </p>
+              <p class="m-0 mb-4">
+                WASM이 해결해 주지 않습니다. <strong>뷰 레이어</strong>에서 클릭
+                대상·키보드 포커스·Rust 모델로의 매핑(위젯 건너뛰기)을 정해야 합니다.
+              </p>
+              <p class="m-0">
+                <a href={localePath("/wasm/accessibility-wasm")} class="text-accent-primary underline">접근성</a>,
+                비편집 블록 관련 케이스는 사이트 시나리오를 참고하세요.
+              </p>
+            </DocSection>
+
+            <DocSection id="wasm-calls" title="WASM 호출 시점">
+              <p class="m-0 mb-4">
+                실무용 가이드:
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>호출:</strong> 스키마 검증, 변환 적용, 붙여넣기 HTML 파싱,
+                  CRDT 병합, 내보내기/가져오기, 무거운 diff.
+                </li>
+                <li>
+                  <strong>피하기:</strong> 모델 미리보기가 꼭 필요하지 않다면 매{" "}
+                  <code>compositionupdate</code>마다 호출하지 않기.
+                </li>
+                <li>
+                  <strong>배치:</strong> 빠른 입력을 프레임 단위 등으로 묶되, IME
+                  커밋 순서를 뒤바꾸지 않기.
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="canvas-custom" title="캔버스·자체 렌더러">
+              <p class="m-0 mb-4">
+                본문을 Canvas/WebGL로 그리는 제품도 숨긴 <code>contenteditable</code>로
+                IME를 받는 경우가 있습니다. 완전 커스텀이면 IME·접근성 부담이 큽니다.
+              </p>
+              <p class="m-0 mb-4">
+                인쇄 정밀 레이아웃·게임 UI 같은 명시적 이유가 없으면 DOM 호스트를
+                유지하는 편이 낫습니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="where-rust-sits" title="Rust가 맡는 일">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>문서 모델 + 연산(변환 적용, 스키마 강제).</li>
+                <li>붙여넣기·가져오기 HTML 파싱, 마크다운 왕복.</li>
+                <li>
+                  CRDT·동기화(예: Yrs)를 WASM으로 두고 JS 호스트와 연동.{" "}
+                  <a href={localePath("/wasm/collaboration-crdt-wasm")} class="text-accent-primary underline">협업·CRDT</a>.
+                </li>
+                <li>본문 줄바꿈을 브라우저에 안 맡기는 고급 레이아웃(선택).</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="choosing" title="선택·다음 단계">
+              <p class="m-0 mb-4">
+                기본 권장: <strong>contenteditable 표면 + WASM 코어</strong>, 진실
+                원천 규칙 명시, 디버거에서 추적 가능한 동기화 루프. 렌더 최적화 전에
+                경계 트래픽을 측정하세요.
+              </p>
+              <p class="m-0 mb-4">
+                다음 읽을 것:{" "}
+                <a href={localePath("/wasm/ime-and-composition")} class="text-accent-primary font-medium underline">IME·조합 입력</a>
+                ·
+                <a href={localePath("/wasm/js-wasm-boundary")} class="text-accent-primary font-medium underline">JS ↔ WASM 경계</a>
+                ·
+                <a href={localePath("/wasm/undo-model")} class="text-accent-primary font-medium underline">실행 취소·다시 실행 모델</a>
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm 가이드"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

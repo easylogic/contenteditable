@@ -1,0 +1,132 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "beforeinput-paste", text: "beforeinput·붙여넣기" },
+  { depth: 2, slug: "sanitize-where", text: "정제 위치" },
+  { depth: 2, slug: "clipboard-api", text: "클립보드 API" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/clipboard-input-routing");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`클립보드·입력 라우팅 – contenteditable.lab`}
+      description="붙여넣기·beforeinput을 JS에서 받고 정제·파싱은 Rust/WASM에서 할지 결정하기."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">클립보드·입력 라우팅</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">클립보드·입력 라우팅</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              이벤트 핸들러는 JS에 두고, HTML 정규화·스키마 강제를 WASM에서 할지
+              경계를 정합니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                붙여넣기는 HTML·플레인·파일을 가져옵니다. 브라우저마다 공백 처리가
+                다릅니다. 결정적 파싱은 Rust가 유리할 수 있지만, raw 데이터는 여전히
+                JS의 <code>clipboardData</code>·비동기 Clipboard API로 받습니다.
+              </p>
+              <p class="m-0 mb-4">
+                <a href={localePath("/wasm/js-wasm-boundary")} class="text-accent-primary underline">JS ↔ WASM 경계</a>와
+                함께 페이로드 크기를 설계하세요.
+              </p>
+            </DocSection>
+
+            <DocSection id="beforeinput-paste" title="beforeinput·붙여넣기">
+              <p class="m-0 mb-4">
+                들어오는 편집을 막거나 바꿀 때 <code>beforeinput</code>을 씁니다.
+                IME와 일부 환경에서는 취소가 제한됩니다.
+              </p>
+              <p class="m-0 mb-4">
+                흔한 흐름: JS가 클립보드 읽기 → 가벼운 전처리 → WASM이 파싱·정제 →
+                연산이나 깨끗한 HTML 문자열 반환 → JS가 DOM/모델에 적용.
+              </p>
+            </DocSection>
+
+            <DocSection id="sanitize-where" title="정제 위치">
+              <ul class="m-0 pl-6 space-y-2">
+                <li><strong>Rust/WASM:</strong> 테스트·네이티브와 규칙 공유에 유리.</li>
+                <li><strong>JS:</strong> DOMParser·기존 생태계와 붙이기 쉬움; 규칙 이중화 주의.</li>
+              </ul>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  붙여넣기·불러오기 경로마다 정책이 다르면 XSS로 이어지기 쉽습니다. <strong>한 정책</strong>을 유지하세요.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="clipboard-api" title="클립보드 API">
+              <p class="m-0 mb-4">
+                비동기 읽기는 사용자 제스처·권한이 필요한 경우가 많습니다. 커스텀
+                선택 모델과 함께 쓸 때 복사·잘라내기 합성 이벤트 전략이 필요할 수 있습니다.
+              </p>
+              <p class="m-0">
+                <a href={localePath("/editor/sanitization-security")} class="text-accent-primary underline">에디터 → 정제·보안</a>
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

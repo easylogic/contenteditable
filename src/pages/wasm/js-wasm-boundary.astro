@@ -1,0 +1,130 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  { depth: 2, slug: "copy-cost", text: "Copy cost & encoding" },
+  { depth: 2, slug: "batching", text: "Batching & op streams" },
+  { depth: 2, slug: "async", text: "Async vs synchronous host calls" },
+  { depth: 2, slug: "ffi-hygiene", text: "FFI hygiene" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/js-wasm-boundary";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="JS ↔ WASM boundary – contenteditable.lab"
+      description="Strings across wasm-bindgen, avoiding per-keystroke full document copies, and async timing with browser input events."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">JS ↔ WASM boundary</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">JS ↔ WASM boundary</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              wasm-bindgen makes calls easy; the expensive part is often data
+              movement and allocation—not Rust’s inner loops.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Browser events arrive on the JS side. Each crossing into WASM may
+                copy linear-memory buffers or convert strings. A naive “serialize
+                whole document to Rust on every <code>input</code>” design will
+                bottleneck before your diff algorithm matters.
+              </p>
+            </DocSection>
+
+            <DocSection id="copy-cost" title="Copy cost & encoding">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  <strong>UTF-16 vs UTF-8:</strong> JS exposes strings as UTF-16
+                  code units; Rust <code>String</code> indices differ. Pass{" "}
+                  <strong>byte offsets</strong> or <strong>scalar offsets</strong>{" "}
+                  explicitly across the boundary, or normalize in one place.
+                </li>
+                <li>
+                  <strong>Large strings:</strong> Full HTML serialization from JS
+                  to Rust duplicates memory. Prefer <strong>incremental patches</strong>,{" "}
+                  <strong>hashed snapshots</strong>, or shared views where your
+                  security model allows.
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="batching" title="Batching & op streams">
+              <p class="m-0 mb-4">
+                Send <strong>small operations</strong> (insert/delete/format) when
+                possible instead of shipping the whole doc. For collaboration,
+                binary CRDT updates are often smaller than text snapshots.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  Debouncing helps for expensive validation—not for losing IME
+                  ordering; never batch in ways that reorder composition relative
+                  to commits.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="async" title="Async vs synchronous host calls">
+              <p class="m-0 mb-4">
+                Promises from WASM resolve on microtasks; input handlers may expect
+                synchronous DOM updates. If Rust work is async, guard against
+                selection races: the user may type again before your WASM task
+                finishes.
+              </p>
+            </DocSection>
+
+            <DocSection id="ffi-hygiene" title="FFI hygiene">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>Prefer stable handles for long-lived documents (e.g. boxed Rust state in WASM linear memory).</li>
+                <li>Expose narrow APIs: “apply op” vs “replace entire tree”.</li>
+                <li>Measure with browser Performance panel: time in WASM vs glue.</li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

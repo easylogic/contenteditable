@@ -1,0 +1,142 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "yrs-yjs", text: "Yrs·Yjs 상호운용" },
+  { depth: 2, slug: "editor-host", text: "JS 에디터 호스트" },
+  { depth: 2, slug: "snapshots-streams", text: "스냅샷 vs 스트림" },
+  { depth: 2, slug: "more-reading", text: "더 읽기" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/collaboration-crdt-wasm");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`협업·CRDT (WASM) – contenteditable.lab`}
+      description="Yrs, WASM 바인딩, Yjs 호환, JS 에디터와의 연결."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">협업·CRDT (WASM)</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">협업·CRDT (WASM)</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              많은 팀이 <strong>Yrs</strong> 등 Rust CRDT를 WASM으로 두고, 보이는
+              에디터는 JS 컴포넌트로 둡니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                실시간 협업은 <strong>작은 업데이트 메시지</strong>와 결정적 병합이
+                필요하고, 기존 <strong>Yjs</strong> 프로바이더와 맞출 때 Rust 쪽이
+                유리할 수 있습니다.
+              </p>
+              <p class="m-0 mb-4">
+                제품 중립 CRDT 설계는 <a href={localePath("/editor/crdt-operations")} class="text-accent-primary underline">에디터 → CRDT 연산</a>을
+                참고하세요.
+              </p>
+            </DocSection>
+
+            <DocSection id="yrs-yjs" title="Yrs·Yjs 상호운용">
+              <p class="m-0 mb-4">
+                <strong>y-crdt</strong> 계열은 Rust(Yrs)와 WASM 바인딩으로 Yjs 와이어
+                형식과 호환되는 업데이트를 주고받을 수 있게 합니다.
+              </p>
+              <ul class="m-0 pl-6 space-y-2">
+                <li>네트워크 코덱·병합을 WASM/네이티브에서 공유.</li>
+                <li>ProseMirror/Lexical 등 어댑터는 JS에 두는 경우가 많음.</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="editor-host" title="JS 에디터 호스트">
+              <p class="m-0 mb-4">
+                WASM 모듈이 전체 UX를 대체하기보다 <strong>협업 엔진</strong>·<strong>변환
+                워커</strong> 역할인 경우가 많습니다. 선택·IME·툴바는 다른 Wasm 가이드와
+                같습니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="snapshots-streams" title="스냅샷 vs 스트림">
+              <p class="m-0 mb-4">
+                참가자 부트스트랩은 초기 스냅샷 + 업데이트 스트림이 일반적입니다.
+                스냅샷 생성 위치(Rust vs JS)와 WASM 경계 크기는{" "}
+                <a href={localePath("/wasm/js-wasm-boundary")} class="text-accent-primary underline">JS ↔ WASM 경계</a>와
+                같이 봅니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  오프라인·IndexedDB·OPFS는 JS 또는 별도 WASM 심—재로드 시 통합 테스트를
+                  권장합니다.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="more-reading" title="더 읽기">
+              <ul class="m-0 pl-6 space-y-2">
+                <li><a href="https://docs.rs/yrs" class="text-accent-primary underline">yrs</a> (docs.rs)</li>
+                <li><a href="https://github.com/y-crdt/y-crdt" class="text-accent-primary underline">y-crdt</a> (GitHub)</li>
+                <li><a href="https://yjs.dev/" class="text-accent-primary underline">Yjs</a></li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
