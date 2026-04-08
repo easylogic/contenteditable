@@ -1,7 +1,18 @@
 # 신규 시나리오 후보 (Research Navigator 결과)
 
 Research Navigator 워크플로우(갭 분석 → 외부 소스 검색 → 기존 시나리오 교차 참조)로 수집한 후보 목록.  
-작성일: 2025-01-29
+작성일: 2025-01-29 · **마지막 동기화: 2026-03-31** (레포에 시나리오 문서가 없는 `scenarioId`는 스크립트로 주기적으로 점검) · **케이스 `scenarioId` 대비 시나리오 `id` 누락: 0**
+
+---
+
+## 이미 반영된 항목 (이 파일 기준 “완료”)
+
+| 후보 | 상태 |
+|------|------|
+| RTL (2번) | `scenario-rtl-text-direction-inconsistent` 영·한 문서 존재 |
+| 인라인 재생성 (1번) | `scenario-inline-element-recreation-after-delete` 존재 |
+| Select All + 비편집 블록 (3번) | `scenario-select-all-non-editable-block` 존재 |
+| 케이스만 있고 시나리오 파일 없음 (일부) | 예: `scenario-auto-scroll-on-typing`, `scenario-space-during-composition`, `scenario-ime-combining-characters-composition`, `scenario-drag-drop-api`, `scenario-firefox-undo-dom-mutation` 등 **2026-03-31** 추가 |
 
 ---
 
@@ -104,3 +115,14 @@ Research Navigator 워크플로우(갭 분석 → 외부 소스 검색 → 기�
 - **시나리오 생성**: [scenario-generator/SKILL.md](skills/scenario-generator/SKILL.md) 참고해 1~3번부터 영문/한국어 시나리오 문서 작성.
 - **케이스 수집**: [case-generator/SKILL.md](skills/case-generator/SKILL.md) 참고해 5·6·7번에 대한 재현 단계·환경이 있는 케이스 초안 작성.
 - **스키마**: 작성 전 [src/content/config.ts](../src/content/config.ts) 시나리오/케이스 스키마 확인.
+
+### 케이스는 있는데 시나리오 `.md`가 없는 id (점검용)
+
+케이스 `scenarioId`와 `src/content/scenarios/`의 `id:`를 비교합니다. **추가됨 (2026-04-08):** `scenario-ime-start-delay-android`, `scenario-ime-table-cell-pinyin-safari`, `scenario-undo-with-composition`.
+
+다음 후보 (2026-04-08 이후 스냅샷):
+
+- **추가됨:** `scenario-ime-composition-keydown-keycode-229`, `scenario-ime-insertfromcomposition-targetranges`, `scenario-ime-composition-focus-change`, `scenario-ime-composition-focus-blur`, `scenario-ime-candidate-list-and-conversion-issues`, 그리고 `scenario-ime-composition-duplicate-events`, `scenario-paste-plain-text`, `scenario-ime-composition-number-input`, `scenario-ime-composition-tab-key`, `scenario-ime-composition-escape-key`, `scenario-ime-rtl-and-character-joining`, `scenario-ime-composition-scroll`, `scenario-ime-composition-paste`, `scenario-ime-pinyin-visible-safari`
+- 아직 문서 없는 id 예: `scenario-chrome-caret-jumps-to-end-dom-manipulation`, `scenario-linux-font-rendering-edge`, `scenario-ios-safari-caret-visible-after-scroll` 등 (케이스 2건 부근) — 스크립트로 재점검
+
+[scenario-generator](skills/scenario-generator/SKILL.md)로 영·한 시나리오를 채우면 `scenarioId` 링크 깨짐이 줄어듭니다.

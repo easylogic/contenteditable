@@ -319,6 +319,7 @@ See [TRANSLATION.md](./TRANSLATION.md) for detailed guidelines on:
 ## Links
 
 - 🌐 [Live Site](https://contenteditable.realerror.com)
+- 🤖 [AGENTS.md](./AGENTS.md) — conventions for AI agents (knowledge base layout, cross-refs)
 - 📖 [Translation Guide](./TRANSLATION.md)
 - 🤝 [Contributing Guide](./CONTRIBUTING.md)
 - 🛠️ [Development Guide](./DEVELOPMENT.md)
