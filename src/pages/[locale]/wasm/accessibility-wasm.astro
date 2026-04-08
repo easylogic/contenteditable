@@ -1,0 +1,121 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "host-surface", text: "브라우저 표면" },
+  { depth: 2, slug: "roles-labels", text: "역할·레이블" },
+  { depth: 2, slug: "focus", text: "포커스" },
+  { depth: 2, slug: "wasm-limit", text: "WASM이 해결 못 하는 것" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/accessibility-wasm");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`접근성 (WASM 호스트) – contenteditable.lab`}
+      description="스크린 리더, ARIA, 포커스—편집 표면이 브라우저일 때 Rust/WASM 로직과의 관계."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">접근성 (WASM 호스트)</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">접근성 (WASM 호스트)</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              로직을 Rust로 옮겨도 접근성 트리는 DOM(또는 대체 전략)에서 나옵니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                <a href={localePath("/editor/accessibility")} class="text-accent-primary underline">에디터 → 접근성</a>을
+                함께 보세요. 하이브리드에서는 WASM이 데이터를, <strong>뷰</strong>가 역할·이름·포커스 이동을 담당합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="host-surface" title="브라우저 표면">
+              <p class="m-0 mb-4">
+                <code>contenteditable</code>이면 보조 기술은 같은 DOM과 상호작용합니다. Rust가 구조를 패치하면 랜드마크(제목·목록)를 안정적으로 유지하도록 설계하세요.
+              </p>
+            </DocSection>
+
+            <DocSection id="roles-labels" title="역할·레이블">
+              <p class="m-0 mb-4">
+                툴바 버튼 레이블, 편집 영역의 <code>aria-multiline</code>, 협업 상태 알림용 라이브 영역 등은 UI 레이어 책임입니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="focus" title="포커스">
+              <p class="m-0 mb-4">
+                모달·툴바가 캐럿 포커스를 빼앗지 않도록 하고, WASM 콜백으로 인한 리렌더 중 IME 세션에 포커스가 끊기지 않게 순서를 맞춥니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">캔버스 전용 에디터는 별도 입력·ARIA 패턴이 필요해 DOM 기반보다 훨씬 무겁습니다.</p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="wasm-limit" title="WASM이 해결 못 하는 것">
+              <p class="m-0 mb-4">
+                스크린 리더·브라우저 휴리스틱은 여전히 지배적입니다. VoiceOver, NVDA, 모바일 TalkBack 등 실기기 테스트를 권장합니다.
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

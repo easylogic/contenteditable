@@ -1,0 +1,138 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "utf-indices", text: "UTF-16 vs UTF-8" },
+  { depth: 2, slug: "selection-range", text: "JS Selection·Range" },
+  { depth: 2, slug: "target-ranges", text: "getTargetRanges" },
+  { depth: 2, slug: "rust-mapping", text: "Rust 모델 매핑" },
+  { depth: 2, slug: "mobile-touch", text: "모바일·터치" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/selection-range-offsets");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`선택·Range·오프셋 (Rust + WASM) – contenteditable.lab`}
+      description="UTF-16 JS 문자열 vs UTF-8 Rust, Selection/Range, getTargetRanges, JS↔WASM 경계에서 인덱스 일치."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">선택·Range·오프셋</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">선택·Range·오프셋</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              캐럿·선택은 DOM에 있고 Rust 모델은 별도 위치를 씁니다. 인덱스 규약을
+              하나로 고정하지 않으면 오프바이원·IME 버그가 납니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                <a href={localePath("/editor/position-selection")} class="text-accent-primary underline">에디터 → 위치·선택</a>과
+                <a href={localePath("/wasm/js-wasm-boundary")} class="text-accent-primary underline">JS ↔ WASM 경계</a>와 함께 읽으세요.
+                여기서는 <strong>숫자 오프셋</strong>과 <strong>Range 끝점</strong>에 초점을 둡니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="utf-indices" title="UTF-16 vs UTF-8">
+              <p class="m-0 mb-4">
+                JS 문자열은 UTF-16 코드 유닛 인덱스이고, Rust <code>String</code>은
+                UTF-8 바이트입니다. 이모지·다국어·IME 구간에서 JS의 “문자” 인덱스와
+                Rust <code>char</code> 경계가 다를 수 있습니다.
+              </p>
+              <ul class="m-0 pl-6 space-y-2">
+                <li>API마다 UTF-16 오프셋·스칼라 인덱스·Rust 바이트 오프셋 중 무엇을 쓰는지 문서화.</li>
+                <li><code>range.startOffset</code>을 Rust 문자 인덱스와 동일하다고 가정하지 않기.</li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="selection-range" title="JS Selection·Range">
+              <p class="m-0 mb-4">
+                WASM에서 히트 테스트를 다시 구현하기보다, JS에서 정규화한 위치(경로·노드 id·플랫 버퍼 오프셋)를 넘기는 편이 일반적입니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="target-ranges" title="getTargetRanges">
+              <p class="m-0 mb-4">
+                <code>beforeinput</code>과 함께 쓸 때 브라우저가 바꾸려는 범위를
+                알려줄 수 있습니다. 지원·동작은 환경별로 다릅니다.{" "}
+                <a href={localePath("/scenarios")} class="text-accent-primary underline">시나리오</a>를 참고하세요.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">조합 중에는 Range가 잠정적일 수 있어 <code>compositionend</code> 이후 정합이 안전한 경우가 많습니다.</p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="rust-mapping" title="Rust 모델 매핑">
+              <p class="m-0 mb-4">
+                블록/인라인 안정 id, 선택만 얇게 직렬화, Rust에 단일 캐논 커서를 두고 DOM에 투영 등 패턴이 있습니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="mobile-touch" title="모바일·터치">
+              <p class="m-0 mb-4">
+                터치 핸들·선택 지연은 데스크톱과 다릅니다. 가능하면 실기기·터치 자동화로 검증하세요.
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

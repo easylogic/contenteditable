@@ -1,0 +1,176 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import "../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "why-multiple-pages", text: "왜 섹션을 나눴나" },
+  { depth: 2, slug: "how-this-fits", text: "사이트 다른 곳과의 관계" },
+  { depth: 2, slug: "guides", text: "가이드" },
+];
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`Rust + WASM 리치 텍스트 – contenteditable.lab`}
+      description="에디팅 방식, IME, JS↔WASM 경계, 클립보드, 툴링, CRDT 등 Rust를 WebAssembly로 올릴 때의 개념 정리."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline"
+                >홈</a
+              >
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Wasm</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">
+              Rust + WebAssembly로 리치 텍스트
+            </h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              <strong>문서 코어</strong>는 Rust로 두고 WASM으로 배포할 때,
+              <strong>IME·선택·입력</strong>은 여전히 브라우저가 맡는 경우가 많고,
+              <strong>JS↔WASM 경계</strong> 비용·동기화 전략을 따로 설계해야
+              합니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <section id="overview" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                개요
+              </h2>
+              <p class="m-0 mb-4">
+                에디터 “뇌”를 Rust로 옮겨도 <strong>브라우저 편집 특성</strong>이
+                사라지지는 않습니다. 조합 입력, 클립보드 정규화, Selection API,
+                실행 취소와의 상호작용은 호스트 책임이며, 표면을 통째로 캔버스로
+                바꾸지 않는 한 <code>contenteditable</code>·입력 이벤트와 함께
+                갑니다.
+              </p>
+              <p class="m-0 mb-4">
+                이 섹션은 <strong>아키텍처와 경계</strong>에 초점을 둡니다:
+                어디서 편집이 일어나는지, IME와 Rust 모델을 어떻게 맞출지,
+                데이터가 JS↔WASM을 어떻게 넘는지, 협업(CRDT)이 WASM 모듈 옆에
+                어떻게 붙는지.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  언어에 무관한 에디터 설계(스키마, 트랜잭션, HTML 매핑)는{" "}
+                  <a href={localePath("/editor")} class="text-accent-primary underline"
+                    >에디터</a
+                  > 문서를 보고, 여기서는 <strong>Rust 코어 + 브라우저 호스트</strong>를
+                  가정합니다.
+                </p>
+              </DocAlert>
+            </section>
+
+            <section id="why-multiple-pages" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                왜 여러 페이지로 나눴나
+              </h2>
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  <strong>에디팅 방식</strong>(DOM·캔버스·하이브리드)에 따라 캐럿·IME·접근성
+                  책임 주체가 달라집니다.
+                </li>
+                <li>
+                  <strong>IME</strong>는 브라우저에서 “Rust로 다시 구현”하는 게
+                  아니라, 조합 이벤트에 맞춰 모델을 맞추는 쪽입니다.
+                </li>
+                <li>
+                  <strong>FFI</strong>: 키 입력마다 전체 문서를 넘기면 알고리즘
+                  전에 병목이 납니다.
+                </li>
+                <li>
+                  <strong>협업</strong>: Rust CRDT + WASM 바인딩과 JS 에디터 호스트가
+                  함께 쓰이는 경우가 많습니다.
+                </li>
+              </ul>
+            </section>
+
+            <section id="how-this-fits" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                사이트 다른 곳과의 관계
+              </h2>
+              <p class="m-0 mb-4">
+                <a href={localePath("/scenarios")} class="text-accent-primary underline"
+                  >시나리오</a
+                >·<a href={localePath("/cases")} class="text-accent-primary underline"
+                  >케이스</a
+                >는 실제 브라우저 동작(IME, 붙여넣기, 선택)을 모읍니다. WASM을
+                쓰더라도 현상은 같고, 이 가이드는 그걸 Rust 코어와 어떻게 연결할지
+                설명합니다.
+              </p>
+            </section>
+
+            <section id="guides" class="mb-8">
+              <h2
+                class="text-2xl font-semibold mb-4 pb-2 border-b border-border-light"
+              >
+                가이드
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {
+                  wasmSectionPages.map((p) => (
+                    <a
+                      href={localePath(`/wasm/${p.slug}`)}
+                      class="p-4 rounded-lg border border-border-light bg-bg-muted hover:bg-bg-surface hover:border-accent-primary transition-colors no-underline"
+                    >
+                      <h3 class="text-sm font-semibold m-0 mb-1 text-text-primary">
+                        {p.titleKo}
+                      </h3>
+                      <p class="text-xs m-0 text-text-secondary">{p.descKo}</p>
+                    </a>
+                  ))
+                }
+              </div>
+            </section>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

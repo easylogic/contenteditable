@@ -1,0 +1,370 @@
+---
+import SiteNav from "../../components/SiteNav.astro";
+import BaseHead from "../../components/BaseHead.astro";
+import TableOfContents from "../../components/TableOfContents.astro";
+import DocSection from "../../components/docs/DocSection.astro";
+import DocAlert from "../../components/docs/DocAlert.astro";
+import DocNavigation from "../../components/docs/DocNavigation.astro";
+import "../../styles/global.css";
+import { wasmSectionPages } from "../../data/wasm-pages";
+
+const headings = [
+  { depth: 2, slug: "overview", text: "Overview" },
+  {
+    depth: 2,
+    slug: "contenteditable-with-wasm",
+    text: "contenteditable + WASM hybrid",
+  },
+  { depth: 2, slug: "source-of-truth", text: "Source of truth" },
+  { depth: 2, slug: "event-pipeline", text: "Input events & order" },
+  { depth: 2, slug: "reconciliation", text: "DOM ↔ model loop" },
+  { depth: 2, slug: "normalization", text: "DOM shape & schema" },
+  { depth: 2, slug: "islands", text: "Non-editable islands" },
+  { depth: 2, slug: "wasm-calls", text: "When to call WASM" },
+  { depth: 2, slug: "canvas-custom", text: "Canvas / custom renderers" },
+  { depth: 2, slug: "where-rust-sits", text: "Where Rust usually sits" },
+  { depth: 2, slug: "choosing", text: "Choosing & next steps" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleEn,
+  href: `/wasm/${p.slug}`,
+  description: p.descEn,
+}));
+const currentPath = "/wasm/editing-approaches";
+---
+
+<html lang="en">
+  <head>
+    <BaseHead
+      title="Editing approaches (Rust + WASM) – contenteditable.lab"
+      description="Using contenteditable with a Rust/WASM core: single source of truth, beforeinput and composition, reconciling DOM to model, normalization, and efficient boundary calls."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href="/" class="text-text-muted no-underline">Home</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href="/wasm" class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">Editing approaches</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">Editing approaches</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              How to combine <code>contenteditable</code> with a Rust/WASM document
+              core so IME, selection, and your model stay coherent.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="Overview">
+              <p class="m-0 mb-4">
+                Most web editors that ship a WASM “brain” still use the browser’s
+                editable surface: a <code>contenteditable</code> root (or a thin
+                wrapper). Rust handles validation, transforms, collaboration, and
+                heavy parsing; the DOM handles caret, IME, and native selection.
+              </p>
+              <p class="m-0 mb-4">
+                This page details <strong>policies and loops</strong> that keep that
+                split healthy. For general model/view theory see{" "}
+                <a href="/editor/architecture" class="text-accent-primary underline"
+                  >Editor → Architecture</a
+                >; for IME and clipboard specifics see the linked Wasm guides.
+              </p>
+            </DocSection>
+
+            <DocSection
+              id="contenteditable-with-wasm"
+              title="contenteditable + WASM hybrid"
+            >
+              <p class="m-0 mb-4">
+                In the hybrid pattern, <strong>JavaScript</strong> (or TS) owns the
+                DOM tree the user types into: event listeners, optional virtual
+                layer, and applying patches back from Rust. <strong>WASM</strong>{" "}
+                owns the canonical document (or op log) you trust for undo,
+                collaboration, and export.
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>Pros:</strong> IME, spellcheck integration, accessibility
+                  tree, and platform selection behavior come from the browser.
+                </li>
+                <li>
+                  <strong>Cons:</strong> Every browser mutates HTML slightly; you
+                  must reconcile continuously. Our{" "}
+                  <a href="/scenarios" class="text-accent-primary underline"
+                    >Scenarios</a
+                  > document real cross-browser differences.
+                </li>
+              </ul>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  Rust does not replace the editable surface here—it replaces{" "}
+                  <strong>fragile or expensive</strong> document logic you prefer
+                  to keep deterministic and testable in one language.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="source-of-truth" title="Source of truth">
+              <p class="m-0 mb-4">
+                Pick <strong>one</strong> authority for committed text at any moment:
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>Model-led:</strong> After each stable edit (often after
+                  IME <code>compositionend</code>), WASM applies an op; JS updates
+                  the DOM to match. Risk: fighting the browser if you patch mid-composition.
+                </li>
+                <li>
+                  <strong>DOM-led during typing:</strong> While the user edits, the
+                  DOM is truth; you periodically or on commit parse into the Rust
+                  model. Risk: drift if parsing is lossy—tighten schema and tests.
+                </li>
+              </ul>
+              <p class="m-0 mb-4">
+                A practical split: treat the DOM as truth <strong>during an IME
+                composition session</strong>, then commit a single stable update into
+                Rust (see{" "}
+                <a href="/wasm/ime-and-composition" class="text-accent-primary underline"
+                  >IME & composition</a
+                >).
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  Two competing “truths” (full DOM string and full Rust tree updated
+                  independently every keystroke) causes races and duplicate
+                  characters—design the handoff explicitly.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="event-pipeline" title="Input events & order">
+              <p class="m-0 mb-4">
+                Build a clear pipeline in your controller code (not implicitly
+                across scattered handlers):
+              </p>
+              <ol class="m-0 mb-4 pl-6 space-y-2 list-decimal">
+                <li>
+                  <code>beforeinput</code> — intercept or cancel certain edits when
+                  the platform allows; read <code>getTargetRanges()</code> when
+                  available.
+                </li>
+                <li>
+                  <code>input</code> — DOM has changed; good place for debounced
+                  sync <strong>outside</strong> active composition if you use
+                  DOM-led snapshots.
+                </li>
+                <li>
+                  <code>composition*</code> — gate when Rust sees committed text vs
+                  preview.
+                </li>
+                <li>
+                  <code>selectionchange</code> — map selection to model coordinates;
+                  watch for async WASM updates that might invalidate ranges (
+                  <a href="/wasm/selection-range-offsets" class="text-accent-primary underline"
+                    >Selection & offsets</a
+                  >).
+                </li>
+              </ol>
+              <p class="m-0">
+                Deeper event semantics:{" "}
+                <a href="/editor/input-handling" class="text-accent-primary underline"
+                  >Editor → Input handling</a
+                >.
+              </p>
+            </DocSection>
+
+            <DocSection id="reconciliation" title="DOM ↔ model loop">
+              <p class="m-0 mb-4">
+                Typical loops look like one of:
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>Parse on commit:</strong> Read serialized subtree or diff
+                  the DOM → send structured ops to WASM → optional WASM response
+                  patches DOM if model rejects or normalizes.
+                </li>
+                <li>
+                  <strong>Op stream from JS:</strong> Translate <code>beforeinput</code>{" "}
+                  input types into small ops in JS; WASM applies and returns “render
+                  instructions” for minimal DOM updates.
+                </li>
+                <li>
+                  <strong>Projection:</strong> WASM is authoritative; after each
+                  transaction, JS replaces or patches the editable subtree from a
+                  serialized view (more control, more diff cost).
+                </li>
+              </ul>
+              <p class="m-0 mb-4">
+                Avoid shipping the <strong>entire HTML string</strong> across the
+                boundary on every event unless profiling proves it is cheap enough (
+                <a href="/wasm/js-wasm-boundary" class="text-accent-primary underline"
+                  >JS ↔ WASM boundary</a
+                >).
+              </p>
+              <p class="m-0">
+                Model/DOM theory:{" "}
+                <a
+                  href="/editor/model-dom-synchronization"
+                  class="text-accent-primary underline"
+                  >Editor → Model–DOM synchronization</a
+                >.
+              </p>
+            </DocSection>
+
+            <DocSection id="normalization" title="DOM shape & schema">
+              <p class="m-0 mb-4">
+                Browsers insert <code>&lt;br&gt;</code>, empty blocks, and nested
+                spans differently. Your Rust schema should define what is{" "}
+                <strong>valid</strong>; after paste or Enter, normalize either in JS
+                (fast DOM surgery) or WASM (shared rules with native clients).
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  Run normalization <strong>after</strong> clipboard insert and{" "}
+                  <strong>before</strong> persisting a CRDT update if paste can
+                  introduce forbidden tags (
+                  <a href="/wasm/clipboard-input-routing" class="text-accent-primary underline"
+                    >Clipboard & input routing</a
+                  >).
+                </li>
+                <li>
+                  Keep one policy with your sanitizer to avoid XSS divergence (
+                  <a href="/wasm/security-deployment-wasm" class="text-accent-primary underline"
+                    >Security & deployment</a
+                  >).
+                </li>
+              </ul>
+              <p class="m-0">
+                Schema concepts:{" "}
+                <a href="/editor/model-schema" class="text-accent-primary underline"
+                  >Editor → Model & schema</a
+                >,{" "}
+                <a href="/editor/html-mapping" class="text-accent-primary underline"
+                  >HTML mapping</a
+                >.
+              </p>
+            </DocSection>
+
+            <DocSection id="islands" title="Non-editable islands">
+              <p class="m-0 mb-4">
+                Mixing <code>contenteditable=false</code> nodes, mentions, math
+                placeholders, or custom widgets inside the editor surface is common.
+                Selection can collapse or jump when crossing boundaries—behavior
+                differs on Android vs desktop.
+              </p>
+              <p class="m-0 mb-4">
+                WASM doesn’t fix this: your <strong>view layer</strong> must define
+                click targets, keyboard traps, and how selection maps into the Rust
+                model (skip widgets vs editable text).
+              </p>
+              <p class="m-0">
+                Related:{" "}
+                <a href="/wasm/accessibility-wasm" class="text-accent-primary underline"
+                  >Accessibility</a
+                >, site cases on non-editable regions.
+              </p>
+            </DocSection>
+
+            <DocSection id="wasm-calls" title="When to call WASM">
+              <p class="m-0 mb-4">
+                Practical rules of thumb:
+              </p>
+              <ul class="m-0 mb-4 pl-6 space-y-2">
+                <li>
+                  <strong>Do call</strong> for schema validation, transform apply,
+                  paste HTML parse, CRDT merge, export/import, expensive diff.
+                </li>
+                <li>
+                  <strong>Avoid calling</strong> on every <code>compositionupdate</code>{" "}
+                  unless you measured the need for live preview in the model.
+                </li>
+                <li>
+                  <strong>Batch</strong> rapid typing into frame-aligned or
+                  micro-task batches if you use DOM snapshots—never reorder relative
+                  to IME commit order.
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="canvas-custom" title="Canvas / custom renderers">
+              <p class="m-0 mb-4">
+                Some products render body text on Canvas/WebGL but still keep a
+                hidden <code>contenteditable</code> for IME. Others go fully custom;
+                that shifts IME and accessibility work onto you.
+              </p>
+              <p class="m-0 mb-4">
+                Prefer staying DOM-hosted until you have a concrete requirement
+                (print-accurate pagination, game UI) that outweighs the cost.
+              </p>
+            </DocSection>
+
+            <DocSection id="where-rust-sits" title="Where Rust usually sits">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  Document model + operations (apply transforms, enforce schema).
+                </li>
+                <li>
+                  Parsing / normalization of pasted or imported HTML; markdown
+                  round-trips.
+                </li>
+                <li>
+                  CRDT / sync (e.g. Yrs) in WASM next to a JS editor host (
+                  <a href="/wasm/collaboration-crdt-wasm" class="text-accent-primary underline"
+                    >Collaboration & CRDT</a
+                  >).
+                </li>
+                <li>
+                  Optional layout when you don’t rely on the browser for line breaks
+                  in the body (advanced).
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="choosing" title="Choosing & next steps">
+              <p class="m-0 mb-4">
+                Default path: <strong>contenteditable surface + WASM core</strong>,
+                explicit source-of-truth rules, and a reconciliation loop you can
+                trace in the debugger. Measure boundary traffic before optimizing
+                rendering.
+              </p>
+              <p class="m-0 mb-4">
+                Read next:{" "}
+                <a href="/wasm/ime-and-composition" class="text-accent-primary font-medium underline"
+                  >IME & composition</a
+                >
+                ·
+                <a href="/wasm/js-wasm-boundary" class="text-accent-primary font-medium underline"
+                  >JS ↔ WASM boundary</a
+                >
+                ·
+                <a href="/wasm/undo-model" class="text-accent-primary font-medium underline"
+                  >Undo & redo model</a
+                >
+              </p>
+            </DocSection>
+
+            <DocNavigation
+              current={currentPath}
+              pages={navPages}
+              title="Wasm guides"
+            />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,143 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "browser-owns-ime", text: "IME는 브라우저 영역" },
+  { depth: 2, slug: "composition-lifecycle", text: "조합 생명주기" },
+  { depth: 2, slug: "model-sync", text: "Rust 모델 동기화" },
+  { depth: 2, slug: "mobile-ime", text: "모바일·플랫폼 차이" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/ime-and-composition");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`IME·조합 입력 (Rust + WASM) – contenteditable.lab`}
+      description="composition 이벤트, Rust 문서 모델과의 정합, 웹에서 IME를 Rust로 다시 구현하지 않는 이유."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">IME·조합 입력</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">IME·조합 입력</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              한·중·일 등 IME는 먼저 DOM과 상호작용합니다. Rust 모델은 조합 세션을
+              따라가며 바꿔야지, IME 자체를 대체하지 않습니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                웹에서 WASM으로 “IME를 구현”한다기보다, OS/IME가 후보창을 띄우고
+                브라우저 편집 파이프라인으로 글자를 넣는 흐름에 맞춰 <strong>이벤트
+                순서·커밋 경계·단일 진실 원천</strong>을 맞추는 일이 큽니다.
+              </p>
+              <p class="m-0 mb-4">
+                이 사이트의 <a href={localePath("/scenarios")} class="text-accent-primary underline">시나리오</a>는
+                Rust 코어를 쓸 때도 동일하게 적용됩니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="browser-owns-ime" title="IME는 브라우저 영역">
+              <p class="m-0 mb-4">
+                매 <code>keydown</code>마다 “최종 글자”를 가정해 WASM으로 넣기
+                어렵습니다. 조합 중에는 부분 문자열이 잠정적입니다.
+                <code>compositionupdate</code>마다 Rust로 미리보기를 흘리면 복사와
+                레이스가 늘어납니다.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">
+                  <strong>compositionend</strong> 등 커밋 신호를 정본 텍스트를 Rust
+                  모델에 넣는 주요 시점으로 두는 편이 안전합니다(취소 처리는 별도 설계).
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="composition-lifecycle" title="조합 생명주기">
+              <ul class="m-0 pl-6 space-y-2">
+                <li><code>compositionstart</code> — IME 세션 표시, 확정 가정 병합 일시 중단.</li>
+                <li><code>compositionupdate</code> — DOM에 중간 글리프; 미리보기만 WASM에 올릴지 결정.</li>
+                <li><code>compositionend</code> — 확정; UTF-16(JS)과 UTF-8(Rust) 오프셋 불일치에 유의.</li>
+              </ul>
+              <p class="m-0 mt-4">
+                <code>beforeinput</code>과 함께 쓰되, 취소 가능 여부는 브라우저·플랫폼마다 다릅니다.{" "}
+                <a href={localePath("/editor/input-handling")} class="text-accent-primary underline">에디터 → 입력 처리</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-sync" title="Rust 모델 동기화">
+              <ol class="m-0 pl-6 space-y-2 list-decimal">
+                <li><strong>조합 중 DOM 우선:</strong> 확정 전까지는 DOM에 두고 커밋 시 한 번에 패치.</li>
+                <li><strong>확정 입력만 op로:</strong> CRDT에는 확정 코드포인트만 반영(프리뷰는 DOM만).</li>
+                <li><strong>풀 미러:</strong> 경계 비용·취소 롤백을 측정·설계한 경우에만.</li>
+              </ol>
+            </DocSection>
+
+            <DocSection id="mobile-ime" title="모바일·플랫폼 차이">
+              <p class="m-0 mb-4">
+                가상 키보드·백스페이스·WebView는 데스크톱과 다릅니다. WASM 코어가
+                이를 흡수하지 못하므로 웹 에디터와 같은 실측이 필요합니다.{" "}
+                <a href={localePath("/editor/mobile-support")} class="text-accent-primary underline">에디터 → 모바일 지원</a>.
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

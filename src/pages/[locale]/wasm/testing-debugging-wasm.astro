@@ -1,0 +1,122 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "e2e", text: "E2E" },
+  { depth: 2, slug: "profiling", text: "경계 프로파일링" },
+  { depth: 2, slug: "ime-paste-ci", text: "IME·붙여넣기·CI" },
+  { depth: 2, slug: "determinism", text: "결정성·시드" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/testing-debugging-wasm");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`테스트·디버깅 (Rust + WASM) – contenteditable.lab`}
+      description="E2E, JS↔WASM 호출 프로파일링, IME·클립보드 CI 재현."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">테스트·디버깅</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">테스트·디버깅</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              에디터는 통합 비용이 크고, WASM은 측정·재현할 레이어가 하나 더 있습니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                <a href={localePath("/editor/testing-strategies")} class="text-accent-primary underline">에디터 → 테스트 전략</a>과
+                병행하고, WASM에 대해 <strong>호출 횟수</strong>·<strong>대용량 붙여넣기 메모리</strong>·<strong>비동기 순서</strong>를 추가로 검증하세요.
+              </p>
+            </DocSection>
+
+            <DocSection id="e2e" title="E2E">
+              <p class="m-0 mb-4">
+                Playwright 등으로 실제 프로덕션 번들(WASM 포함)을 돌립니다. 지연 로드 모듈이 첫 포커스 시 로드되는지 확인합니다. DOM 스냅샷보다 테스트용으로 노출한 모델 상태 단언이 더 안정적일 수 있습니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="profiling" title="경계 프로파일링">
+              <p class="m-0 mb-4">
+                성능 패널에서 glue·WASM 실행·렌더링 시간을 분리합니다. glue 비중이 크면 문자열 복사·배치 호출을 줄입니다.{" "}
+                <a href={localePath("/wasm/js-wasm-boundary")} class="text-accent-primary underline">JS ↔ WASM 경계</a>.
+              </p>
+            </DocSection>
+
+            <DocSection id="ime-paste-ci" title="IME·붙여넣기·CI">
+              <p class="m-0 mb-4">
+                헤드리스 브라우저는 데스크톱 IME와 다릅니다. CJK·모바일 키보드는 실기기·디바이스 팜·수동 시나리오로 보완하고, CI에서는 플레인 텍스트 경로를 자동화합니다.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">비동기 WASM과 입력 이벤트 사이 타이밍이 어긋나 플레이키가 나는 경우가 많습니다. 대기·선택자를 명시하세요.</p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="determinism" title="결정성·시드">
+              <p class="m-0 mb-4">
+                CRDT·퍼징은 Rust 테스트에서 시드를 고정하고, 웹에서는 최소 재현 스텝(연산 목록)을 버그 리포트에 남깁니다.
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

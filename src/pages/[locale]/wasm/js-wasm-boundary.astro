@@ -1,0 +1,135 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "copy-cost", text: "복사 비용·인코딩" },
+  { depth: 2, slug: "batching", text: "배치·연산 스트림" },
+  { depth: 2, slug: "async", text: "비동기와 입력" },
+  { depth: 2, slug: "ffi-hygiene", text: "FFI 위생" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/js-wasm-boundary");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`JS ↔ WASM 경계 – contenteditable.lab`}
+      description="wasm-bindgen 문자열, 키 입력마다 전체 문서 복사 피하기, 비동기와 선택 레이스."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">JS ↔ WASM 경계</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">JS ↔ WASM 경계</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              wasm-bindgen 호출은 쉽지만, 비용은 종종 선형 메모리와 문자열 변환·복사에 있습니다.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                이벤트는 JS에서 들어옵니다. WASM으로 넘길 때마다 문자열·버퍼 복사가
+                붙을 수 있고, 매 <code>input</code>마다 전체 문서를 직렬화하면 내부
+                diff 알고리즘 전에 병목이 납니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="copy-cost" title="복사 비용·인코딩">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>
+                  <strong>UTF-16 vs UTF-8:</strong> JS는 UTF-16 코드 유닛, Rust <code>String</code>은
+                  UTF-8 바이트 인덱스. 경계에서는 스칼라 오프셋·바이트 오프셋을 명시적으로 통일하세요.
+                </li>
+                <li>
+                  <strong>큰 문자열:</strong> HTML 전체를 매번 Rust로 넘기면 메모리 이중화. 증분 패치·해시된 스냅샷·보안 모델이 허용하는 공유 뷰를 검토합니다.
+                </li>
+              </ul>
+            </DocSection>
+
+            <DocSection id="batching" title="배치·연산 스트림">
+              <p class="m-0 mb-4">
+                가능하면 <strong>작은 연산</strong>(삽입·삭제·서식)을 넘기고, 협업에서는
+                바이너리 CRDT 업데이트가 텍스트 스냅샷보다 작을 때가 많습니다.
+              </p>
+              <DocAlert type="info">
+                <p class="m-0 text-sm">
+                  검증 비용 줄이려고 디바운스할 수는 있지만, 조합·커밋 순서를 뒤섞지
+                  않도록 하세요.
+                </p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="async" title="비동기와 입력">
+              <p class="m-0 mb-4">
+                WASM에서 시작한 Promise는 마이크로태스크로 이어집니다. Rust 작업이
+                비동기면 선택·입력 레이스를 막을 가드가 필요합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="ffi-hygiene" title="FFI 위생">
+              <ul class="m-0 pl-6 space-y-2">
+                <li>문서 상태는 길게 살아가는 핸들(박스 포인터)로 좁은 API 노출.</li>
+                <li>“전체 트리 교체”보다 “연산 적용”을 우선.</li>
+                <li>성능 패널에서 glue vs WASM 본연 시간을 분리해 측정.</li>
+              </ul>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

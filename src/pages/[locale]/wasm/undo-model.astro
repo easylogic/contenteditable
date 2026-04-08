@@ -1,0 +1,122 @@
+---
+import SiteNav from "../../../components/SiteNav.astro";
+import BaseHead from "../../../components/BaseHead.astro";
+import TableOfContents from "../../../components/TableOfContents.astro";
+import DocSection from "../../../components/docs/DocSection.astro";
+import DocAlert from "../../../components/docs/DocAlert.astro";
+import DocNavigation from "../../../components/docs/DocNavigation.astro";
+import "../../../styles/global.css";
+import {
+  locales,
+  supportedLocales,
+  defaultLocale,
+  getLocalizedPath,
+  type Locale,
+} from "../../../i18n/translations";
+import type { GetStaticPaths } from "astro";
+import { wasmSectionPages } from "../../../data/wasm-pages";
+
+export const getStaticPaths = (() => {
+  return supportedLocales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => ({
+      params: { locale },
+    }));
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const localePath = (path: string) => getLocalizedPath(path, locale);
+const localeInfo = locales[locale];
+
+const headings = [
+  { depth: 2, slug: "overview", text: "개요" },
+  { depth: 2, slug: "browser-undo", text: "브라우저 undo" },
+  { depth: 2, slug: "model-history", text: "모델 히스토리" },
+  { depth: 2, slug: "wasm-transactions", text: "WASM 트랜잭션" },
+  { depth: 2, slug: "composition", text: "조합 입력" },
+];
+
+const navPages = wasmSectionPages.map((p) => ({
+  title: p.titleKo,
+  href: localePath(`/wasm/${p.slug}`),
+  description: p.descKo,
+}));
+const currentPath = localePath("/wasm/undo-model");
+---
+
+<html lang={localeInfo.code} dir={localeInfo.dir}>
+  <head>
+    <BaseHead
+      title={`실행 취소·다시 실행 모델 – contenteditable.lab`}
+      description="브라우저 undo 스택 vs 앱 히스토리, 프로그래밍 DOM, Rust/WASM 문서 상태."
+    />
+  </head>
+  <body>
+    <SiteNav />
+    <main class="flex max-w-full m-0 p-0">
+      <section
+        class="flex-1 flex max-w-[1120px] mx-auto py-7 px-5 pb-10 gap-6 w-full"
+      >
+        <aside class="hidden lg:block w-[220px] shrink-0">
+          <TableOfContents headings={headings} />
+        </aside>
+        <div class="flex-1 min-w-0">
+          <header class="mb-8">
+            <nav class="mb-4 text-sm">
+              <a href={localePath("/")} class="text-text-muted no-underline">홈</a>
+              <span class="text-text-faint mx-2">/</span>
+              <a href={localePath("/wasm")} class="text-text-muted no-underline">Wasm</a>
+              <span class="text-text-faint mx-2">/</span>
+              <span class="text-text-primary">실행 취소·다시 실행 모델</span>
+            </nav>
+            <h1 class="text-3xl leading-tight m-0 mb-2">실행 취소·다시 실행 모델</h1>
+            <p class="m-0 text-[0.95rem] text-text-secondary">
+              Ctrl+Z가 브라우저 undo인지 앱 undo인지 혼합되면 사용자 경험이 깨집니다. 정책을 명시하세요.
+            </p>
+          </header>
+
+          <article
+            class="rounded-xl border border-border-light bg-bg-surface p-6 px-7 text-[0.9rem] leading-[1.7]"
+          >
+            <DocSection id="overview" title="개요">
+              <p class="m-0 mb-4">
+                <a href={localePath("/editor/history-management")} class="text-accent-primary underline">에디터 → 히스토리 관리</a>와
+                함께 읽으세요. 여기서는 <code>contenteditable</code>과 WASM 모델이 공존할 때 <strong>누가 undo를 소유하는지</strong>를 강조합니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="browser-undo" title="브라우저 undo">
+              <p class="m-0 mb-4">
+                편집 가능 영역에 대한 브라우저 자체 undo가 있습니다. 프로그래밍 방식 DOM 변경·<code>execCommand</code>는 스택을 비우거나 나눌 수 있어 브라우저마다 다릅니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="model-history" title="모델 히스토리">
+              <p class="m-0 mb-4">
+                견고한 에디터는 보통 Rust에서 역연산 또는 스냅샷으로 <strong>모델 히스토리</strong>를 구현하고 DOM을 다시 그립니다. <code>beforeinput</code>으로 가로채기 등은 지원 범위를 확인해야 합니다.
+              </p>
+              <DocAlert type="warning">
+                <p class="m-0 text-sm">브라우저 undo와 앱 undo가 동시에 살아 있으면 사용자에게 혼란입니다. 텍스트 편집에 <strong>하나의 권위 있는 히스토리</strong>를 두세요.</p>
+              </DocAlert>
+            </DocSection>
+
+            <DocSection id="wasm-transactions" title="WASM 트랜잭션">
+              <p class="m-0 mb-4">
+                Rust에서 변경을 트랜잭션으로 묶고, undo는 역연산 또는 체크포인트 롤백으로 노출합니다. DOM 패치만 JS로 넘기면 불일치가 줄어듭니다.
+              </p>
+            </DocSection>
+
+            <DocSection id="composition" title="조합 입력">
+              <p class="m-0 mb-4">
+                IME 조합 중 undo는 특히 깨지기 쉽습니다. 히스토리 커밋을 조합 종료 이후로 미루는 경우가 많습니다.{" "}
+                <a href={localePath("/wasm/ime-and-composition")} class="text-accent-primary underline">IME·조합 입력</a>.
+              </p>
+            </DocSection>
+
+            <DocNavigation current={currentPath} pages={navPages} title="Wasm 가이드" />
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
