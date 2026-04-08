@@ -13,9 +13,11 @@ tags:
 difficulty: intermediate
 relatedScenarios:
   - scenario-link-insertion
+  - scenario-link-span-internal-representation
 relatedCases:
   - ce-0100-link-insertion-chrome
   - ce-0133-link-removal-leaves-empty-ko
+  - ce-0587-link-span-data-href-editing-pattern
 locale: ko
 ---
 
@@ -365,6 +367,20 @@ class LinkManager {
 const editor = document.querySelector('div[contenteditable]');
 const linkManager = new LinkManager(editor);
 ```
+
+## 선택: 편집 중에만 `<span>` + `data-href`(또는 클래스)로 두기
+
+이 사이트 예시와 [모델 스키마 링크](/model-schema/node-types/link)는 링크를 **`<a href>`**로 둡니다. 시맨틱·복사/붙여넣기·보조 기술이 인식할 수 있는 실제 링크로 내보내기 좋습니다.
+
+다만 실제 제품에서는 편집 표면 안에서만 **`<span data-href="...">`**처럼 URL을 **데이터 속성**(또는 전용 클래스 + JS)으로 둔 뒤, 저장·발행 시 `<a>`(또는 Markdown)로 바꾸는 팀도 있습니다. 흔한 이유는 다음과 같습니다.
+
+- 클릭으로 캐럿을 두려 할 때 **기본 이동**을 막고(`click` / `Ctrl+클릭` 직접 처리).
+- **앵커 경계의 캐럿/선택** 이슈를 줄이려고([링크 클릭·편집 시나리오](/scenarios/scenario-link-click-editing) 참고).
+- 인접 링크 병합 전까지 DOM에 **중첩 `<a>`**가 생기지 않게 하려고.
+
+단점: span만으로는 접근성상 “링크”가 아니며, 클립보드 HTML이 그대로 돌아오지 않을 수 있고, `data-href`는 일반 `href`와 마찬가지로 **URL 검증·새니타이즈**가 필요합니다. 이 카탈로그는 span 기반을 **기본 패턴이 아니라**, 의도적인 **에디터 내부 표현**으로 둡니다. 공개 HTML에서 시맨틱 `<a>`를 대체하지는 않습니다.
+
+Lexical/Tiptap/Slate 기본 동작과 외부 참고 링크가 필요하면 [scenario-link-span-internal-representation-ko](/scenarios/scenario-link-span-internal-representation-ko), 패턴 요약은 [ce-0587](/cases/ce-0587-link-span-data-href-editing-pattern-ko)을 보세요.
 
 ## 주의사항
 

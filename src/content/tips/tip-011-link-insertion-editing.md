@@ -13,9 +13,11 @@ tags:
 difficulty: intermediate
 relatedScenarios:
   - scenario-link-insertion
+  - scenario-link-span-internal-representation
 relatedCases:
   - ce-0100-link-insertion-chrome
   - ce-0133-link-removal-leaves-empty-ko
+  - ce-0587-link-span-data-href-editing-pattern
 locale: en
 ---
 
@@ -365,6 +367,20 @@ class LinkManager {
 const editor = document.querySelector('div[contenteditable]');
 const linkManager = new LinkManager(editor);
 ```
+
+## Optional: `<span>` + `data-href` (or class) instead of `<a>` while editing
+
+This site’s examples and the [model-schema link](/model-schema/node-types/link) use **`<a href>`** for links: native semantics, sensible copy/paste, and screen readers recognize real links when exported.
+
+Some production editors still render links as **`<span data-href="...">`**, a styled span with URL in a **data attribute** (or a custom class + JS), **only inside the editing surface**, then convert to `<a>` (or Markdown) on save/publish. Reasons teams do this include:
+
+- Avoiding **default navigation** when the user clicks to place the caret (you handle `click` / `Ctrl+Click` yourself).
+- Reducing **caret-in-anchor** quirks (selection stuck at boundaries, browser-specific behavior documented under [link click editing](/scenarios/scenario-link-click-editing)).
+- Keeping **invalid nested `<a>`** out of the DOM until serialization merges adjacent link runs.
+
+Trade-offs: a span is **not** a native link for accessibility until you export; clipboard HTML may not round-trip; you must **sanitize** `data-href` like any URL. This catalog does not treat span-based links as the default pattern—it is an intentional **editor-internal** representation, not a replacement for semantic `<a>` in published HTML.
+
+For a full scenario write-up (including Lexical/Tiptap/Slate defaults and external references), see [scenario-link-span-internal-representation](/scenarios/scenario-link-span-internal-representation) and pattern case [ce-0587](/cases/ce-0587-link-span-data-href-editing-pattern).
 
 ## Notes
 

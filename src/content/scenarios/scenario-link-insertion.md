@@ -92,6 +92,10 @@ function createLinkSafely(range, url) {
 }
 ```
 
+## See also
+
+- [scenario-link-span-internal-representation](scenario-link-span-internal-representation) — internal `span` + `data-href` vs export `<a>`; how Lexical, Tiptap, and ProseMirror default to `<a>` in the live DOM.
+
 ## References
 
 - [MDN: contenteditable global attribute](https://developer.mozilla.org/docs/Web/HTML/Reference/Global_attributes/contenteditable) - contenteditable documentation

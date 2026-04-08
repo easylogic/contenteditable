@@ -92,6 +92,10 @@ function createLinkSafely(range, url) {
 }
 ```
 
+## 함께 보면 좋은 글
+
+- [scenario-link-span-internal-representation-ko](scenario-link-span-internal-representation-ko) — 편집 중 `span` + `data-href`, 내보내기 시 `<a>`; Lexical·Tiptap·ProseMirror는 라이브 DOM에 `<a>`가 기본인 이유.
+
 ## 참고 자료
 
 - [MDN: contenteditable global attribute](https://developer.mozilla.org/docs/Web/HTML/Reference/Global_attributes/contenteditable) - contenteditable documentation
